@@ -1,40 +1,44 @@
 # hmpps-allocations
 
-This is a skeleton project from which to create new kotlin projects from.
+[![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-allocations/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-allocations)
 
-# Instructions
+This is the HMPPS Allocations service. This is used by Manage a workforce UI to serve unallocated cases.
 
-If this is a HMPPS project then the project will be created as part of bootstrapping - 
-see https://github.com/ministryofjustice/dps-project-bootstrap.
+## What it does
 
-## Creating a CloudPlatform namespace
+Listens to events from Delius, stores unallocated cases and writes an allocation into Delius
 
-When deploying to a new namespace, you may wish to use this template kotlin project namespace as the basis for your new namespace:
+Integration points:
+- Delius via SQS
+- Community-api read and write
+- Assessment-api read
+- Postgres for database
 
-<https://github.com/ministryofjustice/cloud-platform-environments/tree/main/namespaces/live-1.cloud-platform.service.justice.gov.uk/hmpps-template-kotlin>
+## Continuous Integration
+https://app.circleci.com/pipelines/github/ministryofjustice/hmpps-allocations
 
-Copy this folder, update all the existing namespace references, and submit a PR to the CloudPlatform team. Further instructions from the CloudPlatform team can be found here: <https://user-guide.cloud-platform.service.justice.gov.uk/#cloud-platform-user-guide>
 
-## Renaming from HMPPS Template Kotlin - github Actions
 
-Once the new repository is deployed. Navigate to the repository in github, and select the `Actions` tab.
-Click the link to `Enable Actions on this repository`.
+### Prerequisites
+* Java JDK 16+
+* An editor/IDE
+* Gradle
+* Docker
+* OAuth token
 
-Find the Action workflow named: `rename-project-create-pr` and click `Run workflow`.  This workflow will will
-execute the `rename-project.bash` and create Pull Request for you to review.  Review the PR and merge.
+### How to run locally
 
-Note: ideally this workflow would run automatically however due to a recent change github Actions are not
-enabled by default on newly created repos. There is no way to enable Actions other then to click the button in the UI.
-If this situation changes we will update this project so that the workflow is triggered during the bootstrap project.
-Further reading: <https://github.community/t/workflow-isnt-enabled-in-repos-generated-from-template/136421>
+Execute the following commands:
 
-## Manually renaming from HMPPS Template Kotlin
+```shell
+docker-compose up -d
+./gradlew bootRun
+```
 
-Run the `rename-project.bash` and create a PR.
+### How to run the tests locally
 
-The `rename-project.bash` script takes a single argument - the name of the project and calculates from it:
-* The main class name (project name converted to pascal case) 
-* The project description (class name with spaces between the words)
-* The main package name (project name with hyphens removed)
+Execute the following commands:
 
-It then performs a search and replace and directory renames so the project is ready to be used.
+```shell
+./gradlew check
+```
