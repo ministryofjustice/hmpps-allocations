@@ -12,7 +12,14 @@ spring:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
-
+  datasource:
+    url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"
+    username: "${database.username:root}"
+    password: "${database.password:dev}"
+    hikari:
+      maximum-pool-size: 25
+  flyway:
+    locations: classpath:db/migration
   profiles:
     group:
       test:
