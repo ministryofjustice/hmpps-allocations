@@ -32,6 +32,7 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
     )
   }
 
+
   @Test
   fun `can get unallocated cases`() {
     val unallocatedCases = webTestClient.get()
@@ -44,6 +45,7 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
     assertThat(unallocatedCases!!.size).isEqualTo(3)
     val firstCase = unallocatedCases[0]
     assertThat(firstCase).isEqualTo(
+
       UnallocatedCase("Dylan Adam Armstrong", "J678910", "C1", firstSentenceDate, firstInitialAppointment,	"Currently managed")
     )
   }
@@ -52,4 +54,5 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
   fun resetDatabase() {
     repository.deleteAll()
   }
+
 }
