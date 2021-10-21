@@ -32,7 +32,6 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
     )
   }
 
-
   @Test
   fun `can get unallocated cases`() {
     val unallocatedCases = webTestClient.get()
@@ -54,5 +53,4 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
   fun resetDatabase() {
     repository.deleteAll()
   }
-
 }
