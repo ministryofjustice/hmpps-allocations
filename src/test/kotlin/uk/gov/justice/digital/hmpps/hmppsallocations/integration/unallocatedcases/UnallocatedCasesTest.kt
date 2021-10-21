@@ -16,5 +16,9 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .expectBodyList(UnallocatedCase::class.java)
       .returnResult().responseBody
     assertThat(unallocatedCases.size).isEqualTo(1)
+    val firstCase = unallocatedCases.get(0)
+    assertThat(firstCase).isEqualTo(
+      UnallocatedCase("Dylan Adam Armstrong", "J678910", "C1", "17 October 2021", "22 October 2021",	"Currently managed")
+    )
   }
 }
