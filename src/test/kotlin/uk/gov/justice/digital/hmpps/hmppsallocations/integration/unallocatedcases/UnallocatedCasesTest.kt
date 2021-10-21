@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
@@ -7,11 +8,13 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 class UnallocatedCasesTest : IntegrationTestBase() {
   @Test
   fun `can get unallocated cases`() {
-    webTestClient.get()
+    val unallocatedCases = webTestClient.get()
       .uri("/cases/unallocated")
       .exchange()
       .expectStatus()
       .isOk
       .expectBodyList(UnallocatedCase::class.java)
+      .returnResult().responseBody
+    assertThat(unallocatedCases.size).isEqualTo(1)
   }
 }
