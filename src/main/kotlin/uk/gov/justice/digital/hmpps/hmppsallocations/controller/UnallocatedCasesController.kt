@@ -7,20 +7,20 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.repository.UnallocatedCaseEntity
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import java.time.LocalDateTime
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
-  private val unallocatedCasesRepository: UnallocatedCasesRepository
+  private val unallocatedCasesService: UnallocatedCasesService
 ) {
 
   // TODO add role
   @GetMapping("/cases/unallocated")
-  fun unallocatedCases(): ResponseEntity<List<UnallocatedCase>> {
+  fun getUnallocatedCases(): ResponseEntity<List<UnallocatedCase>> {
     return ResponseEntity.ok(
-      unallocatedCasesRepository.findAll().map {
+      unallocatedCasesService.getAll().map {
         UnallocatedCase.from(it)
       }
     )
