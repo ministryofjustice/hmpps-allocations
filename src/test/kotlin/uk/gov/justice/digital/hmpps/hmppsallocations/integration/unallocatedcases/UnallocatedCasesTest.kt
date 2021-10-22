@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
+import org.springframework.http.HttpStatus.NOT_FOUND
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -48,6 +50,24 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
 
       UnallocatedCase("Dylan Adam Armstrong", "J678910", "C1", firstSentenceDate, firstInitialAppointment,	"Currently managed")
     )
+  }
+
+  @Test
+  fun `method not allowed`() {
+    webTestClient.post()
+      .uri("/cases/unallocated")
+      .exchange()
+      .expectStatus()
+      .isEqualTo(METHOD_NOT_ALLOWED)
+  }
+
+  @Test
+  fun `not found`() {
+    webTestClient.post()
+      .uri("/cases/someotherurl")
+      .exchange()
+      .expectStatus()
+      .isEqualTo(NOT_FOUND)
   }
 
   @AfterEach
