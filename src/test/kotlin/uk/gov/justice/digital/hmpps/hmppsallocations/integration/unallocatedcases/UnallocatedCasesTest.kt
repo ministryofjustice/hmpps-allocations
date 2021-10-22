@@ -10,11 +10,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
 
 class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository) : IntegrationTestBase() {
 
-  val firstSentenceDate = LocalDateTime.now().minusDays(4)
-  val firstInitialAppointment = LocalDateTime.now().plusDays(1)
+  val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(SECONDS)
+  val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
 
   @BeforeEach
   fun insertCases() {
