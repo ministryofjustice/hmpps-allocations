@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.repository.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
 @Service

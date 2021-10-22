@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.repository.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
 
@@ -22,11 +22,11 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
-          null, "Dylan Adam Armstrong", "J678910", "C1",
+          1, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment,	"Currently managed"
         ),
-        UnallocatedCaseEntity(null, "Andrei Edwards", "J680648", "A1", LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(2), "New to probation"),
-        UnallocatedCaseEntity(null, "Hannah Francis", "J680660", "C2", LocalDateTime.now().minusDays(1), null, "Previously managed")
+        UnallocatedCaseEntity(2, "Andrei Edwards", "J680648", "A1", LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(2), "New to probation"),
+        UnallocatedCaseEntity(3, "Hannah Francis", "J680660", "C2", LocalDateTime.now().minusDays(1), null, "Previously managed")
 
       )
     )
