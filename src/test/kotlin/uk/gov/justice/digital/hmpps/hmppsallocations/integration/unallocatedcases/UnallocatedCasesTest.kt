@@ -5,9 +5,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-
 import org.springframework.http.HttpStatus
-
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -61,7 +59,6 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
       .expectStatus()
       .isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
   }
-
 
   @AfterEach
   fun resetDatabase() {
