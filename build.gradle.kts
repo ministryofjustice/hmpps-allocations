@@ -11,10 +11,14 @@ configurations {
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
   runtimeOnly("com.h2database:h2:1.4.200")
   runtimeOnly("com.zaxxer:HikariCP:3.4.5")
   runtimeOnly("org.flywaydb:flyway-core:6.5.6")
   runtimeOnly("org.postgresql:postgresql")
+
+  testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 }
 
 java {

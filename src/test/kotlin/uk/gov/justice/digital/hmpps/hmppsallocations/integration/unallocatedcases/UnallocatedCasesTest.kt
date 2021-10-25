@@ -39,6 +39,7 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
   fun `can get unallocated cases`() {
     val unallocatedCases = webTestClient.get()
       .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
       .isOk
@@ -53,9 +54,19 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
   }
 
   @Test
+  fun `cannot get unallocated cases when no auth token supplied`() {
+    webTestClient.get()
+      .uri("/cases/unallocated")
+      .exchange()
+      .expectStatus()
+      .isUnauthorized
+  }
+
+  @Test
   fun `method not allowed`() {
     webTestClient.post()
       .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_QUEUE_WORKLOAD_ADMIN")) }
       .exchange()
       .expectStatus()
       .isEqualTo(METHOD_NOT_ALLOWED)
@@ -65,6 +76,7 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
   fun `not found`() {
     webTestClient.post()
       .uri("/cases/someotherurl")
+      .headers { it.authToken(roles = listOf("ROLE_QUEUE_WORKLOAD_ADMIN")) }
       .exchange()
       .expectStatus()
       .isEqualTo(NOT_FOUND)
