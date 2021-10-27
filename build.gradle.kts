@@ -20,6 +20,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
 }
 
 java {

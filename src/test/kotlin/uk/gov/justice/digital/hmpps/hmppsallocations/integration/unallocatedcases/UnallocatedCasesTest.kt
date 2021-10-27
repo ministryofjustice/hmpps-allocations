@@ -25,11 +25,11 @@ class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
-          1, "Dylan Adam Armstrong", "J678910", "C1",
+          null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment,	"Currently managed"
         ),
-        UnallocatedCaseEntity(2, "Andrei Edwards", "J680648", "A1", LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(2), "New to probation"),
-        UnallocatedCaseEntity(3, "Hannah Francis", "J680660", "C2", LocalDateTime.now().minusDays(1), null, "Previously managed")
+        UnallocatedCaseEntity(null, "Andrei Edwards", "J680648", "A1", LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(2), "New to probation"),
+        UnallocatedCaseEntity(null, "Hannah Francis", "J680660", "C2", LocalDateTime.now().minusDays(1), null, "Previously managed")
 
       )
     )
