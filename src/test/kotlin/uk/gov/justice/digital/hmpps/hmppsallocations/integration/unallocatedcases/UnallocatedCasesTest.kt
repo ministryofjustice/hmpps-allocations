@@ -4,17 +4,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.HttpStatus.NOT_FOUND
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
-class UnallocatedCasesTest(@Autowired val repository: UnallocatedCasesRepository) : IntegrationTestBase() {
+class UnallocatedCasesTest : IntegrationTestBase() {
 
   val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(SECONDS)
   val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)

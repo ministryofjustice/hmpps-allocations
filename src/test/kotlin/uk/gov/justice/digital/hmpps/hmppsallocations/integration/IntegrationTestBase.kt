@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -23,7 +24,8 @@ import java.time.format.DateTimeFormatter
 abstract class IntegrationTestBase {
 
   @BeforeEach
-  fun `clear queues`() {
+  fun `clear queues and database`() {
+    repository.deleteAll()
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
   }
 
@@ -43,6 +45,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var hmppsQueueService: HmppsQueueService
+
+  @Autowired
+  protected lateinit var repository: UnallocatedCasesRepository
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
