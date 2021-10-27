@@ -10,3 +10,12 @@ spring:
     url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
     username: probation
     password: allocation
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    domainqueue:
+      accessKeyId: foobar
+      secretAccessKey: foobar
+      queueName: hmpps_allocation_domain_event_queue
+      dlqName: hmpps_allocation_domain_event_dlq
