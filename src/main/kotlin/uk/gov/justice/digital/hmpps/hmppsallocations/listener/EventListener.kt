@@ -17,7 +17,7 @@ class EventListener(@Autowired val repository: UnallocatedCasesRepository, priva
     val (Message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(Message, HmppsEvent::class.java)
     log.info("received event for crn: {}", event.additionalInformation.crn)
-    val unallocatedCase = UnallocatedCaseEntity(null,event.additionalInformation.name, event.additionalInformation.crn, event.additionalInformation.tier, event.additionalInformation.sentence_date, event.additionalInformation.initial_appointment, event.additionalInformation.status)
+    val unallocatedCase = UnallocatedCaseEntity(null, event.additionalInformation.name, event.additionalInformation.crn, event.additionalInformation.tier, event.additionalInformation.sentence_date, event.additionalInformation.initial_appointment, event.additionalInformation.status)
     repository.save(unallocatedCase)
   }
   companion object {
