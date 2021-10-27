@@ -28,7 +28,7 @@ class EventListenerTest : IntegrationTestBase() {
         )
     )
 
-    await untilCallTo { hmppsDomainSqsClient.countMessagesOnQueue(hmppsDomainQueueUrl) } matches { it == 0 }
+    await untilCallTo { repository.count() } matches { it!! > 0 }
 
     val unallocatedCasesCount = repository.count()
 
