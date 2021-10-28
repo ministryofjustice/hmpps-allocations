@@ -14,14 +14,19 @@ parameters:
 jobs:
   validate:
     executor:
-      name: hmpps/java
-      tag: "16.0"
+      name: hmpps/localstack
+      jdk_tag: "16.0"
+      localstack_tag: "0.12.19"
+      services: "sqs,sns"
     steps:
       - checkout
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
+      - run:
+          name: Wait for localstack to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
       - run:
           command: ./gradlew check
       - save_cache:

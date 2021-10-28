@@ -15,7 +15,7 @@ data class UnallocatedCaseEntity(
   @Id
   @Column
   @GeneratedValue(strategy = IDENTITY)
-  val id: Long = 0,
+  val id: Long? = null,
 
   @Column
   val name: String,

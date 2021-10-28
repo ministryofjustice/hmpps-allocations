@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.controller
+package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat

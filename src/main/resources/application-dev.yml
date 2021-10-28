@@ -1,3 +1,15 @@
 spring:
   datasource:
     url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    hmppsdomainqueue:
+      queueName: hmpps_domain_event_queue
+      dlqName: hmpps_domain_event_dlq
+      subscribeTopicId: hmppsdomaintopic
+      subscribeFilter: '{"eventType":[ "ALLOCATION_REQUIRED"] }'
+  topics:
+    hmppsdomaintopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
