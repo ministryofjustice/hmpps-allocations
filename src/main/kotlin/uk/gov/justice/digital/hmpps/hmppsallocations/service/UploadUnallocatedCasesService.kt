@@ -7,7 +7,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCaseCsv
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -40,7 +39,8 @@ class UploadUnallocatedCasesService(
       "ALLOCATION_REQUIRED", 0, "Generated Allocated Event", "http://dummy.com",
       ZonedDateTime.now().format(
         DateTimeFormatter.ISO_ZONED_DATE_TIME
-      ), HmppsUnallocatedCase(
+      ),
+      HmppsUnallocatedCase(
         unallocatedCase.name!!,
         unallocatedCase.crn!!,
         unallocatedCase.tier!!,

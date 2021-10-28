@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
@@ -50,10 +49,6 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
-
-  internal fun AmazonSQS.countMessagesOnQueue(queueUrl: String): Int =
-    this.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
-      .let { it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0 }
 
   internal fun HttpHeaders.authToken(roles: List<String> = emptyList()) {
     this.setBearerAuth(

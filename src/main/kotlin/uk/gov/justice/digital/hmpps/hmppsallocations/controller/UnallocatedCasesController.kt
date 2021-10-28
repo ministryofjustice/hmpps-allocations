@@ -1,10 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.opencsv.bean.ColumnPositionMappingStrategy
 import com.opencsv.bean.CsvBindByPosition
 import com.opencsv.bean.CsvDate
-import com.opencsv.bean.CsvToBean
 import com.opencsv.bean.CsvToBeanBuilder
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -16,11 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import java.io.InputStreamReader
-import java.io.Reader
 import java.time.LocalDateTime
 
 @RestController
@@ -66,11 +61,9 @@ data class UnallocatedCaseCsv(
   var tier: String? = null,
   @CsvBindByPosition(position = 3)
   @CsvDate("yyyyMMdd HH:mm:ss")
-  @JsonFormat(pattern = "yyyyMMdd HH:mm:ss", shape = JsonFormat.Shape.STRING)
   var sentence_date: LocalDateTime? = null,
   @CsvBindByPosition(position = 4)
   @CsvDate("yyyyMMdd HH:mm:ss")
-  @JsonFormat(pattern = "yyyyMMdd HH:mm:ss", shape = JsonFormat.Shape.STRING)
   var initial_appointment: LocalDateTime? = null,
   @CsvBindByPosition(position = 5)
   var status: String? = null
