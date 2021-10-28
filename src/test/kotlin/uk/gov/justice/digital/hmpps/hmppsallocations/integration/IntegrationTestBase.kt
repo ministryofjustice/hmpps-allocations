@@ -34,7 +34,6 @@ abstract class IntegrationTestBase {
   protected val hmppsDomainSqsClient by lazy { hmppsDomainQueue.sqsClient }
   protected val hmppsDomainSnsClient by lazy { hmppsDomainTopic.snsClient }
   protected val hmppsDomainTopicArn by lazy { hmppsDomainTopic.arn }
-  protected val hmppsDomainQueueUrl by lazy { hmppsDomainQueue.queueUrl }
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
