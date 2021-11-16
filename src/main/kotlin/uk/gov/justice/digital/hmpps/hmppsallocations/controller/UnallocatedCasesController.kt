@@ -33,7 +33,6 @@ class UnallocatedCasesController(
     )
   }
 
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @PostMapping("/cases/unallocated/upload")
   fun uploadUnallocatedCases(@RequestParam("file") file: MultipartFile): ResponseEntity<Void> {
     uploadUnallocatedCasesService.sendEvents(fileToUnallocatedCases(file))

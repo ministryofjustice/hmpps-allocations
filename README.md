@@ -40,5 +40,6 @@ docker-compose up -d
 Execute the following commands:
 
 ```shell
+docker compose up -d localstack
 ./gradlew check
 ```
