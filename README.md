@@ -43,3 +43,26 @@ Execute the following commands:
 docker compose up -d localstack
 ./gradlew check
 ```
+
+# Allocation Endpoints
+
+## Upload CSV
+
+There is an endpoint which will generate messages to be consumed and written to the postgres database backing this
+application. The endpoint is found at `POST /cases/unallocated/upload`.
+
+To Use this endpoint in a deployed environment first port forward to the deployment by executing the following command:
+
+```shell
+kubectl port-forward deployment/hmpps-allocations 8080:8080 -n <NAMESPACE>
+```
+
+replacing `<NAMESPACE>` with the desired namespace for the environment.
+
+The curl command to call the endpoint is:
+
+```shell
+curl http://localhost:8080/cases/unallocated/upload --request POST --form 'file=@"somefile.csv"'
+```
+
+The column order for the csv is `<name>,<crn>,<tier>,<sentence_date>,<initial_appointment>,<status>` with no headers
