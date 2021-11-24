@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.SECONDS
 
 class EventListenerTest : IntegrationTestBase() {
   @Test
@@ -26,7 +26,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
     val firstSentenceDate = LocalDate.now().minusDays(4)
-    val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS)
+    val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
     val unallocatedCase = unallocatedCaseEvent(
       "Dylan Adam Armstrong", "J678910", "C1",
       firstSentenceDate, firstInitialAppointment, "Currently managed"
@@ -60,7 +60,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val firstSentenceDate = LocalDate.now().minusDays(4)
-    val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS)
+    val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
     val unallocatedCase = unallocatedCaseEvent(
       "Dylan Adam Armstrong", "J678910", "C1",
       firstSentenceDate, firstInitialAppointment, "Currently managed"

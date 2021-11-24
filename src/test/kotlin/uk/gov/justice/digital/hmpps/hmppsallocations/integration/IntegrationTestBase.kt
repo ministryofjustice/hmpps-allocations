@@ -6,12 +6,13 @@ import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.matchers.Times
 import org.mockserver.model.HttpRequest
-import org.mockserver.model.HttpResponse
-import org.mockserver.model.MediaType
+import org.mockserver.model.HttpResponse.response
+import org.mockserver.model.MediaType.APPLICATION_JSON
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -31,7 +32,7 @@ import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
   var communityApi: ClientAndServer = startClientAndServer(8092)
@@ -95,7 +96,7 @@ abstract class IntegrationTestBase {
   }
 
   fun setupOauth() {
-    val response = HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
+    val response = response().withContentType(APPLICATION_JSON)
       .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
     oauthMock.`when`(HttpRequest.request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
   }
@@ -105,7 +106,7 @@ abstract class IntegrationTestBase {
       HttpRequest.request().withPath("/secure/offenders/crn/$crn/convictions").withMethod("GET")
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+      response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
     )
   }
 }
