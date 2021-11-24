@@ -1,15 +1,20 @@
+spring:
+  datasource:
+    url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
+    username: probation
+    password: allocation
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:local-public-key.pub
+
 server:
   shutdown: immediate
 
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
-
-spring:
-  datasource:
-    url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
-    username: probation
-    password: allocation
 
 hmpps.sqs:
   provider: localstack
@@ -22,3 +27,16 @@ hmpps.sqs:
   topics:
     hmppsdomaintopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+community:
+  endpoint:
+    url: http://localhost:8092
+
+oauth:
+  endpoint:
+    url: http://localhost:9090/auth
+    client:
+      id: client-id
+      secret: client-secret
+
+

@@ -2,7 +2,15 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInstance
+import org.mockserver.integration.ClientAndServer
+import org.mockserver.integration.ClientAndServer.startClientAndServer
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.MediaType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -20,7 +28,12 @@ import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class IntegrationTestBase {
+
+  var communityApi: ClientAndServer = startClientAndServer(8092)
+  private var oauthMock: ClientAndServer = startClientAndServer(9090)
+  private val gson: Gson = Gson()
 
   @BeforeEach
   fun `clear queues and database`() {
@@ -69,4 +82,16 @@ abstract class IntegrationTestBase {
     ),
     HmppsUnallocatedCase(name, crn, tier, sentence_date, initial_appointment, status)
   )
+
+  @AfterAll
+  fun tearDownServer() {
+    communityApi.stop()
+    oauthMock.stop()
+  }
+
+  fun setupOauth() {
+    val response = HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
+      .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
+    oauthMock.`when`(HttpRequest.request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
+  }
 }

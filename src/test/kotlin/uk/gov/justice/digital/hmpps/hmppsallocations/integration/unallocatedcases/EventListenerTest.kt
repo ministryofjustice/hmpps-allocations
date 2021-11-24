@@ -7,6 +7,7 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import org.mockserver.model.HttpRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -33,5 +34,34 @@ class EventListenerTest : IntegrationTestBase() {
     val unallocatedCasesCount = repository.count()
 
     assertThat(unallocatedCasesCount).isEqualTo(1)
+  }
+
+  @Test
+  fun `retrieve sentenceDate from delius`() {
+
+    val foo = HttpRequest.request().withPath("/secure/offenders/crn/12345/convictions").withMethod("GET")
+
+    // Given
+    val deliusSentenceDate = LocalDateTime.now().minusDays(3).truncatedTo(ChronoUnit.SECONDS)
+    val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(ChronoUnit.SECONDS)
+    val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS)
+    val unallocatedCase = unallocatedCaseEvent(
+      "Dylan Adam Armstrong", "J678910", "C1",
+      firstSentenceDate, firstInitialAppointment, "Currently managed"
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType))
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val unAllocatedCases = repository.findAll()
+    val ucase = unAllocatedCases.iterator().next()
+
+    assertThat(ucase.sentence_date).isEqualTo(deliusSentenceDate)
   }
 }

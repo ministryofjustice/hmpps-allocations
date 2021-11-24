@@ -12,7 +12,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
+
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
   implementation("com.opencsv:opencsv:5.2")
   runtimeOnly("com.h2database:h2:1.4.200")
   runtimeOnly("com.zaxxer:HikariCP:3.4.5")
@@ -21,6 +24,7 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
+  testImplementation("org.mock-server:mockserver-netty:5.11.1")
 }
 
 java {
