@@ -109,7 +109,6 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         "Dylan Adam Armstrong",
         "J678910",
         "C1",
-        firstSentenceDate,
         firstInitialAppointment,
         "Currently managed"
       ),
@@ -117,7 +116,6 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         "Andrei Edwards",
         "J680648",
         "A1",
-        LocalDate.now().minusDays(3),
         LocalDateTime.now().plusDays(2),
         "New to probation"
       ),
@@ -125,7 +123,6 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         "Hannah Francis",
         "J680660",
         "C2",
-        LocalDate.now().minusDays(1),
         null,
         "Previously managed"
       )
