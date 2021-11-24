@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
@@ -36,7 +35,13 @@ class EventListener(
   }
 }
 
-data class HmppsUnallocatedCase(val name: String, val crn: String, val tier: String, val sentence_date: LocalDate, val initial_appointment: LocalDateTime?, val status: String)
+data class HmppsUnallocatedCase(
+  val name: String,
+  val crn: String,
+  val tier: String,
+  val initial_appointment: LocalDateTime?,
+  val status: String
+)
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)
 data class EventType(val Value: String, val Type: String)
 data class MessageAttributes(val eventType: EventType)

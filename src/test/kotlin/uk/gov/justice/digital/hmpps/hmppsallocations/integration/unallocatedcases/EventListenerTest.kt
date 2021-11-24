@@ -41,10 +41,9 @@ class EventListenerTest : IntegrationTestBase() {
     )
     await untilCallTo { repository.count() } matches { it!! > 0 }
 
-    val unAllocatedCases = repository.findAll()
-    val ucase = unAllocatedCases.iterator().next()
+    val case = repository.findAll().first()
 
-    assertThat(ucase.sentence_date).isEqualTo(deliusSentenceDate)
+    assertThat(case.sentence_date).isEqualTo(deliusSentenceDate)
   }
 
   @Test
@@ -75,9 +74,8 @@ class EventListenerTest : IntegrationTestBase() {
     )
     await untilCallTo { repository.count() } matches { it!! > 0 }
 
-    val unAllocatedCases = repository.findAll()
-    val ucase = unAllocatedCases.iterator().next()
+    val case = repository.findAll().first()
 
-    assertThat(ucase.sentence_date).isEqualTo(latestConvictionSentenceDate)
+    assertThat(case.sentence_date).isEqualTo(latestConvictionSentenceDate)
   }
 }

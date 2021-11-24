@@ -85,7 +85,7 @@ abstract class IntegrationTestBase {
     ZonedDateTime.now().format(
       DateTimeFormatter.ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(name, crn, tier, sentence_date, initial_appointment, status)
+    HmppsUnallocatedCase(name, crn, tier, initial_appointment, status)
   )
 
   @AfterAll
