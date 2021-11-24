@@ -2,6 +2,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.13-beta-2"
   kotlin("plugin.spring") version "1.5.31"
   kotlin("plugin.jpa") version "1.5.31"
+  id("io.gitlab.arturbosch.detekt").version("1.17.1")
 }
 
 configurations {
@@ -37,8 +38,17 @@ tasks {
       jvmTarget = "16"
     }
   }
+  getByName("check") {
+    dependsOn(":ktlintCheck", "detekt")
+  }
 }
 
 tasks.named<JavaExec>("bootRun") {
   systemProperty("spring.profiles.active", "dev,localstack,docker")
+}
+
+detekt {
+  config = files("src/test/resources/detekt-config.yml")
+  buildUponDefaultConfig = true
+  ignoreFailures = true
 }
