@@ -7,8 +7,8 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import org.mockserver.model.HttpRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -16,7 +16,7 @@ class EventListenerTest : IntegrationTestBase() {
 
   @Test
   fun `event is written to database`() {
-    val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(ChronoUnit.SECONDS)
+    val firstSentenceDate = LocalDate.now().minusDays(4)
     val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS)
     val event = unallocatedCaseEvent(
       "Dylan Adam Armstrong", "J678910", "C1",
@@ -39,11 +39,11 @@ class EventListenerTest : IntegrationTestBase() {
   @Test
   fun `retrieve sentenceDate from delius`() {
 
-    val foo = HttpRequest.request().withPath("/secure/offenders/crn/12345/convictions").withMethod("GET")
+    singleActiveConvictionResponse("J678910")
 
     // Given
-    val deliusSentenceDate = LocalDateTime.now().minusDays(3).truncatedTo(ChronoUnit.SECONDS)
-    val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(ChronoUnit.SECONDS)
+    val deliusSentenceDate = LocalDate.parse("2019-11-17")
+    val firstSentenceDate = LocalDate.now().minusDays(4)
     val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS)
     val unallocatedCase = unallocatedCaseEvent(
       "Dylan Adam Armstrong", "J678910", "C1",

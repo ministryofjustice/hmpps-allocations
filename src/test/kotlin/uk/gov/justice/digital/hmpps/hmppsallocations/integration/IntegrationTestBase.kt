@@ -17,11 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,6 +41,7 @@ abstract class IntegrationTestBase {
   fun `clear queues and database`() {
     repository.deleteAll()
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
+    setupOauth()
   }
 
   private val hmppsDomainQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") ?: throw MissingQueueException("HmppsQueue hmppsdomainqueue not found") }
@@ -75,7 +78,7 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun unallocatedCaseEvent(name: String, crn: String, tier: String, sentence_date: LocalDateTime, initial_appointment: LocalDateTime?, status: String) = HmppsEvent(
+  protected fun unallocatedCaseEvent(name: String, crn: String, tier: String, sentence_date: LocalDate, initial_appointment: LocalDateTime?, status: String) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
       DateTimeFormatter.ISO_ZONED_DATE_TIME
@@ -93,5 +96,14 @@ abstract class IntegrationTestBase {
     val response = HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
       .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
     oauthMock.`when`(HttpRequest.request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
+  }
+
+  protected fun singleActiveConvictionResponse(crn: String) {
+    val convictionsRequest =
+      HttpRequest.request().withPath("/secure/offenders/crn/$crn/convictions").withMethod("GET")
+
+    communityApi.`when`(convictionsRequest).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(convictionsResponse())
+    )
   }
 }

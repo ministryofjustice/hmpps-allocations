@@ -20,12 +20,13 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.io.File
 import java.io.FileWriter
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 class UnallocatedCasesTest : IntegrationTestBase() {
 
-  val firstSentenceDate = LocalDateTime.now().minusDays(4).truncatedTo(SECONDS)
+  val firstSentenceDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
 
   fun insertCases() {
@@ -41,7 +42,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
           "Andrei Edwards",
           "J680648",
           "A1",
-          LocalDateTime.now().minusDays(3),
+          LocalDate.now().minusDays(3),
           LocalDateTime.now().plusDays(2),
           "New to probation"
         ),
@@ -50,7 +51,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
           "Hannah Francis",
           "J680660",
           "C2",
-          LocalDateTime.now().minusDays(1),
+          LocalDate.now().minusDays(1),
           null,
           "Previously managed"
         )
@@ -99,6 +100,10 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
   @Test
   fun `populate database from csv upload of unallocated cases`() {
+    singleActiveConvictionResponse("J678910")
+    singleActiveConvictionResponse("J680648")
+    singleActiveConvictionResponse("J680660")
+
     val unallocatedCases = listOf(
       UnallocatedCaseCsv(
         "Dylan Adam Armstrong",
@@ -112,7 +117,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         "Andrei Edwards",
         "J680648",
         "A1",
-        LocalDateTime.now().minusDays(3),
+        LocalDate.now().minusDays(3),
         LocalDateTime.now().plusDays(2),
         "New to probation"
       ),
@@ -120,7 +125,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         "Hannah Francis",
         "J680660",
         "C2",
-        LocalDateTime.now().minusDays(1),
+        LocalDate.now().minusDays(1),
         null,
         "Previously managed"
       )

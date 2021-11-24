@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import java.io.InputStreamReader
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -59,8 +60,8 @@ data class UnallocatedCaseCsv(
   @CsvBindByPosition(position = 2)
   var tier: String? = null,
   @CsvBindByPosition(position = 3)
-  @CsvDate("yyyyMMdd HH:mm:ss")
-  var sentence_date: LocalDateTime? = null,
+  @CsvDate("yyyy-MM-dd")
+  var sentence_date: LocalDate? = null,
   @CsvBindByPosition(position = 4)
   @CsvDate("yyyyMMdd HH:mm:ss")
   var initial_appointment: LocalDateTime? = null,
