@@ -58,9 +58,6 @@ data class UnallocatedCaseCsv(
   var crn: String? = null,
   @CsvBindByPosition(position = 2)
   var tier: String? = null,
-  @CsvBindByPosition(position = 3)
-  @CsvDate("yyyyMMdd HH:mm:ss")
-  var sentence_date: LocalDateTime? = null,
   @CsvBindByPosition(position = 4)
   @CsvDate("yyyyMMdd HH:mm:ss")
   var initial_appointment: LocalDateTime? = null,
