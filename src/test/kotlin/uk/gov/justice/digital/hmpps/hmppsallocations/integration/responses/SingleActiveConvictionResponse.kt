@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun convictionsResponse() = """
+fun singleActiveConvictionResponse() = """
 [
     {
         "convictionId": 2500292515,

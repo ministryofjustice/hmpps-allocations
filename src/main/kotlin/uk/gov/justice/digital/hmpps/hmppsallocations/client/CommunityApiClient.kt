@@ -14,7 +14,7 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
 
     return webClient
       .get()
-      .uri("/secure/offenders/crn/$crn/convictions")
+      .uri("/secure/offenders/crn/$crn/convictions?activeOnly=true")
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()

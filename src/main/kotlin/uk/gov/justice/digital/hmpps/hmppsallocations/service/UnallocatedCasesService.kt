@@ -20,6 +20,6 @@ class UnallocatedCasesService(
 
   fun getSentenceDate(crn: String): LocalDate {
     val convictions = communityApiClient.getConvictions(crn)
-    return convictions.map { c -> c.sentence.startDate }[0]
+    return convictions.sortedByDescending { c -> c.convictionDate }.first().sentence.startDate
   }
 }
