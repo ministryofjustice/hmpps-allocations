@@ -20,16 +20,15 @@ import java.time.temporal.ChronoUnit.SECONDS
 class EventListenerTest : IntegrationTestBase() {
   @Test
   fun `retrieve sentenceDate from delius`() {
-
-    singleActiveConvictionResponse("J678910")
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
 
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
-    val firstSentenceDate = LocalDate.now().minusDays(4)
     val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", "J678910", "C1",
-      firstSentenceDate, firstInitialAppointment, "Currently managed"
+      "Dylan Adam Armstrong", crn, "C1",
+      firstInitialAppointment, "Currently managed"
     )
 
     // Then
@@ -48,9 +47,9 @@ class EventListenerTest : IntegrationTestBase() {
 
   @Test
   fun `retrieve sentenceDate for latest conviction from delius`() {
-
+    val crn = "J678910"
     val convictionsRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/J678910/convictions").withMethod("GET")
+      HttpRequest.request().withPath("/secure/offenders/crn/$crn/convictions").withMethod("GET")
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
@@ -58,11 +57,10 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
-    val firstSentenceDate = LocalDate.now().minusDays(4)
     val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", "J678910", "C1",
-      firstSentenceDate, firstInitialAppointment, "Currently managed"
+      "Dylan Adam Armstrong", crn, "C1",
+      firstInitialAppointment, "Currently managed"
     )
 
     // Then
