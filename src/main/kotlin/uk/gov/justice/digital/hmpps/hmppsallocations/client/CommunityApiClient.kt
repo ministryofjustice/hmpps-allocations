@@ -4,7 +4,11 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val webClient: WebClient) {
@@ -15,6 +19,17 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
     return webClient
       .get()
       .uri("/secure/offenders/crn/$crn/convictions?activeOnly=true")
+      .retrieve()
+      .bodyToMono(responseType)
+      .block() ?: listOf()
+  }
+
+  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): List<Contact> {
+    val responseType = object : ParameterizedTypeReference<List<Contact>>() {}
+    val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    return webClient
+      .get()
+      .uri("/secure/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
-import java.time.LocalDateTime
 
 @Component
 class EventListener(
@@ -23,9 +22,10 @@ class EventListener(
     val crn = event.additionalInformation.crn
     log.info("received event for crn: {}", crn)
     val sentenceDate = unallocatedCasesService.getSentenceDate(crn)
+    val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
     val unallocatedCase = UnallocatedCaseEntity(
       null, event.additionalInformation.name,
-      crn, event.additionalInformation.tier, sentenceDate, event.additionalInformation.initial_appointment, event.additionalInformation.status
+      crn, event.additionalInformation.tier, sentenceDate, initialAppointment, event.additionalInformation.status
     )
 
     repository.save(unallocatedCase)
@@ -39,7 +39,6 @@ data class HmppsUnallocatedCase(
   val name: String,
   val crn: String,
   val tier: String,
-  val initial_appointment: LocalDateTime?,
   val status: String
 )
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)

@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -32,7 +31,7 @@ data class UnallocatedCaseEntity(
   val sentence_date: LocalDate,
 
   @Column
-  val initial_appointment: LocalDateTime? = null,
+  val initial_appointment: LocalDate? = null,
 
   @Column
   val status: String
