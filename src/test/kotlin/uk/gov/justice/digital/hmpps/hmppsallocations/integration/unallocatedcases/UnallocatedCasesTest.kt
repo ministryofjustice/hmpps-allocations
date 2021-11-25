@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import java.io.File
 import java.io.FileWriter
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class UnallocatedCasesTest : IntegrationTestBase() {
 
@@ -73,27 +74,28 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   @Test
   fun `can get unallocated cases`() {
     insertCases()
-    val unallocatedCases = webTestClient.get()
+    webTestClient.get()
       .uri("/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
       .isOk
-      .expectBodyList(UnallocatedCase::class.java)
-      .returnResult().responseBody
-    assertThat(unallocatedCases!!.size).isEqualTo(3)
-    val firstCase = unallocatedCases[0]
-    assertThat(firstCase).isEqualTo(
+      .expectBody()
+      .jsonPath("$.length()")
+      .isEqualTo(3)
+      .jsonPath("$.[0].sentenceDate")
+      .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.[0].initialAppointment")
+      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.[0].name")
+      .isEqualTo("Dylan Adam Armstrong")
+      .jsonPath("$.[0].crn")
+      .isEqualTo("J678910")
+      .jsonPath("$.[0].tier")
+      .isEqualTo("C1")
+      .jsonPath("$.[0].status")
+      .isEqualTo("Currently managed")
 
-      UnallocatedCase(
-        "Dylan Adam Armstrong",
-        "J678910",
-        "C1",
-        firstSentenceDate,
-        firstInitialAppointment,
-        "Currently managed"
-      )
-    )
   }
 
   @Test

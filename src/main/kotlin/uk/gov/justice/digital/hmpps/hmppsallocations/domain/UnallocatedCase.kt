@@ -11,9 +11,9 @@ data class UnallocatedCase @JsonCreator constructor(
   val crn: String,
   val tier: String,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val sentence_date: LocalDate,
+  val sentenceDate: LocalDate,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val initial_appointment: LocalDate?,
+  val initialAppointment: LocalDate?,
   val status: String
 ) {
 
