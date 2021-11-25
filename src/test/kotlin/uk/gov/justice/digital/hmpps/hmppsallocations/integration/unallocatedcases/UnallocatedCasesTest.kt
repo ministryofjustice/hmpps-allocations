@@ -21,13 +21,11 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import java.io.File
 import java.io.FileWriter
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit.SECONDS
 
 class UnallocatedCasesTest : IntegrationTestBase() {
 
   val firstSentenceDate = LocalDate.now().minusDays(4)
-  val firstInitialAppointment = LocalDateTime.now().plusDays(1).truncatedTo(SECONDS)
+  val firstInitialAppointment = LocalDate.now().plusDays(1)
 
   fun insertCases() {
 
@@ -43,7 +41,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
           "J680648",
           "A1",
           LocalDate.now().minusDays(3),
-          LocalDateTime.now().plusDays(2),
+          LocalDate.now().plusDays(2),
           "New to probation"
         ),
         UnallocatedCaseEntity(
@@ -101,29 +99,29 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   @Test
   fun `populate database from csv upload of unallocated cases`() {
     singleActiveConvictionResponse("J678910")
+    singleActiveInductionResponse("J678910")
     singleActiveConvictionResponse("J680648")
+    singleActiveInductionResponse("J680648")
     singleActiveConvictionResponse("J680660")
+    singleActiveInductionResponse("J680660")
 
     val unallocatedCases = listOf(
       UnallocatedCaseCsv(
         "Dylan Adam Armstrong",
         "J678910",
         "C1",
-        firstInitialAppointment,
         "Currently managed"
       ),
       UnallocatedCaseCsv(
         "Andrei Edwards",
         "J680648",
         "A1",
-        LocalDateTime.now().plusDays(2),
         "New to probation"
       ),
       UnallocatedCaseCsv(
         "Hannah Francis",
         "J680660",
         "C2",
-        null,
         "Previously managed"
       )
     )

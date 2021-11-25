@@ -20,13 +20,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -80,12 +79,17 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun unallocatedCaseEvent(name: String, crn: String, tier: String, sentence_date: LocalDate, initial_appointment: LocalDateTime?, status: String) = HmppsEvent(
+  protected fun unallocatedCaseEvent(
+    name: String,
+    crn: String,
+    tier: String,
+    status: String
+  ) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
       DateTimeFormatter.ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(name, crn, tier, initial_appointment, status)
+    HmppsUnallocatedCase(name, crn, tier, status)
   )
 
   @AfterAll
@@ -107,6 +111,24 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+    )
+  }
+
+  protected fun singleActiveInductionResponse(crn: String) {
+    val inductionRequest =
+      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+
+    communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
+    )
+  }
+
+  protected fun noActiveInductionResponse(crn: String) {
+    val inductionRequest =
+      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+
+    communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
     )
   }
 }

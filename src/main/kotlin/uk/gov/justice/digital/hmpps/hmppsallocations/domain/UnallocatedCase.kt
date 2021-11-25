@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class UnallocatedCase @JsonCreator constructor(
   val name: String,
@@ -13,8 +12,8 @@ data class UnallocatedCase @JsonCreator constructor(
   val tier: String,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val sentence_date: LocalDate,
-  @JsonFormat(pattern = "yyyyMMdd HH:mm:ss", shape = STRING)
-  val initial_appointment: LocalDateTime?,
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val initial_appointment: LocalDate?,
   val status: String
 ) {
 

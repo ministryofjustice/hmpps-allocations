@@ -65,4 +65,4 @@ The curl command to call the endpoint is:
 curl http://localhost:8080/cases/unallocated/upload --request POST --form 'file=@"somefile.csv"'
 ```
 
-The column order for the csv is `<name>,<crn>,<tier>,<sentence_date>,<initial_appointment>,<status>` with no headers
+The column order for the csv is `<name>,<crn>,<tier>,<status>` with no headers

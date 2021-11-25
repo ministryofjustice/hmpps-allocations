@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
 import com.opencsv.bean.CsvBindByPosition
-import com.opencsv.bean.CsvDate
 import com.opencsv.bean.CsvToBeanBuilder
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -16,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import java.io.InputStreamReader
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -58,9 +56,6 @@ data class UnallocatedCaseCsv(
   var crn: String? = null,
   @CsvBindByPosition(position = 2)
   var tier: String? = null,
-  @CsvBindByPosition(position = 4)
-  @CsvDate("yyyyMMdd HH:mm:ss")
-  var initial_appointment: LocalDateTime? = null,
-  @CsvBindByPosition(position = 5)
+  @CsvBindByPosition(position = 3)
   var status: String? = null
 )

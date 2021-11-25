@@ -44,7 +44,6 @@ class UploadUnallocatedCasesService(
         unallocatedCase.name!!,
         unallocatedCase.crn!!,
         unallocatedCase.tier!!,
-        unallocatedCase.initial_appointment,
         unallocatedCase.status!!
       )
     )
