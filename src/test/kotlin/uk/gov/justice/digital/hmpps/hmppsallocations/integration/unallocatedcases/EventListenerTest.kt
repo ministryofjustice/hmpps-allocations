@@ -103,4 +103,31 @@ class EventListenerTest : IntegrationTestBase() {
 
     assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
   }
+
+  @Test
+  fun `retrieve no initialAppointmentDate from delius`() {
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+    noActiveInductionResponse(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      "Dylan Adam Armstrong", crn, "C1",
+      "Currently managed"
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.initial_appointment).isNull()
+  }
 }
