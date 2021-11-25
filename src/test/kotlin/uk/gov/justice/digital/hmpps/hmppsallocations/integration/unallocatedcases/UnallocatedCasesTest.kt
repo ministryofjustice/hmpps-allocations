@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import com.opencsv.CSVWriter
 import com.opencsv.bean.StatefulBeanToCsv
 import com.opencsv.bean.StatefulBeanToCsvBuilder
-import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -15,7 +14,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCaseCsv
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.io.File
@@ -95,7 +93,6 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("C1")
       .jsonPath("$.[0].status")
       .isEqualTo("Currently managed")
-
   }
 
   @Test
