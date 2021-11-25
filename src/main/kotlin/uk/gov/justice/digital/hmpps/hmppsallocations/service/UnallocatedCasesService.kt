@@ -25,6 +25,6 @@ class UnallocatedCasesService(
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
     val contacts = communityApiClient.getInductionContacts(crn, contactsFromDate)
-    return contacts.firstOrNull()?.contactStart?.toLocalDate()
+    return contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
   }
 }

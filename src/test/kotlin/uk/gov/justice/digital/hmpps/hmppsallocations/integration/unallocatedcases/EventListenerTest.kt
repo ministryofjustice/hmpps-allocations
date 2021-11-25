@@ -13,6 +13,7 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveInductionResponse
 import java.time.LocalDate
 
 class EventListenerTest : IntegrationTestBase() {
@@ -129,5 +130,41 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.initial_appointment).isNull()
+  }
+
+  @Test
+  fun `retrieve first initialAppointmentDate from delius`() {
+    // Given
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+
+    val inductionRequest =
+      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+
+    communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveInductionResponse())
+    )
+
+    val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
+    val unallocatedCase = unallocatedCaseEvent(
+      "Dylan Adam Armstrong", crn, "C1",
+      "Currently managed"
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
   }
 }
