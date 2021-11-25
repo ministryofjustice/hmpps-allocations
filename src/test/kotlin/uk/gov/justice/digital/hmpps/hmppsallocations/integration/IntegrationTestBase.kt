@@ -107,7 +107,7 @@ abstract class IntegrationTestBase {
 
   protected fun singleActiveConvictionResponse(crn: String) {
     val convictionsRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/$crn/convictions").withMethod("GET")
+      HttpRequest.request().withPath("/offenders/crn/$crn/convictions").withMethod("GET")
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
@@ -116,7 +116,7 @@ abstract class IntegrationTestBase {
 
   protected fun singleActiveInductionResponse(crn: String) {
     val inductionRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
@@ -125,7 +125,7 @@ abstract class IntegrationTestBase {
 
   protected fun noActiveInductionResponse(crn: String) {
     val inductionRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")

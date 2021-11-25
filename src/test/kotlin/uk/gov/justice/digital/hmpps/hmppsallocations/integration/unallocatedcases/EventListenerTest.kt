@@ -47,7 +47,7 @@ class EventListenerTest : IntegrationTestBase() {
   fun `retrieve sentenceDate for latest conviction from delius`() {
     val crn = "J678910"
     val convictionsRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/$crn/convictions").withMethod("GET")
+      HttpRequest.request().withPath("/offenders/crn/$crn/convictions").withMethod("GET")
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
@@ -139,7 +139,7 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
 
     val inductionRequest =
-      HttpRequest.request().withPath("/secure/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       HttpResponse.response()

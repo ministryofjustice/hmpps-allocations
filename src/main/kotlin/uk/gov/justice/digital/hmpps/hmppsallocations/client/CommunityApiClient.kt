@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import java.time.LocalDate
@@ -18,7 +17,7 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
 
     return webClient
       .get()
-      .uri("/secure/offenders/crn/$crn/convictions?activeOnly=true")
+      .uri("/offenders/crn/$crn/convictions?activeOnly=true")
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()
@@ -29,7 +28,7 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
     val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     return webClient
       .get()
-      .uri("/secure/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
+      .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()
