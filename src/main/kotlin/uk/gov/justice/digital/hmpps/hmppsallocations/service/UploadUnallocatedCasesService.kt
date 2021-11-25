@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCaseCsv
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -17,7 +18,8 @@ import java.time.format.DateTimeFormatter
 @Service
 class UploadUnallocatedCasesService(
   private val hmppsQueueService: HmppsQueueService,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
+  private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -29,6 +31,7 @@ class UploadUnallocatedCasesService(
   }
 
   fun sendEvents(unallocatedCases: List<UnallocatedCaseCsv>) {
+    unallocatedCasesRepository.deleteAll()
     unallocatedCases.forEach {
       publishToHmppsDomainTopic(it)
     }
