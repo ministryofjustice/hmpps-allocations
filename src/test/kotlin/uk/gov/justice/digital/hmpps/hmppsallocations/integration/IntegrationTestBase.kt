@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -80,7 +81,6 @@ abstract class IntegrationTestBase {
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
   protected fun unallocatedCaseEvent(
-    name: String,
     crn: String,
     tier: String,
     status: String
@@ -89,7 +89,7 @@ abstract class IntegrationTestBase {
     ZonedDateTime.now().format(
       DateTimeFormatter.ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(name, crn, tier, status)
+    HmppsUnallocatedCase(crn, tier, status)
   )
 
   @AfterAll
@@ -120,6 +120,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
+    )
+  }
+
+  protected fun offenderSummaryResponse(crn: String) {
+    val summaryRequest =
+      HttpRequest.request().withPath("/offenders/crn/$crn").withMethod("GET")
+
+    communityApi.`when`(summaryRequest, Times.exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(offenderSummary())
     )
   }
 

@@ -22,10 +22,11 @@ class EventListenerTest : IntegrationTestBase() {
     val crn = "J678910"
     singleActiveConvictionResponse(crn)
     noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", crn, "C1",
+      crn, "C1",
       "Currently managed"
     )
 
@@ -53,11 +54,12 @@ class EventListenerTest : IntegrationTestBase() {
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
     )
     noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
 
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", crn, "C1",
+      crn, "C1",
       "Currently managed"
     )
 
@@ -82,10 +84,11 @@ class EventListenerTest : IntegrationTestBase() {
     val crn = "J678910"
     singleActiveConvictionResponse(crn)
     singleActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
     // Given
     val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", crn, "C1",
+      crn, "C1",
       "Currently managed"
     )
 
@@ -110,9 +113,10 @@ class EventListenerTest : IntegrationTestBase() {
     val crn = "J678910"
     singleActiveConvictionResponse(crn)
     noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", crn, "C1",
+      crn, "C1",
       "Currently managed"
     )
 
@@ -137,6 +141,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val crn = "J678910"
     singleActiveConvictionResponse(crn)
+    offenderSummaryResponse(crn)
 
     val inductionRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
@@ -148,7 +153,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
     val unallocatedCase = unallocatedCaseEvent(
-      "Dylan Adam Armstrong", crn, "C1",
+      crn, "C1",
       "Currently managed"
     )
 
@@ -166,5 +171,33 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
+  }
+
+  @Test
+  fun `retrieve name from delius`() {
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn, "C1",
+      "Currently managed"
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.name).isEqualTo("Tester TestSurname")
   }
 }

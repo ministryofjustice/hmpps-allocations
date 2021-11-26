@@ -32,6 +32,11 @@ class UnallocatedCasesService(
     return contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
   }
 
+  fun getOffenderName(crn: String): String {
+    val offenderSummary = communityApiClient.getOffenderSummary(crn)
+    return "${offenderSummary.firstName} ${offenderSummary.surname}"
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }

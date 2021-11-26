@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -32,5 +33,14 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()
+  }
+
+  fun getOffenderSummary(crn: String): OffenderSummary {
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn")
+      .retrieve()
+      .bodyToMono(OffenderSummary::class.java)
+      .block()!!
   }
 }

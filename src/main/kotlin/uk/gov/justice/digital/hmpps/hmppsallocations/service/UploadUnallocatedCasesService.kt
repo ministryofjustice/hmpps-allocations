@@ -44,7 +44,6 @@ class UploadUnallocatedCasesService(
         DateTimeFormatter.ISO_ZONED_DATE_TIME
       ),
       HmppsUnallocatedCase(
-        unallocatedCase.name!!,
         unallocatedCase.crn!!,
         unallocatedCase.tier!!,
         unallocatedCase.status!!
