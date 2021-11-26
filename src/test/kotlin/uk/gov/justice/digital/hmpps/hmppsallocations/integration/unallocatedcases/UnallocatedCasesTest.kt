@@ -97,15 +97,9 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
   @Test
   fun `populate database from csv upload of unallocated cases`() {
-    singleActiveConvictionResponse("J678910")
-    singleActiveInductionResponse("J678910")
-    offenderSummaryResponse("J678910")
-    singleActiveConvictionResponse("J680648")
-    singleActiveInductionResponse("J680648")
-    offenderSummaryResponse("J680648")
-    singleActiveConvictionResponse("J680660")
-    singleActiveInductionResponse("J680660")
-    offenderSummaryResponse("J680660")
+    allDeliusResponses("J678910")
+    allDeliusResponses("J680648")
+    allDeliusResponses("J680660")
 
     val unallocatedCases = listOf(
       UnallocatedCaseCsv(

@@ -140,4 +140,10 @@ abstract class IntegrationTestBase {
       response().withContentType(APPLICATION_JSON).withBody("[]")
     )
   }
+
+  protected fun allDeliusResponses(crn: String) {
+    singleActiveConvictionResponse(crn)
+    singleActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+  }
 }
