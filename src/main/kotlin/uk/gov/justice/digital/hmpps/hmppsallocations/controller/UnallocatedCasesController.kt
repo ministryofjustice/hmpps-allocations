@@ -52,8 +52,8 @@ class UnallocatedCasesController(
 data class UnallocatedCaseCsv(
   @CsvBindByPosition(position = 0)
   var crn: String? = null,
-  @CsvBindByPosition(position = 2)
+  @CsvBindByPosition(position = 1)
   var tier: String? = null,
-  @CsvBindByPosition(position = 3)
+  @CsvBindByPosition(position = 2)
   var status: String? = null
 )
