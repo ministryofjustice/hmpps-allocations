@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun offenderSummary() = """
+fun offenderSummaryResponse() = """
   {
       "offenderId": 9999999999,
       "firstName": "Tester",

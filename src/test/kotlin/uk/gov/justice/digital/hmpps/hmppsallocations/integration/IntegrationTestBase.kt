@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummary
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -128,7 +128,7 @@ abstract class IntegrationTestBase {
       HttpRequest.request().withPath("/offenders/crn/$crn").withMethod("GET")
 
     communityApi.`when`(summaryRequest, Times.exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderSummary())
+      response().withContentType(APPLICATION_JSON).withBody(offenderSummaryResponse())
     )
   }
 
