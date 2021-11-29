@@ -18,7 +18,6 @@ class HmppsTierApiClient(@Qualifier("hmppsTierWebClientAppScope") private val we
     .block()!!.tierScore
     .also {
       log.info("Fetching Tier for $crn")
-      log.debug("Body: $it for $crn")
     }
 
   companion object {
