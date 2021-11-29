@@ -31,6 +31,9 @@ hmpps.sqs:
 community:
   endpoint:
     url: http://localhost:8092
+hmpps-tier:
+  endpoint:
+    url: http://localhost:8082
 
 oauth:
   endpoint:

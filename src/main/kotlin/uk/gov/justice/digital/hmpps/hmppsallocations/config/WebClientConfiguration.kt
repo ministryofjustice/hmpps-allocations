@@ -14,7 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class WebClientConfiguration(
-  @Value("\${community.endpoint.url}") private val communityApiRootUri: String
+  @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
+  @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String
 ) {
 
   @Bean
@@ -37,6 +38,14 @@ class WebClientConfiguration(
     builder: WebClient.Builder
   ): WebClient {
     return getOAuthWebClient(authorizedClientManager, builder, communityApiRootUri, "community-api")
+  }
+
+  @Bean
+  fun hmppsTierWebClientAppScope(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManager, builder, hmppsTierApiRootUri, "hmpps-tier-api")
   }
 
   private fun getOAuthWebClient(

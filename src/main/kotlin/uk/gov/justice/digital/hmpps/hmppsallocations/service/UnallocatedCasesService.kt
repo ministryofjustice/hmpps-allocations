@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
@@ -10,7 +11,8 @@ import java.time.LocalDate
 @Service
 class UnallocatedCasesService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
-  private val communityApiClient: CommunityApiClient
+  private val communityApiClient: CommunityApiClient,
+  private val hmppsTierApiClient: HmppsTierApiClient
 ) {
 
   fun getAll(): List<UnallocatedCase> {
@@ -35,6 +37,10 @@ class UnallocatedCasesService(
   fun getOffenderName(crn: String): String {
     val offenderSummary = communityApiClient.getOffenderSummary(crn)
     return "${offenderSummary.firstName} ${offenderSummary.surname}"
+  }
+
+  fun getTier(crn: String): String {
+    return hmppsTierApiClient.getTierByCrn(crn)
   }
 
   companion object {

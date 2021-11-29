@@ -45,7 +45,6 @@ class UploadUnallocatedCasesService(
       ),
       HmppsUnallocatedCase(
         unallocatedCase.crn!!,
-        unallocatedCase.tier!!,
         unallocatedCase.status!!
       )
     )

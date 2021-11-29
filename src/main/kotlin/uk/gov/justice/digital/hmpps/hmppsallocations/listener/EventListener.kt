@@ -25,9 +25,10 @@ class EventListener(
     val sentenceDate = unallocatedCasesService.getSentenceDate(crn)
     val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
     val name = unallocatedCasesService.getOffenderName(crn)
+    val tier = unallocatedCasesService.getTier(crn)
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, event.additionalInformation.tier, sentenceDate, initialAppointment, event.additionalInformation.status
+      crn, tier, sentenceDate, initialAppointment, event.additionalInformation.status
     )
 
     repository.save(unallocatedCase)
@@ -46,7 +47,6 @@ class EventListener(
 
 data class HmppsUnallocatedCase(
   val crn: String,
-  val tier: String,
   val status: String
 )
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)

@@ -23,10 +23,11 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -55,11 +56,12 @@ class EventListenerTest : IntegrationTestBase() {
     )
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
 
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -85,10 +87,11 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
     // Given
     val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -114,9 +117,10 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -142,6 +146,7 @@ class EventListenerTest : IntegrationTestBase() {
     val crn = "J678910"
     singleActiveConvictionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
 
     val inductionRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
@@ -153,7 +158,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -179,9 +184,10 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn, "C1",
+      crn,
       "Currently managed"
     )
 
@@ -199,5 +205,34 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.name).isEqualTo("Tester TestSurname")
+  }
+
+  @Test
+  fun `retrieve tier from hmpps tier`() {
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn,
+      "Currently managed"
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.tier).isEqualTo("B3")
   }
 }
