@@ -104,17 +104,14 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     val unallocatedCases = listOf(
       UnallocatedCaseCsv(
         "J678910",
-        "C1",
         "Currently managed"
       ),
       UnallocatedCaseCsv(
         "J680648",
-        "A1",
         "New to probation"
       ),
       UnallocatedCaseCsv(
         "J680660",
-        "C2",
         "Previously managed"
       )
     )

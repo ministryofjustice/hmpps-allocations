@@ -53,7 +53,5 @@ data class UnallocatedCaseCsv(
   @CsvBindByPosition(position = 0)
   var crn: String? = null,
   @CsvBindByPosition(position = 1)
-  var tier: String? = null,
-  @CsvBindByPosition(position = 2)
   var status: String? = null
 )

@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter
 abstract class IntegrationTestBase {
 
   var communityApi: ClientAndServer = startClientAndServer(8092)
+  var hmppsTier: ClientAndServer = startClientAndServer(8082)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
 
@@ -82,19 +83,19 @@ abstract class IntegrationTestBase {
 
   protected fun unallocatedCaseEvent(
     crn: String,
-    tier: String,
     status: String
   ) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
       DateTimeFormatter.ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(crn, tier, status)
+    HmppsUnallocatedCase(crn, status)
   )
 
   @AfterAll
   fun tearDownServer() {
     communityApi.stop()
+    hmppsTier.stop()
     oauthMock.stop()
     repository.deleteAll()
   }
@@ -141,9 +142,17 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun tierCalculationResponse(crn: String) {
+    val request = HttpRequest.request().withPath("/crn/$crn/tier")
+    hmppsTier.`when`(request).respond(
+      response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
+    )
+  }
+
   protected fun allDeliusResponses(crn: String) {
     singleActiveConvictionResponse(crn)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
   }
 }

@@ -36,6 +36,11 @@ spring:
             client-id: ${oauth.client.id}
             client-secret: ${oauth.client.secret}
             authorization-grant-type: client_credentials
+          hmpps-tier-api:
+            provider: hmpps-auth
+            client-id: ${oauth.client.id}
+            client-secret: ${oauth.client.secret}
+            authorization-grant-type: client_credentials
         provider:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
