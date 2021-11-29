@@ -11,3 +11,4 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     OAUTH_ENDPOINT_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
     COMMUNITY_ENDPOINT_URL: https://community-api-secure.pre-prod.delius.probation.hmpps.dsd.io/secure
+    HMPPS_TIER_ENDPOINT_URL: https://hmpps-tier-preprod.hmpps.service.justice.gov.uk
