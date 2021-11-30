@@ -24,7 +24,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
@@ -86,7 +86,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
@@ -118,6 +118,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
@@ -148,7 +149,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     val inductionRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
@@ -187,7 +188,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
@@ -218,7 +219,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
@@ -249,7 +250,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
