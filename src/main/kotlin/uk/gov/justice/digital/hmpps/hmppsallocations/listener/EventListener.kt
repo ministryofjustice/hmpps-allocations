@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
@@ -18,18 +19,18 @@ class EventListener(
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    val (Message) = objectMapper.readValue(rawMessage, Message::class.java)
-    val event = objectMapper.readValue(Message, HmppsEvent::class.java)
+    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
+    val event = objectMapper.readValue(message, HmppsEvent::class.java)
     val crn = event.additionalInformation.crn
     log.info("received event for crn: {}", crn)
     val sentenceDate = unallocatedCasesService.getSentenceDate(crn)
     val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
     val name = unallocatedCasesService.getOffenderName(crn)
     val tier = unallocatedCasesService.getTier(crn)
-    val status = unallocatedCasesService.getProbationStatus(crn)
+    val (status, previousConvictionDate) = unallocatedCasesService.getProbationStatus(crn)
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, tier, sentenceDate, initialAppointment, status.status.status, status.previousConvictionDate
+      crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate
     )
 
     repository.save(unallocatedCase)
@@ -53,7 +54,8 @@ data class HmppsEvent(val eventType: String, val version: Int, val description: 
 data class EventType(val Value: String, val Type: String)
 data class MessageAttributes(val eventType: EventType)
 data class Message(
-  val Message: String,
+
+  @JsonProperty("Message") val message: String,
   val MessageId: String,
   val MessageAttributes: MessageAttributes
 )
