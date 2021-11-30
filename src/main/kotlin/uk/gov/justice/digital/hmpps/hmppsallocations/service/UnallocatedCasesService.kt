@@ -43,15 +43,21 @@ class UnallocatedCasesService(
     return hmppsTierApiClient.getTierByCrn(crn)
   }
 
-  fun getProbationStatus(crn: String): String {
+  fun getProbationStatus(crn: String): ProbationStatus {
     val activeConvictions = communityApiClient.getActiveConvictions(crn).size
     return when {
-      activeConvictions > 1 -> "Currently managed"
+      activeConvictions > 1 -> ProbationStatus("Currently managed")
       else -> {
-        val allConvictions = communityApiClient.getAllConvictions(crn).size
+        val allConvictions = communityApiClient.getAllConvictions(crn)
         return when {
-          allConvictions > 1 -> "Previously managed"
-          else -> "New to probation"
+          allConvictions.size > 1 -> {
+            val mostRecentInactiveConvictionEndDate =
+              allConvictions.filter { c -> !c.active && c.sentence.terminationDate != null }
+                .map { c -> c.sentence.terminationDate!! }
+                .maxByOrNull { it }
+            ProbationStatus("Previously managed", mostRecentInactiveConvictionEndDate)
+          }
+          else -> ProbationStatus("New to probation")
         }
       }
     }
@@ -61,3 +67,8 @@ class UnallocatedCasesService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
+
+data class ProbationStatus(
+  val status: String,
+  val previousConvictionDate: LocalDate? = null
+)

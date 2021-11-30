@@ -330,5 +330,6 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.status).isEqualTo("Previously managed")
+    assertThat(case.previous_conviction_date).isEqualTo("2019-12-13")
   }
 }

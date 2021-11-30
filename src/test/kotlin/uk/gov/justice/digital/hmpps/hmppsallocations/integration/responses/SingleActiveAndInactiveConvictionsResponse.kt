@@ -42,6 +42,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
             "lengthInDays": 181,
             "expectedSentenceEndDate": "2020-05-16",
             "startDate": "2019-11-17",
+            "terminationDate": "2019-12-13",
             "sentenceType": {
                 "code": "SC",
                 "description": "Adult Custody < 12m"

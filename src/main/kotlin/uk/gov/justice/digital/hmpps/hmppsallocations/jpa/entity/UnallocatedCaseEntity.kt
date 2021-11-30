@@ -34,5 +34,8 @@ data class UnallocatedCaseEntity(
   val initial_appointment: LocalDate? = null,
 
   @Column
-  val status: String
+  val status: String,
+
+  @Column
+  val previous_conviction_date: LocalDate? = null
 )
