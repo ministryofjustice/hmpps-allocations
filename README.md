@@ -62,7 +62,7 @@ replacing `<NAMESPACE>` with the desired namespace for the environment.
 The curl command to call the endpoint is:
 
 ```shell
-curl http://localhost:8080/cases/unallocated/upload --request POST --form 'file=@"somefile.csv"'
+curl http://localhost:8080/cases/unallocated/upload --request POST --form 'file=@"src/test/resources/unallocated-case.csv"'
 ```
 
-The column order for the csv is `<crn>,<status>` with no headers
+The column order for the csv is `<crn>` with no headers
