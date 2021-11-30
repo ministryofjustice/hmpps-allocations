@@ -25,9 +25,20 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
   val firstSentenceDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment = LocalDate.now().plusDays(1)
+  val previousConvictionEndDate = LocalDate.now().minusDays(60)
+
+  val previouslyManagedCase = UnallocatedCaseEntity(
+    null,
+    "Hannah Francis",
+    "J680660",
+    "C2",
+    LocalDate.now().minusDays(1),
+    null,
+    "Previously managed",
+    previousConvictionEndDate
+  )
 
   fun insertCases() {
-
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
@@ -43,15 +54,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
           LocalDate.now().plusDays(2),
           "New to probation"
         ),
-        UnallocatedCaseEntity(
-          null,
-          "Hannah Francis",
-          "J680660",
-          "C2",
-          LocalDate.now().minusDays(1),
-          null,
-          "Previously managed"
-        )
+        previouslyManagedCase
 
       )
     )
@@ -93,6 +96,22 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("C1")
       .jsonPath("$.[0].status")
       .isEqualTo("Currently managed")
+  }
+
+  @Test
+  fun `can get previous conviction end date`() {
+    repository.save(previouslyManagedCase)
+    webTestClient.get()
+      .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[0].status")
+      .isEqualTo(previouslyManagedCase.status)
+      .jsonPath("$.[0].previousConvictionEndDate")
+      .isEqualTo((previouslyManagedCase.previous_conviction_date!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
   }
 
   @Test

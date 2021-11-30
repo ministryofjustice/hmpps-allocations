@@ -14,14 +14,17 @@ data class UnallocatedCase @JsonCreator constructor(
   val sentenceDate: LocalDate,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val initialAppointment: LocalDate?,
-  val status: String
+  val status: String,
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val previousConvictionEndDate: LocalDate?
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
       return UnallocatedCase(
         case.name,
-        case.crn, case.tier, case.sentence_date, case.initial_appointment, case.status
+        case.crn, case.tier, case.sentence_date, case.initial_appointment, case.status,
+        case.previous_conviction_date
       )
     }
   }
