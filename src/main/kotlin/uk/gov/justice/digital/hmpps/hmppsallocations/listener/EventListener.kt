@@ -20,6 +20,7 @@ class EventListener(
   fun processMessage(rawMessage: String?) {
     val (Message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(Message, HmppsEvent::class.java)
+
     val crn = event.additionalInformation.crn
     log.info("received event for crn: {}", crn)
     val sentenceDate = unallocatedCasesService.getSentenceDate(crn)

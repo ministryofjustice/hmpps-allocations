@@ -92,6 +92,18 @@ abstract class IntegrationTestBase {
     HmppsUnallocatedCase(crn, status)
   )
 
+  /*protected fun tierCalculationEvent(
+    crn: String,
+    tier: String
+
+  ) = HmppsEvent(
+    "TIER_CALCULATION_COMPLETE", 0, "some event description", "http://dummy.com",
+    ZonedDateTime.now().format(
+      DateTimeFormatter.ISO_ZONED_DATE_TIME
+    ),
+    CalculationEventListener.CalculationEventData(crn, UUID.randomUUID())
+  )*/
+
   @AfterAll
   fun tearDownServer() {
     communityApi.stop()
