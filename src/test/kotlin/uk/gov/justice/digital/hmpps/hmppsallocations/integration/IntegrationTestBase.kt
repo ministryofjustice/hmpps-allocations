@@ -9,10 +9,11 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
-import org.mockserver.matchers.Times
+import org.mockserver.matchers.Times.exactly
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType.APPLICATION_JSON
+import org.mockserver.model.Parameter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -107,9 +108,18 @@ abstract class IntegrationTestBase {
 
   protected fun singleActiveConvictionResponse(crn: String) {
     val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+    )
+  }
+
+  protected fun singleActiveConvictionResponseForAllConvictions(crn: String) {
+    val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
 
-    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
     )
   }
@@ -118,7 +128,7 @@ abstract class IntegrationTestBase {
     val inductionRequest =
       request().withPath("/offenders/crn/$crn/contact-summary/inductions")
 
-    communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
+    communityApi.`when`(inductionRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
     )
   }
@@ -127,7 +137,7 @@ abstract class IntegrationTestBase {
     val summaryRequest =
       request().withPath("/offenders/crn/$crn")
 
-    communityApi.`when`(summaryRequest, Times.exactly(1)).respond(
+    communityApi.`when`(summaryRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderSummaryResponse())
     )
   }
@@ -136,7 +146,7 @@ abstract class IntegrationTestBase {
     val inductionRequest =
       request().withPath("/offenders/crn/$crn/contact-summary/inductions")
 
-    communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
+    communityApi.`when`(inductionRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")
     )
   }
@@ -152,7 +162,7 @@ abstract class IntegrationTestBase {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
 
-    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
     )
   }
@@ -160,7 +170,7 @@ abstract class IntegrationTestBase {
   protected fun singleActiveAndInactiveConvictionsResponse(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
-    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse())
     )
   }
@@ -171,6 +181,6 @@ abstract class IntegrationTestBase {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
   }
 }
