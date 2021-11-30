@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import com.opencsv.CSVWriter
+import com.opencsv.CSVWriter.DEFAULT_SEPARATOR
 import com.opencsv.bean.StatefulBeanToCsv
 import com.opencsv.bean.StatefulBeanToCsvBuilder
 import org.awaitility.kotlin.await
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.io.FileSystemResource
 import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.MULTIPART_FORM_DATA
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCaseCsv
@@ -62,7 +62,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     val writer = FileWriter(tempFile)
 
     val sbc: StatefulBeanToCsv<UnallocatedCaseCsv> = StatefulBeanToCsvBuilder<UnallocatedCaseCsv>(writer)
-      .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+      .withSeparator(DEFAULT_SEPARATOR)
       .build()
     sbc.write(unallocatedCases)
     writer.close()
@@ -103,16 +103,13 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
     val unallocatedCases = listOf(
       UnallocatedCaseCsv(
-        "J678910",
-        "Currently managed"
+        "J678910"
       ),
       UnallocatedCaseCsv(
-        "J680648",
-        "New to probation"
+        "J680648"
       ),
       UnallocatedCaseCsv(
-        "J680660",
-        "Previously managed"
+        "J680660"
       )
     )
     val csvFile = generateCsv(unallocatedCases)
@@ -121,7 +118,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
     webTestClient.post()
       .uri("/cases/unallocated/upload")
-      .contentType(MediaType.MULTIPART_FORM_DATA)
+      .contentType(MULTIPART_FORM_DATA)
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
       .exchange()

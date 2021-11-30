@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCa
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 
 @Service
 class UploadUnallocatedCasesService(
@@ -41,11 +41,10 @@ class UploadUnallocatedCasesService(
     val hmppsEvent = HmppsEvent(
       "ALLOCATION_REQUIRED", 0, "Generated Allocated Event", "http://dummy.com",
       ZonedDateTime.now().format(
-        DateTimeFormatter.ISO_ZONED_DATE_TIME
+        ISO_ZONED_DATE_TIME
       ),
       HmppsUnallocatedCase(
-        unallocatedCase.crn!!,
-        unallocatedCase.status!!
+        unallocatedCase.crn!!
       )
     )
     hmppsDomainTopic.snsClient.publish(
