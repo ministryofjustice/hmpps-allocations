@@ -23,8 +23,8 @@ data class UnallocatedCase @JsonCreator constructor(
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
       return UnallocatedCase(
         case.name,
-        case.crn, case.tier, case.sentence_date, case.initial_appointment, case.status,
-        case.previous_conviction_date
+        case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
+        case.previousConvictionDate
       )
     }
   }

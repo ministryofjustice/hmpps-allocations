@@ -43,7 +43,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentence_date).isEqualTo(deliusSentenceDate)
+    assertThat(case.sentenceDate).isEqualTo(deliusSentenceDate)
   }
 
   @Test
@@ -75,7 +75,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentence_date).isEqualTo(latestConvictionSentenceDate)
+    assertThat(case.sentenceDate).isEqualTo(latestConvictionSentenceDate)
   }
 
   @Test
@@ -107,7 +107,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
+    assertThat(case.initialAppointment).isEqualTo(deliusInitialAppointmentDate)
   }
 
   @Test
@@ -138,7 +138,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isNull()
+    assertThat(case.initialAppointment).isNull()
   }
 
   @Test
@@ -177,7 +177,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
+    assertThat(case.initialAppointment).isEqualTo(deliusInitialAppointmentDate)
   }
 
   @Test
@@ -331,6 +331,6 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.status).isEqualTo("Previously managed")
-    assertThat(case.previous_conviction_date).isEqualTo("2019-12-13")
+    assertThat(case.previousConvictionDate).isEqualTo("2019-12-13")
   }
 }

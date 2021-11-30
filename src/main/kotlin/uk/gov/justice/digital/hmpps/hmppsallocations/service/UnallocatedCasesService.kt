@@ -6,6 +6,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
 
 @Service
@@ -46,7 +49,7 @@ class UnallocatedCasesService(
   fun getProbationStatus(crn: String): ProbationStatus {
     val activeConvictions = communityApiClient.getActiveConvictions(crn).size
     return when {
-      activeConvictions > 1 -> ProbationStatus("Currently managed")
+      activeConvictions > 1 -> ProbationStatus(CURRENTLY_MANAGED)
       else -> {
         val allConvictions = communityApiClient.getAllConvictions(crn)
         return when {
@@ -55,9 +58,9 @@ class UnallocatedCasesService(
               allConvictions.filter { c -> !c.active && c.sentence.terminationDate != null }
                 .map { c -> c.sentence.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus("Previously managed", mostRecentInactiveConvictionEndDate)
+            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate)
           }
-          else -> ProbationStatus("New to probation")
+          else -> ProbationStatus(NEW_TO_PROBATION)
         }
       }
     }
@@ -69,6 +72,14 @@ class UnallocatedCasesService(
 }
 
 data class ProbationStatus(
-  val status: String,
+  val status: ProbationStatusType,
   val previousConvictionDate: LocalDate? = null
 )
+
+enum class ProbationStatusType(
+  val status: String
+) {
+  CURRENTLY_MANAGED("Currently managed"),
+  PREVIOUSLY_MANAGED("Previously managed"),
+  NEW_TO_PROBATION("New to probation")
+}

@@ -111,7 +111,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .jsonPath("$.[0].status")
       .isEqualTo(previouslyManagedCase.status)
       .jsonPath("$.[0].previousConvictionEndDate")
-      .isEqualTo((previouslyManagedCase.previous_conviction_date!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+      .isEqualTo((previouslyManagedCase.previousConvictionDate!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
   }
 
   @Test
