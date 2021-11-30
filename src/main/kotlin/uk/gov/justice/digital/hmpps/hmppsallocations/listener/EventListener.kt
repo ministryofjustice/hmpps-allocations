@@ -29,7 +29,7 @@ class EventListener(
     val status = unallocatedCasesService.getProbationStatus(crn)
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, tier, sentenceDate, initialAppointment, status.status, status.previousConvictionDate
+      crn, tier, sentenceDate, initialAppointment, status.status.status, status.previousConvictionDate
     )
 
     repository.save(unallocatedCase)
