@@ -22,7 +22,7 @@ class UnallocatedCasesService(
   }
 
   fun getSentenceDate(crn: String): LocalDate {
-    val convictions = communityApiClient.getConvictions(crn)
+    val convictions = communityApiClient.getActiveConvictions(crn)
     log.info("convictions from com-api : {}", convictions.size)
     return convictions.sortedByDescending { c -> c.convictionDate }.first().sentence.startDate
   }
@@ -41,6 +41,20 @@ class UnallocatedCasesService(
 
   fun getTier(crn: String): String {
     return hmppsTierApiClient.getTierByCrn(crn)
+  }
+
+  fun getProbationStatus(crn: String): String {
+    val activeConvictions = communityApiClient.getActiveConvictions(crn).size
+    return when {
+      activeConvictions > 1 -> "Currently managed"
+      else -> {
+        val allConvictions = communityApiClient.getAllConvictions(crn).size
+        return when {
+          allConvictions > 1 -> "Previously managed"
+          else -> "New to probation"
+        }
+      }
+    }
   }
 
   companion object {

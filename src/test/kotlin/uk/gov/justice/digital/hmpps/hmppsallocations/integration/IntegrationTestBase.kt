@@ -10,7 +10,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.matchers.Times
-import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType.APPLICATION_JSON
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,15 +20,17 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -81,15 +83,12 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun unallocatedCaseEvent(
-    crn: String,
-    status: String
-  ) = HmppsEvent(
+  protected fun unallocatedCaseEvent(crn: String) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
-      DateTimeFormatter.ISO_ZONED_DATE_TIME
+      ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(crn, status)
+    HmppsUnallocatedCase(crn)
   )
 
   @AfterAll
@@ -103,12 +102,12 @@ abstract class IntegrationTestBase {
   fun setupOauth() {
     val response = response().withContentType(APPLICATION_JSON)
       .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
-    oauthMock.`when`(HttpRequest.request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
+    oauthMock.`when`(request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
   }
 
   protected fun singleActiveConvictionResponse(crn: String) {
     val convictionsRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/convictions").withMethod("GET")
+      request().withPath("/offenders/crn/$crn/convictions")
 
     communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
@@ -117,7 +116,7 @@ abstract class IntegrationTestBase {
 
   protected fun singleActiveInductionResponse(crn: String) {
     val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
@@ -126,7 +125,7 @@ abstract class IntegrationTestBase {
 
   protected fun offenderSummaryResponse(crn: String) {
     val summaryRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn").withMethod("GET")
+      request().withPath("/offenders/crn/$crn")
 
     communityApi.`when`(summaryRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderSummaryResponse())
@@ -135,7 +134,7 @@ abstract class IntegrationTestBase {
 
   protected fun noActiveInductionResponse(crn: String) {
     val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
+      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")
@@ -143,9 +142,26 @@ abstract class IntegrationTestBase {
   }
 
   protected fun tierCalculationResponse(crn: String) {
-    val request = HttpRequest.request().withPath("/crn/$crn/tier")
+    val request = request().withPath("/crn/$crn/tier")
     hmppsTier.`when`(request).respond(
       response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
+    )
+  }
+
+  protected fun twoActiveConvictionsResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions")
+
+    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
+    )
+  }
+
+  protected fun singleActiveAndInactiveConvictionsResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions")
+    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse())
     )
   }
 
@@ -154,5 +170,7 @@ abstract class IntegrationTestBase {
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponse(crn)
   }
 }

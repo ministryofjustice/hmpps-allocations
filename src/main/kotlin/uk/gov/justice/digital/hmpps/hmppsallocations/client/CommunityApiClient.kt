@@ -13,12 +13,22 @@ import java.time.format.DateTimeFormatter
 @Component
 class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val webClient: WebClient) {
 
-  fun getConvictions(crn: String): List<Conviction> {
+  fun getActiveConvictions(crn: String): List<Conviction> {
     val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
 
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions?activeOnly=true")
+      .retrieve()
+      .bodyToMono(responseType)
+      .block() ?: listOf()
+  }
+
+  fun getAllConvictions(crn: String): List<Conviction> {
+    val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/convictions")
       .retrieve()
       .bodyToMono(responseType)
       .block() ?: listOf()
