@@ -51,10 +51,9 @@ data class HmppsUnallocatedCase(
   val crn: String
 )
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)
-data class EventType(val Value: String, val Type: String)
+data class EventType(@JsonProperty("Value") val value: String, val Type: String)
 data class MessageAttributes(val eventType: EventType)
 data class Message(
-
   @JsonProperty("Message") val message: String,
   val MessageId: String,
   val MessageAttributes: MessageAttributes
