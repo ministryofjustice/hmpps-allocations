@@ -26,12 +26,14 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -92,17 +94,16 @@ abstract class IntegrationTestBase {
     HmppsUnallocatedCase(crn)
   )
 
-  /*protected fun tierCalculationEvent(
-    crn: String,
-    tier: String
+  protected fun tierCalculationEvent(
+    crn: String
 
-  ) = HmppsEvent(
+  ) = CalculationEventListener.CalculationEvent(
     "TIER_CALCULATION_COMPLETE", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
-      DateTimeFormatter.ISO_ZONED_DATE_TIME
+      ISO_ZONED_DATE_TIME
     ),
     CalculationEventListener.CalculationEventData(crn, UUID.randomUUID())
-  )*/
+  )
 
   @AfterAll
   fun tearDownServer() {

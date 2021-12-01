@@ -22,8 +22,13 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
     repository.save(UnallocatedCaseEntity(crn = "J678910", tier = "D0", name = "foo", status = "active", sentenceDate = LocalDate.now()))
 
+    val calculationEvent = tierCalculationEvent(
+      crn
+    )
+
+    // Then
     hmppsDomainSnsClient.publish(
-      PublishRequest(hmppsDomainTopicArn, tierUpdateMessage())
+      PublishRequest(hmppsDomainTopicArn, jsonString(calculationEvent))
         .withMessageAttributes(
           mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("TIER_CALCULATION_COMPLETE"))
         )
@@ -36,25 +41,4 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
     Assertions.assertThat(case.tier).isEqualTo("B3")
   }
-
-  fun tierUpdateMessage() = """
-{
-  "Type": "Notification",
-  "MessageId": "f39059e7-a62d-4157-929a-fb049015c993",
-  "Token": null,
-  "TopicArn": "arn:aws:sns:eu-west-2:000000000000:hmpps-domain",
-  "Message": "{\"crn\":\"J678910\",\"calculationId\":\"e45559d1-3460-4a0e-8281-c736de57c562\"}",
-  "SubscribeURL": null,
-  "Timestamp": "2021-10-21T06:27:57.028Z",
-  "SignatureVersion": "1",
-  "Signature": "EXAMPLEpH+..",
-  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-0000000000000000000000.pem",
-  "MessageAttributes": {
-    "eventType": {
-      "Type": "String",
-      "Value": "TIER_CALCULATION_COMPLETE"
-    }
-  }
-}   
-  """.trimIndent()
 }
