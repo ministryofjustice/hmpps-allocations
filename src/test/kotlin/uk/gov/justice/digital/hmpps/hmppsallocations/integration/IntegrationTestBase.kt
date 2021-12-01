@@ -49,12 +49,15 @@ abstract class IntegrationTestBase {
   fun `clear queues and database`() {
     repository.deleteAll()
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
+    tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     setupOauth()
   }
 
   private val hmppsDomainQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") ?: throw MissingQueueException("HmppsQueue hmppsdomainqueue not found") }
+  private val tierCalculationQueue by lazy { hmppsQueueService.findByQueueId("tiercalculationqueue") ?: throw MissingQueueException("HmppsQueue tiercalculationqueue not found") }
   private val hmppsDomainTopic by lazy { hmppsQueueService.findByTopicId("hmppsdomaintopic") ?: throw MissingQueueException("HmppsTopic hmppsdomaintopic not found") }
   protected val hmppsDomainSqsClient by lazy { hmppsDomainQueue.sqsClient }
+  protected val tierCalculationSqsClient by lazy { tierCalculationQueue.sqsClient }
   protected val hmppsDomainSnsClient by lazy { hmppsDomainTopic.snsClient }
   protected val hmppsDomainTopicArn by lazy { hmppsDomainTopic.arn }
 

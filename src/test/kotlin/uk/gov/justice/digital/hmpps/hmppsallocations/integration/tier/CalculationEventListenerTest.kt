@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.listener
+package uk.gov.justice.digital.hmpps.hmppsallocations.integration.tier
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
