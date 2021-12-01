@@ -15,8 +15,9 @@ class CalculationEventListener(hmppsTierApiClient: HmppsTierApiClient, private v
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
-    val event = objectMapper.readValue(message, HmppsEvent::class.java)
+    val event = objectMapper.readValue(message, CalculationEvent::class.java)
     println("Message processed!!!!")
+    println(event)
   }
 
   companion object {
