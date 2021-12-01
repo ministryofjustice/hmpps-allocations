@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.tier
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
-import org.assertj.core.api.Assertions
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -14,19 +13,15 @@ import java.time.LocalDate
 internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   @Test
-  fun `retrieve sentenceDate from delius`() {
-    // Given
+  fun `change tier after event calculation is consumed`() {
+
     val crn = "J678910"
     tierCalculationResponse(crn)
-    // Ad record in the DB for that CRN in order to check exist.
-
+    // Add  unallocated case to the database with the original tier value that will be  changed based on consumed message.
     repository.save(UnallocatedCaseEntity(crn = "J678910", tier = "D0", name = "foo", status = "active", sentenceDate = LocalDate.now()))
+    val calculationEvent = tierCalculationEvent(crn)
 
-    val calculationEvent = tierCalculationEvent(
-      crn
-    )
-
-    // Then
+    // Then publish the  event that the calculation is complete for a given CRN.
     hmppsDomainSnsClient.publish(
       PublishRequest(hmppsDomainTopicArn, jsonString(calculationEvent))
         .withMessageAttributes(
@@ -36,9 +31,5 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
     // Then check entry is in the DB.
     await untilCallTo { repository.findByCrn(crn) } matches { it!!.tier.equals("B3") }
-
-    val case = repository.findAll().first()
-
-    Assertions.assertThat(case.tier).isEqualTo("B3")
   }
 }

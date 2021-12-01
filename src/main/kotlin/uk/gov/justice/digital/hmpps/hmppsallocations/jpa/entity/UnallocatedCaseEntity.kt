@@ -15,27 +15,28 @@ data class UnallocatedCaseEntity(
   @Id
   @Column
   @GeneratedValue(strategy = IDENTITY)
-  val id: Long? = null,
+  var id: Long? = null,
 
   @Column
-  val name: String,
+  var name: String,
 
   @Column
   @NotNull
-  val crn: String,
+  var crn: String,
 
   @Column
-  val tier: String,
+  var tier: String,
 
   @Column(name = "sentence_date")
-  val sentenceDate: LocalDate,
+  var sentenceDate: LocalDate,
 
   @Column(name = "initial_appointment")
-  val initialAppointment: LocalDate? = null,
+  var initialAppointment: LocalDate? = null,
 
   @Column
-  val status: String,
+  var status: String,
 
   @Column(name = "previous_conviction_date")
   val previousConvictionDate: LocalDate? = null
+
 )

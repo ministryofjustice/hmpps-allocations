@@ -1,12 +1,19 @@
+
+
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.13-beta-2"
   kotlin("plugin.spring") version "1.5.31"
   kotlin("plugin.jpa") version "1.5.31"
   id("io.gitlab.arturbosch.detekt").version("1.17.1")
+  id("org.jetbrains.kotlin.plugin.allopen").version("1.6.0")
 }
 
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
+}
+
+allOpen {
+  annotations("javax.persistence.Entity")
 }
 
 dependencies {
@@ -22,6 +29,7 @@ dependencies {
   runtimeOnly("com.zaxxer:HikariCP:3.4.5")
   runtimeOnly("org.flywaydb:flyway-core:6.5.6")
   runtimeOnly("org.postgresql:postgresql")
+  runtimeOnly("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.5")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")

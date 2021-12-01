@@ -6,18 +6,22 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.CalculationTierService
 import java.util.UUID
 
 @Component
-class CalculationEventListener(hmppsTierApiClient: HmppsTierApiClient, private val objectMapper: ObjectMapper,) {
+class CalculationEventListener(
+  private val calculationTierService: CalculationTierService,
+  private val objectMapper: ObjectMapper
+) {
 
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(message, CalculationEvent::class.java)
-    println("Message processed!!!!")
-    println(event)
+
+    calculationTierService.updateCalculationTier(event.additionalInformation.crn)
+    log.info("tire calculation update consumed for crn: ${event.additionalInformation.crn}")
   }
 
   companion object {
