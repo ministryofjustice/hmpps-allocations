@@ -13,6 +13,7 @@ complexity:
   LongMethod:
     active: true
     threshold: 30
+    excludes: ['**/test/**']
   LongParameterList:
     active: true
     functionThreshold: 4
@@ -25,14 +26,14 @@ complexity:
     threshold: 4
   StringLiteralDuplication:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['**/test/**']
     threshold: 3
     ignoreAnnotation: true
     excludeStringsWithLessThan5Characters: true
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['**/test/**']
     thresholdInFiles: 11
     thresholdInClasses: 11
     thresholdInInterfaces: 11

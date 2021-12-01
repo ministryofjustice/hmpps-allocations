@@ -27,12 +27,15 @@ data class UnallocatedCaseEntity(
   @Column
   val tier: String,
 
-  @Column
-  val sentence_date: LocalDate,
+  @Column(name = "sentence_date")
+  val sentenceDate: LocalDate,
+
+  @Column(name = "initial_appointment")
+  val initialAppointment: LocalDate? = null,
 
   @Column
-  val initial_appointment: LocalDate? = null,
+  val status: String,
 
-  @Column
-  val status: String
+  @Column(name = "previous_conviction_date")
+  val previousConvictionDate: LocalDate? = null
 )

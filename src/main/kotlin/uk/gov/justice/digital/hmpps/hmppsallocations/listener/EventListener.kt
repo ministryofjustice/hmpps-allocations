@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
@@ -18,8 +19,9 @@ class EventListener(
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    val (Message) = objectMapper.readValue(rawMessage, Message::class.java)
-    val event = objectMapper.readValue(Message, HmppsEvent::class.java)
+
+    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
+    val event = objectMapper.readValue(message, HmppsEvent::class.java)
 
     val crn = event.additionalInformation.crn
     log.info("received event for crn: {}", crn)
@@ -27,9 +29,10 @@ class EventListener(
     val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
     val name = unallocatedCasesService.getOffenderName(crn)
     val tier = unallocatedCasesService.getTier(crn)
+    val (status, previousConvictionDate) = unallocatedCasesService.getProbationStatus(crn)
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, tier, sentenceDate, initialAppointment, event.additionalInformation.status
+      crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate
     )
 
     repository.save(unallocatedCase)
@@ -47,14 +50,11 @@ class EventListener(
 }
 
 data class HmppsUnallocatedCase(
-  val crn: String,
-  val status: String
+  val crn: String
 )
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)
-data class EventType(val Value: String, val Type: String)
-data class MessageAttributes(val eventType: EventType)
+
 data class Message(
-  val Message: String,
-  val MessageId: String,
-  val MessageAttributes: MessageAttributes
+  @JsonProperty("Message") val message: String,
+
 )

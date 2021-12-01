@@ -6,6 +6,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
 
 @Service
@@ -22,7 +25,7 @@ class UnallocatedCasesService(
   }
 
   fun getSentenceDate(crn: String): LocalDate {
-    val convictions = communityApiClient.getConvictions(crn)
+    val convictions = communityApiClient.getActiveConvictions(crn)
     log.info("convictions from com-api : {}", convictions.size)
     return convictions.sortedByDescending { c -> c.convictionDate }.first().sentence.startDate
   }
@@ -43,7 +46,40 @@ class UnallocatedCasesService(
     return hmppsTierApiClient.getTierByCrn(crn)
   }
 
+  fun getProbationStatus(crn: String): ProbationStatus {
+    val activeConvictions = communityApiClient.getActiveConvictions(crn).size
+    return when {
+      activeConvictions > 1 -> ProbationStatus(CURRENTLY_MANAGED)
+      else -> {
+        val allConvictions = communityApiClient.getAllConvictions(crn)
+        return when {
+          allConvictions.size > 1 -> {
+            val mostRecentInactiveConvictionEndDate =
+              allConvictions.filter { c -> !c.active && c.sentence.terminationDate != null }
+                .map { c -> c.sentence.terminationDate!! }
+                .maxByOrNull { it }
+            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate)
+          }
+          else -> ProbationStatus(NEW_TO_PROBATION)
+        }
+      }
+    }
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
+}
+
+data class ProbationStatus(
+  val status: ProbationStatusType,
+  val previousConvictionDate: LocalDate? = null
+)
+
+enum class ProbationStatusType(
+  val status: String
+) {
+  CURRENTLY_MANAGED("Currently managed"),
+  PREVIOUSLY_MANAGED("Previously managed"),
+  NEW_TO_PROBATION("New to probation")
 }

@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test
 import org.mockserver.matchers.Times
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
-import org.mockserver.model.MediaType
+import org.mockserver.model.MediaType.APPLICATION_JSON
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveInductionResponse
 import java.time.LocalDate
 
@@ -24,11 +23,13 @@ class EventListenerTest : IntegrationTestBase() {
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -42,27 +43,23 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentence_date).isEqualTo(deliusSentenceDate)
+    assertThat(case.sentenceDate).isEqualTo(deliusSentenceDate)
   }
 
   @Test
   fun `retrieve sentenceDate for latest conviction from delius`() {
     val crn = "J678910"
-    val convictionsRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/convictions").withMethod("GET")
-
-    communityApi.`when`(convictionsRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
-    )
+    twoActiveConvictionsResponse(crn)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    twoActiveConvictionsResponse(crn)
+    twoActiveConvictionsResponse(crn)
 
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -78,7 +75,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentence_date).isEqualTo(latestConvictionSentenceDate)
+    assertThat(case.sentenceDate).isEqualTo(latestConvictionSentenceDate)
   }
 
   @Test
@@ -88,11 +85,13 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
     // Given
     val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -108,7 +107,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
+    assertThat(case.initialAppointment).isEqualTo(deliusInitialAppointmentDate)
   }
 
   @Test
@@ -118,10 +117,12 @@ class EventListenerTest : IntegrationTestBase() {
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -137,7 +138,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isNull()
+    assertThat(case.initialAppointment).isNull()
   }
 
   @Test
@@ -147,19 +148,20 @@ class EventListenerTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
 
     val inductionRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions").withMethod("GET")
 
     communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(twoActiveInductionResponse())
+        .withContentType(APPLICATION_JSON).withBody(twoActiveInductionResponse())
     )
 
     val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -175,7 +177,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initial_appointment).isEqualTo(deliusInitialAppointmentDate)
+    assertThat(case.initialAppointment).isEqualTo(deliusInitialAppointmentDate)
   }
 
   @Test
@@ -185,10 +187,12 @@ class EventListenerTest : IntegrationTestBase() {
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -214,10 +218,12 @@ class EventListenerTest : IntegrationTestBase() {
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn,
-      "Currently managed"
+      crn
     )
 
     // Then
@@ -234,5 +240,97 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.tier).isEqualTo("B3")
+  }
+
+  @Test
+  fun `retrieve new to probation status from delius`() {
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.status).isEqualTo("New to probation")
+  }
+
+  @Test
+  fun `retrieve currently managed probation status from delius`() {
+    val crn = "J678910"
+    twoActiveConvictionsResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    twoActiveConvictionsResponse(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.status).isEqualTo("Currently managed")
+  }
+
+  @Test
+  fun `retrieve previously managed probation status from delius`() {
+    val crn = "J678910"
+    singleActiveConvictionResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveAndInactiveConvictionsResponse(crn)
+
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.status).isEqualTo("Previously managed")
+    assertThat(case.previousConvictionDate).isEqualTo("2019-12-13")
   }
 }
