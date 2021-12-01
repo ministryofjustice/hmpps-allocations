@@ -20,7 +20,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     tierCalculationResponse(crn)
     // Ad record in the DB for that CRN in order to check exist.
 
-    repository.save(UnallocatedCaseEntity(crn = "J678910", tier = "D0", name = "foo", status = "active", sentence_date = LocalDate.now()))
+    repository.save(UnallocatedCaseEntity(crn = "J678910", tier = "D0", name = "foo", status = "active", sentenceDate = LocalDate.now()))
 
     hmppsDomainSnsClient.publish(
       PublishRequest(hmppsDomainTopicArn, tierUpdateMessage())
