@@ -29,7 +29,6 @@ dependencies {
   runtimeOnly("com.zaxxer:HikariCP:3.4.5")
   runtimeOnly("org.flywaydb:flyway-core:6.5.6")
   runtimeOnly("org.postgresql:postgresql")
-  runtimeOnly("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.5")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
