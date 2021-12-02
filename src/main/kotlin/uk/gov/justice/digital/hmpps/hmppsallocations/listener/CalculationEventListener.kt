@@ -18,10 +18,11 @@ class CalculationEventListener(
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
-    val event = objectMapper.readValue(message, CalculationEvent::class.java)
+    val actualMessage = objectMapper.readValue(message, Message::class.java)
+    val event = objectMapper.readValue(actualMessage.message, CalculationEventData::class.java)
 
-    calculationTierService.updateTier(event.additionalInformation.crn)
-    log.info("Tier calculation update consumed successfully for crn: ${event.additionalInformation.crn}")
+    calculationTierService.updateTier(event.crn)
+    log.info("Tier calculation update consumed successfully for crn: ${event.crn}")
   }
 
   companion object {
@@ -35,8 +36,6 @@ class CalculationEventListener(
   }
 
   data class CalculationEventData(val crn: String, val calculationId: UUID)
-
-  data class CalculationEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: CalculationEventData)
 
   data class Message(@JsonProperty("Message") val message: String)
 }

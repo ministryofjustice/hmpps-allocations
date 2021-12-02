@@ -50,7 +50,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
     hmppsDomainSnsClient.publish(
-      PublishRequest(hmppsDomainTopicArn, jsonString(tierCalculationEvent(crn)))
+      PublishRequest(hmppsDomainTopicArn, tierCalculationEvent(crn))
         .withMessageAttributes(
           mapOf(
             "eventType" to MessageAttributeValue().withDataType("String").withStringValue("TIER_CALCULATION_COMPLETE")
