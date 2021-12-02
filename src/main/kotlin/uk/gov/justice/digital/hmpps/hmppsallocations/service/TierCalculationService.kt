@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -19,7 +20,7 @@ class TierCalculationService(
       unallocatedCase.tier = tier
       repository.save(unallocatedCase)
       log.info("Tier updated for CRN: $crn")
-    } catch (e: Exception) {
+    } catch (e: EmptyResultDataAccessException) {
       log.warn("No unallocated case with CRN: $crn ")
     }
   }

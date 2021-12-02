@@ -15,31 +15,37 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   @Test
   fun `change tier after event calculation is consumed`() {
-
-    val crn = "J678910"
+    val crn = "X123456"
     tierCalculationResponse(crn)
-    // Add  unallocated case to the database with the original tier value that will be  changed based on consumed message.
-    repository.save(UnallocatedCaseEntity(crn = crn, tier = "D0", name = "foo", status = "active", sentenceDate = LocalDate.now()))
-
+    writeUnallocatedCaseToDatabase(crn, "D0")
     publishTierCalculationCompleteMessage(crn)
-
-    // Then check entry is in the DB.
-    await untilCallTo { repository.findByCrn(crn) } matches { it!!.tier.equals("B3") }
+    checkTierHasBeenUpdated(crn, "B3")
   }
 
   @Test
   fun `does not get tier calculation when the crn is not for an unallocated case`() {
-
     val crn = "J678910"
     val tierCalculationRequest = tierCalculationResponse(crn)
-    // Add  unallocated case to the database with the original tier value
-    repository.save(UnallocatedCaseEntity(crn = "A123456", tier = "D0", name = "foo", status = "active", sentenceDate = LocalDate.now()))
-
     publishTierCalculationCompleteMessage(crn)
-
     whenCalculationQueueIsEmpty()
     whenCalculationMessageHasBeenProcessed()
     hmppsTier.verify(tierCalculationRequest, VerificationTimes.exactly(0))
+  }
+
+  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String) {
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        tier = tier,
+        name = "foo",
+        status = "active",
+        sentenceDate = LocalDate.now()
+      )
+    )
+  }
+
+  private fun checkTierHasBeenUpdated(crn: String, tier: String) {
+    await untilCallTo { repository.findByCrn(crn) } matches { it!!.tier.equals(tier) }
   }
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
