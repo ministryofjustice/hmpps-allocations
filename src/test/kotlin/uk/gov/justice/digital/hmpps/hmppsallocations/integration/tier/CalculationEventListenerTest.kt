@@ -45,7 +45,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   }
 
   private fun checkTierHasBeenUpdated(crn: String, tier: String) {
-    await untilCallTo { repository.findByCrn(crn) } matches { it!!.tier.equals(tier) }
+    await untilCallTo { repository.findByCrn(crn) } matches { it!!.get().tier.equals(tier) }
   }
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
