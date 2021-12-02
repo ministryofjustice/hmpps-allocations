@@ -19,8 +19,10 @@ class EventListener(
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
+
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(message, HmppsEvent::class.java)
+
     val crn = event.additionalInformation.crn
     log.info("received event for crn: {}", crn)
     val sentenceDate = unallocatedCasesService.getSentenceDate(crn)

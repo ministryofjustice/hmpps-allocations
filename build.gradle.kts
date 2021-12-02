@@ -1,12 +1,19 @@
+
+
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.13-beta-2"
   kotlin("plugin.spring") version "1.5.31"
   kotlin("plugin.jpa") version "1.5.31"
   id("io.gitlab.arturbosch.detekt").version("1.17.1")
+  id("org.jetbrains.kotlin.plugin.allopen").version("1.6.0")
 }
 
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
+}
+
+allOpen {
+  annotations("javax.persistence.Entity")
 }
 
 dependencies {
