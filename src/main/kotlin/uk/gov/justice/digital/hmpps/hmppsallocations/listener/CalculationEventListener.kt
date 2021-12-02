@@ -18,8 +18,7 @@ class CalculationEventListener(
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val fullMessage = objectMapper.readValue(rawMessage, Message::class.java)
-    val (message) = objectMapper.readValue(fullMessage.message, Message::class.java)
-    val event = objectMapper.readValue(message, CalculationEventData::class.java)
+    val event = objectMapper.readValue(fullMessage.message, CalculationEventData::class.java)
     calculationTierService.updateTier(event.crn)
     log.info("Tier calculation update consumed successfully for crn: ${event.crn}")
   }

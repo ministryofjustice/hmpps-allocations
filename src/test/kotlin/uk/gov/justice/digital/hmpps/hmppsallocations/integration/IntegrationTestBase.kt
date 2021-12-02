@@ -31,12 +31,14 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -102,25 +104,7 @@ abstract class IntegrationTestBase {
 
   protected fun tierCalculationEvent(
     crn: String
-  ) = """
-    {
-        "Type": "Notification",
-        "MessageId": "51d4fd16-5462-5d81-a985-a737297b10e8",
-        "TopicArn": "arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-e29fb030a51b3576dd645aa5e460e573",
-        "Message": "{\"crn\":\"$crn\",\"calculationId\":\"e6c61816-3c02-4664-b967-8e524f08d551\"}",
-        "Timestamp": "2021-12-01T13:38:33.522Z",
-        "SignatureVersion": "1",
-        "Signature": "fG/RaDvbRcFbUCC+qScsOSqv9AF17Pyz8Z13YKCTfHoM4x77Mi8LyMeSGkh4Aflt77YEcrHihQwavKkQZT5f4tayWNtiESo86kv32wXgv2LiNzQ/n4+c74ToInhaD60owXgA9HJ8s+wvekXVkaUTffZTNwZBd91lORXP3Na07R+uLR6Ic4bS4UwTx+uBSN5Y77gZ3eKG3p1tiA8Iihc67kVa+GOUnT272hmR7p3tnNnIWA40pdBmwAWarHKxRFbRpJLC9U2ttwG/K/aQKG8y2GrZYO0UPgf8+5hQkCZ4xK9IoHDrZafnPa3uGbmqkh7tUNDFHtFKEDH+wQNigewDZQ==",
-        "SigningCertURL": "https://sns.eu-west-2.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem",
-        "UnsubscribeURL": "https://sns.eu-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-e29fb030a51b3576dd645aa5e460e573:9000a6de-4582-4477-aeb6-6d3b5641895e",
-        "MessageAttributes": {
-            "eventType": {
-                "Type": "String",
-                "Value": "TIER_CALCULATION_COMPLETE"
-            }
-        }
-    }
-  """.trimIndent()
+  ) = CalculationEventListener.CalculationEventData(crn, UUID.randomUUID())
 
   @AfterAll
   fun tearDownServer() {
