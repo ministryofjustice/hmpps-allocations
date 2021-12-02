@@ -1,8 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 
+import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -10,6 +14,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.matchers.Times.exactly
+import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType.APPLICATION_JSON
@@ -167,11 +172,12 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun tierCalculationResponse(crn: String) {
+  protected fun tierCalculationResponse(crn: String): HttpRequest {
     val request = request().withPath("/crn/$crn/tier")
     hmppsTier.`when`(request).respond(
       response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
     )
+    return request!!
   }
 
   protected fun twoActiveConvictionsResponse(crn: String) {
@@ -198,5 +204,32 @@ abstract class IntegrationTestBase {
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
+  }
+
+  private fun getNumberOfMessagesCurrentlyOnQueue(client: AmazonSQS, queueUrl: String): Int? {
+    val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
+    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+  }
+  protected fun whenCalculationQueueIsEmpty() {
+    await untilCallTo {
+      getNumberOfMessagesCurrentlyOnQueue(
+        tierCalculationSqsClient,
+        tierCalculationQueue.queueUrl
+      )
+    } matches { it == 0 }
+  }
+
+  protected fun whenCalculationMessageHasBeenProcessed() {
+    await untilCallTo {
+      getNumberOfMessagesCurrentlyNotVisibleOnQueue(
+        tierCalculationSqsClient,
+        tierCalculationQueue.queueUrl
+      )
+    } matches { it == 0 }
+  }
+
+  private fun getNumberOfMessagesCurrentlyNotVisibleOnQueue(client: AmazonSQS, queueUrl: String): Int? {
+    val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessagesNotVisible"))
+    return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()
   }
 }

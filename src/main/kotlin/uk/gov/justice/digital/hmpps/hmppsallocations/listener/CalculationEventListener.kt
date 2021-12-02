@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.CalculationTierService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
 import java.util.UUID
 
 @Component
 class CalculationEventListener(
-  private val calculationTierService: CalculationTierService,
+  private val calculationTierService: TierCalculationService,
   private val objectMapper: ObjectMapper
 ) {
 
@@ -20,8 +20,8 @@ class CalculationEventListener(
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(message, CalculationEvent::class.java)
 
-    calculationTierService.updateCalculationTier(event.additionalInformation.crn)
-    log.info("tire calculation update consumed for crn: ${event.additionalInformation.crn}")
+    calculationTierService.updateTier(event.additionalInformation.crn)
+    log.info("Tier calculation update consumed successfully for crn: ${event.additionalInformation.crn}")
   }
 
   companion object {
