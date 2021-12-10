@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
