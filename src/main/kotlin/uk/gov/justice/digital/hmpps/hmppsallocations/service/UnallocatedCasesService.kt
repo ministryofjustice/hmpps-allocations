@@ -51,11 +51,11 @@ class UnallocatedCasesService(
     return when {
       activeConvictions > 1 -> ProbationStatus(CURRENTLY_MANAGED)
       else -> {
-        val allConvictions = communityApiClient.getInactiveConvictions(crn)
+        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn)
         return when {
-          allConvictions.size > 1 -> {
+          inactiveConvictions.isNotEmpty() -> {
             val mostRecentInactiveConvictionEndDate =
-              allConvictions.filter { c -> c.sentence.terminationDate != null }
+              inactiveConvictions.filter { c -> c.sentence.terminationDate != null }
                 .map { c -> c.sentence.terminationDate!! }
                 .maxByOrNull { it }
             ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate)
