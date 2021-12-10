@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PreviousConviction
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -25,8 +25,8 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .block() ?: listOf()
   }
 
-  fun getInactiveConvictions(crn: String): List<PreviousConviction> {
-    val responseType = object : ParameterizedTypeReference<List<PreviousConviction>>() {}
+  fun getInactiveConvictions(crn: String): List<InactiveConviction> {
+    val responseType = object : ParameterizedTypeReference<List<InactiveConviction>>() {}
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions")
