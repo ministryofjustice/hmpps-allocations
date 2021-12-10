@@ -119,7 +119,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
         "inBreach": false,
         "failureToComplyCount": 3,
         "awaitingPsr": false,
-        "convictionDate": "2021-11-21",
+
         "referralDate": "2019-11-17",
         "offences": [
             {
