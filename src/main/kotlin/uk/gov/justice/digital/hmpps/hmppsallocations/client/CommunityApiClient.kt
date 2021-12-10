@@ -25,14 +25,16 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .block() ?: listOf()
   }
 
-  fun getAllConvictions(crn: String): List<PreviousConviction> {
+  fun getInactiveConvictions(crn: String): List<PreviousConviction> {
     val responseType = object : ParameterizedTypeReference<List<PreviousConviction>>() {}
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions")
       .retrieve()
       .bodyToMono(responseType)
-      .block() ?: listOf()
+      .block()
+      ?.filter { c -> !c.active }
+      ?: listOf()
   }
 
   fun getInductionContacts(crn: String, contactDateFrom: LocalDate): List<Contact> {
