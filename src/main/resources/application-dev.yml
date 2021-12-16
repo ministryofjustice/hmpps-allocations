@@ -1,7 +1,3 @@
-spring:
-  datasource:
-    url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
-
 hmpps.sqs:
   provider: localstack
   queues:

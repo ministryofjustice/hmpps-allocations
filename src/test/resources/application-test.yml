@@ -1,8 +1,4 @@
 spring:
-  datasource:
-    url: 'jdbc:h2:mem:probation-allocation;MODE=PostgreSQL;'
-    username: probation
-    password: allocation
   security:
     oauth2:
       resourceserver:
