@@ -25,9 +25,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
   implementation("com.opencsv:opencsv:5.2")
-  runtimeOnly("com.h2database:h2:1.4.200")
+  runtimeOnly("com.h2database:h2:2.0.202")
   runtimeOnly("com.zaxxer:HikariCP:3.4.5")
-  runtimeOnly("org.flywaydb:flyway-core:6.5.6")
+  runtimeOnly("org.flywaydb:flyway-core:8.2.2")
   runtimeOnly("org.postgresql:postgresql")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
