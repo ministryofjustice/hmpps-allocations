@@ -26,7 +26,7 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
           "/swagger-ui/**",
           "/swagger-ui.html",
           "/cases/unallocated/upload",
-          "/queue-admin/retry-all-dlqs"
+          "/queue-admin/**"
         )
           .permitAll().anyRequest().authenticated()
       }.oauth2ResourceServer().jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())

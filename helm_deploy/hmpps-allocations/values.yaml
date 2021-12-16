@@ -22,7 +22,7 @@ generic-service:
           deny all;
           return 401;
         }
-        location /queue-admin/retry-all-dlqs {
+        location /queue-admin/** {
           deny all;
           return 401;
         }
