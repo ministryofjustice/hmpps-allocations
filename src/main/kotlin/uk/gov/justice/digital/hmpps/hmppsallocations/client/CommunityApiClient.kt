@@ -58,7 +58,7 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .block()!!
   }
 
-  fun getOffenderManagerName(crn: String): List<OffenderManager> {
+  fun getOffenderManagerName(crn: String): Staff {
     val responseType = object : ParameterizedTypeReference<List<OffenderManager>>() {}
 
     return webClient
@@ -66,12 +66,12 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .uri("/offenders/crn/$crn/allOffenderManagers")
       .retrieve()
       .bodyToMono(responseType)
-      .block() ?: listOf()
+      .block().first().staff // Not sure if will always be just one. Needs to be checked.
   }
 
   data class Staff @JsonCreator constructor(
     val forenames: String,
     val surname: String
   )
-  data class OffenderManager @JsonCreator constructor(val staff: Staff)
+  private data class OffenderManager @JsonCreator constructor(val staff: Staff)
 }

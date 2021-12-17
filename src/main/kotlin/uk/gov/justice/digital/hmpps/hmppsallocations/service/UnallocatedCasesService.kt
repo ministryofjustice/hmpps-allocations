@@ -52,10 +52,10 @@ class UnallocatedCasesService(
     return when {
 
       activeConvictions > 1 -> {
-        val staff = communityApiClient.getOffenderManagerName(crn).first()
+        val staff = communityApiClient.getOffenderManagerName(crn)
         return ProbationStatus(
           CURRENTLY_MANAGED,
-          offenderManagerName = OffenderManagerName(forenames = staff.staff.forenames, surname = staff.staff.surname)
+          offenderManagerName = OffenderManagerName(forenames = staff.forenames, surname = staff.surname)
         )
       }
       else -> {
