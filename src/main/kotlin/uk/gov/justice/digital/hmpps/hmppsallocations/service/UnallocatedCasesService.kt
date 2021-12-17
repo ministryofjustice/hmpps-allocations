@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerName
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
@@ -49,7 +50,14 @@ class UnallocatedCasesService(
   fun getProbationStatus(crn: String): ProbationStatus {
     val activeConvictions = communityApiClient.getActiveConvictions(crn).size
     return when {
-      activeConvictions > 1 -> ProbationStatus(CURRENTLY_MANAGED)
+
+      activeConvictions > 1 -> {
+        val staff = communityApiClient.getOffenderManagerName(crn).first()
+        return ProbationStatus(
+          CURRENTLY_MANAGED,
+          offenderManagerName = OffenderManagerName(forenames = staff.staff.forenames, surname = staff.staff.surname)
+        )
+      }
       else -> {
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn)
         return when {
@@ -73,7 +81,8 @@ class UnallocatedCasesService(
 
 data class ProbationStatus(
   val status: ProbationStatusType,
-  val previousConvictionDate: LocalDate? = null
+  val previousConvictionDate: LocalDate? = null,
+  val offenderManagerName: OffenderManagerName? = null
 )
 
 enum class ProbationStatusType(

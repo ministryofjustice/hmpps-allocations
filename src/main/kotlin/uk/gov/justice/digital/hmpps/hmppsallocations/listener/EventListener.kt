@@ -26,11 +26,13 @@ class EventListener(
     val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
     val name = unallocatedCasesService.getOffenderName(crn)
     val tier = unallocatedCasesService.getTier(crn)
-    val (status, previousConvictionDate) = unallocatedCasesService.getProbationStatus(crn)
+    val (status, previousConvictionDate, offenderManagerName) = unallocatedCasesService.getProbationStatus(crn)
 
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate
+      crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate,
+      offenderManagerSurname = offenderManagerName?.surname,
+      offenderManagerForename = offenderManagerName?.forenames
     )
 
     repository.save(unallocatedCase)

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
@@ -56,4 +57,21 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .bodyToMono(OffenderSummary::class.java)
       .block()!!
   }
+
+  fun getOffenderManagerName(crn: String): List<OffenderManager> {
+    val responseType = object : ParameterizedTypeReference<List<OffenderManager>>() {}
+
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/allOffenderManagers")
+      .retrieve()
+      .bodyToMono(responseType)
+      .block() ?: listOf()
+  }
+
+  data class Staff @JsonCreator constructor(
+    val forenames: String,
+    val surname: String
+  )
+  data class OffenderManager @JsonCreator constructor(val staff: Staff)
 }
