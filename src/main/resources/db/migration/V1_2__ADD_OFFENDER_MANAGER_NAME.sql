@@ -1,0 +1,2 @@
+alter table unallocated_cases add column offender_manager_forename VARCHAR;
+alter table unallocated_cases add column offender_manager_surname VARCHAR;

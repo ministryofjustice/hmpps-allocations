@@ -37,6 +37,12 @@ data class UnallocatedCaseEntity(
   val status: String,
 
   @Column(name = "previous_conviction_date")
-  val previousConvictionDate: LocalDate? = null
+  val previousConvictionDate: LocalDate? = null,
+
+  @Column(name = "offender_manager_forename")
+  val offenderManagerForename: String? = null,
+
+  @Column(name = "offender_manager_surname")
+  val offenderManagerSurname: String? = null
 
 )
