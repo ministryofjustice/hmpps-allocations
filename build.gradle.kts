@@ -1,9 +1,9 @@
 
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.16"
-  kotlin("plugin.spring") version "1.5.31"
-  kotlin("plugin.jpa") version "1.5.31"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.0"
+  kotlin("plugin.spring") version "1.6.10"
+  kotlin("plugin.jpa") version "1.6.10"
   id("io.gitlab.arturbosch.detekt").version("1.17.1")
   id("org.jetbrains.kotlin.plugin.allopen").version("1.6.0")
 }
@@ -25,8 +25,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
   implementation("com.opencsv:opencsv:5.2")
-  runtimeOnly("com.zaxxer:HikariCP:3.4.5")
-  runtimeOnly("org.flywaydb:flyway-core:8.2.2")
+  runtimeOnly("com.zaxxer:HikariCP")
+  runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")

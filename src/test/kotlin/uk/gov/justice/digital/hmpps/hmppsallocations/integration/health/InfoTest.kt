@@ -16,7 +16,7 @@ class InfoTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("app.name").isEqualTo("Hmpps Allocations")
+      .jsonPath("build.name").isEqualTo("hmpps-allocations")
   }
 
   @Test
