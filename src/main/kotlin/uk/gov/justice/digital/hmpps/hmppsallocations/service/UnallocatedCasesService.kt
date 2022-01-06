@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerName
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
@@ -58,11 +58,11 @@ class UnallocatedCasesService(
         val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
         return ProbationStatus(
           CURRENTLY_MANAGED,
-          offenderManagerName = OffenderManagerName(
+          offenderManagerDetails = OffenderManagerDetails(
             forenames = offenderManager.staff.forenames,
-            surname = offenderManager.staff.surname
-          ),
-          grade = grade
+            surname = offenderManager.staff.surname,
+            grade = grade
+          )
         )
       }
       else -> {
@@ -89,8 +89,7 @@ class UnallocatedCasesService(
 data class ProbationStatus(
   val status: ProbationStatusType,
   val previousConvictionDate: LocalDate? = null,
-  val offenderManagerName: OffenderManagerName? = null,
-  val grade: String? = null
+  val offenderManagerDetails: OffenderManagerDetails? = null
 )
 
 enum class ProbationStatusType(
