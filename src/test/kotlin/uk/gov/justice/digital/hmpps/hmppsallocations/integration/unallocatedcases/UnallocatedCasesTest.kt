@@ -44,7 +44,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
-          null, "Antonio", "LoSardo"
+          null, "Antonio", "LoSardo", "PO"
         ),
         UnallocatedCaseEntity(
           null,
@@ -97,6 +97,12 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("C1")
       .jsonPath("$.[0].status")
       .isEqualTo("Currently managed")
+      .jsonPath("$.[0].offenderManager.forenames")
+      .isEqualTo("Antonio")
+      .jsonPath("$.[0].offenderManager.surname")
+      .isEqualTo("LoSardo")
+      .jsonPath("$.[0].offenderManager.grade")
+      .isEqualTo("PO")
   }
 
   @Test
@@ -175,23 +181,5 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isEqualTo(NOT_FOUND)
-  }
-
-  @Test
-  fun `can get offender manager name`() {
-    insertCases()
-    webTestClient.get()
-      .uri("/cases/unallocated/")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.length()")
-      .isEqualTo(3)
-      .jsonPath("$.[0].offenderManager.forenames")
-      .isEqualTo("Antonio")
-      .jsonPath("$.[0].offenderManager.surname")
-      .isEqualTo("LoSardo")
   }
 }

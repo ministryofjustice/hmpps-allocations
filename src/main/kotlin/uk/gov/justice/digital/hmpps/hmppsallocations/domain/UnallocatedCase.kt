@@ -17,7 +17,7 @@ data class UnallocatedCase @JsonCreator constructor(
   val status: String,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val previousConvictionEndDate: LocalDate?,
-  val offenderManager: OffenderManagerName
+  val offenderManager: OffenderManagerDetails
 
 ) {
 
@@ -27,16 +27,18 @@ data class UnallocatedCase @JsonCreator constructor(
         case.name,
         case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
         case.previousConvictionDate,
-        OffenderManagerName(
+        OffenderManagerDetails(
           case.offenderManagerForename,
-          case.offenderManagerSurname
+          case.offenderManagerSurname,
+          case.offenderManagerGrade
         )
       )
     }
   }
 }
 
-data class OffenderManagerName @JsonCreator constructor(
+data class OffenderManagerDetails @JsonCreator constructor(
   val forenames: String?,
-  val surname: String?
+  val surname: String?,
+  val grade: String?
 )

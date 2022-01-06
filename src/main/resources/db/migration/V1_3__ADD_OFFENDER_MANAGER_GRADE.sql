@@ -1,0 +1,1 @@
+alter table unallocated_cases add column offender_manager_grade VARCHAR;
