@@ -397,4 +397,34 @@ class EventListenerTest : IntegrationTestBase() {
 
     assertThat(case.offenderManagerGrade).isEqualTo("PSO")
   }
+
+  @Test
+  fun `retrieve offenderManager without grade for currently managed `() {
+    val crn = "J678910"
+    twoActiveConvictionsResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    twoActiveConvictionsResponse(crn)
+    getStaffWithoutGradeFromDelius(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.offenderManagerGrade).isNull()
+  }
 }
