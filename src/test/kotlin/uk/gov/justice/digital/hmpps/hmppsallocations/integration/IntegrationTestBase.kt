@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
@@ -191,12 +192,21 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getStaffFromDelius(crn: String) {
+  protected fun getStaffWithGradeFromDelius(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/allOffenderManagers")
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponse())
+    )
+  }
+
+  protected fun getStaffWithoutGradeFromDelius(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/allOffenderManagers")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponseNoGrade())
     )
   }
 

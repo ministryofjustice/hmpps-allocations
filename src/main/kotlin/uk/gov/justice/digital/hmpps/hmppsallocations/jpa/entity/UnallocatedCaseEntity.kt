@@ -43,6 +43,9 @@ data class UnallocatedCaseEntity(
   val offenderManagerForename: String? = null,
 
   @Column(name = "offender_manager_surname")
-  val offenderManagerSurname: String? = null
+  val offenderManagerSurname: String? = null,
+
+  @Column(name = "offender_manager_grade")
+  val offenderManagerGrade: String? = null
 
 )

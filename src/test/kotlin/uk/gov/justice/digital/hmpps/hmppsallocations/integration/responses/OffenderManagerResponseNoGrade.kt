@@ -1,13 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun offenderManagerResponse() = """
+fun offenderManagerResponseNoGrade() = """
 [
   {
     "fromDate": "2019-12-04",
-    "grade": {
-      "code": "PSQ",
-      "description": "Some description"
-    },
     "isPrisonOffenderManager": true,
     "isResponsibleOfficer": true,
     "isUnallocated": true,

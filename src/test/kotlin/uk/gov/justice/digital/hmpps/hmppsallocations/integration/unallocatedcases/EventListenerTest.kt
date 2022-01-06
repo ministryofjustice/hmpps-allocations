@@ -55,7 +55,7 @@ class EventListenerTest : IntegrationTestBase() {
     tierCalculationResponse(crn)
     twoActiveConvictionsResponse(crn)
     twoActiveConvictionsResponse(crn)
-    getStaffFromDelius(crn)
+    getStaffWithGradeFromDelius(crn)
 
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
@@ -282,7 +282,7 @@ class EventListenerTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     twoActiveConvictionsResponse(crn)
-    getStaffFromDelius(crn)
+    getStaffWithGradeFromDelius(crn)
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
@@ -338,14 +338,14 @@ class EventListenerTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `retrieve  offenderManager name for currently managed `() {
+  fun `retrieve offenderManager name for currently managed `() {
     val crn = "J678910"
     twoActiveConvictionsResponse(crn)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
     twoActiveConvictionsResponse(crn)
-    getStaffFromDelius(crn)
+    getStaffWithGradeFromDelius(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
       crn
@@ -366,5 +366,35 @@ class EventListenerTest : IntegrationTestBase() {
 
     assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
     assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
+  }
+
+  @Test
+  fun `retrieve offenderManager with grade for currently managed `() {
+    val crn = "J678910"
+    twoActiveConvictionsResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    twoActiveConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    // Given
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.offenderManagerGrade).isEqualTo("PSO")
   }
 }
