@@ -182,4 +182,34 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .expectStatus()
       .isEqualTo(NOT_FOUND)
   }
+
+  @Test
+  fun `can get case by crn`() {
+    insertCases()
+    webTestClient.get()
+      .uri("/cases/unallocated/J678910")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.sentenceDate")
+      .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.initialAppointment")
+      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.name")
+      .isEqualTo("Dylan Adam Armstrong")
+      .jsonPath("$.crn")
+      .isEqualTo("J678910")
+      .jsonPath("$.tier")
+      .isEqualTo("C1")
+      .jsonPath("$.status")
+      .isEqualTo("Currently managed")
+      .jsonPath("$.offenderManager.forenames")
+      .isEqualTo("Antonio")
+      .jsonPath("$.offenderManager.surname")
+      .isEqualTo("LoSardo")
+      .jsonPath("$.offenderManager.grade")
+      .isEqualTo("PO")
+  }
 }

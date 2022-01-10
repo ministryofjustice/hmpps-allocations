@@ -27,6 +27,12 @@ class UnallocatedCasesService(
     }
   }
 
+  fun getCase(crn: String): UnallocatedCase? =
+    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+      log.info("Found unallocated case for $crn")
+      UnallocatedCase.from(it)
+    }
+
   fun getSentenceDate(crn: String): LocalDate {
     val convictions = communityApiClient.getActiveConvictions(crn)
     log.info("convictions from com-api : {}", convictions.size)
