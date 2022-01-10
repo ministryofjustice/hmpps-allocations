@@ -5,4 +5,6 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 
 @Repository
-interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long>
+interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
+  fun findByCrn(crn: String): UnallocatedCaseEntity?
+}

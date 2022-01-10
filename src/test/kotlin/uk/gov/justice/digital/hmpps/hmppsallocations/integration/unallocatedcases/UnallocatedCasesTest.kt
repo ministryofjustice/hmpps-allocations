@@ -169,4 +169,28 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .expectStatus()
       .isEqualTo(NOT_FOUND)
   }
+
+  @Test
+  fun `can get unallocated case by crn`() {
+    insertCases()
+    val unallocatedCase = webTestClient.get()
+      .uri("/cases/unallocated/J678910")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody(UnallocatedCase::class.java)
+      .returnResult().responseBody
+    assertThat(unallocatedCase).isEqualTo(
+
+      UnallocatedCase(
+        "Dylan Adam Armstrong",
+        "J678910",
+        "C1",
+        firstSentenceDate,
+        firstInitialAppointment,
+        "Currently managed"
+      )
+    )
+  }
 }
