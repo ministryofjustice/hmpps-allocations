@@ -66,3 +66,9 @@ curl http://localhost:8080/cases/unallocated/upload --request POST --form 'file=
 ```
 
 The column order for the csv is `<crn>` with no headers
+
+## Code Style
+
+[ktlint](https://github.com/pinterest/ktlint) is the authority on style and is enforced on build.
+
+Run `./gradlew ktlintFormat` to fix formatting errors in your code before commit.

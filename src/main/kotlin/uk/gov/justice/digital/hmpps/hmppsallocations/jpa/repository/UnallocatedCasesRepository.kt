@@ -7,6 +7,6 @@ import java.util.Optional
 
 @Repository
 interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
-
   fun findByCrn(crn: String): Optional<UnallocatedCaseEntity>
+  fun findCaseByCrn(crn: String): UnallocatedCaseEntity?
 }

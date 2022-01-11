@@ -6,6 +6,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import java.io.InputStreamReader
 
 @RestController
@@ -30,6 +32,11 @@ class UnallocatedCasesController(
       unallocatedCasesService.getAll()
     )
   }
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}")
+  fun getUnallocatedCase(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCase> =
+    ResponseEntity.ok(unallocatedCasesService.getCase(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn"))
 
   @PostMapping("/cases/unallocated/upload")
   fun uploadUnallocatedCases(@RequestParam("file") file: MultipartFile): ResponseEntity<Void> {
