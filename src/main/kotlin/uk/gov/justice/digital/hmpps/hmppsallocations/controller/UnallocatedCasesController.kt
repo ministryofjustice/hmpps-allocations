@@ -2,6 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
 import com.opencsv.bean.CsvBindByPosition
 import com.opencsv.bean.CsvToBeanBuilder
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -25,6 +28,13 @@ class UnallocatedCasesController(
   private val uploadUnallocatedCasesService: UploadUnallocatedCasesService
 ) {
 
+  @Operation(summary = "Retrieve all unallocated cases")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated")
   fun getUnallocatedCases(): ResponseEntity<List<UnallocatedCase>> {
@@ -33,10 +43,19 @@ class UnallocatedCasesController(
     )
   }
 
+  @Operation(summary = "Retrieve unallocated cases by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}")
   fun getUnallocatedCase(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCase> =
-    ResponseEntity.ok(unallocatedCasesService.getCase(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn"))
+    ResponseEntity.ok(
+      unallocatedCasesService.getCase(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
 
   @PostMapping("/cases/unallocated/upload")
   fun uploadUnallocatedCases(@RequestParam("file") file: MultipartFile): ResponseEntity<Void> {
