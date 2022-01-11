@@ -4,7 +4,7 @@ services:
     image: postgres:11
     networks:
       - hmpps
-    container_name: hmpps-workload-postgres
+    container_name: hmpps-allocations-postgres
     restart: always
     ports:
       - '5432:5432'

@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 data class Conviction @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val convictionDate: LocalDate,
-  val sentence: Sentence,
+  val convictionDate: LocalDate?,
+  val sentence: Sentence?,
   val active: Boolean,
 )

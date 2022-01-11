@@ -80,6 +80,39 @@ class EventListenerTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `retrieve sentenceDate for convictions which only have sentences from delius`() {
+    val crn = "J678910"
+    twoActiveConvictionsOneNoDateResponse(crn)
+    noActiveInductionResponse(crn)
+    offenderSummaryResponse(crn)
+    tierCalculationResponse(crn)
+    twoActiveConvictionsOneNoDateResponse(crn)
+    twoActiveConvictionsOneNoDateResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+
+    // Given
+    val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
+    val unallocatedCase = unallocatedCaseEvent(
+      crn
+    )
+
+    // Then
+    hmppsDomainSnsClient.publish(
+      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
+        .withMessageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
+          )
+        )
+    )
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.sentenceDate).isEqualTo(latestConvictionSentenceDate)
+  }
+
+  @Test
   fun `retrieve initialAppointmentDate from delius`() {
     val crn = "J678910"
     singleActiveConvictionResponse(crn)

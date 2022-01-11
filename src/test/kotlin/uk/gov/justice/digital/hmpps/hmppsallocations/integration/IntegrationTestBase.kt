@@ -31,6 +31,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offen
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsOneNoDateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
@@ -57,6 +58,8 @@ abstract class IntegrationTestBase {
     repository.deleteAll()
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
+    communityApi.reset()
+    hmppsTier.reset()
     setupOauth()
   }
 
@@ -181,6 +184,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
+    )
+  }
+
+  protected fun twoActiveConvictionsOneNoDateResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsOneNoDateResponse())
     )
   }
 
