@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConversionException
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -50,6 +52,13 @@ class ControllerAdvice {
   fun handle(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse?> {
     log.error("MethodArgumentTypeMismatchException: {}", e.message)
     return ResponseEntity(ErrorResponse(status = 400, developerMessage = e.message), BAD_REQUEST)
+  }
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+  @ResponseStatus(METHOD_NOT_ALLOWED)
+  fun handle(e: HttpRequestMethodNotSupportedException): ResponseEntity<ErrorResponse?> {
+    log.error("HttpRequestMethodNotSupportedException: {}", e.message)
+    return ResponseEntity(ErrorResponse(status = 405, developerMessage = e.message), METHOD_NOT_ALLOWED)
   }
 
   @ExceptionHandler(Exception::class)
