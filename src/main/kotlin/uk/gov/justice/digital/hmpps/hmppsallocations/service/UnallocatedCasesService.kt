@@ -36,7 +36,8 @@ class UnallocatedCasesService(
   fun getSentenceDate(crn: String): LocalDate {
     val convictions = communityApiClient.getActiveConvictions(crn)
     log.info("convictions from com-api : {}", convictions.size)
-    return convictions.sortedByDescending { c -> c.convictionDate }.first().sentence.startDate
+    return convictions.filter { c -> c.sentence != null }.sortedByDescending { c -> c.convictionDate }
+      .first().sentence!!.startDate
   }
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
