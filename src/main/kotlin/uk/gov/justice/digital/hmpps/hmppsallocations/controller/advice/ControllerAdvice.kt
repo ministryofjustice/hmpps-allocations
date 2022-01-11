@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.controller.advice
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
@@ -15,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
 @ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class ControllerAdvice {
 
   companion object {
@@ -30,7 +33,7 @@ class ControllerAdvice {
 
   @ExceptionHandler(HttpMessageConversionException::class)
   @ResponseStatus(BAD_REQUEST)
-  fun handle(e: HttpMessageConversionException): ResponseEntity<*> {
+  fun handle(e: HttpMessageConversionException): ResponseEntity<ErrorResponse?> {
     log.error("HttpMessageConversionException: {}", e.message)
     return ResponseEntity(ErrorResponse(status = 400, developerMessage = e.message), BAD_REQUEST)
   }
