@@ -26,12 +26,19 @@ data class UnallocatedCase @JsonCreator constructor(
   @Schema(description = "Previous Conviction End Date", example = "2021-03-01")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val previousConvictionEndDate: LocalDate?,
-  val offenderManager: OffenderManagerDetails
+  val offenderManager: OffenderManagerDetails,
+  val gender: String?,
+  val dateOfBirth: LocalDate?,
+  val age: Int?
 
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
+      return from(case, null, null, null)
+    }
+
+    fun from(case: UnallocatedCaseEntity, gender: String?, dateOfBirth: LocalDate?, age: Int?): UnallocatedCase {
       return UnallocatedCase(
         case.name,
         case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
@@ -40,7 +47,10 @@ data class UnallocatedCase @JsonCreator constructor(
           case.offenderManagerForename,
           case.offenderManagerSurname,
           case.offenderManagerGrade
-        )
+        ),
+        gender,
+        dateOfBirth,
+        age
       )
     }
   }

@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
+import java.time.Period
 
 @Service
 class UnallocatedCasesService(
@@ -30,7 +31,9 @@ class UnallocatedCasesService(
   fun getCase(crn: String): UnallocatedCase? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       log.info("Found unallocated case for $crn")
-      UnallocatedCase.from(it)
+      val offenderSummary = communityApiClient.getOffenderSummary(crn)
+      val age = Period.between(offenderSummary.dateOfBirth, LocalDate.now()).years
+      return UnallocatedCase.from(it, offenderSummary.gender, offenderSummary.dateOfBirth, age)
     }
 
   fun getSentenceDate(crn: String): LocalDate {
