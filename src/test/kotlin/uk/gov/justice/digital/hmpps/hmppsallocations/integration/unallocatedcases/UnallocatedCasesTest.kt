@@ -212,4 +212,14 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .jsonPath("$.offenderManager.grade")
       .isEqualTo("PO")
   }
+
+  @Test
+  fun `get 404 if crn not found`() {
+    webTestClient.get()
+      .uri("/cases/unallocated/J678912")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .is5xxServerError // this should be .isNotFound
+  }
 }
