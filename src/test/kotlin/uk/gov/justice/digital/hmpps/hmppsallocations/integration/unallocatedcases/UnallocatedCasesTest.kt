@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import java.io.File
 import java.io.FileWriter
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 
 class UnallocatedCasesTest : IntegrationTestBase() {
@@ -185,9 +186,13 @@ class UnallocatedCasesTest : IntegrationTestBase() {
 
   @Test
   fun `can get case by crn`() {
+    val crn = "J678910"
     insertCases()
+    val dateOfBirth = LocalDate.of(2001, 11, 17)
+    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
+    offenderSummaryResponse(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/J678910")
+      .uri("/cases/unallocated/$crn")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -211,6 +216,12 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("LoSardo")
       .jsonPath("$.offenderManager.grade")
       .isEqualTo("PO")
+      .jsonPath("$.gender")
+      .isEqualTo("Male")
+      .jsonPath("$.dateOfBirth")
+      .isEqualTo("2001-11-17")
+      .jsonPath("$.age")
+      .isEqualTo(expectedAge)
   }
 
   @Test
