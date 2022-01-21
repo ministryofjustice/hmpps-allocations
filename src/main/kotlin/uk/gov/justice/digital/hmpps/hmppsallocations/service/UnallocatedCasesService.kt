@@ -34,10 +34,11 @@ class UnallocatedCasesService(
       val offenderSummary = communityApiClient.getOffenderSummary(crn)
       val age = Period.between(offenderSummary.dateOfBirth, LocalDate.now()).years
       val conviction = communityApiClient.getActiveConvictions(crn).filter { c -> c.sentence != null }
-        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
+        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!
+      val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
       return UnallocatedCase.from(
-        it, offenderSummary.gender, offenderSummary.dateOfBirth, age, conviction?.offences,
-        conviction?.sentence?.expectedSentenceEndDate
+        it, offenderSummary.gender, offenderSummary.dateOfBirth, age, conviction.offences,
+        conviction.sentence?.expectedSentenceEndDate, requirements.requirements
       )
     }
 
