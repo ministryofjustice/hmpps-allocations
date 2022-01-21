@@ -11,4 +11,5 @@ data class Conviction @JsonCreator constructor(
   val sentence: Sentence?,
   val active: Boolean,
   val offences: List<Offence>,
+  val convictionId: Long,
 )
