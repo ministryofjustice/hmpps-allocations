@@ -33,14 +33,19 @@ class UnallocatedCasesService(
       log.info("Found unallocated case for $crn")
       val offenderSummary = communityApiClient.getOffenderSummary(crn)
       val age = Period.between(offenderSummary.dateOfBirth, LocalDate.now()).years
-      return UnallocatedCase.from(it, offenderSummary.gender, offenderSummary.dateOfBirth, age)
+      val conviction = communityApiClient.getActiveConvictions(crn).filter { c -> c.sentence != null }
+        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!
+      return UnallocatedCase.from(
+        it, offenderSummary.gender, offenderSummary.dateOfBirth, age, conviction.offences,
+        conviction.sentence?.expectedSentenceEndDate
+      )
     }
 
   fun getSentenceDate(crn: String): LocalDate {
     val convictions = communityApiClient.getActiveConvictions(crn)
     log.info("convictions from com-api : {}", convictions.size)
-    return convictions.filter { c -> c.sentence != null }.sortedByDescending { c -> c.convictionDate }
-      .first().sentence!!.startDate
+    return convictions.filter { c -> c.sentence != null }
+      .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!.sentence!!.startDate
   }
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {

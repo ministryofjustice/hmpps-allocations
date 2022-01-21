@@ -11,4 +11,6 @@ data class Sentence @JsonCreator constructor(
   val startDate: LocalDate,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val terminationDate: LocalDate?,
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val expectedSentenceEndDate: LocalDate?,
 )

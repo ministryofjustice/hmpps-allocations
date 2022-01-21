@@ -191,6 +191,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
     offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -222,6 +223,14 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("2001-11-17")
       .jsonPath("$.age")
       .isEqualTo(expectedAge)
+      .jsonPath("$.expectedSentenceEndDate")
+      .isEqualTo("2020-05-16")
+      .jsonPath("$.offences[0].mainOffence")
+      .isEqualTo(true)
+      .jsonPath("$.offences[0].mainCategoryDescription")
+      .isEqualTo("Abstracting electricity")
+      .jsonPath("$.offences[0].subCategoryDescription")
+      .isEqualTo("Abstracting electricity")
   }
 
   @Test
