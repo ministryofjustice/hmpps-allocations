@@ -39,7 +39,7 @@ data class UnallocatedCase @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val expectedSentenceEndDate: LocalDate?,
 
-  ) {
+) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
