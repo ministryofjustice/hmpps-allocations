@@ -12,7 +12,8 @@ fun offenderSummaryResponse() = """
       "dateOfBirth": "2001-11-17",
       "gender": "Male",
       "otherIds": {
-          "crn": "XXXXXXX"
+          "crn": "XXXXXXX",
+          "pncNumber": "9999/1234567A"
       },
       "contactDetails": {},
       "offenderProfile": {

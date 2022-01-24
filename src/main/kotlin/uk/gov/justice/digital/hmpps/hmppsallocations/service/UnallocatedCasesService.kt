@@ -37,7 +37,7 @@ class UnallocatedCasesService(
         .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!
       val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
       return UnallocatedCase.from(
-        it, offenderSummary.gender, offenderSummary.dateOfBirth, age, conviction.offences,
+        it, offenderSummary, age, conviction.offences,
         conviction.sentence?.expectedSentenceEndDate, requirements.requirements
       )
     }

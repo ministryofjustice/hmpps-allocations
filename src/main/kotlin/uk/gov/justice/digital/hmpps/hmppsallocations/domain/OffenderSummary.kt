@@ -7,5 +7,10 @@ data class OffenderSummary @JsonCreator constructor(
   val firstName: String,
   val surname: String,
   val gender: String,
-  val dateOfBirth: LocalDate
+  val dateOfBirth: LocalDate,
+  val otherIds: OffenderSummaryOtherIds?
+)
+
+data class OffenderSummaryOtherIds @JsonCreator constructor(
+  val pncNumber: String?
 )

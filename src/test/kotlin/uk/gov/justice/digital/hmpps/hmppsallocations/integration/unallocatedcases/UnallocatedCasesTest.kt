@@ -240,6 +240,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo(100)
       .jsonPath("$.requirements[0].lengthUnit")
       .isEqualTo("Hours")
+      .jsonPath("$.pncNumber")
+      .isEqualTo("9999/1234567A")
   }
 
   @Test

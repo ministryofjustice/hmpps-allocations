@@ -1,7 +1,7 @@
 # hmpps-allocations
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-allocations/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-allocations)
-
+[![API docs](https://img.shields.io/badge/API_docs-view-85EA2D.svg?logo=swagger)](https://hmpps-allocations-dev.hmpps.service.justice.gov.uk/swagger-ui.html)]
 This is the HMPPS Allocations service. This is used by Manage a workforce UI to serve unallocated cases.
 
 ## What it does
