@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UnallocatedCase @JsonCreator constructor(
 
@@ -41,11 +42,12 @@ data class UnallocatedCase @JsonCreator constructor(
   val requirements: List<UnallocatedCaseRequirement>?,
   @Schema(description = "PNC Number")
   val pncNumber: String?,
+  val courtReport: UnallocatedCaseCourtReport?
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return from(case, null, null, null, null, null)
+      return from(case, null, null, null, null, null, null)
     }
 
     fun from(
@@ -55,6 +57,7 @@ data class UnallocatedCase @JsonCreator constructor(
       offences: List<Offence>?,
       expectedSentenceEndDate: LocalDate?,
       requirements: List<ConvictionRequirement>?,
+      courtReport: CourtReport?,
     ): UnallocatedCase {
       return UnallocatedCase(
         case.name,
@@ -71,7 +74,8 @@ data class UnallocatedCase @JsonCreator constructor(
         offences?.map { UnallocatedCaseOffence.from(it) },
         expectedSentenceEndDate,
         requirements?.map { UnallocatedCaseRequirement.from(it) },
-        offenderSummary?.otherIds?.pncNumber
+        offenderSummary?.otherIds?.pncNumber,
+        UnallocatedCaseCourtReport.from(courtReport)
       )
     }
   }
@@ -123,6 +127,28 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
         requirement.length,
         requirement.lengthUnit
       )
+    }
+  }
+}
+
+data class UnallocatedCaseCourtReport @JsonCreator constructor(
+  @Schema(description = "code", example = "CJF")
+  val code: String,
+  @Schema(description = "Description", example = "Fast")
+  val description: String,
+  @Schema(description = "Completed Date", example = "2019-11-11")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val completedDate: LocalDateTime
+) {
+  companion object {
+    fun from(courtReport: CourtReport?): UnallocatedCaseCourtReport? {
+      return courtReport?.let {
+        UnallocatedCaseCourtReport(
+          it.courtReportType.code,
+          it.courtReportType.description,
+          it.completedDate
+        )
+      }
     }
   }
 }

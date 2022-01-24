@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
@@ -19,7 +20,8 @@ class UnallocatedCasesService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   private val communityApiClient: CommunityApiClient,
   private val hmppsTierApiClient: HmppsTierApiClient,
-  private val gradeMapper: GradeMapper
+  private val gradeMapper: GradeMapper,
+  private val courtReportMapper: CourtReportMapper
 ) {
 
   fun getAll(): List<UnallocatedCase> {
@@ -36,9 +38,16 @@ class UnallocatedCasesService(
       val conviction = communityApiClient.getActiveConvictions(crn).filter { c -> c.sentence != null }
         .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!
       val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
+      val courtReport = communityApiClient.getCourtReports(crn, conviction.convictionId)
+        .map { cr ->
+          cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
+          cr
+        }
+        .maxByOrNull { cr -> cr.completedDate }
       return UnallocatedCase.from(
         it, offenderSummary, age, conviction.offences,
-        conviction.sentence?.expectedSentenceEndDate, requirements.requirements
+        conviction.sentence?.expectedSentenceEndDate, requirements.requirements,
+        courtReport
       )
     }
 

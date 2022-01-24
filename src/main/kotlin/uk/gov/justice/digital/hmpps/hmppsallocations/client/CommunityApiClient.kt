@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CourtReport
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
@@ -76,6 +78,17 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .retrieve()
       .bodyToMono(responseType)
       .block().first() // Not sure if will always be just one. Needs to be checked.
+  }
+
+  fun getCourtReports(crn: String, convictionId: Long): List<CourtReport> {
+    val responseType = object : ParameterizedTypeReference<List<CourtReport>>() {}
+
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+      .retrieve()
+      .bodyToMono(responseType)
+      .block()
   }
 
   data class Staff @JsonCreator constructor(

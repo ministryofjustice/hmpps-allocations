@@ -193,6 +193,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
+    singleCourtReportResponse(crn, 2500292515)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -242,6 +243,12 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("Hours")
       .jsonPath("$.pncNumber")
       .isEqualTo("9999/1234567A")
+      .jsonPath("$.courtReport.code")
+      .isEqualTo("CJF")
+      .jsonPath("$.courtReport.description")
+      .isEqualTo("Fast")
+      .jsonPath("$.courtReport.completedDate")
+      .isEqualTo("2019-11-11")
   }
 
   @Test
