@@ -10,4 +10,6 @@ data class Conviction @JsonCreator constructor(
   val convictionDate: LocalDate?,
   val sentence: Sentence?,
   val active: Boolean,
+  val offences: List<Offence>,
+  val convictionId: Long,
 )

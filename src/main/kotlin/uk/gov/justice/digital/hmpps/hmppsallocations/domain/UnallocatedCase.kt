@@ -33,16 +33,28 @@ data class UnallocatedCase @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val dateOfBirth: LocalDate?,
   @Schema(description = "Age", example = "34")
-  val age: Int?
-
+  val age: Int?,
+  val offences: List<UnallocatedCaseOffence>?,
+  @Schema(description = "Expected Sentence Date", example = "2020-05-16")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val expectedSentenceEndDate: LocalDate?,
+  val requirements: List<UnallocatedCaseRequirement>?,
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return from(case, null, null, null)
+      return from(case, null, null, null, null, null, null)
     }
 
-    fun from(case: UnallocatedCaseEntity, gender: String?, dateOfBirth: LocalDate?, age: Int?): UnallocatedCase {
+    fun from(
+      case: UnallocatedCaseEntity,
+      gender: String?,
+      dateOfBirth: LocalDate?,
+      age: Int?,
+      offences: List<Offence>?,
+      expectedSentenceEndDate: LocalDate?,
+      requirements: List<ConvictionRequirement>?,
+    ): UnallocatedCase {
       return UnallocatedCase(
         case.name,
         case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
@@ -54,7 +66,10 @@ data class UnallocatedCase @JsonCreator constructor(
         ),
         gender,
         dateOfBirth,
-        age
+        age,
+        offences?.map { UnallocatedCaseOffence.from(it) },
+        expectedSentenceEndDate,
+        requirements?.map { UnallocatedCaseRequirement.from(it) }
       )
     }
   }
@@ -68,3 +83,44 @@ data class OffenderManagerDetails @JsonCreator constructor(
   @Schema(description = "Grade", example = "PSO")
   val grade: String?
 )
+
+data class UnallocatedCaseOffence @JsonCreator constructor(
+  @Schema(description = "Main Offence", example = "True")
+  val mainOffence: Boolean,
+  @Schema(description = "Main Category", example = "Abstracting electricity")
+  val mainCategory: String,
+  @Schema(description = "Sub Category", example = "Abstracting electricity")
+  val subCategory: String
+) {
+  companion object {
+    fun from(offence: Offence): UnallocatedCaseOffence {
+      return UnallocatedCaseOffence(
+        offence.mainOffence,
+        offence.detail.mainCategoryDescription,
+        offence.detail.subCategoryDescription
+      )
+    }
+  }
+}
+
+data class UnallocatedCaseRequirement @JsonCreator constructor(
+  @Schema(description = "Main Category", example = "Unpaid Work")
+  val mainCategory: String,
+  @Schema(description = "Sub Category", example = "Regular")
+  val subCategory: String,
+  @Schema(description = "Length", example = "100")
+  val length: Long,
+  @Schema(description = "Length Unit", example = "Hours")
+  val lengthUnit: String,
+) {
+  companion object {
+    fun from(requirement: ConvictionRequirement): UnallocatedCaseRequirement {
+      return UnallocatedCaseRequirement(
+        requirement.requirementTypeMainCategory.description,
+        requirement.requirementTypeSubCategory.description,
+        requirement.length,
+        requirement.lengthUnit
+      )
+    }
+  }
+}
