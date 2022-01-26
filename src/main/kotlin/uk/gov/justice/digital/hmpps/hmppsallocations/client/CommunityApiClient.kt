@@ -1,9 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
@@ -16,8 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Component
-class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val webClient: WebClient) {
+class CommunityApiClient(private val webClient: WebClient) {
 
   fun getActiveConvictions(crn: String): Mono<List<Conviction>> {
     val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}

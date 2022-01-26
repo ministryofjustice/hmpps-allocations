@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
@@ -16,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType
 import java.time.LocalDate
 import java.time.Period
 
-@Service
 class UnallocatedCasesService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   private val communityApiClient: CommunityApiClient,

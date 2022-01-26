@@ -5,6 +5,7 @@ import com.opencsv.bean.CsvToBeanBuilder
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -24,7 +25,7 @@ import java.io.InputStreamReader
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
-  private val unallocatedCasesService: UnallocatedCasesService,
+  @Qualifier("unallocatedCasesUserEnhancedService") private val unallocatedCasesService: UnallocatedCasesService,
   private val uploadUnallocatedCasesService: UploadUnallocatedCasesService
 ) {
 
