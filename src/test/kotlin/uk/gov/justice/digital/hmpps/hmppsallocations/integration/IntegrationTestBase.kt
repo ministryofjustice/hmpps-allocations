@@ -32,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsOneNoDateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -211,6 +212,14 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/convictions")
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse())
+    )
+  }
+
+  protected fun singleCourtReportResponse(crn: String, convictionId: Long) {
+    val courtReportsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singleCourtReportResponse())
     )
   }
 

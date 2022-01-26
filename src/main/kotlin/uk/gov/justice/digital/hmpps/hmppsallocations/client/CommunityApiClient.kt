@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CourtReport
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
@@ -16,7 +19,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val webClient: WebClient) {
 
-  fun getActiveConvictions(crn: String): List<Conviction> {
+  fun getActiveConvictions(crn: String): Mono<List<Conviction>> {
     val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
 
     return webClient
@@ -24,30 +27,26 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .uri("/offenders/crn/$crn/convictions?activeOnly=true")
       .retrieve()
       .bodyToMono(responseType)
-      .block() ?: listOf()
   }
-  fun getActiveRequirements(crn: String, convictionId: Long): ConvictionRequirements {
+  fun getActiveRequirements(crn: String, convictionId: Long): Mono<ConvictionRequirements> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions/$convictionId/requirements?activeOnly=true")
       .retrieve()
       .bodyToMono(ConvictionRequirements::class.java)
-      .block()!!
   }
 
-  fun getInactiveConvictions(crn: String): List<InactiveConviction> {
+  fun getInactiveConvictions(crn: String): Mono<List<InactiveConviction>> {
     val responseType = object : ParameterizedTypeReference<List<InactiveConviction>>() {}
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions")
       .retrieve()
       .bodyToMono(responseType)
-      .block()
-      ?.filter { c -> !c.active }
-      ?: listOf()
+      .map { convictions -> convictions.filter { c -> !c.active } }
   }
 
-  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): List<Contact> {
+  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Mono<List<Contact>> {
     val responseType = object : ParameterizedTypeReference<List<Contact>>() {}
     val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     return webClient
@@ -55,19 +54,17 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
       .bodyToMono(responseType)
-      .block() ?: listOf()
   }
 
-  fun getOffenderSummary(crn: String): OffenderSummary {
+  fun getOffenderSummary(crn: String): Mono<OffenderSummary> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn")
       .retrieve()
       .bodyToMono(OffenderSummary::class.java)
-      .block()!!
   }
 
-  fun getOffenderManagerName(crn: String): OffenderManager {
+  fun getOffenderManagerName(crn: String): Mono<OffenderManager> {
     val responseType = object : ParameterizedTypeReference<List<OffenderManager>>() {}
 
     return webClient
@@ -75,7 +72,17 @@ class CommunityApiClient(@Qualifier("communityWebClientAppScope") private val we
       .uri("/offenders/crn/$crn/allOffenderManagers")
       .retrieve()
       .bodyToMono(responseType)
-      .block().first() // Not sure if will always be just one. Needs to be checked.
+      .map { it.first() }
+  }
+
+  fun getCourtReports(crn: String, convictionId: Long): Mono<List<CourtReport>> {
+    val responseType = object : ParameterizedTypeReference<List<CourtReport>>() {}
+
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+      .retrieve()
+      .bodyToMono(responseType)
   }
 
   data class Staff @JsonCreator constructor(
