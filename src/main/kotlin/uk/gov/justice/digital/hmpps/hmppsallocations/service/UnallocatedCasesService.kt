@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
@@ -34,40 +35,58 @@ class UnallocatedCasesService(
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       log.info("Found unallocated case for $crn")
       val offenderSummary = communityApiClient.getOffenderSummary(crn)
-      val age = Period.between(offenderSummary.dateOfBirth, LocalDate.now()).years
-      val conviction = communityApiClient.getActiveConvictions(crn).filter { c -> c.sentence != null }
-        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!
+
+      val conviction = communityApiClient.getActiveConvictions(crn)
+        .map { convictions ->
+          convictions.filter { c -> c.sentence != null }
+            .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
+        }
+        .block()!!
+
       val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
       val courtReport = communityApiClient.getCourtReports(crn, conviction.convictionId)
-        .map { cr ->
-          cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
-          cr
+        .map { courtReports ->
+          courtReports
+            .map { cr ->
+              cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
+              cr
+            }
+            .maxByOrNull { cr -> cr.completedDate }
         }
-        .maxByOrNull { cr -> cr.completedDate }
+
+      val results = Mono.zip(offenderSummary, requirements, courtReport).block()!!
+
+      val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
-        it, offenderSummary, age, conviction.offences,
-        conviction.sentence?.expectedSentenceEndDate, requirements.requirements,
-        courtReport
+        it, results.t1, age, conviction.offences,
+        conviction.sentence?.expectedSentenceEndDate, results.t2.requirements,
+        results.t3
       )
     }
 
   fun getSentenceDate(crn: String): LocalDate {
-    val convictions = communityApiClient.getActiveConvictions(crn)
-    log.info("convictions from com-api : {}", convictions.size)
-    return convictions.filter { c -> c.sentence != null }
-      .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!.sentence!!.startDate
+    return communityApiClient.getActiveConvictions(crn)
+      .map { convictions ->
+        log.info("convictions from com-api : {}", convictions.size)
+        convictions.filter { c -> c.sentence != null }
+          .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!.sentence!!.startDate
+      }
+      .block()!!
   }
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
-    val contacts = communityApiClient.getInductionContacts(crn, contactsFromDate)
-    log.info("contacts from com-api : {}", contacts.size)
-
-    return contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
+    return communityApiClient.getInductionContacts(crn, contactsFromDate)
+      .mapNotNull { contacts ->
+        log.info("contacts from com-api : {}", contacts.size)
+        contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
+      }
+      .block()
   }
 
   fun getOffenderName(crn: String): String {
-    val offenderSummary = communityApiClient.getOffenderSummary(crn)
-    return "${offenderSummary.firstName} ${offenderSummary.surname}"
+    return communityApiClient.getOffenderSummary(crn)
+      .map { "${it.firstName} ${it.surname}" }
+      .block()!!
   }
 
   fun getTier(crn: String): String {
@@ -75,23 +94,25 @@ class UnallocatedCasesService(
   }
 
   fun getProbationStatus(crn: String): ProbationStatus {
-    val activeConvictions = communityApiClient.getActiveConvictions(crn).size
+    val activeConvictions = (communityApiClient.getActiveConvictions(crn).block() ?: emptyList()).size
     return when {
 
       activeConvictions > 1 -> {
-        val offenderManager = communityApiClient.getOffenderManagerName(crn)
-        val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
-        return ProbationStatus(
-          CURRENTLY_MANAGED,
-          offenderManagerDetails = OffenderManagerDetails(
-            forenames = offenderManager.staff.forenames,
-            surname = offenderManager.staff.surname,
-            grade = grade
-          )
-        )
+        return communityApiClient.getOffenderManagerName(crn)
+          .map { offenderManager ->
+            val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
+            ProbationStatus(
+              CURRENTLY_MANAGED,
+              offenderManagerDetails = OffenderManagerDetails(
+                forenames = offenderManager.staff.forenames,
+                surname = offenderManager.staff.surname,
+                grade = grade
+              )
+            )
+          }.block()!!
       }
       else -> {
-        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn)
+        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
         return when {
           inactiveConvictions.isNotEmpty() -> {
             val mostRecentInactiveConvictionEndDate =
