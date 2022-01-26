@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.needsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
@@ -50,6 +51,7 @@ import java.util.UUID
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
+  var assessRisksAndNeedsApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
@@ -62,6 +64,7 @@ abstract class IntegrationTestBase {
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     communityApi.reset()
     hmppsTier.reset()
+    assessRisksAndNeedsApi.reset()
     setupOauth()
   }
 
@@ -118,6 +121,7 @@ abstract class IntegrationTestBase {
     communityApi.stop()
     hmppsTier.stop()
     oauthMock.stop()
+    assessRisksAndNeedsApi.stop()
     repository.deleteAll()
   }
 
@@ -238,6 +242,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponseNoGrade())
+    )
+  }
+
+  protected fun getNeedsForCrn(crn: String) {
+    val needsRequest =
+      request().withPath("/needs/crn/$crn")
+
+    assessRisksAndNeedsApi.`when`(needsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(needsResponse())
     )
   }
 
