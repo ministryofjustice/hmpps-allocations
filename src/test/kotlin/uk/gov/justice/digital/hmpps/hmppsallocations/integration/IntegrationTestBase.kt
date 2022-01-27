@@ -23,9 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.needsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.notFoundNeedsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
@@ -227,6 +229,14 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noCourtReportResponse(crn: String, convictionId: Long) {
+    val courtReportsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
+    )
+  }
+
   protected fun getStaffWithGradeFromDelius(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/allOffenderManagers")
@@ -252,6 +262,17 @@ abstract class IntegrationTestBase {
 
     assessRisksAndNeedsApi.`when`(needsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(needsResponse())
+    )
+  }
+
+  protected fun notFoundNeedsForCrn(crn: String, token: String) {
+    val needsRequest =
+      request().withPath("/needs/crn/$crn")
+        .withHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
+    assessRisksAndNeedsApi.`when`(needsRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON).withBody(
+        notFoundNeedsResponse()
+      )
     )
   }
 

@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
 import java.time.Period
+import java.util.Optional
 
 class UnallocatedCasesService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
@@ -46,16 +47,18 @@ class UnallocatedCasesService(
       val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
       val courtReport = communityApiClient.getCourtReports(crn, conviction.convictionId)
         .map { courtReports ->
-          courtReports
-            .map { cr ->
-              cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
-              cr
-            }
-            .maxByOrNull { cr -> cr.completedDate }
+          Optional.ofNullable(
+            courtReports
+              .map { cr ->
+                cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
+                cr
+              }
+              .maxByOrNull { cr -> cr.completedDate }
+          )
         }
 
       val assessment = assessmentApiClient.getAssessment(crn)
-        .map { a -> a.assessedOn }
+        .map { a -> Optional.ofNullable(a.assessedOn) }
 
       val results = Mono.zip(offenderSummary, requirements, courtReport, assessment).block()!!
 
@@ -63,8 +66,8 @@ class UnallocatedCasesService(
       return UnallocatedCase.from(
         it, results.t1, age, conviction.offences,
         conviction.sentence?.expectedSentenceEndDate, results.t2.requirements,
-        results.t3,
-        results.t4
+        results.t3.orElse(null),
+        results.t4.orElse(null)
       )
     }
 

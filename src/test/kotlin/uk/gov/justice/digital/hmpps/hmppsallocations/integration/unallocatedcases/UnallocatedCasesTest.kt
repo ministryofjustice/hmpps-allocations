@@ -260,6 +260,61 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `can get case by crn missing court report`() {
+    val crn = "J678910"
+    insertCases()
+    val dateOfBirth = LocalDate.of(2001, 11, 17)
+    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
+    val token = jwtAuthHelper.createJwt(
+      subject = "SOME_USER",
+      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
+      clientId = "some-client"
+    )
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveRequirementResponse(crn, 2500292515)
+    noCourtReportResponse(crn, 2500292515)
+    getNeedsForCrn(crn, token)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn")
+      .headers { it.setBearerAuth(token) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.courtReport")
+      .doesNotExist()
+  }
+
+  @Test
+  fun `can get case by crn missing assessment`() {
+    val crn = "J678910"
+    insertCases()
+    val dateOfBirth = LocalDate.of(2001, 11, 17)
+    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
+    val token = jwtAuthHelper.createJwt(
+      subject = "SOME_USER",
+      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
+      clientId = "some-client"
+    )
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveRequirementResponse(crn, 2500292515)
+    singleCourtReportResponse(crn, 2500292515)
+    notFoundNeedsForCrn(crn, token)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn")
+      .headers { it.setBearerAuth(token) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.assessment")
+      .doesNotExist()
+  }
+  @Test
   fun `get 404 if crn not found`() {
     val result = webTestClient.get()
       .uri("/cases/unallocated/J678912")
