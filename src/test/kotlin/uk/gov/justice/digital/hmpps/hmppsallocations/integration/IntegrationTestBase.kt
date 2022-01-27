@@ -245,9 +245,10 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getNeedsForCrn(crn: String) {
+  protected fun getNeedsForCrn(crn: String, token: String) {
     val needsRequest =
       request().withPath("/needs/crn/$crn")
+        .withHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
     assessRisksAndNeedsApi.`when`(needsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(needsResponse())

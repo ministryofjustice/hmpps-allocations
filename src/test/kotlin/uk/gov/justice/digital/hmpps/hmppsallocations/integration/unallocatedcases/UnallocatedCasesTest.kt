@@ -190,14 +190,19 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     insertCases()
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
+    val token = jwtAuthHelper.createJwt(
+      subject = "SOME_USER",
+      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
+      clientId = "some-client"
+    )
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
     singleCourtReportResponse(crn, 2500292515)
-    getNeedsForCrn(crn)
+    getNeedsForCrn(crn, token)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .headers { it.setBearerAuth(token) }
       .exchange()
       .expectStatus()
       .isOk
