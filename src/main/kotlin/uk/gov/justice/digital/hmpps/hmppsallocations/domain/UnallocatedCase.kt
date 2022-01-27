@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 
 data class UnallocatedCase @JsonCreator constructor(
 
@@ -60,7 +59,7 @@ data class UnallocatedCase @JsonCreator constructor(
       expectedSentenceEndDate: LocalDate?,
       requirements: List<ConvictionRequirement>?,
       courtReport: CourtReport?,
-      assessedOn: ZonedDateTime?,
+      assessedOn: LocalDateTime?,
     ): UnallocatedCase {
       return UnallocatedCase(
         case.name,
@@ -160,5 +159,5 @@ data class UnallocatedCaseCourtReport @JsonCreator constructor(
 data class UnallocatedAssessment @JsonCreator constructor(
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val lastAssessedOn: ZonedDateTime
+  val lastAssessedOn: LocalDateTime
 )
