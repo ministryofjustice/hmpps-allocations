@@ -194,6 +194,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
     singleCourtReportResponse(crn, 2500292515)
+    getNeedsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -249,6 +250,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("Fast")
       .jsonPath("$.courtReport.completedDate")
       .isEqualTo("2019-11-11")
+      .jsonPath("$.assessment.lastAssessedOn")
+      .isEqualTo("2022-01-26")
   }
 
   @Test

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
@@ -19,6 +20,7 @@ class UnallocatedCasesService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   private val communityApiClient: CommunityApiClient,
   private val hmppsTierApiClient: HmppsTierApiClient,
+  private val assessmentApiClient: AssessmentApiClient,
   private val gradeMapper: GradeMapper,
   private val courtReportMapper: CourtReportMapper
 ) {
@@ -52,13 +54,17 @@ class UnallocatedCasesService(
             .maxByOrNull { cr -> cr.completedDate }
         }
 
-      val results = Mono.zip(offenderSummary, requirements, courtReport).block()!!
+      val assessment = assessmentApiClient.getAssessment(crn)
+        .map { a -> a.assessedOn }
+
+      val results = Mono.zip(offenderSummary, requirements, courtReport, assessment).block()!!
 
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
         it, results.t1, age, conviction.offences,
         conviction.sentence?.expectedSentenceEndDate, results.t2.requirements,
-        results.t3
+        results.t3,
+        results.t4
       )
     }
 
