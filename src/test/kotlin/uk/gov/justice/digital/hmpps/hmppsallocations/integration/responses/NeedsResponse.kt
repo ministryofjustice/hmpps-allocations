@@ -41,6 +41,6 @@ fun needsResponse() = """
       "needScore": 4
     }
   ],
-  "assessedOn": "2022-01-26T16:30:06.942Z"
+  "assessedOn": "2022-01-26T16:30:06"
 }
 """.trimIndent()

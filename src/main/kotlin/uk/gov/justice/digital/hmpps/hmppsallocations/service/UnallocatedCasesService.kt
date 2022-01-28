@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
@@ -133,6 +134,11 @@ class UnallocatedCasesService(
       }
     }
   }
+
+  fun getCaseConvictions(crn: String): UnallocatedCaseConvictions? =
+    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+      return UnallocatedCaseConvictions.from(it)
+    }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
