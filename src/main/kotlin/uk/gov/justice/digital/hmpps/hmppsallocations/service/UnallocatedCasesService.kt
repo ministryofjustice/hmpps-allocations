@@ -150,7 +150,17 @@ class UnallocatedCasesService(
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
 
-      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions)
+      val offenderManager = communityApiClient.getOffenderManagerName(crn)
+        .map { offenderManager ->
+          val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
+          OffenderManagerDetails(
+            forenames = offenderManager.staff.forenames,
+            surname = offenderManager.staff.surname,
+            grade = grade
+          )
+        }.block()!!
+
+      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions, offenderManager)
     }
 
   companion object {

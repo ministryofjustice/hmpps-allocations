@@ -320,6 +320,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     val crn = "J678910"
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -341,6 +342,38 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo(6)
       .jsonPath("$.previous[0].lengthUnit")
       .isEqualTo("Months")
+      .jsonPath("$.previous[0].endDate")
+      .isEqualTo("2019-12-13")
+  }
+
+  @Test
+  fun `active probation record has probation practitioner`() {
+    val crn = "J678910"
+    insertCases()
+    twoActiveConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.active[0].description")
+      .isEqualTo("Adult Custody < 12m")
+      .jsonPath("$.active[0].length")
+      .isEqualTo(6)
+      .jsonPath("$.active[0].lengthUnit")
+      .isEqualTo("Months")
+      .jsonPath("$.active[0].startDate")
+      .isEqualTo("2019-11-17")
+      .jsonPath("$.active[0].offenderManager.forenames")
+      .isEqualTo("Sheila Linda")
+      .jsonPath("$.active[0].offenderManager.surname")
+      .isEqualTo("Hancock")
+      .jsonPath("$.active[0].offenderManager.grade")
+      .isEqualTo("PSO")
   }
 
   @Test
