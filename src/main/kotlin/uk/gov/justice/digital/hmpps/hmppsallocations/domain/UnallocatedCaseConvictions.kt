@@ -45,7 +45,8 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
   val startDate: LocalDate?,
   @Schema(description = "End of sentence", example = "2021-11-15")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val endDate: LocalDate?
+  val endDate: LocalDate?,
+  val offences: List<UnallocatedCaseConvictionOffence>,
 ) {
   companion object {
     fun from(conviction: Conviction, offenderManager: OffenderManagerDetails?, startDate: LocalDate?, endDate: LocalDate?): UnallocatedCaseConviction {
@@ -55,8 +56,22 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
         conviction.sentence.originalLengthUnits,
         offenderManager,
         startDate,
-        endDate
+        endDate,
+        conviction.offences.map { UnallocatedCaseConvictionOffence.from(it) }
       )
+    }
+  }
+}
+
+data class UnallocatedCaseConvictionOffence @JsonCreator constructor(
+  @Schema(description = "Description", example = "ORA Community Order")
+  val description: String,
+  @Schema(description = "Main offence", example = "true|false")
+  val mainOffence: Boolean,
+) {
+  companion object {
+    fun from(offence: Offence): UnallocatedCaseConvictionOffence {
+      return UnallocatedCaseConvictionOffence(offence.detail.description, offence.mainOffence)
     }
   }
 }

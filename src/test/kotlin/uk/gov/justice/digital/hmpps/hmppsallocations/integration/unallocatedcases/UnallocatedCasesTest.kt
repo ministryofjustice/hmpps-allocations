@@ -344,6 +344,10 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("Months")
       .jsonPath("$.previous[0].endDate")
       .isEqualTo("2019-12-13")
+      .jsonPath("$.previous[0].offences[0].description")
+      .isEqualTo("Abstracting electricity - 04300")
+      .jsonPath("$.previous[0].offences[0].mainOffence")
+      .isEqualTo(true)
   }
 
   @Test
@@ -374,6 +378,10 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("Hancock")
       .jsonPath("$.active[0].offenderManager.grade")
       .isEqualTo("PSO")
+      .jsonPath("$.active[0].offences[0].description")
+      .isEqualTo("Abstracting electricity - 04300")
+      .jsonPath("$.active[0].offences[0].mainOffence")
+      .isEqualTo(true)
   }
 
   @Test
