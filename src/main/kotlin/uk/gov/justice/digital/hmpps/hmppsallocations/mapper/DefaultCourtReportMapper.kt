@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 @Component
 class DefaultCourtReportMapper : CourtReportMapper {
 
-  private val courtReportTypes: Map<String, String> = mapOf("CJF" to "Fast", "CJO" to "Oral", "CJS" to "Standard")
+  private val courtReportTypes: Map<String, String> = mapOf("CJF" to "Fast", "CJO" to "Oral", "CJS" to "Standard", "PSA" to "Addendum")
 
   override fun deliusToReportType(reportTypeCode: String, reportTypeDescription: String): String {
     return courtReportTypes.getOrDefault(reportTypeCode, reportTypeDescription)

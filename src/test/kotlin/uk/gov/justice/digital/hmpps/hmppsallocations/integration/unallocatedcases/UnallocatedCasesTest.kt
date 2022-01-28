@@ -319,7 +319,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   fun `can get case probation record`() {
     val crn = "J678910"
     insertCases()
-
+    singleActiveAndInactiveConvictionsResponse(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -333,6 +333,14 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C1")
+      .jsonPath("$.active")
+      .isEmpty
+      .jsonPath("$.previous[0].description")
+      .isEqualTo("Adult Custody < 12m")
+      .jsonPath("$.previous[0].length")
+      .isEqualTo(6)
+      .jsonPath("$.previous[0].lengthUnit")
+      .isEqualTo("Months")
   }
 
   @Test

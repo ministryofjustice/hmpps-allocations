@@ -141,7 +141,7 @@ data class UnallocatedCaseCourtReport @JsonCreator constructor(
   val description: String,
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val completedDate: LocalDateTime
+  val completedDate: LocalDateTime?
 ) {
   companion object {
     fun from(courtReport: CourtReport?): UnallocatedCaseCourtReport? {

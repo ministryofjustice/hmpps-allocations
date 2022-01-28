@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 data class CourtReport @JsonCreator constructor(
   val courtReportId: Long,
-  val completedDate: LocalDateTime,
+  val completedDate: LocalDateTime?,
   val courtReportType: CourtReportType
 )
 
