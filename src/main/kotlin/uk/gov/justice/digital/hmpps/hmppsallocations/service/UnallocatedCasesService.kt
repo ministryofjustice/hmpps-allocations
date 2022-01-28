@@ -142,14 +142,15 @@ class UnallocatedCasesService(
         .map { convictions ->
           convictions.groupBy { it.active }
         }.blockOptional().orElse(emptyMap())
-      val activeConvictions = convictions.getOrDefault(true, emptyList()).sortedBy { c -> c.convictionDate ?: LocalDate.MIN }
+      val activeConvictions = convictions.getOrDefault(true, emptyList())
         .filter { c -> c.sentence != null }
-      activeConvictions.dropLast(1)
+      val currentConviction = activeConvictions.filter { c -> c.sentence != null }
+        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
 
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
 
-      return UnallocatedCaseConvictions.from(it, activeConvictions, inactiveConvictions)
+      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions)
     }
 
   companion object {
