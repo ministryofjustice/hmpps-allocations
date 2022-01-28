@@ -385,6 +385,25 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `can get probation record for no convictions`() {
+    val crn = "J678910"
+    insertCases()
+    noConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.active")
+      .isEmpty
+      .jsonPath("$.previous")
+      .isEmpty
+  }
+
+  @Test
   fun `get 404 if crn not found`() {
     val result = webTestClient.get()
       .uri("/cases/unallocated/J678912")
