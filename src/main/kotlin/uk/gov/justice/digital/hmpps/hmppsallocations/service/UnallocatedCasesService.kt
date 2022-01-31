@@ -38,7 +38,7 @@ class UnallocatedCasesService(
       val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
       return UnallocatedCase.from(
         it, offenderSummary.gender, offenderSummary.dateOfBirth, age, conviction.offences,
-        conviction.sentence?.expectedSentenceEndDate, requirements.requirements
+        conviction.sentence?.expectedSentenceEndDate, conviction.sentence?.description, requirements.requirements
       )
     }
 

@@ -226,6 +226,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo(expectedAge)
       .jsonPath("$.expectedSentenceEndDate")
       .isEqualTo("2020-05-16")
+      .jsonPath("$.sentenceDescription")
+      .isEqualTo("Adult Custody < 12m")
       .jsonPath("$.offences[0].mainOffence")
       .isEqualTo(true)
       .jsonPath("$.offences[0].mainCategory")
