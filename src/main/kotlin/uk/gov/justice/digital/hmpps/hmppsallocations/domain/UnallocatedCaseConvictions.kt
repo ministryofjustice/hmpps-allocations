@@ -38,7 +38,7 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
   @Schema(description = "Length", example = "5")
   val length: Int,
   @Schema(description = "Length Unit", example = "Months")
-  val lengthUnit: String,
+  val lengthUnit: String?,
   val offenderManager: OffenderManagerDetails?,
   @Schema(description = "Start of sentence", example = "2021-11-15")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
