@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 import java.util.Optional
 
@@ -54,7 +55,7 @@ class UnallocatedCasesService(
                 cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
                 cr
               }
-              .maxByOrNull { cr -> cr.completedDate }
+              .maxByOrNull { cr -> cr.completedDate ?: LocalDateTime.MIN }
           )
         }
 
@@ -137,7 +138,29 @@ class UnallocatedCasesService(
 
   fun getCaseConvictions(crn: String): UnallocatedCaseConvictions? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
-      return UnallocatedCaseConvictions.from(it)
+      val convictions = communityApiClient.getAllConvictions(crn)
+        .map { convictions ->
+          convictions.groupBy { it.active }
+        }.blockOptional().orElse(emptyMap())
+      val activeConvictions = convictions.getOrDefault(true, emptyList())
+        .filter { c -> c.sentence != null }
+      val currentConviction = activeConvictions.filter { c -> c.sentence != null }
+        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
+
+      val inactiveConvictions = convictions.getOrDefault(false, emptyList())
+        .filter { c -> c.sentence != null }
+
+      val offenderManager = communityApiClient.getOffenderManagerName(crn)
+        .map { offenderManager ->
+          val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
+          OffenderManagerDetails(
+            forenames = offenderManager.staff.forenames,
+            surname = offenderManager.staff.surname,
+            grade = grade
+          )
+        }.block()!!
+
+      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions, offenderManager)
     }
 
   companion object {

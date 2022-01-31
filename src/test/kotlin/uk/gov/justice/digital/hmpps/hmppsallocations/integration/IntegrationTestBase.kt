@@ -204,6 +204,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noConvictionsResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
+    )
+  }
+
   protected fun twoActiveConvictionsOneNoDateResponse(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")

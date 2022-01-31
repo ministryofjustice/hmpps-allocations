@@ -33,6 +33,16 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(ConvictionRequirements::class.java)
   }
 
+  fun getAllConvictions(crn: String): Mono<List<Conviction>> {
+    val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
+
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/convictions")
+      .retrieve()
+      .bodyToMono(responseType)
+  }
+
   fun getInactiveConvictions(crn: String): Mono<List<InactiveConviction>> {
     val responseType = object : ParameterizedTypeReference<List<InactiveConviction>>() {}
     return webClient
