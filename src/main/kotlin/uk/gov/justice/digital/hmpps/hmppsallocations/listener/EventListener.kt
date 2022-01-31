@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
@@ -14,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesSer
 class EventListener(
   private val repository: UnallocatedCasesRepository,
   private val objectMapper: ObjectMapper,
-  private val unallocatedCasesService: UnallocatedCasesService
+  @Qualifier("unallocatedCasesService") private val unallocatedCasesService: UnallocatedCasesService
 ) {
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")

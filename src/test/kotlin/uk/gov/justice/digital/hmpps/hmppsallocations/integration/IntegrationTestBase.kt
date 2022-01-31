@@ -23,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
@@ -32,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsOneNoDateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -49,6 +52,7 @@ import java.util.UUID
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
+  var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
@@ -61,6 +65,7 @@ abstract class IntegrationTestBase {
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     communityApi.reset()
     hmppsTier.reset()
+    offenderAssessmentApi.reset()
     setupOauth()
   }
 
@@ -117,13 +122,14 @@ abstract class IntegrationTestBase {
     communityApi.stop()
     hmppsTier.stop()
     oauthMock.stop()
+    offenderAssessmentApi.stop()
     repository.deleteAll()
   }
 
   fun setupOauth() {
     val response = response().withContentType(APPLICATION_JSON)
       .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
-    oauthMock.`when`(request().withPath("/auth/oauth/token").withBody("grant_type=client_credentials")).respond(response)
+    oauthMock.`when`(request().withPath("/auth/oauth/token")).respond(response)
   }
 
   protected fun singleActiveConvictionResponse(crn: String) {
@@ -197,6 +203,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noConvictionsResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
+    )
+  }
+
   protected fun twoActiveConvictionsOneNoDateResponse(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
@@ -211,6 +226,22 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/convictions")
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse())
+    )
+  }
+
+  protected fun singleCourtReportResponse(crn: String, convictionId: Long) {
+    val courtReportsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singleCourtReportResponse())
+    )
+  }
+
+  protected fun noCourtReportResponse(crn: String, convictionId: Long) {
+    val courtReportsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
     )
   }
 
@@ -229,6 +260,23 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponseNoGrade())
+    )
+  }
+
+  protected fun getAssessmentsForCrn(crn: String) {
+    val needsRequest =
+      request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+
+    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(assessmentResponse())
+    )
+  }
+
+  protected fun notFoundAssessmentForCrn(crn: String) {
+    val needsRequest =
+      request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 

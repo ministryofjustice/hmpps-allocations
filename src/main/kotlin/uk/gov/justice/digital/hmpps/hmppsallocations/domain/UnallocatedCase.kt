@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UnallocatedCase @JsonCreator constructor(
 
@@ -41,22 +42,27 @@ data class UnallocatedCase @JsonCreator constructor(
   @Schema(description = "Sentence description", example = "SA2020 Suspended Sentence Order")
   val sentenceDescription: String?,
   val requirements: List<UnallocatedCaseRequirement>?,
+  @Schema(description = "PNC Number")
+  val pncNumber: String?,
+  val courtReport: UnallocatedCaseCourtReport?,
+  val assessment: UnallocatedAssessment?,
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return from(case, null, null, null, null, null, null, null)
+      return from(case, null, null, null, null, null, null, null, null)
     }
 
     fun from(
       case: UnallocatedCaseEntity,
-      gender: String?,
-      dateOfBirth: LocalDate?,
+      offenderSummary: OffenderSummary?,
       age: Int?,
       offences: List<Offence>?,
       expectedSentenceEndDate: LocalDate?,
       sentenceDescription: String?,
       requirements: List<ConvictionRequirement>?,
+      courtReport: CourtReport?,
+      assessment: Assessment?,
     ): UnallocatedCase {
       return UnallocatedCase(
         case.name,
@@ -67,13 +73,16 @@ data class UnallocatedCase @JsonCreator constructor(
           case.offenderManagerSurname,
           case.offenderManagerGrade
         ),
-        gender,
-        dateOfBirth,
+        offenderSummary?.gender,
+        offenderSummary?.dateOfBirth,
         age,
         offences?.map { UnallocatedCaseOffence.from(it) },
         expectedSentenceEndDate,
         sentenceDescription,
-        requirements?.map { UnallocatedCaseRequirement.from(it) }
+        requirements?.map { UnallocatedCaseRequirement.from(it) },
+        offenderSummary?.otherIds?.pncNumber,
+        UnallocatedCaseCourtReport.from(courtReport),
+        UnallocatedAssessment.from(assessment)
       )
     }
   }
@@ -125,6 +134,43 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
         requirement.length,
         requirement.lengthUnit
       )
+    }
+  }
+}
+
+data class UnallocatedCaseCourtReport @JsonCreator constructor(
+  @Schema(description = "code", example = "CJF")
+  val code: String,
+  @Schema(description = "Description", example = "Fast")
+  val description: String,
+  @Schema(description = "Completed Date", example = "2019-11-11")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val completedDate: LocalDateTime?
+) {
+  companion object {
+    fun from(courtReport: CourtReport?): UnallocatedCaseCourtReport? {
+      return courtReport?.let {
+        UnallocatedCaseCourtReport(
+          it.courtReportType.code,
+          it.courtReportType.description,
+          it.completedDate
+        )
+      }
+    }
+  }
+}
+
+data class UnallocatedAssessment @JsonCreator constructor(
+  @Schema(description = "Completed Date", example = "2019-11-11")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val lastAssessedOn: LocalDateTime,
+  val type: String,
+) {
+  companion object {
+    fun from(assessment: Assessment?): UnallocatedAssessment? {
+      return assessment?.let {
+        UnallocatedAssessment(assessment.completed, assessment.assessmentType)
+      }
     }
   }
 }

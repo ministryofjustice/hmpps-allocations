@@ -190,9 +190,12 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     insertCases()
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
+
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
+    singleCourtReportResponse(crn, 2500292515)
+    getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -242,6 +245,148 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo(100)
       .jsonPath("$.requirements[0].lengthUnit")
       .isEqualTo("Hours")
+      .jsonPath("$.pncNumber")
+      .isEqualTo("9999/1234567A")
+      .jsonPath("$.courtReport.code")
+      .isEqualTo("CJF")
+      .jsonPath("$.courtReport.description")
+      .isEqualTo("Fast")
+      .jsonPath("$.courtReport.completedDate")
+      .isEqualTo("2019-11-11")
+      .jsonPath("$.assessment.lastAssessedOn")
+      .isEqualTo("2014-03-28")
+      .jsonPath("$.assessment.type")
+      .isEqualTo("LAYER_3")
+  }
+
+  @Test
+  fun `can get case by crn missing court report`() {
+    val crn = "J678910"
+    insertCases()
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveRequirementResponse(crn, 2500292515)
+    noCourtReportResponse(crn, 2500292515)
+    getAssessmentsForCrn(crn)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.courtReport")
+      .doesNotExist()
+  }
+
+  @Test
+  fun `can get case by crn missing assessment`() {
+    val crn = "J678910"
+    insertCases()
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveRequirementResponse(crn, 2500292515)
+    singleCourtReportResponse(crn, 2500292515)
+    notFoundAssessmentForCrn(crn)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.assessment")
+      .doesNotExist()
+  }
+
+  @Test
+  fun `can get case probation record`() {
+    val crn = "J678910"
+    insertCases()
+    singleActiveAndInactiveConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.name")
+      .isEqualTo("Dylan Adam Armstrong")
+      .jsonPath("$.crn")
+      .isEqualTo("J678910")
+      .jsonPath("$.tier")
+      .isEqualTo("C1")
+      .jsonPath("$.active")
+      .isEmpty
+      .jsonPath("$.previous[0].description")
+      .isEqualTo("Adult Custody < 12m")
+      .jsonPath("$.previous[0].length")
+      .isEqualTo(6)
+      .jsonPath("$.previous[0].lengthUnit")
+      .isEqualTo("Months")
+      .jsonPath("$.previous[0].endDate")
+      .isEqualTo("2019-12-13")
+      .jsonPath("$.previous[0].offences[0].description")
+      .isEqualTo("Abstracting electricity - 04300")
+      .jsonPath("$.previous[0].offences[0].mainOffence")
+      .isEqualTo(true)
+  }
+
+  @Test
+  fun `active probation record has probation practitioner`() {
+    val crn = "J678910"
+    insertCases()
+    twoActiveConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.active[0].description")
+      .isEqualTo("Adult Custody < 12m")
+      .jsonPath("$.active[0].length")
+      .isEqualTo(6)
+      .jsonPath("$.active[0].lengthUnit")
+      .isEqualTo("Months")
+      .jsonPath("$.active[0].startDate")
+      .isEqualTo("2019-11-17")
+      .jsonPath("$.active[0].offenderManager.forenames")
+      .isEqualTo("Sheila Linda")
+      .jsonPath("$.active[0].offenderManager.surname")
+      .isEqualTo("Hancock")
+      .jsonPath("$.active[0].offenderManager.grade")
+      .isEqualTo("PSO")
+      .jsonPath("$.active[0].offences[0].description")
+      .isEqualTo("Abstracting electricity - 04300")
+      .jsonPath("$.active[0].offences[0].mainOffence")
+      .isEqualTo(true)
+  }
+
+  @Test
+  fun `can get probation record for no convictions`() {
+    val crn = "J678910"
+    insertCases()
+    noConvictionsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.active")
+      .isEmpty
+      .jsonPath("$.previous")
+      .isEmpty
   }
 
   @Test
