@@ -35,17 +35,14 @@ fun singleActiveAndInactiveConvictionsResponse() = """
         ],
         "sentence": {
             "sentenceId": 2500278160,
-            "description": "Adult Custody < 12m",
-            "originalLength": 6,
-            "originalLengthUnits": "Months",
-            "defaultLength": 6,
-            "lengthInDays": 181,
-            "expectedSentenceEndDate": "2020-05-16",
-            "startDate": "2019-11-17",
-            "terminationDate": "2019-12-13",
+            "description": "Absolute/Conditional Discharge",
+            "defaultLength": 0,
+            "startDate": "2009-10-12",
+            "terminationDate": "2009-10-12",
+            "terminationReason": "Term Other Reason (19)",
             "sentenceType": {
-                "code": "SC",
-                "description": "Adult Custody < 12m"
+                "code": "NP",
+                "description": "Absolute/Conditional Discharge"
             },
             "failureToComplyLimit": 3,
             "cja2003Order": true,
