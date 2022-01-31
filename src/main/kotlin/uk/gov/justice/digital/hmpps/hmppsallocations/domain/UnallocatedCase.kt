@@ -59,7 +59,7 @@ data class UnallocatedCase @JsonCreator constructor(
       expectedSentenceEndDate: LocalDate?,
       requirements: List<ConvictionRequirement>?,
       courtReport: CourtReport?,
-      assessedOn: LocalDateTime?,
+      assessment: Assessment?,
     ): UnallocatedCase {
       return UnallocatedCase(
         case.name,
@@ -78,7 +78,7 @@ data class UnallocatedCase @JsonCreator constructor(
         requirements?.map { UnallocatedCaseRequirement.from(it) },
         offenderSummary?.otherIds?.pncNumber,
         UnallocatedCaseCourtReport.from(courtReport),
-        assessedOn?.let { UnallocatedAssessment(assessedOn) }
+        UnallocatedAssessment.from(assessment)
       )
     }
   }
@@ -159,5 +159,14 @@ data class UnallocatedCaseCourtReport @JsonCreator constructor(
 data class UnallocatedAssessment @JsonCreator constructor(
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val lastAssessedOn: LocalDateTime
-)
+  val lastAssessedOn: LocalDateTime,
+  val type: String,
+) {
+  companion object {
+    fun from(assessment: Assessment?): UnallocatedAssessment? {
+      return assessment?.let {
+        UnallocatedAssessment(assessment.completed, assessment.assessmentType)
+      }
+    }
+  }
+}

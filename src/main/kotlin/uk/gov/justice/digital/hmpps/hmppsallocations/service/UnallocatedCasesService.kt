@@ -60,7 +60,7 @@ class UnallocatedCasesService(
         }
 
       val assessment = assessmentApiClient.getAssessment(crn)
-        .map { a -> Optional.ofNullable(a.assessedOn) }
+        .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
 
       val results = Mono.zip(offenderSummary, requirements, courtReport, assessment).block()!!
 
