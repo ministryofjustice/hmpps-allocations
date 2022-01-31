@@ -190,19 +190,15 @@ class UnallocatedCasesTest : IntegrationTestBase() {
     insertCases()
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
-    val token = jwtAuthHelper.createJwt(
-      subject = "SOME_USER",
-      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
-      clientId = "some-client"
-    )
+
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
     singleCourtReportResponse(crn, 2500292515)
-    getNeedsForCrn(crn, token)
+    getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
-      .headers { it.setBearerAuth(token) }
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
       .isOk
@@ -256,29 +252,24 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .jsonPath("$.courtReport.completedDate")
       .isEqualTo("2019-11-11")
       .jsonPath("$.assessment.lastAssessedOn")
-      .isEqualTo("2022-01-26")
+      .isEqualTo("2014-03-28")
+      .jsonPath("$.assessment.type")
+      .isEqualTo("LAYER_3")
   }
 
   @Test
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
     insertCases()
-    val dateOfBirth = LocalDate.of(2001, 11, 17)
-    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
-    val token = jwtAuthHelper.createJwt(
-      subject = "SOME_USER",
-      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
-      clientId = "some-client"
-    )
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
     noCourtReportResponse(crn, 2500292515)
-    getNeedsForCrn(crn, token)
+    getAssessmentsForCrn(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
-      .headers { it.setBearerAuth(token) }
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
       .isOk
@@ -291,22 +282,15 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
     insertCases()
-    val dateOfBirth = LocalDate.of(2001, 11, 17)
-    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
-    val token = jwtAuthHelper.createJwt(
-      subject = "SOME_USER",
-      roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE"),
-      clientId = "some-client"
-    )
     offenderSummaryResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveRequirementResponse(crn, 2500292515)
     singleCourtReportResponse(crn, 2500292515)
-    notFoundNeedsForCrn(crn, token)
+    notFoundAssessmentForCrn(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn")
-      .headers { it.setBearerAuth(token) }
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
       .isOk

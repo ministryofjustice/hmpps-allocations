@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpHeaders
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService
@@ -16,13 +15,10 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentia
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.context.annotation.RequestScope
-import org.springframework.web.reactive.function.client.ClientRequest
-import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.utils.UserContext
 
 @Configuration
 class WebClientUserEnhancementConfiguration(
@@ -34,16 +30,10 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   @RequestScope
   fun assessmentWebClientUserEnhancedAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository,
     builder: WebClient.Builder
   ): WebClient {
-    return builder.baseUrl(assessmentApiRootUri)
-      .filter { request: ClientRequest, next: ExchangeFunction ->
-        val filtered = ClientRequest.from(request)
-          .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
-          .build()
-        next.exchange(filtered)
-      }
-      .build()
+    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository), builder, assessmentApiRootUri, "assessment-api")
   }
 
   @Bean
