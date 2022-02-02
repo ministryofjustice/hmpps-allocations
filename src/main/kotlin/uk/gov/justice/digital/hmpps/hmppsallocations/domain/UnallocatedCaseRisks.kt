@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UnallocatedCaseRisks @JsonCreator constructor (
@@ -15,20 +16,23 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val tier: String,
   val activeRegistrations: List<UnallocatedCaseRegistration>,
   val inactiveRegistrations: List<UnallocatedCaseRegistration>,
-  val rosh: UnallocatedCaseRosh?
+  val rosh: UnallocatedCaseRosh?,
+  val rsr: UnallocatedCaseRsr?,
 ) {
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
       activeRegistrations: List<OffenderRegistration>,
       inactiveRegistrations: List<OffenderRegistration>,
-      riskSummary: RiskSummary?
+      riskSummary: RiskSummary?,
+      riskPredictor: RiskPredictor?,
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
         case.name, case.crn, case.tier,
         activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
         inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        riskSummary?.let { UnallocatedCaseRosh(it.overallRiskLevel, it.assessedOn.toLocalDate()) }
+        riskSummary?.let { UnallocatedCaseRosh(it.overallRiskLevel, it.assessedOn.toLocalDate()) },
+        riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) }
       )
     }
   }
@@ -68,4 +72,13 @@ data class UnallocatedCaseRosh @JsonCreator constructor(
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val lastUpdatedOn: LocalDate
+)
+
+data class UnallocatedCaseRsr @JsonCreator constructor(
+  @Schema(description = "Level", example = "HIGH")
+  val level: String,
+  @Schema(description = "last updated on Date", example = "2020-01-16")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+  val lastUpdatedOn: LocalDate,
+  val percentage: BigDecimal
 )

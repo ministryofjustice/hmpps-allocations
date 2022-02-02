@@ -11,6 +11,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     insertCases()
     getRegistrationsFromDelius(crn)
     getRiskSummaryForCrn(crn)
+    getRiskPredictorsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -48,6 +49,12 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("HIGH")
       .jsonPath("$.rosh.lastUpdatedOn")
       .isEqualTo("2022-02-02")
+      .jsonPath("$.rsr.level")
+      .isEqualTo("MEDIUM")
+      .jsonPath("$.rsr.lastUpdatedOn")
+      .isEqualTo("2019-02-12")
+      .jsonPath("$.rsr.percentage")
+      .isEqualTo(3.8)
   }
 
   @Test
@@ -56,6 +63,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     insertCases()
     getNoRegistrationsFromDelius(crn)
     getRiskSummaryForCrn(crn)
+    getRiskPredictorsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -75,6 +83,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     insertCases()
     getNoRegistrationsFromDelius(crn)
     notFoundRiskSummaryForCrn(crn)
+    getRiskPredictorsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

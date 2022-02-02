@@ -109,8 +109,17 @@ class GetUnallocatedCaseService(
         }
       val riskSummary = assessRisksNeedsApiClient.getRiskSummary(crn)
 
-      val results = Mono.zip(registrations, riskSummary).block()!!
-      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null))
+      val latestRiskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
+        .map { riskPredictors ->
+          Optional.ofNullable(
+            riskPredictors
+              .filter { riskPredictor -> riskPredictor.rsrScoreLevel != null && riskPredictor.rsrPercentageScore != null }
+              .maxByOrNull { riskPredictor -> riskPredictor.completedDate ?: LocalDateTime.MIN }
+          )
+        }
+
+      val results = Mono.zip(registrations, riskSummary, latestRiskPredictor).block()!!
+      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null))
     }
 
   companion object {

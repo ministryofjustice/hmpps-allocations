@@ -31,6 +31,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
@@ -358,6 +359,15 @@ abstract class IntegrationTestBase {
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+    )
+  }
+
+  protected fun getRiskPredictorsForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/predictors/rsr/history")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(riskPredictorResponse())
     )
   }
 
