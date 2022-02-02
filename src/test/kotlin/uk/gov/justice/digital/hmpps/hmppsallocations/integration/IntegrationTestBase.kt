@@ -37,12 +37,14 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsOneNoDateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 import java.util.UUID
@@ -57,6 +59,44 @@ abstract class IntegrationTestBase {
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
+
+  val firstSentenceDate = LocalDate.now().minusDays(4)
+  val firstInitialAppointment = LocalDate.now().plusDays(1)
+  val previousConvictionEndDate = LocalDate.now().minusDays(60)
+
+  val previouslyManagedCase = UnallocatedCaseEntity(
+    null,
+    "Hannah Francis",
+    "J680660",
+    "C2",
+    LocalDate.now().minusDays(1),
+    null,
+    "Previously managed",
+    previousConvictionEndDate
+  )
+
+  fun insertCases() {
+    repository.saveAll(
+      listOf(
+        UnallocatedCaseEntity(
+          null, "Dylan Adam Armstrong", "J678910", "C1",
+          firstSentenceDate, firstInitialAppointment, "Currently managed",
+          null, "Antonio", "LoSardo", "PO"
+        ),
+        UnallocatedCaseEntity(
+          null,
+          "Andrei Edwards",
+          "J680648",
+          "A1",
+          LocalDate.now().minusDays(3),
+          LocalDate.now().plusDays(2),
+          "New to probation"
+        ),
+        previouslyManagedCase
+
+      )
+    )
+  }
 
   @BeforeEach
   fun `clear queues and database`() {
