@@ -7,10 +7,14 @@ import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
@@ -54,6 +58,58 @@ class HmppsAllocationsExceptionHandler {
           developerMessage = e.message
         )
       )
+  }
+
+  @ExceptionHandler(EntityNotFoundException::class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  fun handle(e: EntityNotFoundException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+    log.debug("Not found (404) returned with message {}", e.message)
+    return ResponseEntity(
+      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+        status = 404,
+        developerMessage = e.message
+      ),
+      HttpStatus.NOT_FOUND
+    )
+  }
+
+  @ExceptionHandler(HttpMessageConversionException::class)
+  @ResponseStatus(BAD_REQUEST)
+  fun handle(e: HttpMessageConversionException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+    log.error("HttpMessageConversionException: {}", e.message)
+    return ResponseEntity(
+      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+        status = 400,
+        developerMessage = e.message
+      ),
+      BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(IllegalArgumentException::class)
+  @ResponseStatus(BAD_REQUEST)
+  fun handle(e: IllegalArgumentException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+    log.error("IllegalArgumentException: {}", e.message)
+    return ResponseEntity(
+      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+        status = 400,
+        developerMessage = e.message
+      ),
+      BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+  @ResponseStatus(BAD_REQUEST)
+  fun handle(e: MethodArgumentTypeMismatchException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+    log.error("MethodArgumentTypeMismatchException: {}", e.message)
+    return ResponseEntity(
+      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+        status = 400,
+        developerMessage = e.message
+      ),
+      BAD_REQUEST
+    )
   }
 
   @ExceptionHandler(java.lang.Exception::class)
