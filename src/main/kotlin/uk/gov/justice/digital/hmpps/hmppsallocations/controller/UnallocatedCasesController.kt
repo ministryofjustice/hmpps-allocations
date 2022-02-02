@@ -87,20 +87,6 @@ class UnallocatedCasesController(
       getUnallocatedCaseService.getCaseRisks(crn) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 
-  @Operation(summary = "Retrieve unallocated case risks by crn")
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
-  )
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/risks")
-  fun getUnallocatedCaseRisks(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseRisks> =
-    ResponseEntity.ok(
-      unallocatedCasesService.getCaseRisks(crn) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
-    )
-
   @PostMapping("/cases/unallocated/upload")
   fun uploadUnallocatedCases(@RequestParam("file") file: MultipartFile): ResponseEntity<Void> {
     uploadUnallocatedCasesService.sendEvents(fileToUnallocatedCases(file))
