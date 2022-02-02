@@ -13,24 +13,25 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val crn: String,
   @Schema(description = "Latest tier of case", example = "D2")
   val tier: String,
-  val activeRegistrations: List<UnallocatedCaseRisk>,
-  val inactiveRegistrations: List<UnallocatedCaseRisk>,
+  val activeRegistrations: List<UnallocatedCaseRegistration>,
+  val inactiveRegistrations: List<UnallocatedCaseRegistration>,
 ) {
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
-
+      activeRegistrations: List<OffenderRegistration>,
+      inactiveRegistrations: List<OffenderRegistration>,
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
         case.name, case.crn, case.tier,
-        emptyList(),
-        emptyList()
+        activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) }
       )
     }
   }
 }
 
-data class UnallocatedCaseRisk @JsonCreator constructor(
+data class UnallocatedCaseRegistration @JsonCreator constructor(
   @Schema(description = "Type", example = "Suicide/self-harm")
   val type: String,
   @Schema(description = "Registered date", example = "2020-03-21")
@@ -40,5 +41,20 @@ data class UnallocatedCaseRisk @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val nextReviewDate: LocalDate?,
   @Schema(description = "Notes", example = "Previous suicide /self-harm attempt. Needs further investigating.")
-  val notes: String?
-)
+  val notes: String?,
+  @Schema(description = "End Date", example = "2020-01-16")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+  val endDate: LocalDate?,
+) {
+  companion object {
+    fun from(offenderRegistration: OffenderRegistration): UnallocatedCaseRegistration {
+      return UnallocatedCaseRegistration(
+        offenderRegistration.type.description,
+        offenderRegistration.startDate,
+        offenderRegistration.nextReviewDate,
+        offenderRegistration.notes,
+        offenderRegistration.endDate
+      )
+    }
+  }
+}

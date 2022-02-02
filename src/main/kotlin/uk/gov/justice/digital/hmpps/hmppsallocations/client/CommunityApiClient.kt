@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CourtReport
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -90,6 +91,14 @@ class CommunityApiClient(private val webClient: WebClient) {
       .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
       .retrieve()
       .bodyToMono(responseType)
+  }
+
+  fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/registrations")
+      .retrieve()
+      .bodyToMono(OffenderRegistrations::class.java)
   }
 
   data class Staff @JsonCreator constructor(

@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
@@ -300,6 +301,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponseNoGrade())
+    )
+  }
+
+  protected fun getRegistrationsFromDelius(crn: String) {
+    val registrationsRequest =
+      request().withPath("/offenders/crn/$crn/registrations")
+
+    communityApi.`when`(registrationsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(multipleRegistrationResponse())
     )
   }
 

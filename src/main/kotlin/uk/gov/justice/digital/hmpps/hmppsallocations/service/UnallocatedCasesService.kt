@@ -166,7 +166,11 @@ class UnallocatedCasesService(
 
   fun getCaseRisks(crn: String): UnallocatedCaseRisks? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
-      return UnallocatedCaseRisks.from(it)
+      val registrations = communityApiClient.getAllRegistrations(crn)
+        .map { registrations ->
+          registrations.registrations.groupBy { it.active }
+        }.blockOptional().orElse(emptyMap())
+      return UnallocatedCaseRisks.from(it, registrations.getOrDefault(true, emptyList()), registrations.getOrDefault(false, emptyList()))
     }
 
   companion object {

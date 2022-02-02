@@ -9,7 +9,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `can get case risks`() {
     val crn = "J678910"
     insertCases()
-
+    getRegistrationsFromDelius(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -23,9 +23,25 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C1")
-      .jsonPath("$.activeRegistrations")
-      .isEmpty
-      .jsonPath("$.inactiveRegistrations")
-      .isEmpty
+      .jsonPath("$.activeRegistrations[0].type")
+      .isEqualTo("ALT Under MAPPA Arrangements")
+      .jsonPath("$.activeRegistrations[0].registered")
+      .isEqualTo("2021-08-30")
+      .jsonPath("$.activeRegistrations[0].nextReviewDate")
+      .doesNotExist()
+      .jsonPath("$.activeRegistrations[0].notes")
+      .doesNotExist()
+      .jsonPath("$.activeRegistrations[0].endDate")
+      .doesNotExist()
+      .jsonPath("$.inactiveRegistrations[0].type")
+      .isEqualTo("Child Protection")
+      .jsonPath("$.inactiveRegistrations[0].registered")
+      .isEqualTo("2021-05-20")
+      .jsonPath("$.inactiveRegistrations[0].nextReviewDate")
+      .doesNotExist()
+      .jsonPath("$.inactiveRegistrations[0].notes")
+      .isEqualTo("Some Notes.")
+      .jsonPath("$.inactiveRegistrations[0].endDate")
+      .isEqualTo("2021-08-30")
   }
 }
