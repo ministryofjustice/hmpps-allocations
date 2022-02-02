@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
@@ -71,6 +72,20 @@ class UnallocatedCasesController(
   fun getUnallocatedCaseConvictions(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseConvictions> =
     ResponseEntity.ok(
       unallocatedCasesService.getCaseConvictions(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
+
+  @Operation(summary = "Retrieve unallocated case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/risks")
+  fun getUnallocatedCaseRisks(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseRisks> =
+    ResponseEntity.ok(
+      unallocatedCasesService.getCaseRisks(crn) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 
   @PostMapping("/cases/unallocated/upload")

@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
@@ -161,6 +162,15 @@ class UnallocatedCasesService(
         }.block()!!
 
       return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions, offenderManager)
+    }
+
+  fun getCaseRisks(crn: String): UnallocatedCaseRisks? =
+    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+      val registrations = communityApiClient.getAllRegistrations(crn)
+        .map { registrations ->
+          registrations.registrations.groupBy { it.active }
+        }.blockOptional().orElse(emptyMap())
+      return UnallocatedCaseRisks.from(it, registrations.getOrDefault(true, emptyList()), registrations.getOrDefault(false, emptyList()))
     }
 
   companion object {
