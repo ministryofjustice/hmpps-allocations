@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
@@ -24,7 +25,8 @@ class GetUnallocatedCaseService(
   @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
-  private val gradeMapper: GradeMapper
+  private val gradeMapper: GradeMapper,
+  @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
 
   fun getCase(crn: String): UnallocatedCase? =
@@ -103,9 +105,12 @@ class GetUnallocatedCaseService(
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
-          registrations.registrations.groupBy { it.active }
-        }.blockOptional().orElse(emptyMap())
-      return UnallocatedCaseRisks.from(it, registrations.getOrDefault(true, emptyList()), registrations.getOrDefault(false, emptyList()))
+          registrations.registrations.groupBy { registration -> registration.active }
+        }
+      val riskSummary = assessRisksNeedsApiClient.getRiskSummary(crn)
+
+      val results = Mono.zip(registrations, riskSummary).block()!!
+      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null))
     }
 
   companion object {

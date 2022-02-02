@@ -10,6 +10,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     insertCases()
     getRegistrationsFromDelius(crn)
+    getRiskSummaryForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -43,5 +44,45 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("Some Notes.")
       .jsonPath("$.inactiveRegistrations[0].endDate")
       .isEqualTo("2021-08-30")
+      .jsonPath("$.rosh.level")
+      .isEqualTo("HIGH")
+      .jsonPath("$.rosh.lastUpdatedOn")
+      .isEqualTo("2022-02-02")
+  }
+
+  @Test
+  fun `get case risks with no registrations`() {
+    val crn = "J678910"
+    insertCases()
+    getNoRegistrationsFromDelius(crn)
+    getRiskSummaryForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.activeRegistrations")
+      .isEmpty
+      .jsonPath("$.inactiveRegistrations")
+      .isEmpty
+  }
+
+  @Test
+  fun `get case risks with no ROSH summary`() {
+    val crn = "J678910"
+    insertCases()
+    getNoRegistrationsFromDelius(crn)
+    notFoundRiskSummaryForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.rosh")
+      .doesNotExist()
   }
 }

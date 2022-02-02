@@ -15,17 +15,20 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val tier: String,
   val activeRegistrations: List<UnallocatedCaseRegistration>,
   val inactiveRegistrations: List<UnallocatedCaseRegistration>,
+  val rosh: UnallocatedCaseRosh?
 ) {
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
       activeRegistrations: List<OffenderRegistration>,
       inactiveRegistrations: List<OffenderRegistration>,
+      riskSummary: RiskSummary?
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
         case.name, case.crn, case.tier,
         activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) }
+        inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        riskSummary?.let { UnallocatedCaseRosh(it.overallRiskLevel, it.assessedOn.toLocalDate()) }
       )
     }
   }
@@ -58,3 +61,11 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
     }
   }
 }
+
+data class UnallocatedCaseRosh @JsonCreator constructor(
+  @Schema(description = "Level", example = "HIGH")
+  val level: String,
+  @Schema(description = "last updated on Date", example = "2020-01-16")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+  val lastUpdatedOn: LocalDate
+)

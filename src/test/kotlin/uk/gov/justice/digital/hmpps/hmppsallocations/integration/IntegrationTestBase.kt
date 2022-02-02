@@ -109,6 +109,7 @@ abstract class IntegrationTestBase {
     communityApi.reset()
     hmppsTier.reset()
     offenderAssessmentApi.reset()
+    assessRisksNeedsApi.reset()
     setupOauth()
   }
 
@@ -166,6 +167,7 @@ abstract class IntegrationTestBase {
     hmppsTier.stop()
     oauthMock.stop()
     offenderAssessmentApi.stop()
+    assessRisksNeedsApi.stop()
     repository.deleteAll()
   }
 
@@ -315,6 +317,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun getNoRegistrationsFromDelius(crn: String) {
+    val registrationsRequest =
+      request().withPath("/offenders/crn/$crn/registrations")
+
+    communityApi.`when`(registrationsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("{\"registrations\":[]}")
+    )
+  }
+
   protected fun getAssessmentsForCrn(crn: String) {
     val needsRequest =
       request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
@@ -338,6 +349,15 @@ abstract class IntegrationTestBase {
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(riskSummaryResponse())
+    )
+  }
+
+  protected fun notFoundRiskSummaryForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/summary")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 

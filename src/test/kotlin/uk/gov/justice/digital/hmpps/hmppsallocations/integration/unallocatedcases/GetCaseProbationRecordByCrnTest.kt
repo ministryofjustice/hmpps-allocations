@@ -11,7 +11,6 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn)
     getStaffWithGradeFromDelius(crn)
-    getRiskSummaryForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -39,10 +38,6 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .isEqualTo("Abstracting electricity - 04300")
       .jsonPath("$.previous[0].offences[0].mainOffence")
       .isEqualTo(true)
-      .jsonPath("$.roshLevel")
-      .isEqualTo("HIGH")
-      .jsonPath("$.roshLastUpdatedOn")
-      .isEqualTo("2022-02-02")
   }
 
   @Test
