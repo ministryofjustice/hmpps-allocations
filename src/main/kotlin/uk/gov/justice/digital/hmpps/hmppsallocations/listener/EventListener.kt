@@ -3,19 +3,18 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
 
 @Component
 class EventListener(
   private val repository: UnallocatedCasesRepository,
   private val objectMapper: ObjectMapper,
-  @Qualifier("unallocatedCasesService") private val unallocatedCasesService: UnallocatedCasesService
+  private val enrichEventService: EnrichEventService
 ) {
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
@@ -23,11 +22,11 @@ class EventListener(
     val crn = getCrn(rawMessage)
     log.info("received event for crn: {}", crn)
 
-    val sentenceDate = unallocatedCasesService.getSentenceDate(crn)
-    val initialAppointment = unallocatedCasesService.getInitialAppointmentDate(crn, sentenceDate)
-    val name = unallocatedCasesService.getOffenderName(crn)
-    val tier = unallocatedCasesService.getTier(crn)
-    val (status, previousConvictionDate, offenderManagerDetails) = unallocatedCasesService.getProbationStatus(crn)
+    val sentenceDate = enrichEventService.getSentenceDate(crn)
+    val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentenceDate)
+    val name = enrichEventService.getOffenderName(crn)
+    val tier = enrichEventService.getTier(crn)
+    val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(crn)
 
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,

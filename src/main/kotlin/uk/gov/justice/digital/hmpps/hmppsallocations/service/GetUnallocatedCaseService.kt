@@ -1,10 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
@@ -12,28 +13,19 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.util.Optional
 
-class UnallocatedCasesService(
+@Service
+class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
-  private val communityApiClient: CommunityApiClient,
-  private val hmppsTierApiClient: HmppsTierApiClient,
-  private val assessmentApiClient: AssessmentApiClient,
-  private val gradeMapper: GradeMapper,
-  private val courtReportMapper: CourtReportMapper
+  @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
+  private val courtReportMapper: CourtReportMapper,
+  @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
+  private val gradeMapper: GradeMapper
 ) {
-
-  fun getAll(): List<UnallocatedCase> {
-    return unallocatedCasesRepository.findAll().map {
-      UnallocatedCase.from(it)
-    }
-  }
 
   fun getCase(crn: String): UnallocatedCase? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
@@ -74,66 +66,9 @@ class UnallocatedCasesService(
       )
     }
 
-  fun getSentenceDate(crn: String): LocalDate {
-    return communityApiClient.getActiveConvictions(crn)
-      .map { convictions ->
-        log.info("convictions from com-api : {}", convictions.size)
-        convictions.filter { c -> c.sentence != null }
-          .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!.sentence!!.startDate
-      }
-      .block()!!
-  }
-
-  fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
-    return communityApiClient.getInductionContacts(crn, contactsFromDate)
-      .mapNotNull { contacts ->
-        log.info("contacts from com-api : {}", contacts.size)
-        contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
-      }
-      .block()
-  }
-
-  fun getOffenderName(crn: String): String {
-    return communityApiClient.getOffenderSummary(crn)
-      .map { "${it.firstName} ${it.surname}" }
-      .block()!!
-  }
-
-  fun getTier(crn: String): String {
-    return hmppsTierApiClient.getTierByCrn(crn)
-  }
-
-  fun getProbationStatus(crn: String): ProbationStatus {
-    val activeConvictions = (communityApiClient.getActiveConvictions(crn).block() ?: emptyList()).size
-    return when {
-
-      activeConvictions > 1 -> {
-        return communityApiClient.getOffenderManagerName(crn)
-          .map { offenderManager ->
-            val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
-            ProbationStatus(
-              CURRENTLY_MANAGED,
-              offenderManagerDetails = OffenderManagerDetails(
-                forenames = offenderManager.staff.forenames,
-                surname = offenderManager.staff.surname,
-                grade = grade
-              )
-            )
-          }.block()!!
-      }
-      else -> {
-        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
-        return when {
-          inactiveConvictions.isNotEmpty() -> {
-            val mostRecentInactiveConvictionEndDate =
-              inactiveConvictions.filter { c -> c.sentence.terminationDate != null }
-                .map { c -> c.sentence.terminationDate!! }
-                .maxByOrNull { it }
-            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate)
-          }
-          else -> ProbationStatus(NEW_TO_PROBATION)
-        }
-      }
+  fun getAll(): List<UnallocatedCase> {
+    return unallocatedCasesRepository.findAll().map {
+      UnallocatedCase.from(it)
     }
   }
 
@@ -176,18 +111,4 @@ class UnallocatedCasesService(
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
-}
-
-data class ProbationStatus(
-  val status: ProbationStatusType,
-  val previousConvictionDate: LocalDate? = null,
-  val offenderManagerDetails: OffenderManagerDetails? = null
-)
-
-enum class ProbationStatusType(
-  val status: String
-) {
-  CURRENTLY_MANAGED("Currently managed"),
-  PREVIOUSLY_MANAGED("Previously managed"),
-  NEW_TO_PROBATION("New to probation")
 }

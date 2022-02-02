@@ -5,7 +5,6 @@ import com.opencsv.bean.CsvToBeanBuilder
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -19,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedCasesService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import java.io.InputStreamReader
@@ -27,8 +26,8 @@ import java.io.InputStreamReader
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
-  @Qualifier("unallocatedCasesUserEnhancedService") private val unallocatedCasesService: UnallocatedCasesService,
-  private val uploadUnallocatedCasesService: UploadUnallocatedCasesService
+  private val uploadUnallocatedCasesService: UploadUnallocatedCasesService,
+  private val getUnallocatedCaseService: GetUnallocatedCaseService
 ) {
 
   @Operation(summary = "Retrieve all unallocated cases")
@@ -42,7 +41,7 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated")
   fun getUnallocatedCases(): ResponseEntity<List<UnallocatedCase>> {
     return ResponseEntity.ok(
-      unallocatedCasesService.getAll()
+      getUnallocatedCaseService.getAll()
     )
   }
 
@@ -57,7 +56,7 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated/{crn}")
   fun getUnallocatedCase(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCase> =
     ResponseEntity.ok(
-      unallocatedCasesService.getCase(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCase(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case convictions by crn")
@@ -71,7 +70,21 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated/{crn}/convictions")
   fun getUnallocatedCaseConvictions(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseConvictions> =
     ResponseEntity.ok(
-      unallocatedCasesService.getCaseConvictions(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCaseConvictions(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
+
+  @Operation(summary = "Retrieve unallocated case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/risks")
+  fun getUnallocatedCaseRisks(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseRisks> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseRisks(crn) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
