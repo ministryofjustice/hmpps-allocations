@@ -20,6 +20,7 @@ class WebClientConfiguration(
   @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
   @Value("\${assessment.endpoint.url}") private val assessmentApiRootUri: String,
+  @Value("\${assess-risks-needs.endpoint.url}") private val assessRisksNeedsApiRootUri: String,
 ) {
 
   @Bean
@@ -34,6 +35,19 @@ class WebClientConfiguration(
     )
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
     return authorizedClientManager
+  }
+
+  @Bean
+  fun assessRisksNeedsWebClientAppScope(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManager, builder, assessRisksNeedsApiRootUri, "arn-api")
+  }
+
+  @Bean
+  fun assessRisksNeedsApiClient(@Qualifier("assessRisksNeedsWebClientAppScope") webClient: WebClient): AssessmentApiClient {
+    return AssessmentApiClient(webClient)
   }
 
   @Bean

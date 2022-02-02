@@ -40,6 +40,10 @@ assessment:
   endpoint:
     url: http://localhost:8072
 
+assess-risks-needs:
+  endpoint:
+    url: http://localhost:8085
+
 oauth:
   endpoint:
     url: http://localhost:9090/auth
