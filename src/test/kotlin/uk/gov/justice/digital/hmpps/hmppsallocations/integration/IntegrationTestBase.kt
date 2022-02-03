@@ -31,6 +31,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
@@ -55,6 +57,7 @@ import java.util.UUID
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
+  var assessRisksNeedsApi: ClientAndServer = startClientAndServer(8085)
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
@@ -107,6 +110,7 @@ abstract class IntegrationTestBase {
     communityApi.reset()
     hmppsTier.reset()
     offenderAssessmentApi.reset()
+    assessRisksNeedsApi.reset()
     setupOauth()
   }
 
@@ -164,6 +168,7 @@ abstract class IntegrationTestBase {
     hmppsTier.stop()
     oauthMock.stop()
     offenderAssessmentApi.stop()
+    assessRisksNeedsApi.stop()
     repository.deleteAll()
   }
 
@@ -336,6 +341,33 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
       response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+    )
+  }
+
+  protected fun getRiskSummaryForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/summary")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(riskSummaryResponse())
+    )
+  }
+
+  protected fun notFoundRiskSummaryForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/summary")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+    )
+  }
+
+  protected fun getRiskPredictorsForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/predictors/rsr/history")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(riskPredictorResponse())
     )
   }
 

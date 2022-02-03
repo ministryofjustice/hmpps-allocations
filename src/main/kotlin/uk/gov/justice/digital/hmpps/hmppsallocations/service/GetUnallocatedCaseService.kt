@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
@@ -24,7 +25,8 @@ class GetUnallocatedCaseService(
   @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
-  private val gradeMapper: GradeMapper
+  private val gradeMapper: GradeMapper,
+  @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
 
   fun getCase(crn: String): UnallocatedCase? =
@@ -103,9 +105,21 @@ class GetUnallocatedCaseService(
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
-          registrations.registrations?.groupBy { it.active } ?: emptyMap()
-        }.block()
-      return UnallocatedCaseRisks.from(it, registrations.getOrDefault(true, emptyList()), registrations.getOrDefault(false, emptyList()))
+          registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
+        }
+      val riskSummary = assessRisksNeedsApiClient.getRiskSummary(crn)
+
+      val latestRiskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
+        .map { riskPredictors ->
+          Optional.ofNullable(
+            riskPredictors
+              .filter { riskPredictor -> riskPredictor.rsrScoreLevel != null && riskPredictor.rsrPercentageScore != null }
+              .maxByOrNull { riskPredictor -> riskPredictor.completedDate ?: LocalDateTime.MIN }
+          )
+        }
+
+      val results = Mono.zip(registrations, riskSummary, latestRiskPredictor).block()!!
+      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null))
     }
 
   companion object {

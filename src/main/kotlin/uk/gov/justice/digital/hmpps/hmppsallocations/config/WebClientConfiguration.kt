@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 
@@ -19,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 class WebClientConfiguration(
   @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
-  @Value("\${assessment.endpoint.url}") private val assessmentApiRootUri: String,
 ) {
 
   @Bean
@@ -34,19 +32,6 @@ class WebClientConfiguration(
     )
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
     return authorizedClientManager
-  }
-
-  @Bean
-  fun assessmentWebClientAppScope(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: WebClient.Builder
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManager, builder, assessmentApiRootUri, "assessment-api")
-  }
-
-  @Bean
-  fun assessmentApiClient(@Qualifier("assessmentWebClientAppScope") webClient: WebClient): AssessmentApiClient {
-    return AssessmentApiClient(webClient)
   }
 
   @Bean
