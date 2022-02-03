@@ -61,7 +61,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no registrations`() {
     val crn = "J678910"
     insertCases()
-    getNoRegistrationsFromDelius(crn)
+    noRegistrationsFromDelius(crn)
     getRiskSummaryForCrn(crn)
     getRiskPredictorsForCrn(crn)
     webTestClient.get()
@@ -81,7 +81,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no ROSH summary`() {
     val crn = "J678910"
     insertCases()
-    getNoRegistrationsFromDelius(crn)
+    noRegistrationsFromDelius(crn)
     notFoundRiskSummaryForCrn(crn)
     getRiskPredictorsForCrn(crn)
     webTestClient.get()
