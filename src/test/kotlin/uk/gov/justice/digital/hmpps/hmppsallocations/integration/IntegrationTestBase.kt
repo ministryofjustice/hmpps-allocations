@@ -313,6 +313,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noRegistrationsFromDelius(crn: String) {
+    val registrationsRequest =
+      request().withPath("/offenders/crn/$crn/registrations")
+
+    communityApi.`when`(registrationsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("{}")
+    )
+  }
+
   protected fun getAssessmentsForCrn(crn: String) {
     val needsRequest =
       request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))

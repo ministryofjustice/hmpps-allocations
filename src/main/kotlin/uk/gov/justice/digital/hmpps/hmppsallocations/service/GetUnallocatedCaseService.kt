@@ -103,8 +103,8 @@ class GetUnallocatedCaseService(
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
-          registrations.registrations.groupBy { it.active }
-        }.blockOptional().orElse(emptyMap())
+          registrations.registrations?.groupBy { it.active } ?: emptyMap()
+        }.block()
       return UnallocatedCaseRisks.from(it, registrations.getOrDefault(true, emptyList()), registrations.getOrDefault(false, emptyList()))
     }
 

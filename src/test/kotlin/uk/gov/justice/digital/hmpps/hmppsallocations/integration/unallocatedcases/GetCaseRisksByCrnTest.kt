@@ -44,4 +44,22 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .jsonPath("$.inactiveRegistrations[0].endDate")
       .isEqualTo("2021-08-30")
   }
+
+  @Test
+  fun `can get case risks when no registrations are returned`() {
+    val crn = "J678910"
+    insertCases()
+    noRegistrationsFromDelius(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.activeRegistrations")
+      .isEmpty
+      .jsonPath("$.inactiveRegistrations")
+      .isEmpty
+  }
 }
