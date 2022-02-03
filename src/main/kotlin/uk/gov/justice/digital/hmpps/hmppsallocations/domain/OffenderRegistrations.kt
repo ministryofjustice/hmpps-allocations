@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 
 data class OffenderRegistrations @JsonCreator constructor(
-  val registrations: List<OffenderRegistration>
+  val registrations: List<OffenderRegistration>?
 )
 
 data class OffenderRegistration @JsonCreator constructor(
