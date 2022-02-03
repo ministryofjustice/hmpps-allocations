@@ -318,12 +318,12 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getNoRegistrationsFromDelius(crn: String) {
+  protected fun noRegistrationsFromDelius(crn: String) {
     val registrationsRequest =
       request().withPath("/offenders/crn/$crn/registrations")
 
     communityApi.`when`(registrationsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{\"registrations\":[]}")
+      response().withContentType(APPLICATION_JSON).withBody("{}")
     )
   }
 

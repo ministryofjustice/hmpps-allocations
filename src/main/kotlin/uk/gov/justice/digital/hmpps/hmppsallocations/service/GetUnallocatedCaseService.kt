@@ -105,7 +105,7 @@ class GetUnallocatedCaseService(
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
-          registrations.registrations.groupBy { registration -> registration.active }
+          registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
         }
       val riskSummary = assessRisksNeedsApiClient.getRiskSummary(crn)
 
