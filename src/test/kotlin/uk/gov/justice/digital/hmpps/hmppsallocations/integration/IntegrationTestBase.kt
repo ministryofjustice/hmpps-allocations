@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.asses
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagersToAllocateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
@@ -57,6 +58,7 @@ import java.util.UUID
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
+  var workloadApi: ClientAndServer = startClientAndServer(8087)
   var assessRisksNeedsApi: ClientAndServer = startClientAndServer(8085)
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
@@ -111,6 +113,7 @@ abstract class IntegrationTestBase {
     hmppsTier.reset()
     offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
+    workloadApi.reset()
     setupOauth()
   }
 
@@ -169,6 +172,7 @@ abstract class IntegrationTestBase {
     oauthMock.stop()
     offenderAssessmentApi.stop()
     assessRisksNeedsApi.stop()
+    workloadApi.stop()
     repository.deleteAll()
   }
 
@@ -368,6 +372,14 @@ abstract class IntegrationTestBase {
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(riskPredictorResponse())
+    )
+  }
+
+  protected fun getOffenderManagersToAllocateForCrn() {
+    var offenderManagerRequest = request().withPath("/team/N03F01/offenderManagers")
+
+    workloadApi.`when`(offenderManagerRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(offenderManagersToAllocateResponse())
     )
   }
 

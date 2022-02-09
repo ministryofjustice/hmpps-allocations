@@ -44,6 +44,10 @@ assess-risks-needs:
   endpoint:
     url: http://localhost:8085
 
+workload:
+  endpoint:
+    url: http://localhost:8087
+
 oauth:
   endpoint:
     url: http://localhost:9090/auth
