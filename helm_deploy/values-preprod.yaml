@@ -14,3 +14,4 @@ generic-service:
     HMPPS_TIER_ENDPOINT_URL: https://hmpps-tier-preprod.hmpps.service.justice.gov.uk
     ASSESSMENT_ENDPOINT_URL: https://offender-prprod.aks-live-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs-preprod.hmpps.service.justice.gov.uk
+    WORKLOAD_ENDPOINT_URL: https://hmpps-workload-preprod.hmpps.service.justice.gov.uk

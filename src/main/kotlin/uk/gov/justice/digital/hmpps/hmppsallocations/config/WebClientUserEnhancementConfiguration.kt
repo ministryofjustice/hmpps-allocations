@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkloadApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.utils.UserContext
 
 @Configuration
@@ -29,6 +30,7 @@ class WebClientUserEnhancementConfiguration(
   @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
   @Value("\${assessment.endpoint.url}") private val assessmentApiRootUri: String,
   @Value("\${assess-risks-needs.endpoint.url}") private val assessRisksNeedsApiRootUri: String,
+  @Value("\${workload.endpoint.url}") private val workloadApiRootUri: String,
 ) {
 
   @Bean
@@ -47,6 +49,20 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient {
     return AssessRisksNeedsApiClient(webClient)
+  }
+
+  @Bean
+  @RequestScope
+  fun workloadWebClientUserEnhancedAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    builder: WebClient.Builder
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository), builder, workloadApiRootUri, "workload-api")
+  }
+
+  @Bean
+  fun workloadApiClientUserEnhanced(@Qualifier("workloadWebClientUserEnhancedAppScope") webClient: WebClient): WorkloadApiClient {
+    return WorkloadApiClient(webClient)
   }
 
   @Bean
