@@ -32,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offen
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagersToAllocateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
@@ -372,6 +373,15 @@ abstract class IntegrationTestBase {
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(riskPredictorResponse())
+    )
+  }
+
+  protected fun getOgrsScoreForCrn(crn: String) {
+    val ogrsRequest =
+      request().withPath("/offenders/crn/$crn/assessments")
+
+    communityApi.`when`(ogrsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(ogrsResponse())
     )
   }
 

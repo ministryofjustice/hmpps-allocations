@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDate
 
 data class UnallocatedCaseRisks @JsonCreator constructor (
@@ -18,6 +19,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val inactiveRegistrations: List<UnallocatedCaseRegistration>,
   val rosh: UnallocatedCaseRosh?,
   val rsr: UnallocatedCaseRsr?,
+  val ogrs: UnallocatedCaseOgrs?
 ) {
   companion object {
     fun from(
@@ -26,13 +28,15 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
       inactiveRegistrations: List<OffenderRegistration>,
       riskSummary: RiskSummary?,
       riskPredictor: RiskPredictor?,
+      offenderAssessment: OffenderAssessment?
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
         case.name, case.crn, case.tier,
         activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
         inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
         riskSummary?.let { UnallocatedCaseRosh(it.overallRiskLevel, it.assessedOn.toLocalDate()) },
-        riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) }
+        riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) },
+        offenderAssessment?.ogrsScore?.let { UnallocatedCaseOgrs(it) }
       )
     }
   }
@@ -81,4 +85,9 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val lastUpdatedOn: LocalDate,
   val percentage: BigDecimal
+)
+
+data class UnallocatedCaseOgrs @JsonCreator constructor(
+  @Schema(description = "Score", example = "62")
+  val score: BigInteger
 )
