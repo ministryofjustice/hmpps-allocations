@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkloadApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocateCaseOffenderManagerWorkload
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocateCaseOffenderManagers
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialAllocateCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 
@@ -25,5 +26,14 @@ class GetAllocateCaseService(
             }
         }.block()!!
       return AllocateCaseOffenderManagers.from(it, offenderManagers)
+    }
+
+  fun getImpactOfAllocation(crn: String, offenderManagerCode: String): PotentialAllocateCase? =
+    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+      return workloadApiClient.getPotentialCaseLoad(it.tier, offenderManagerCode)
+        .map { offenderManagerWorkload ->
+          PotentialAllocateCase.from(it, offenderManagerWorkload, gradeMapper.workloadToStaffGrade(offenderManagerWorkload.grade))
+        }
+        .block()
     }
 }
