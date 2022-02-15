@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.time.LocalDateTime
 
 data class RiskSummary @JsonCreator constructor(
-  val overallRiskLevel: String,
-  val assessedOn: LocalDateTime
+  val overallRiskLevel: String?,
+  val assessedOn: LocalDateTime?
 )
