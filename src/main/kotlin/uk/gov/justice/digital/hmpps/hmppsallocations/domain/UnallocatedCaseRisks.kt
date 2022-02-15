@@ -34,7 +34,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
         case.name, case.crn, case.tier,
         activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
         inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        riskSummary?.let { UnallocatedCaseRosh(it.overallRiskLevel, it.assessedOn.toLocalDate()) },
+        riskSummary?.let { it.overallRiskLevel?.let { riskLevel -> UnallocatedCaseRosh(riskLevel, it.assessedOn!!.toLocalDate()) } },
         riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) },
         offenderAssessment?.ogrsScore?.let { UnallocatedCaseOgrs(it) }
       )
