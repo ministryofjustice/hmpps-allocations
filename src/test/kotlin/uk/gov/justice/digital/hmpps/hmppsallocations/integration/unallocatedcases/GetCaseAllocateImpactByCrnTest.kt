@@ -24,5 +24,17 @@ class GetCaseAllocateImpactByCrnTest : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C1")
+      .jsonPath("$.offenderManagerForename")
+      .isEqualTo("John")
+      .jsonPath("$.offenderManagerSurname")
+      .isEqualTo("Smith")
+      .jsonPath("$.offenderManagerGrade")
+      .isEqualTo("PO")
+      .jsonPath("$.offenderManagerCurrentCapacity")
+      .isEqualTo(56.7)
+      .jsonPath("$.offenderManagerCode")
+      .isEqualTo("OM1")
+      .jsonPath("$.offenderManagerPotentialCapacity")
+      .isEqualTo(87.2)
   }
 }

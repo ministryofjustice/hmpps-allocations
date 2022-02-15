@@ -23,11 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.requests.offenderManagerPotentialCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
@@ -398,7 +397,8 @@ abstract class IntegrationTestBase {
 
   protected fun getImpactToOffenderManagerWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
     val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode/potentialCases")
-      .withMethod(HttpMethod.POST.name).withBody(offenderManagerPotentialCaseRequest())
+      .withMethod("POST")
+      .withBody(gson.toJson(PotentialCaseRequest("C1")))
 
     workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagersPotentialCaseResponse())
