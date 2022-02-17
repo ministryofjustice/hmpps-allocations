@@ -91,7 +91,7 @@ data class UnallocatedCase @JsonCreator constructor(
 data class OffenderManagerDetails @JsonCreator constructor(
   @Schema(description = "Forenames", example = "John William")
   val forenames: String?,
-  @Schema(description = "Surname", example = "Doe")
+  @Schema(description = "Surname", example = "Smith")
   val surname: String?,
   @Schema(description = "Grade", example = "PSO")
   val grade: String?

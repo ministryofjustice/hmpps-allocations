@@ -12,4 +12,11 @@ data class Conviction @JsonCreator constructor(
   val active: Boolean,
   val offences: List<Offence>,
   val convictionId: Long,
+  val orderManagers: List<OrderManager>
+)
+
+data class OrderManager @JsonCreator constructor (
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val dateStartOfAllocation: LocalDate?,
+  val name: String,
 )
