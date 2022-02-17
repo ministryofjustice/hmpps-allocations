@@ -30,6 +30,7 @@ class GetAllocateCaseService(
 
   fun getImpactOfAllocation(crn: String, offenderManagerCode: String): PotentialAllocateCase? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+      // TODO: Determine case type
       return workloadApiClient.getPotentialCaseLoad(it.tier, offenderManagerCode)
         .map { offenderManagerWorkload ->
           PotentialAllocateCase.from(it, offenderManagerWorkload, gradeMapper.workloadToStaffGrade(offenderManagerWorkload.grade))
