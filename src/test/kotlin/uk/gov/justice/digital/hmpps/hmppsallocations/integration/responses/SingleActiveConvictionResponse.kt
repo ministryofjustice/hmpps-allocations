@@ -109,7 +109,17 @@ fun singleActiveConvictionResponse() = """
                 "description": "Sentence"
             },
             "crn": "X320741"
-        }
+        },
+        "orderManagers": [
+            {
+                "probationAreaId": 123456789,
+                "teamId": 123456789,
+                "officerId": 123456789,
+                "name": "A Staff Name",
+                "staffCode": "STFFCDE",
+                "dateStartOfAllocation": "2014-05-29"
+            }
+        ]
     }
 ]
 """.trimIndent()

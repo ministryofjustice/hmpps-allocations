@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import java.time.LocalDate
 
@@ -55,7 +54,7 @@ class EnrichEventService(
             val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
             ProbationStatus(
               ProbationStatusType.CURRENTLY_MANAGED,
-              offenderManagerDetails = OffenderManagerDetails(
+              offenderManagerDetails = OffenderManagerFullNameDetails(
                 forenames = offenderManager.staff.forenames,
                 surname = offenderManager.staff.surname,
                 grade = grade
@@ -87,7 +86,13 @@ class EnrichEventService(
 data class ProbationStatus(
   val status: ProbationStatusType,
   val previousConvictionDate: LocalDate? = null,
-  val offenderManagerDetails: OffenderManagerDetails? = null
+  val offenderManagerDetails: OffenderManagerFullNameDetails? = null
+)
+
+data class OffenderManagerFullNameDetails(
+  val forenames: String?,
+  val surname: String?,
+  val grade: String?,
 )
 
 enum class ProbationStatusType(

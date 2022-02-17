@@ -39,7 +39,7 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
   val length: Int,
   @Schema(description = "Length Unit", example = "Months")
   val lengthUnit: String?,
-  val offenderManager: OffenderManagerDetails?,
+  val offenderManager: UnallocatedCaseConvictionPractitioner?,
   @Schema(description = "Start of sentence", example = "2021-11-15")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val startDate: LocalDate?,
@@ -50,18 +50,33 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
 ) {
   companion object {
     fun from(conviction: Conviction, offenderManager: OffenderManagerDetails?, startDate: LocalDate?, endDate: LocalDate?): UnallocatedCaseConviction {
+
       return UnallocatedCaseConviction(
         conviction.sentence!!.description,
         conviction.sentence.originalLength,
         conviction.sentence.originalLengthUnits,
-        offenderManager,
+        offenderManagerFrom(offenderManager, conviction),
         startDate,
         endDate,
         conviction.offences.map { UnallocatedCaseConvictionOffence.from(it) }
       )
     }
+
+    fun offenderManagerFrom(offenderManager: OffenderManagerDetails?, conviction: Conviction): UnallocatedCaseConvictionPractitioner? {
+      if (offenderManager != null) {
+        return UnallocatedCaseConvictionPractitioner("${offenderManager.forenames} ${offenderManager.surname}", offenderManager.grade)
+      }
+      return conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.let { UnallocatedCaseConvictionPractitioner(it.name, null) }
+    }
   }
 }
+
+data class UnallocatedCaseConvictionPractitioner @JsonCreator constructor(
+  @Schema(description = "Full Name", example = "John William Smith")
+  val name: String?,
+  @Schema(description = "Grade", example = "PSO")
+  val grade: String?
+)
 
 data class UnallocatedCaseConvictionOffence @JsonCreator constructor(
   @Schema(description = "Description", example = "ORA Community Order")
