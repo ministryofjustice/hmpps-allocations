@@ -1,5 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import org.springframework.stereotype.Service
+
+@Service
 class CustodyCaseTypeRule : CaseTypeRule {
 
   private val custodialStatusCodes = setOf("A", "C", "D", "R", "I", "AT")

@@ -7,15 +7,21 @@ class CustodyCaseTypeRuleTests {
   private val custodyCaseTypeRule = CustodyCaseTypeRule()
 
   @Test
-  fun `must return true when sentence type code is Statutory Custody`() {
+  fun `must return true when sentence type code is Statutory Custody and Custodial Status is Sentenced In Custody`() {
     val result = custodyCaseTypeRule.isCaseType("SC", "A")
     Assertions.assertTrue(result)
   }
 
   @Test
-  fun `must return true when sentence type code is Non Statutory Custody`() {
+  fun `must return true when sentence type code is Non Statutory Custody and Custodial Status is Sentenced In Custody`() {
     val result = custodyCaseTypeRule.isCaseType("NC", "A")
     Assertions.assertTrue(result)
+  }
+
+  @Test
+  fun `must return false when sentence type code is Statutory Custody and Custodial Status is Released On Licence`() {
+    val result = custodyCaseTypeRule.isCaseType("SC", "B")
+    Assertions.assertFalse(result)
   }
 
   @Test
