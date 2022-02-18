@@ -46,6 +46,8 @@ data class UnallocatedCase @JsonCreator constructor(
   val pncNumber: String?,
   val courtReport: UnallocatedCaseCourtReport?,
   val assessment: UnallocatedAssessment?,
+  @Schema(description = "Conviction Id")
+  val convictionId: Long
 ) {
 
   companion object {
@@ -82,7 +84,8 @@ data class UnallocatedCase @JsonCreator constructor(
         requirements?.map { UnallocatedCaseRequirement.from(it) },
         offenderSummary?.otherIds?.pncNumber,
         UnallocatedCaseCourtReport.from(courtReport),
-        UnallocatedAssessment.from(assessment)
+        UnallocatedAssessment.from(assessment),
+        case.convictionId
       )
     }
   }
