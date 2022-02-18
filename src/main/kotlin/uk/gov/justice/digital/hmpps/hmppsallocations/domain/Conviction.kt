@@ -13,7 +13,7 @@ data class Conviction @JsonCreator constructor(
   val offences: List<Offence>,
   val convictionId: Long,
   val orderManagers: List<OrderManager>,
-  val custody: Custody,
+  val custody: Custody?,
 )
 
 data class OrderManager @JsonCreator constructor (

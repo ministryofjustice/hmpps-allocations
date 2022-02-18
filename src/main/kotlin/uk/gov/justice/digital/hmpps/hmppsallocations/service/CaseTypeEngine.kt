@@ -18,7 +18,7 @@ class CaseTypeEngine(
           convictions.map { conviction ->
             var caseType: String? = null
             for (caseTypeRule in caseTypeRules) {
-              if (caseTypeRule.isCaseType(conviction.sentence!!.sentenceType.code, conviction.custody.status.code)) {
+              if (caseTypeRule.isCaseType(conviction.sentence!!.sentenceType.code, conviction.custody?.status?.code)) {
                 caseType = caseTypeRule.getCaseType()
                 break
               }
