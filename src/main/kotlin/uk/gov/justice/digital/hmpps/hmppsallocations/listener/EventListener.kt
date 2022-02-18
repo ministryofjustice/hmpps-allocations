@@ -19,21 +19,22 @@ class EventListener(
 
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
-    val crn = getCrn(rawMessage)
-    log.info("received event for crn: {}", crn)
+    val case = getCase(rawMessage)
+    log.info("received event for crn: {}", case.crn)
 
-    val sentenceDate = enrichEventService.getSentenceDate(crn)
-    val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentenceDate)
-    val name = enrichEventService.getOffenderName(crn)
-    val tier = enrichEventService.getTier(crn)
-    val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(crn)
+    val sentenceDate = enrichEventService.getSentenceDate(case.crn)
+    val initialAppointment = enrichEventService.getInitialAppointmentDate(case.crn, sentenceDate)
+    val name = enrichEventService.getOffenderName(case.crn)
+    val tier = enrichEventService.getTier(case.crn)
+    val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(case.crn)
 
     val unallocatedCase = UnallocatedCaseEntity(
       null, name,
-      crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate,
+      case.crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate,
       offenderManagerSurname = offenderManagerDetails?.surname,
       offenderManagerForename = offenderManagerDetails?.forenames,
-      offenderManagerGrade = offenderManagerDetails?.grade
+      offenderManagerGrade = offenderManagerDetails?.grade,
+      convictionId = case.convictionId
     )
 
     repository.save(unallocatedCase)
@@ -41,14 +42,14 @@ class EventListener(
 
   @MessageExceptionHandler()
   fun errorHandler(e: Exception, msg: String) {
-    log.warn("Failed to create an unallocated case  with CRN ${getCrn(msg)} with error: ${e.message}")
+    log.warn("Failed to create an unallocated case  with CRN ${getCase(msg).crn} with error: ${e.message}")
     throw e
   }
 
-  private fun getCrn(rawMessage: String): String {
+  private fun getCase(rawMessage: String): HmppsUnallocatedCase {
     val (message) = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(message, HmppsEvent::class.java)
-    return event.additionalInformation.crn
+    return event.additionalInformation
   }
 
   companion object {
@@ -57,7 +58,8 @@ class EventListener(
 }
 
 data class HmppsUnallocatedCase(
-  val crn: String
+  val crn: String,
+  val convictionId: Long
 )
 data class HmppsEvent(val eventType: String, val version: Int, val description: String, val detailUrl: String, val occurredAt: String, val additionalInformation: HmppsUnallocatedCase)
 

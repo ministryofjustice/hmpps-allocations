@@ -29,7 +29,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val deliusSentenceDate = LocalDate.parse("2019-11-17")
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -60,7 +60,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -93,7 +93,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val latestConvictionSentenceDate = LocalDate.parse("2021-11-22")
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -125,7 +125,7 @@ class EventListenerTest : IntegrationTestBase() {
     // Given
     val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -156,7 +156,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -195,7 +195,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -226,7 +226,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -257,7 +257,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -288,7 +288,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -319,7 +319,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -350,7 +350,7 @@ class EventListenerTest : IntegrationTestBase() {
 
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -381,7 +381,7 @@ class EventListenerTest : IntegrationTestBase() {
     getStaffWithGradeFromDelius(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -412,7 +412,7 @@ class EventListenerTest : IntegrationTestBase() {
     getStaffWithGradeFromDelius(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then
@@ -442,7 +442,7 @@ class EventListenerTest : IntegrationTestBase() {
     getStaffWithoutGradeFromDelius(crn)
     // Given
     val unallocatedCase = unallocatedCaseEvent(
-      crn
+      crn, 1234
     )
 
     // Then

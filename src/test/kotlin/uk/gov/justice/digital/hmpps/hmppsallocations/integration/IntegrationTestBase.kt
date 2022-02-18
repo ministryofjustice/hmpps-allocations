@@ -82,7 +82,8 @@ abstract class IntegrationTestBase {
     LocalDate.now().minusDays(1),
     null,
     "Previously managed",
-    previousConvictionEndDate
+    previousConvictionEndDate,
+    convictionId = 987654321
   )
 
   fun insertCases() {
@@ -91,7 +92,8 @@ abstract class IntegrationTestBase {
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
-          null, "Antonio", "LoSardo", "PO"
+          null, "Antonio", "LoSardo", "PO",
+          123456789
         ),
         UnallocatedCaseEntity(
           null,
@@ -100,9 +102,16 @@ abstract class IntegrationTestBase {
           "A1",
           LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
-          "New to probation"
+          "New to probation",
+          convictionId = 23456789
         ),
-        previouslyManagedCase
+        previouslyManagedCase,
+        UnallocatedCaseEntity(
+          null, "Dylan Adam Armstrong", "J678910", "C1",
+          firstSentenceDate, firstInitialAppointment, "Currently managed",
+          null, "Antonio", "LoSardo", "PO",
+          56785493
+        )
 
       )
     )
@@ -157,12 +166,12 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun unallocatedCaseEvent(crn: String) = HmppsEvent(
+  protected fun unallocatedCaseEvent(crn: String, convictionId: Long) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
       ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(crn)
+    HmppsUnallocatedCase(crn, convictionId)
   )
 
   protected fun tierCalculationEvent(
@@ -416,6 +425,7 @@ abstract class IntegrationTestBase {
   }
 
   protected fun allDeliusResponses(crn: String) {
+    singleActiveConvictionResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)

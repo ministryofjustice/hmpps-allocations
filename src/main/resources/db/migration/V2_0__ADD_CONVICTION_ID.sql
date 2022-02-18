@@ -1,0 +1,1 @@
+alter table unallocated_cases add column conviction_id bigint;

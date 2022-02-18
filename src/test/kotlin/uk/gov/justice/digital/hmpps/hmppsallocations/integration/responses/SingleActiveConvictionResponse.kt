@@ -115,8 +115,8 @@ fun singleActiveConvictionResponse() = """
                 "probationAreaId": 123456789,
                 "teamId": 123456789,
                 "officerId": 123456789,
-                "name": "A Staff Name",
-                "staffCode": "STFFCDE",
+                "name": "A Unallocated Staff Name",
+                "staffCode": "STFFCDEU",
                 "dateStartOfAllocation": "2014-05-29"
             }
         ]
