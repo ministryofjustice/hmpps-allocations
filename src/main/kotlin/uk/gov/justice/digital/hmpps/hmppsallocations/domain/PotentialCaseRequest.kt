@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 data class PotentialCaseRequest @JsonCreator constructor(
   val tier: String,
-  val type: String = "COMMUNITY",
+  val type: String,
   val isT2A: Boolean = false
 )

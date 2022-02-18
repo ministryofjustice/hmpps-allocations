@@ -12,7 +12,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 class GetAllocateCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   private val workloadApiClient: WorkloadApiClient,
-  private val gradeMapper: GradeMapper
+  private val gradeMapper: GradeMapper,
+  private val caseTypeEngine: CaseTypeEngine
 ) {
   fun getOffenderManagers(crn: String): AllocateCaseOffenderManagers? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
@@ -30,8 +31,8 @@ class GetAllocateCaseService(
 
   fun getImpactOfAllocation(crn: String, offenderManagerCode: String): PotentialAllocateCase? =
     unallocatedCasesRepository.findCaseByCrn(crn)?.let {
-      // TODO: Determine case type
-      return workloadApiClient.getPotentialCaseLoad(it.tier, offenderManagerCode)
+      val caseType = caseTypeEngine.getCaseType(crn)
+      return workloadApiClient.getPotentialCaseLoad(it.tier, caseType, offenderManagerCode)
         .map { offenderManagerWorkload ->
           PotentialAllocateCase.from(it, offenderManagerWorkload, gradeMapper.workloadToStaffGrade(offenderManagerWorkload.grade))
         }
