@@ -17,11 +17,11 @@ class WorkloadApiClient(private val webClient: WebClient) {
       .bodyToMono(OffenderManagerWorkloads::class.java)
   }
 
-  fun getPotentialCaseLoad(tier: String, offenderManagerCode: String): Mono<PotentialOffenderManagerWorkload> {
+  fun getPotentialCaseLoad(tier: String, caseType: String, offenderManagerCode: String): Mono<PotentialOffenderManagerWorkload> {
     return webClient
       .post()
       .uri("/team/N03F01/offenderManagers/$offenderManagerCode/potentialCases")
-      .bodyValue(PotentialCaseRequest(tier))
+      .bodyValue(PotentialCaseRequest(tier, caseType))
       .headers {
         it.contentType = MediaType.APPLICATION_JSON
       }

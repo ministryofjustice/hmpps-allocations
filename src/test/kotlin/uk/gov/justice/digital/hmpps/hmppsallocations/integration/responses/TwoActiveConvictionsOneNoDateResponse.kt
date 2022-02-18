@@ -47,6 +47,25 @@ fun twoActiveConvictionsOneNoDateResponse() = """
             },
             "crn": "X320741"
         },
+        "custody": {
+            "institution": {
+                "institutionId": 157,
+                "isEstablishment": true,
+                "code": "UNKNOW",
+                "description": "Unknown",
+                "institutionName": "Unknown",
+                "establishmentType": {
+                    "code": "E",
+                    "description": "Prison"
+                }
+            },
+            "keyDates": {},
+            "status": {
+                "code": "A",
+                "description": "Sentenced - In Custody"
+            },
+            "sentenceStartDate": "2021-12-02"
+        },
         "orderManagers": [
             {
                 "probationAreaId": 123456789,

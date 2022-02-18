@@ -10,6 +10,7 @@ class GetCaseAllocateImpactByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val offenderManagerCode = "OM1"
     insertCases()
+    singleActiveConvictionResponse(crn)
     getImpactToOffenderManagerWhenAllocatingForCrn(crn, offenderManagerCode)
     webTestClient.get()
       .uri("/cases/$crn/allocate/$offenderManagerCode/impact")

@@ -408,7 +408,7 @@ abstract class IntegrationTestBase {
   protected fun getImpactToOffenderManagerWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
     val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode/potentialCases")
       .withMethod("POST")
-      .withBody(gson.toJson(PotentialCaseRequest("C1")))
+      .withBody(gson.toJson(PotentialCaseRequest("C1", "CUSTODY")))
 
     workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagersPotentialCaseResponse())
