@@ -22,7 +22,7 @@ class EventListener(
     val case = getCase(rawMessage)
     log.info("received event for crn: {}", case.crn)
 
-    val sentenceDate = enrichEventService.getSentenceDate(case.crn)
+    val sentenceDate = enrichEventService.getSentenceDate(case.crn, case.convictionId)
     val initialAppointment = enrichEventService.getInitialAppointmentDate(case.crn, sentenceDate)
     val name = enrichEventService.getOffenderName(case.crn)
     val tier = enrichEventService.getTier(case.crn)

@@ -16,14 +16,12 @@ class EnrichEventService(
   private val gradeMapper: GradeMapper
 ) {
 
-  fun getSentenceDate(crn: String): LocalDate {
-    return communityApiClient.getActiveConvictions(crn)
-      .map { convictions ->
-        log.info("convictions from com-api : {}", convictions.size)
-        convictions.filter { c -> c.sentence != null }
-          .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }!!.sentence!!.startDate
-      }
-      .block()!!
+  fun getSentenceDate(crn: String, convictionId: Long): LocalDate {
+    return communityApiClient
+      .getConviction(crn, convictionId)
+      .map { conviction ->
+        conviction.sentence!!.startDate
+      }.block()!!
   }
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {

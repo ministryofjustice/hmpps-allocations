@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
@@ -201,6 +202,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+    )
+  }
+
+  protected fun convictionResponse(crn: String, convictionId: Long) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(convictionResponse())
     )
   }
 
@@ -426,7 +436,7 @@ abstract class IntegrationTestBase {
 
   protected fun allDeliusResponses(crn: String) {
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponse(crn)
+    convictionResponse(crn, 2500292515)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)
