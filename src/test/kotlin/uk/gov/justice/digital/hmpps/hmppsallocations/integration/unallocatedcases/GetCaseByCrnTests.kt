@@ -11,17 +11,18 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get case by crn`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
 
     offenderSummaryResponse(crn)
-    singleActiveConvictionResponse(crn)
-    singleActiveRequirementResponse(crn, 2500292515)
-    singleCourtReportResponse(crn, 2500292515)
+    convictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    singleCourtReportResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -81,20 +82,23 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("2014-03-28")
       .jsonPath("$.assessment.type")
       .isEqualTo("LAYER_3")
+      .jsonPath("$.convictionId")
+      .isEqualTo(convictionId)
   }
 
   @Test
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     offenderSummaryResponse(crn)
-    singleActiveConvictionResponse(crn)
-    singleActiveRequirementResponse(crn, 2500292515)
-    noCourtReportResponse(crn, 2500292515)
+    convictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    noCourtReportResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
 
     webTestClient.get()
-      .uri("/cases/unallocated/$crn")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -107,15 +111,16 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     offenderSummaryResponse(crn)
-    singleActiveConvictionResponse(crn)
-    singleActiveRequirementResponse(crn, 2500292515)
-    singleCourtReportResponse(crn, 2500292515)
+    convictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    singleCourtReportResponse(crn, convictionId)
     notFoundAssessmentForCrn(crn)
 
     webTestClient.get()
-      .uri("/cases/unallocated/$crn")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -128,7 +133,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `get 404 if crn not found`() {
     webTestClient.get()
-      .uri("/cases/unallocated/J678912")
+      .uri("/cases/unallocated/J678912/convictions/51245325")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()

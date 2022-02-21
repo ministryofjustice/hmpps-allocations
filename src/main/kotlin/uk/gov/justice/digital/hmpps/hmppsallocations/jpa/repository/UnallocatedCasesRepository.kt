@@ -9,4 +9,5 @@ import java.util.Optional
 interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
   fun findFirstByCrn(crn: String): Optional<UnallocatedCaseEntity>
   fun findFirstCaseByCrn(crn: String): UnallocatedCaseEntity?
+  fun findCaseByCrnAndConvictionId(crn: String, convictionId: Long): UnallocatedCaseEntity?
 }

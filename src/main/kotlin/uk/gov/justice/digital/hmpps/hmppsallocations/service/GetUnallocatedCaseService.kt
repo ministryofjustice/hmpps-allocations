@@ -29,20 +29,15 @@ class GetUnallocatedCaseService(
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
 
-  fun getCase(crn: String): UnallocatedCase? =
-    unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
+  fun getCase(crn: String, convictionId: Long): UnallocatedCase? =
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       log.info("Found unallocated case for $crn")
       val offenderSummary = communityApiClient.getOffenderSummary(crn)
 
-      val conviction = communityApiClient.getActiveConvictions(crn)
-        .map { convictions ->
-          convictions.filter { c -> c.sentence != null }
-            .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
-        }
-        .block()!!
+      val conviction = communityApiClient.getConviction(crn, convictionId)
 
-      val requirements = communityApiClient.getActiveRequirements(crn, conviction.convictionId)
-      val courtReport = communityApiClient.getCourtReports(crn, conviction.convictionId)
+      val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
+      val courtReport = communityApiClient.getCourtReports(crn, convictionId)
         .map { courtReports ->
           Optional.ofNullable(
             courtReports
@@ -57,12 +52,12 @@ class GetUnallocatedCaseService(
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
 
-      val results = Mono.zip(offenderSummary, requirements, courtReport, assessment).block()!!
+      val results = Mono.zip(offenderSummary, requirements, courtReport, assessment, conviction).block()!!
 
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
-        it, results.t1, age, conviction.offences,
-        conviction.sentence?.expectedSentenceEndDate, conviction.sentence?.description, results.t2.requirements,
+        it, results.t1, age, results.t5.offences,
+        results.t5.sentence?.expectedSentenceEndDate, results.t5.sentence?.description, results.t2.requirements,
         results.t3.orElse(null),
         results.t4.orElse(null)
       )
