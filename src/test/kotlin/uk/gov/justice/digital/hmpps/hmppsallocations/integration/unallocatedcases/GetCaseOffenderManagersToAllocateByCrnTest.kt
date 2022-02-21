@@ -8,10 +8,11 @@ class GetCaseOffenderManagersToAllocateByCrnTest : IntegrationTestBase() {
   @Test
   fun `can get Offender Managers to allocate by crn`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     getOffenderManagersToAllocateForCrn()
     webTestClient.get()
-      .uri("/cases/$crn/allocate/offenderManagers")
+      .uri("/cases/$crn/convictions/$convictionId/allocate/offenderManagers")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -45,5 +46,7 @@ class GetCaseOffenderManagersToAllocateByCrnTest : IntegrationTestBase() {
       .isEqualTo(0.5)
       .jsonPath("$.offenderManagersToAllocate[0].code")
       .isEqualTo("OM1")
+      .jsonPath("$.convictionId")
+      .isEqualTo(convictionId)
   }
 }
