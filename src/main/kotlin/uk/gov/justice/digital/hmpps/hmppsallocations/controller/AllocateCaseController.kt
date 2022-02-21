@@ -28,9 +28,12 @@ class AllocateCaseController(
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/{crn}/allocate/offenderManagers")
-  fun getOffenderManagersToAllocate(@PathVariable(required = true) crn: String): AllocateCaseOffenderManagers =
-    getAllocateCaseService.getOffenderManagers(crn) ?: throw EntityNotFoundException("Case offender managers Not Found for $crn")
+  @GetMapping("/cases/{crn}/convictions/{convictionId}/allocate/offenderManagers")
+  fun getOffenderManagersToAllocate(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionId: Long
+  ): AllocateCaseOffenderManagers =
+    getAllocateCaseService.getOffenderManagers(crn, convictionId) ?: throw EntityNotFoundException("Case offender managers Not Found for $crn")
 
   @Operation(summary = "See impact of allocating case to officer")
   @ApiResponses(
@@ -40,7 +43,11 @@ class AllocateCaseController(
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/{crn}/allocate/{offenderManagerCode}/impact")
-  fun getAllocateImpact(@PathVariable(required = true) crn: String, @PathVariable(required = true) offenderManagerCode: String): PotentialAllocateCase =
-    getAllocateCaseService.getImpactOfAllocation(crn, offenderManagerCode) ?: throw EntityNotFoundException("Case impact Not Found for $crn")
+  @GetMapping("/cases/{crn}/convictions/{convictionId}/allocate/{offenderManagerCode}/impact")
+  fun getAllocateImpact(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionId: Long,
+    @PathVariable(required = true) offenderManagerCode: String
+  ): PotentialAllocateCase =
+    getAllocateCaseService.getImpactOfAllocation(crn, convictionId, offenderManagerCode) ?: throw EntityNotFoundException("Case impact Not Found for $crn")
 }

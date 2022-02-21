@@ -14,7 +14,8 @@ data class AllocateCaseOffenderManagers @JsonCreator constructor(
   @Schema(description = "Probation Status", example = "Currently managed")
   val status: String,
   val offenderManager: OffenderManagerDetails,
-  val offenderManagersToAllocate: List<AllocateCaseOffenderManagerWorkload>
+  val offenderManagersToAllocate: List<AllocateCaseOffenderManagerWorkload>,
+  val convictionId: Long
 ) {
   companion object {
     fun from(unallocatedCaseEntity: UnallocatedCaseEntity, offenderManagers: List<AllocateCaseOffenderManagerWorkload>): AllocateCaseOffenderManagers {
@@ -28,7 +29,8 @@ data class AllocateCaseOffenderManagers @JsonCreator constructor(
           unallocatedCaseEntity.offenderManagerSurname,
           unallocatedCaseEntity.offenderManagerGrade
         ),
-        offenderManagers
+        offenderManagers,
+        unallocatedCaseEntity.convictionId
       )
     }
   }

@@ -8,12 +8,13 @@ class GetCaseAllocateImpactByCrnTest : IntegrationTestBase() {
   @Test
   fun `can get impact to Offender Manager when allocate by crn`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     val offenderManagerCode = "OM1"
     insertCases()
     singleActiveConvictionResponse(crn)
     getImpactToOffenderManagerWhenAllocatingForCrn(crn, offenderManagerCode)
     webTestClient.get()
-      .uri("/cases/$crn/allocate/$offenderManagerCode/impact")
+      .uri("/cases/$crn/convictions/$convictionId/allocate/$offenderManagerCode/impact")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -37,5 +38,7 @@ class GetCaseAllocateImpactByCrnTest : IntegrationTestBase() {
       .isEqualTo("OM1")
       .jsonPath("$.offenderManagerPotentialCapacity")
       .isEqualTo(87.2)
+      .jsonPath("$.convictionId")
+      .isEqualTo(convictionId)
   }
 }

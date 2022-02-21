@@ -24,6 +24,7 @@ data class PotentialAllocateCase @JsonCreator constructor(
   val offenderManagerCode: String,
   @Schema(description = "Offender Manager Potential Capacity", example = "64.8")
   val offenderManagerPotentialCapacity: BigDecimal,
+  val convictionId: Long
 ) {
   companion object {
     fun from(unallocatedCaseEntity: UnallocatedCaseEntity, potentialOffenderManagerWorkload: PotentialOffenderManagerWorkload, grade: String): PotentialAllocateCase {
@@ -36,7 +37,8 @@ data class PotentialAllocateCase @JsonCreator constructor(
         grade,
         potentialOffenderManagerWorkload.capacity,
         potentialOffenderManagerWorkload.code,
-        potentialOffenderManagerWorkload.potentialCapacity
+        potentialOffenderManagerWorkload.potentialCapacity,
+        unallocatedCaseEntity.convictionId
       )
     }
   }
