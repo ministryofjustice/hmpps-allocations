@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
@@ -82,7 +83,8 @@ abstract class IntegrationTestBase {
     LocalDate.now().minusDays(1),
     null,
     "Previously managed",
-    previousConvictionEndDate
+    previousConvictionEndDate,
+    convictionId = 987654321
   )
 
   fun insertCases() {
@@ -91,7 +93,8 @@ abstract class IntegrationTestBase {
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
-          null, "Antonio", "LoSardo", "PO"
+          null, "Antonio", "LoSardo", "PO",
+          123456789
         ),
         UnallocatedCaseEntity(
           null,
@@ -100,9 +103,16 @@ abstract class IntegrationTestBase {
           "A1",
           LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
-          "New to probation"
+          "New to probation",
+          convictionId = 23456789
         ),
-        previouslyManagedCase
+        previouslyManagedCase,
+        UnallocatedCaseEntity(
+          null, "Dylan Adam Armstrong", "J678910", "C1",
+          firstSentenceDate, firstInitialAppointment, "Currently managed",
+          null, "Antonio", "LoSardo", "PO",
+          56785493
+        )
 
       )
     )
@@ -157,12 +167,12 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun unallocatedCaseEvent(crn: String) = HmppsEvent(
+  protected fun unallocatedCaseEvent(crn: String, convictionId: Long) = HmppsEvent(
     "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
     ZonedDateTime.now().format(
       ISO_ZONED_DATE_TIME
     ),
-    HmppsUnallocatedCase(crn)
+    HmppsUnallocatedCase(crn, convictionId)
   )
 
   protected fun tierCalculationEvent(
@@ -192,6 +202,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+    )
+  }
+
+  protected fun convictionResponse(crn: String, convictionId: Long) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(convictionResponse())
     )
   }
 
@@ -417,6 +436,7 @@ abstract class IntegrationTestBase {
 
   protected fun allDeliusResponses(crn: String) {
     singleActiveConvictionResponse(crn)
+    convictionResponse(crn, 2500292515)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)

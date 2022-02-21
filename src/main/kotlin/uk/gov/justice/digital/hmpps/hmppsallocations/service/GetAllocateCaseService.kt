@@ -16,7 +16,7 @@ class GetAllocateCaseService(
   private val caseTypeEngine: CaseTypeEngine
 ) {
   fun getOffenderManagers(crn: String): AllocateCaseOffenderManagers? =
-    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+    unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
 
       val offenderManagers = workloadApiClient.getOffenderManagersForTeam()
         .map { offenderManagerWorkloads ->
@@ -30,7 +30,7 @@ class GetAllocateCaseService(
     }
 
   fun getImpactOfAllocation(crn: String, offenderManagerCode: String): PotentialAllocateCase? =
-    unallocatedCasesRepository.findCaseByCrn(crn)?.let {
+    unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
       val caseType = caseTypeEngine.getCaseType(crn)
       return workloadApiClient.getPotentialCaseLoad(it.tier, caseType, offenderManagerCode)
         .map { offenderManagerWorkload ->

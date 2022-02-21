@@ -20,6 +20,7 @@ data class OrderManager @JsonCreator constructor (
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val dateStartOfAllocation: LocalDate?,
   val name: String,
+  val staffCode: String,
 )
 
 data class Custody @JsonCreator constructor(

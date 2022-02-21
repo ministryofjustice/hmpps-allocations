@@ -27,6 +27,14 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(responseType)
   }
+
+  fun getConviction(crn: String, convictionId: Long): Mono<Conviction> {
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/convictions/$convictionId")
+      .retrieve()
+      .bodyToMono(Conviction::class.java)
+  }
   fun getActiveRequirements(crn: String, convictionId: Long): Mono<ConvictionRequirements> {
     return webClient
       .get()

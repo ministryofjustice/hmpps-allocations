@@ -114,7 +114,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "teamId": 123456789,
                 "officerId": 123456789,
                 "name": "A Staff Name",
-                "staffCode": "STFFCDE",
+                "staffCode": "STFFCDEU",
                 "dateStartOfAllocation": "2014-05-29"
             }
         ]
@@ -233,7 +233,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "teamId": 123456789,
                 "officerId": 123456789,
                 "name": "A Staff Name",
-                "staffCode": "STFFCDE",
+                "staffCode": "STFFCDEU",
                 "dateStartOfAllocation": "2014-05-29"
             }
         ]

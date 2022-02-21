@@ -44,7 +44,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(3)
+      .isEqualTo(4)
       .jsonPath("$.[0].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].initialAppointment")
@@ -63,6 +63,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("LoSardo")
       .jsonPath("$.[0].offenderManager.grade")
       .isEqualTo("PO")
+      .jsonPath("$.[0].convictionId")
+      .isEqualTo(123456789)
   }
 
   @Test

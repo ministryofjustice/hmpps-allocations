@@ -39,13 +39,14 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         tier = tier,
         name = "foo",
         status = "active",
-        sentenceDate = LocalDate.now()
+        sentenceDate = LocalDate.now(),
+        convictionId = 1234
       )
     )
   }
 
   private fun checkTierHasBeenUpdated(crn: String, tier: String) {
-    await untilCallTo { repository.findByCrn(crn) } matches { it!!.get().tier.equals(tier) }
+    await untilCallTo { repository.findFirstByCrn(crn) } matches { it!!.get().tier.equals(tier) }
   }
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
