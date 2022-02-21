@@ -69,7 +69,7 @@ class GetUnallocatedCaseService(
     }
   }
 
-  fun getCaseConvictions(crn: String): UnallocatedCaseConvictions? =
+  fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
     unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
       val convictions = communityApiClient.getAllConvictions(crn)
         .map { convictions ->
@@ -77,8 +77,6 @@ class GetUnallocatedCaseService(
         }.blockOptional().orElse(emptyMap())
       val activeConvictions = convictions.getOrDefault(true, emptyList())
         .filter { c -> c.sentence != null }
-      val currentConviction = activeConvictions.filter { c -> c.sentence != null }
-        .maxByOrNull { c -> c.convictionDate ?: LocalDate.MIN }
 
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
@@ -93,11 +91,11 @@ class GetUnallocatedCaseService(
           )
         }.block()!!
 
-      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != currentConviction!!.convictionId }, inactiveConvictions, offenderManager)
+      return UnallocatedCaseConvictions.from(it, activeConvictions.filter { it.convictionId != excludeConvictionId }, inactiveConvictions, offenderManager)
     }
 
-  fun getCaseRisks(crn: String): UnallocatedCaseRisks? =
-    unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
+  fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()

@@ -8,11 +8,12 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
   @Test
   fun `can get case probation record`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions")
+      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -45,12 +46,13 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
   @Test
   fun `active probation record has probation practitioner`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     twoActiveConvictionsResponse(crn)
     getStaffWithGradeFromDelius(crn)
 
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions")
+      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -77,11 +79,12 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
   @Test
   fun `can get probation record for no convictions`() {
     val crn = "J678910"
+    val convictionId = 123456789L
     insertCases()
     noConvictionsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions")
+      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()

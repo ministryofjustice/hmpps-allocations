@@ -71,9 +71,9 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions")
-  fun getUnallocatedCaseConvictions(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseConvictions> =
+  fun getUnallocatedCaseConvictions(@PathVariable(required = true) crn: String, @RequestParam(required = false) excludeConvictionId: Long?): ResponseEntity<UnallocatedCaseConvictions> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseConvictions(crn) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionId) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
@@ -84,10 +84,13 @@ class UnallocatedCasesController(
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/risks")
-  fun getUnallocatedCaseRisks(@PathVariable(required = true) crn: String): ResponseEntity<UnallocatedCaseRisks> =
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/risks")
+  fun getUnallocatedCaseRisks(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionId: Long
+  ): ResponseEntity<UnallocatedCaseRisks> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseRisks(crn) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+      getUnallocatedCaseService.getCaseRisks(crn, convictionId) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 
   @PostMapping("/cases/unallocated/upload")

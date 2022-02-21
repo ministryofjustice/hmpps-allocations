@@ -19,7 +19,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val inactiveRegistrations: List<UnallocatedCaseRegistration>,
   val rosh: UnallocatedCaseRosh?,
   val rsr: UnallocatedCaseRsr?,
-  val ogrs: UnallocatedCaseOgrs?
+  val ogrs: UnallocatedCaseOgrs?,
+  val convictionId: Long
 ) {
   companion object {
     fun from(
@@ -36,7 +37,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
         inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
         riskSummary?.let { it.overallRiskLevel?.let { riskLevel -> UnallocatedCaseRosh(riskLevel, it.assessedOn!!.toLocalDate()) } },
         riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) },
-        offenderAssessment?.ogrsScore?.let { UnallocatedCaseOgrs(it) }
+        offenderAssessment?.ogrsScore?.let { UnallocatedCaseOgrs(it) },
+        case.convictionId
       )
     }
   }
