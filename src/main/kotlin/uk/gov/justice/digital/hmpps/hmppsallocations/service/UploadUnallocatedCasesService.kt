@@ -42,7 +42,11 @@ class UploadUnallocatedCasesService(
     unallocatedCases
       .map { publishToHmppsDomainTopic(it) }
       .forEach {
-        it.block()
+        it
+          .onErrorResume {
+            Mono.empty()
+          }
+          .block()
       }
   }
 
