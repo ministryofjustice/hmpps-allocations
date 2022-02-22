@@ -56,7 +56,7 @@ class UploadUnallocatedCasesService(
       .map { convictions ->
         convictions.filter { conviction ->
           conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }!!
-            .staffCode.endsWith("U")
+            .staffCode.endsWith("U") && conviction.sentence != null
         }
           .map { conviction ->
             val hmppsEvent = HmppsEvent(
