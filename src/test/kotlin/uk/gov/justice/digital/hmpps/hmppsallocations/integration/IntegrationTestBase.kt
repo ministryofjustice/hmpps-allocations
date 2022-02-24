@@ -44,12 +44,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleCourtReportResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsOneNoDateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
@@ -123,6 +123,7 @@ abstract class IntegrationTestBase {
     repository.deleteAll()
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
+    hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.queueUrl))
     communityApi.reset()
     hmppsTier.reset()
     offenderAssessmentApi.reset()
@@ -133,11 +134,20 @@ abstract class IntegrationTestBase {
 
   private val hmppsDomainQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") ?: throw MissingQueueException("HmppsQueue hmppsdomainqueue not found") }
   private val tierCalculationQueue by lazy { hmppsQueueService.findByQueueId("tiercalculationqueue") ?: throw MissingQueueException("HmppsQueue tiercalculationqueue not found") }
+  private val hmppsOffenderQueue by lazy { hmppsQueueService.findByQueueId("hmppsoffenderqueue") ?: throw MissingQueueException("HmppsQueue hmppsoffenderqueue not found") }
+
   private val hmppsDomainTopic by lazy { hmppsQueueService.findByTopicId("hmppsdomaintopic") ?: throw MissingQueueException("HmppsTopic hmppsdomaintopic not found") }
+  private val hmppsOffenderTopic by lazy { hmppsQueueService.findByTopicId("hmppsoffendertopic") ?: throw MissingQueueException("HmppsTopic hmppsoffendertopic not found") }
+
   protected val hmppsDomainSqsClient by lazy { hmppsDomainQueue.sqsClient }
   protected val tierCalculationSqsClient by lazy { tierCalculationQueue.sqsClient }
+  protected val hmppsOffenderSqsClient by lazy { hmppsOffenderQueue.sqsClient }
+
   protected val hmppsDomainSnsClient by lazy { hmppsDomainTopic.snsClient }
   protected val hmppsDomainTopicArn by lazy { hmppsDomainTopic.arn }
+
+  protected val hmppsOffenderSnsClient by lazy { hmppsOffenderTopic.snsClient }
+  protected val hmppsOffenderTopicArn by lazy { hmppsOffenderTopic.arn }
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -174,6 +184,8 @@ abstract class IntegrationTestBase {
     ),
     HmppsUnallocatedCase(crn, convictionId)
   )
+
+  protected fun offenderEvent(crn: String, convictionId: Long) = HmppsOffenderEvent(crn, convictionId)
 
   protected fun tierCalculationEvent(
     crn: String
@@ -282,15 +294,6 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")
-    )
-  }
-
-  protected fun twoActiveConvictionsOneNoDateResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsOneNoDateResponse())
     )
   }
 

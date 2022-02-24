@@ -22,22 +22,24 @@ class EventListener(
     val case = getCase(rawMessage)
     log.info("received event for crn: {}", case.crn)
 
-    val sentenceDate = enrichEventService.getSentenceDate(case.crn, case.convictionId)
-    val initialAppointment = enrichEventService.getInitialAppointmentDate(case.crn, sentenceDate)
-    val name = enrichEventService.getOffenderName(case.crn)
-    val tier = enrichEventService.getTier(case.crn)
-    val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(case.crn)
+    enrichEventService.getSentenceDate(case.crn, case.convictionId)?.let { sentenceDate ->
+      enrichEventService.getTier(case.crn)?.let { tier ->
+        val initialAppointment = enrichEventService.getInitialAppointmentDate(case.crn, sentenceDate)
+        val name = enrichEventService.getOffenderName(case.crn)
+        val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(case.crn)
 
-    val unallocatedCase = UnallocatedCaseEntity(
-      null, name,
-      case.crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate,
-      offenderManagerSurname = offenderManagerDetails?.surname,
-      offenderManagerForename = offenderManagerDetails?.forenames,
-      offenderManagerGrade = offenderManagerDetails?.grade,
-      convictionId = case.convictionId
-    )
+        val unallocatedCase = UnallocatedCaseEntity(
+          null, name,
+          case.crn, tier, sentenceDate, initialAppointment, status.status, previousConvictionDate,
+          offenderManagerSurname = offenderManagerDetails?.surname,
+          offenderManagerForename = offenderManagerDetails?.forenames,
+          offenderManagerGrade = offenderManagerDetails?.grade,
+          convictionId = case.convictionId
+        )
 
-    repository.save(unallocatedCase)
+        repository.save(unallocatedCase)
+      }
+    }
   }
 
   @MessageExceptionHandler()

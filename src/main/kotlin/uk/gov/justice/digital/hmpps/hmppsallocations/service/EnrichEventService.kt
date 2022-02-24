@@ -16,11 +16,11 @@ class EnrichEventService(
   private val gradeMapper: GradeMapper
 ) {
 
-  fun getSentenceDate(crn: String, convictionId: Long): LocalDate {
+  fun getSentenceDate(crn: String, convictionId: Long): LocalDate? {
     return communityApiClient
       .getConviction(crn, convictionId)
       .map { conviction ->
-        conviction.sentence!!.startDate
+        conviction.sentence?.startDate
       }.block()!!
   }
 
@@ -39,7 +39,7 @@ class EnrichEventService(
       .block()!!
   }
 
-  fun getTier(crn: String): String {
+  fun getTier(crn: String): String? {
     return hmppsTierApiClient.getTierByCrn(crn)
   }
 
