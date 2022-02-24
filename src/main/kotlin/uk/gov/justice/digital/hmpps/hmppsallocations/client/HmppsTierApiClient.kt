@@ -27,7 +27,7 @@ class HmppsTierApiClient(private val webClient: WebClient) {
       }
     }
     .block()?.map { it.tierScore }
-    ?.orElseGet(null)
+    ?.orElse(null)
     .also {
       log.info("Fetching Tier for $crn")
     }

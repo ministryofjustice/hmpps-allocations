@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
@@ -124,6 +125,7 @@ abstract class IntegrationTestBase {
     hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.queueUrl))
+    hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
     communityApi.reset()
     hmppsTier.reset()
     offenderAssessmentApi.reset()
@@ -138,6 +140,8 @@ abstract class IntegrationTestBase {
 
   private val hmppsDomainTopic by lazy { hmppsQueueService.findByTopicId("hmppsdomaintopic") ?: throw MissingQueueException("HmppsTopic hmppsdomaintopic not found") }
   private val hmppsOffenderTopic by lazy { hmppsQueueService.findByTopicId("hmppsoffendertopic") ?: throw MissingQueueException("HmppsTopic hmppsoffendertopic not found") }
+
+  private val hmppsOffenderSqsDlqClient by lazy { hmppsOffenderQueue.sqsDlqClient as AmazonSQS }
 
   protected val hmppsDomainSqsClient by lazy { hmppsDomainQueue.sqsClient }
   protected val tierCalculationSqsClient by lazy { tierCalculationQueue.sqsClient }
@@ -174,6 +178,14 @@ abstract class IntegrationTestBase {
       )
     )
   }
+
+  protected fun countMessagesOnOffenderEventQueue(): Int =
+    hmppsOffenderSqsClient.getQueueAttributes(hmppsOffenderQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+      .let { (it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0) + (it.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0) }
+
+  protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int =
+    hmppsOffenderSqsDlqClient.getQueueAttributes(hmppsOffenderQueue.dlqUrl, listOf("ApproximateNumberOfMessages"))
+      .let { it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0 }
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
@@ -217,12 +229,30 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun convictionResponse(crn: String, convictionId: Long) {
+  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions/$convictionId")
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(convictionResponse())
+      response().withContentType(APPLICATION_JSON).withBody(convictionResponse("STFFCDEU"))
+    )
+  }
+
+  protected fun allocatedConvictionResponse(crn: String, convictionId: Long) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(convictionResponse("STFFCDE"))
+    )
+  }
+
+  protected fun convictionWithNoSentenceResponse(crn: String, convictionId: Long) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(convictionNoSentenceResponse("STFFCDEU"))
     )
   }
 
@@ -439,7 +469,7 @@ abstract class IntegrationTestBase {
 
   protected fun allDeliusResponses(crn: String) {
     singleActiveConvictionResponse(crn)
-    convictionResponse(crn, 123456789)
+    unallocatedConvictionResponse(crn, 123456789)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
     tierCalculationResponse(crn)

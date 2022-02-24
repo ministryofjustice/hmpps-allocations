@@ -17,7 +17,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
 
     offenderSummaryResponse(crn)
-    convictionResponse(crn, convictionId)
+    unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     singleCourtReportResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
@@ -92,7 +92,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     offenderSummaryResponse(crn)
-    convictionResponse(crn, convictionId)
+    unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     noCourtReportResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
@@ -114,7 +114,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     offenderSummaryResponse(crn)
-    convictionResponse(crn, convictionId)
+    unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     singleCourtReportResponse(crn, convictionId)
     notFoundAssessmentForCrn(crn)
