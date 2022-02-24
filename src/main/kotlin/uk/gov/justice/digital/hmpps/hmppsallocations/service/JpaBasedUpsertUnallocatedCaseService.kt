@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
+import javax.transaction.Transactional
 
 @Service
 class JpaBasedUpsertUnallocatedCaseService(
@@ -15,7 +16,47 @@ class JpaBasedUpsertUnallocatedCaseService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService
 ) : UpsertUnallocatedCaseService {
+  @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
+    repository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+      updateExistingCase(it)
+    } ?: run {
+      insertNewCase(crn, convictionId)
+    }
+  }
+
+  private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity) {
+    communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
+      .block()!!.let { conviction ->
+      if (isUnallocated(conviction)) {
+        conviction.sentence?.let { sentence ->
+          enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
+            val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
+            val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
+            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn)
+
+            unallocatedCaseEntity.sentenceDate = sentence.startDate
+            unallocatedCaseEntity.initialAppointment = initialAppointment
+            unallocatedCaseEntity.tier = tier
+            unallocatedCaseEntity.name = name
+            unallocatedCaseEntity.status = status.status
+            unallocatedCaseEntity.previousConvictionDate = previousConvictionDate
+            unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
+            unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
+            unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
+          } ?: run {
+            repository.deleteById(unallocatedCaseEntity.id!!)
+          }
+        } ?: run {
+          repository.deleteById(unallocatedCaseEntity.id!!)
+        }
+      } else {
+        repository.deleteById(unallocatedCaseEntity.id!!)
+      }
+    }
+  }
+
+  private fun insertNewCase(crn: String, convictionId: Long) {
     communityApiClient.getConviction(crn, convictionId)
       .block()!!.let { conviction ->
       if (isUnallocated(conviction)) {
