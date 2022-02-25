@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
@@ -253,6 +254,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(convictionNoSentenceResponse("STFFCDEU"))
+    )
+  }
+
+  protected fun inactiveConvictionResponse(crn: String, convictionId: Long) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(inactiveConvictionResponse("STFFCDEU"))
     )
   }
 
