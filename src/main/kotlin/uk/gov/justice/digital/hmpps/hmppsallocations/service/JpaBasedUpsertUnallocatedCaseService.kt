@@ -44,8 +44,6 @@ class JpaBasedUpsertUnallocatedCaseService(
             unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
             unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
             unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
-          } ?: run {
-            repository.deleteById(unallocatedCaseEntity.id!!)
           }
         } ?: run {
           repository.deleteById(unallocatedCaseEntity.id!!)

@@ -53,4 +53,72 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.tier).isEqualTo("B3")
     assertThat(case.status).isEqualTo("New to probation")
   }
+
+  @Test
+  fun `delete when conviction allocated to actual officer`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        sentenceDate = LocalDate.parse("2019-11-17"),
+        initialAppointment = LocalDate.parse("2021-11-30"),
+        name = "Tester TestSurname",
+        tier = "B3",
+        status = "New to probation",
+        convictionId = convictionId
+      )
+    )
+    allocatedConvictionResponse(crn, convictionId)
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
+    assertThat(repository.count()).isEqualTo(0)
+  }
+
+  @Test
+  fun `delete when conviction's sentence is removed`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        sentenceDate = LocalDate.parse("2019-11-17"),
+        initialAppointment = LocalDate.parse("2021-11-30"),
+        name = "Tester TestSurname",
+        tier = "B3",
+        status = "New to probation",
+        convictionId = convictionId
+      )
+    )
+    convictionWithNoSentenceResponse(crn, convictionId)
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
+    assertThat(repository.count()).isEqualTo(0)
+  }
 }
