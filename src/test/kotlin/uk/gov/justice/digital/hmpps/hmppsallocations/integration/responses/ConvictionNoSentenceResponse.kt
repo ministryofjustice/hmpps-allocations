@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun convictionResponse(staffCode: String) = """
+fun convictionNoSentenceResponse(staffCode: String) = """
   {
         "convictionId": 2500292515,
         "index": "1",
@@ -32,23 +32,6 @@ fun convictionResponse(staffCode: String) = """
                 "lastUpdatedDatetime": "2019-11-17T20:50:25"
             }
         ],
-        "sentence": {
-            "sentenceId": 2500278160,
-            "description": "Adult Custody < 12m",
-            "originalLength": 6,
-            "originalLengthUnits": "Months",
-            "defaultLength": 6,
-            "lengthInDays": 181,
-            "expectedSentenceEndDate": "2020-05-16",
-            "startDate": "2019-11-17",
-            "sentenceType": {
-                "code": "SC",
-                "description": "Adult Custody < 12m"
-            },
-            "failureToComplyLimit": 3,
-            "cja2003Order": true,
-            "legacyOrder": false
-        },
         "latestCourtAppearanceOutcome": {
             "code": "307",
             "description": "Adult Custody < 12m"

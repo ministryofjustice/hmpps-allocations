@@ -14,8 +14,9 @@ class TierCalculationService(
   @Transactional
   fun updateTier(crn: String) {
     repository.findFirstByCrn(crn).ifPresent {
-      val tier = hmppsTierApiClient.getTierByCrn(crn)
-      it.tier = tier
+      hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
+        it.tier = tier
+      }
     }
   }
 }
