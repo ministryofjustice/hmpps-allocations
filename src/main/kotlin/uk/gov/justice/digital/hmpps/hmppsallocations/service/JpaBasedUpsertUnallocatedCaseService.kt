@@ -28,7 +28,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity) {
     communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
       .block()!!.let { conviction ->
-      if (isUnallocated(conviction)) {
+      if (isUnallocated(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
@@ -57,7 +57,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private fun insertNewCase(crn: String, convictionId: Long) {
     communityApiClient.getConviction(crn, convictionId)
       .block()!!.let { conviction ->
-      if (isUnallocated(conviction)) {
+      if (isUnallocated(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentence.startDate)
