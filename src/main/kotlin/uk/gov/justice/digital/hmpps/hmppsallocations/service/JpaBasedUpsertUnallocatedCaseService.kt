@@ -27,7 +27,7 @@ class JpaBasedUpsertUnallocatedCaseService(
 
   private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity) {
     communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
-      .block()!!.let { conviction ->
+      .block()!!.orElse(null)?.let { conviction ->
       if (isUnallocated(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
@@ -51,12 +51,14 @@ class JpaBasedUpsertUnallocatedCaseService(
       } else {
         repository.deleteById(unallocatedCaseEntity.id!!)
       }
+    } ?: run {
+      repository.deleteById(unallocatedCaseEntity.id!!)
     }
   }
 
   private fun insertNewCase(crn: String, convictionId: Long) {
     communityApiClient.getConviction(crn, convictionId)
-      .block()!!.let { conviction ->
+      .block()!!.ifPresent { conviction ->
       if (isUnallocated(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(crn)?.let { tier ->

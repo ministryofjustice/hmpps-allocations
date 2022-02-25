@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
@@ -15,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistration
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Optional
 
 class CommunityApiClient(private val webClient: WebClient) {
 
@@ -28,12 +30,23 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(responseType)
   }
 
-  fun getConviction(crn: String, convictionId: Long): Mono<Conviction> {
+  fun getConviction(crn: String, convictionId: Long): Mono<Optional<Conviction>> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions/$convictionId")
       .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
+        { Mono.error(MissingConvictionError("No tier found for $crn")) }
+      )
       .bodyToMono(Conviction::class.java)
+      .map { Optional.of(it) }
+      .onErrorResume { ex ->
+        when (ex) {
+          is MissingConvictionError -> Mono.just(Optional.empty())
+          else -> Mono.error(ex)
+        }
+      }
   }
   fun getActiveRequirements(crn: String, convictionId: Long): Mono<ConvictionRequirements> {
     return webClient
@@ -129,3 +142,5 @@ class CommunityApiClient(private val webClient: WebClient) {
 
   data class OffenderManager @JsonCreator constructor(val staff: Staff, val grade: Grade?)
 }
+
+private class MissingConvictionError(msg: String) : RuntimeException(msg)

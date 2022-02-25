@@ -20,7 +20,9 @@ class EnrichEventService(
     return communityApiClient
       .getConviction(crn, convictionId)
       .map { conviction ->
-        conviction.sentence?.startDate
+        conviction
+          .map { it.sentence?.startDate }
+          .orElse(null)
       }.block()!!
   }
 
