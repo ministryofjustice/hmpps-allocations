@@ -231,11 +231,15 @@ abstract class IntegrationTestBase {
   }
 
   protected fun unallocatedConvictionResponse(crn: String, convictionId: Long) {
+    unallocatedConvictionResponse(crn, convictionId, "STFFCDEU")
+  }
+
+  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long, staffCode: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions/$convictionId")
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(convictionResponse("STFFCDEU"))
+      response().withContentType(APPLICATION_JSON).withBody(convictionResponse(staffCode))
     )
   }
 
