@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -14,7 +15,8 @@ import javax.transaction.Transactional
 class JpaBasedUpsertUnallocatedCaseService(
   private val repository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
-  private val enrichEventService: EnrichEventService
+  private val enrichEventService: EnrichEventService,
+  private val caseOfficerConfigProperties: CaseOfficerConfigProperties
 ) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
@@ -28,7 +30,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity) {
     communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
       .block()!!.orElse(null)?.let { conviction ->
-      if (isUnallocated(conviction) && conviction.active) {
+      if (isUnallocatedIncluded(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
@@ -59,7 +61,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private fun insertNewCase(crn: String, convictionId: Long) {
     communityApiClient.getConviction(crn, convictionId)
       .block()!!.ifPresent { conviction ->
-      if (isUnallocated(conviction) && conviction.active) {
+      if (isUnallocatedIncluded(conviction) && conviction.active) {
         conviction.sentence?.let { sentence ->
           enrichEventService.getTier(crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentence.startDate)
@@ -88,8 +90,8 @@ class JpaBasedUpsertUnallocatedCaseService(
     }
   }
 
-  private fun isUnallocated(conviction: Conviction): Boolean {
-    return conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.staffCode?.endsWith("U") ?: false
+  private fun isUnallocatedIncluded(conviction: Conviction): Boolean {
+    return caseOfficerConfigProperties.includes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.staffCode)
   }
 
   companion object {

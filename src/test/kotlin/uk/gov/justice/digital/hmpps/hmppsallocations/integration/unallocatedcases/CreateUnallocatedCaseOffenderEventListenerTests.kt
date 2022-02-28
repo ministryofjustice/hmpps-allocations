@@ -131,4 +131,27 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
   }
+
+  @Test
+  fun `do not save when conviction is with unallocated bucket not on include list`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    unallocatedConvictionResponse(crn, convictionId, "STFFCDEOTHERU")
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderSummaryResponse(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
+    assertThat(repository.count()).isEqualTo(0)
+  }
 }
