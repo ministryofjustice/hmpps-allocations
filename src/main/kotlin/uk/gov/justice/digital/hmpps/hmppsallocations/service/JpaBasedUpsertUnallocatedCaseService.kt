@@ -2,9 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -16,7 +16,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private val repository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService,
-  @Value("\${unallocates.cases.officer.includes}") private val includedOfficerCodes: List<String>
+  private val caseOfficerConfigProperties: CaseOfficerConfigProperties
 ) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
@@ -91,7 +91,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   }
 
   private fun isUnallocatedIncluded(conviction: Conviction): Boolean {
-    return includedOfficerCodes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.staffCode)
+    return caseOfficerConfigProperties.includes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.staffCode)
   }
 
   companion object {

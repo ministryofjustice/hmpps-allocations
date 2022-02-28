@@ -36,11 +36,7 @@ hmpps.sqs:
     hmppsoffendertopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
-unallocated:
-  cases:
-    officer:
-      includes:
-        - STFFCDEU
+
 
 community:
   endpoint:
@@ -60,6 +56,12 @@ assess-risks-needs:
 workload:
   endpoint:
     url: http://localhost:8087
+
+unallocated:
+  cases:
+    officer:
+      includes:
+        - STFFCDEU
 
 oauth:
   endpoint:
