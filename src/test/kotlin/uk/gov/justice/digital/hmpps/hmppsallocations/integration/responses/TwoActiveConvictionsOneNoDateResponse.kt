@@ -73,7 +73,7 @@ fun twoActiveConvictionsOneNoDateResponse() = """
                 "officerId": 123456789,
                 "name": "A Staff Name",
                 "staffCode": "STFFCDEU",
-                "dateStartOfAllocation": "2014-05-29"
+                "dateStartOfAllocation": "2014-05-29T20:50:18"
             }
         ]
     },
@@ -192,7 +192,7 @@ fun twoActiveConvictionsOneNoDateResponse() = """
                 "officerId": 123456789,
                 "name": "A Staff Name",
                 "staffCode": "STFFCDEU",
-                "dateStartOfAllocation": "2014-05-29"
+                "dateStartOfAllocation": "2014-05-29T20:50:18"
             }
         ]
     }

@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigPro
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 @Service
@@ -91,7 +91,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   }
 
   private fun isUnallocatedIncluded(conviction: Conviction): Boolean {
-    return caseOfficerConfigProperties.includes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.staffCode)
+    return caseOfficerConfigProperties.includes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode)
   }
 
   companion object {

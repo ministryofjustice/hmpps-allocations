@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class Conviction @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
@@ -17,8 +18,7 @@ data class Conviction @JsonCreator constructor(
 )
 
 data class OrderManager @JsonCreator constructor (
-  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val dateStartOfAllocation: LocalDate?,
+  val dateStartOfAllocation: LocalDateTime?,
   val name: String,
   val staffCode: String,
 )

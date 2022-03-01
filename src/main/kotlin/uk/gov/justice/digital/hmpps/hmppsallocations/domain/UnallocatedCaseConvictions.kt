@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UnallocatedCaseConvictions @JsonCreator constructor (
   @Schema(description = "Offender Name", example = "John Smith")
@@ -66,7 +67,7 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
       if (offenderManager != null) {
         return UnallocatedCaseConvictionPractitioner("${offenderManager.forenames} ${offenderManager.surname}", offenderManager.grade)
       }
-      return conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }?.let { UnallocatedCaseConvictionPractitioner(it.name, null) }
+      return conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { UnallocatedCaseConvictionPractitioner(it.name, null) }
     }
   }
 }

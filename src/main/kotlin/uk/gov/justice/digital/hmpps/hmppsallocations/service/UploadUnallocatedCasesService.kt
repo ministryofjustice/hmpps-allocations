@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 
@@ -55,7 +55,7 @@ class UploadUnallocatedCasesService(
     return communityApiClient.getActiveConvictions(unallocatedCase.crn!!)
       .map { convictions ->
         convictions.filter { conviction ->
-          conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDate.MIN }!!
+          conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }!!
             .staffCode.endsWith("U") && conviction.sentence != null
         }
           .map { conviction ->
