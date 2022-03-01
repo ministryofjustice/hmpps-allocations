@@ -13,7 +13,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     getRegistrationsFromDelius(crn)
     getRiskSummaryForCrn(crn)
     getRiskPredictorsForCrn(crn)
-    getOgrsScoreForCrn(crn)
+    getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -57,6 +57,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("2019-02-12")
       .jsonPath("$.rsr.percentage")
       .isEqualTo(3.8)
+      .jsonPath("$.ogrs.lastUpdatedOn")
+      .isEqualTo("2018-11-17")
       .jsonPath("$.ogrs.score")
       .isEqualTo(85)
       .jsonPath("$.convictionId")
@@ -71,7 +73,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     noRegistrationsFromDelius(crn)
     getRiskSummaryForCrn(crn)
     getRiskPredictorsForCrn(crn)
-    getOgrsScoreForCrn(crn)
+    getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -93,7 +95,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     noRegistrationsFromDelius(crn)
     notFoundRiskSummaryForCrn(crn)
     getRiskPredictorsForCrn(crn)
-    getOgrsScoreForCrn(crn)
+    getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -113,7 +115,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     noRegistrationsFromDelius(crn)
     getRiskSummaryNoLevelForCrn(crn)
     getRiskPredictorsForCrn(crn)
-    getOgrsScoreForCrn(crn)
+    getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -131,7 +133,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     noRegistrationsFromDelius(crn)
-    getOgrsScoreForCrn(crn)
+    getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

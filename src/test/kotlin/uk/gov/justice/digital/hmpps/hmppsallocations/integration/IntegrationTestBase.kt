@@ -463,7 +463,7 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getOgrsScoreForCrn(crn: String) {
+  protected fun getOgrsForCrn(crn: String) {
     val ogrsRequest =
       request().withPath("/offenders/crn/$crn/assessments")
 
