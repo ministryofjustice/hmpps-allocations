@@ -4,6 +4,6 @@ fun ogrsResponse() = """
   {
     "ogrsLastUpdate": "2018-11-17",
     "ogrsScore": 85,
-    "rsrScore": 0,
+    "rsrScore": 0
   }
 """.trimIndent()
