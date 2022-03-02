@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class UnallocatedCaseConvictions @JsonCreator constructor (
   @Schema(description = "Offender Name", example = "John Smith")
@@ -20,14 +19,13 @@ data class UnallocatedCaseConvictions @JsonCreator constructor (
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
-      active: List<Conviction>,
-      previous: List<Conviction>,
-      currentOffenderManager: OffenderManagerDetails?
+      active: List<UnallocatedCaseConviction>,
+      previous: List<UnallocatedCaseConviction>
     ): UnallocatedCaseConvictions {
       return UnallocatedCaseConvictions(
         case.name, case.crn, case.tier,
-        active.map { UnallocatedCaseConviction.from(it, currentOffenderManager, it.sentence!!.startDate, null) },
-        previous.map { UnallocatedCaseConviction.from(it, null, null, it.sentence!!.terminationDate) }
+        active,
+        previous
       )
     }
   }
@@ -50,24 +48,17 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
   val offences: List<UnallocatedCaseConvictionOffence>,
 ) {
   companion object {
-    fun from(conviction: Conviction, offenderManager: OffenderManagerDetails?, startDate: LocalDate?, endDate: LocalDate?): UnallocatedCaseConviction {
+    fun from(conviction: Conviction, startDate: LocalDate?, endDate: LocalDate?, practitioner: UnallocatedCaseConvictionPractitioner?): UnallocatedCaseConviction {
 
       return UnallocatedCaseConviction(
         conviction.sentence!!.description,
         conviction.sentence.originalLength,
         conviction.sentence.originalLengthUnits,
-        offenderManagerFrom(offenderManager, conviction),
+        practitioner,
         startDate,
         endDate,
         conviction.offences.map { UnallocatedCaseConvictionOffence.from(it) }
       )
-    }
-
-    fun offenderManagerFrom(offenderManager: OffenderManagerDetails?, conviction: Conviction): UnallocatedCaseConvictionPractitioner? {
-      if (offenderManager != null) {
-        return UnallocatedCaseConvictionPractitioner("${offenderManager.forenames} ${offenderManager.surname}", offenderManager.grade)
-      }
-      return conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { UnallocatedCaseConvictionPractitioner(it.name, null) }
     }
   }
 }
