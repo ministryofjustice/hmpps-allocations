@@ -410,6 +410,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noOgrsFromDelius(crn: String) {
+    val ogrsRequest =
+      request().withPath("/offenders/crn/$crn/assessments")
+
+    communityApi.`when`(ogrsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("{}")
+    )
+  }
+
   protected fun getAssessmentsForCrn(crn: String) {
     val needsRequest =
       request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
@@ -448,6 +457,15 @@ abstract class IntegrationTestBase {
   protected fun notFoundRiskSummaryForCrn(crn: String) {
     val riskRequest =
       request().withPath("/risks/crn/$crn/summary")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+    )
+  }
+
+  protected fun notFoundOgrsForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/offenders/crn/$crn/assessments")
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)

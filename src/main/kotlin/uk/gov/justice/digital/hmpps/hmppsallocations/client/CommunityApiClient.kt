@@ -123,12 +123,23 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(OffenderRegistrations::class.java)
   }
 
-  fun getAssessment(crn: String): Mono<OffenderAssessment> {
+  fun getAssessment(crn: String): Mono<Optional<OffenderAssessment>> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/assessments")
       .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
+        { Mono.error(MissingOffenderAssessmentError("No offender assessment found for $crn")) }
+      )
       .bodyToMono(OffenderAssessment::class.java)
+      .map { Optional.of(it) }
+      .onErrorResume { ex ->
+        when (ex) {
+          is MissingOffenderAssessmentError -> Mono.just(Optional.empty())
+          else -> Mono.error(ex)
+        }
+      }
   }
 
   data class Staff @JsonCreator constructor(
@@ -144,3 +155,4 @@ class CommunityApiClient(private val webClient: WebClient) {
 }
 
 private class MissingConvictionError(msg: String) : RuntimeException(msg)
+private class MissingOffenderAssessmentError(msg: String) : RuntimeException(msg)

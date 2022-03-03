@@ -108,6 +108,25 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `get case risks with no ogrs`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+    noRegistrationsFromDelius(crn)
+    notFoundOgrsForCrn(crn)
+    getRiskPredictorsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.ogrs")
+      .doesNotExist()
+  }
+
+  @Test
   fun `get case risks with no ROSH level`() {
     val crn = "J678910"
     val convictionId = 123456789L

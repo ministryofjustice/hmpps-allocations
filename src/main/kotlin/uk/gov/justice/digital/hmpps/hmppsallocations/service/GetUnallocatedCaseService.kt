@@ -114,7 +114,7 @@ class GetUnallocatedCaseService(
       val ogrs = communityApiClient.getAssessment(crn)
 
       val results = Mono.zip(registrations, riskSummary, latestRiskPredictor, ogrs).block()!!
-      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null), results.t4)
+      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null), results.t4.orElse(null))
     }
 
   companion object {
