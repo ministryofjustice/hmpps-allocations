@@ -21,6 +21,7 @@ data class OrderManager @JsonCreator constructor (
   val dateStartOfAllocation: LocalDateTime?,
   val name: String,
   val staffCode: String,
+  val gradeCode: String?,
 )
 
 data class Custody @JsonCreator constructor(
