@@ -11,7 +11,6 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -49,7 +48,6 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     twoActiveConvictionsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
@@ -67,7 +65,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .jsonPath("$.active[0].startDate")
       .isEqualTo("2019-11-17")
       .jsonPath("$.active[0].offenderManager.name")
-      .isEqualTo("Sheila Linda Hancock")
+      .isEqualTo("A Staff Name")
       .jsonPath("$.active[0].offenderManager.grade")
       .isEqualTo("PSO")
       .jsonPath("$.active[0].offences[0].description")
@@ -82,7 +80,6 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     noConvictionsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
