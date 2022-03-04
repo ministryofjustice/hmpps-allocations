@@ -54,6 +54,12 @@ class JpaBasedUpsertUnallocatedCaseService(
             unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
             unallocatedCaseEntity.caseType = caseType
             return unallocatedCaseEntity
+          } ?: run {
+            log.info("no tier for crn ${unallocatedCaseEntity.crn} so unable to allocate")
+            unallocatedCaseEntity.id?.let {
+              repository.deleteById(it)
+            }
+            return null
           }
         } ?: run {
           log.info("no sentence for crn ${unallocatedCaseEntity.crn} so unable to allocate")
