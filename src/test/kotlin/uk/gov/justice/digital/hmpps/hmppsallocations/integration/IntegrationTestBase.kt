@@ -513,6 +513,7 @@ abstract class IntegrationTestBase {
     unallocatedConvictionResponse(crn, 123456789)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)

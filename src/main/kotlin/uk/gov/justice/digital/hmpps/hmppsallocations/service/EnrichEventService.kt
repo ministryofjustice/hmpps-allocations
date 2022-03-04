@@ -47,21 +47,21 @@ class EnrichEventService(
 
   fun getProbationStatus(crn: String): ProbationStatus {
     val activeConvictions = (communityApiClient.getActiveConvictions(crn).block() ?: emptyList()).size
+    val offenderManager = communityApiClient.getOffenderManagerName(crn)
+      .map { offenderManager ->
+        val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
+        OffenderManagerDetails(
+          forenames = offenderManager.staff.forenames,
+          surname = offenderManager.staff.surname,
+          grade = grade
+        )
+      }.block()!!
     return when {
-
       activeConvictions > 1 -> {
-        return communityApiClient.getOffenderManagerName(crn)
-          .map { offenderManager ->
-            val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
-            ProbationStatus(
-              ProbationStatusType.CURRENTLY_MANAGED,
-              offenderManagerDetails = OffenderManagerDetails(
-                forenames = offenderManager.staff.forenames,
-                surname = offenderManager.staff.surname,
-                grade = grade
-              )
-            )
-          }.block()!!
+        ProbationStatus(
+          ProbationStatusType.CURRENTLY_MANAGED,
+          offenderManagerDetails = offenderManager
+        )
       }
       else -> {
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
@@ -71,9 +71,9 @@ class EnrichEventService(
               inactiveConvictions.filter { c -> c.sentence.terminationDate != null }
                 .map { c -> c.sentence.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus(ProbationStatusType.PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate)
+            ProbationStatus(ProbationStatusType.PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, offenderManager)
           }
-          else -> ProbationStatus(ProbationStatusType.NEW_TO_PROBATION)
+          else -> ProbationStatus(ProbationStatusType.NEW_TO_PROBATION, offenderManagerDetails = offenderManager)
         }
       }
     }

@@ -33,6 +33,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 

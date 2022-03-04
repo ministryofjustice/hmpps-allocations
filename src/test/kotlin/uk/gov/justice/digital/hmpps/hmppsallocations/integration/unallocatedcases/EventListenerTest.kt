@@ -23,6 +23,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -54,6 +55,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -87,6 +89,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -119,6 +122,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 1234L
     unallocatedConvictionResponse(crn, convictionId)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -159,6 +163,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -191,6 +196,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -223,6 +229,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -246,6 +253,9 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.status).isEqualTo("New to probation")
+    assertThat(case.offenderManagerGrade).isEqualTo("PSO")
+    assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
+    assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
   }
 
   @Test
@@ -278,6 +288,9 @@ class EventListenerTest : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.status).isEqualTo("Currently managed")
+    assertThat(case.offenderManagerGrade).isEqualTo("PSO")
+    assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
+    assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
   }
 
   @Test
@@ -287,6 +300,7 @@ class EventListenerTest : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveAndInactiveConvictionsResponse(crn)
@@ -311,69 +325,9 @@ class EventListenerTest : IntegrationTestBase() {
 
     assertThat(case.status).isEqualTo("Previously managed")
     assertThat(case.previousConvictionDate).isEqualTo("2009-10-12")
-  }
-
-  @Test
-  fun `retrieve offenderManager name for currently managed `() {
-    val crn = "J678910"
-    val convictionId = 1234L
-    unallocatedConvictionResponse(crn, convictionId)
-    noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
-    tierCalculationResponse(crn)
-    twoActiveConvictionsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
-    // Given
-    val unallocatedCase = unallocatedCaseEvent(
-      crn, convictionId
-    )
-
-    // Then
-    hmppsDomainSnsClient.publish(
-      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
-        .withMessageAttributes(
-          mapOf(
-            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
-          )
-        )
-    )
-    await untilCallTo { repository.count() } matches { it!! > 0 }
-
-    val case = repository.findAll().first()
-
-    assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
-    assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
-  }
-
-  @Test
-  fun `retrieve offenderManager with grade for currently managed `() {
-    val crn = "J678910"
-    val convictionId = 1234L
-    unallocatedConvictionResponse(crn, convictionId)
-    noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
-    tierCalculationResponse(crn)
-    twoActiveConvictionsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
-    // Given
-    val unallocatedCase = unallocatedCaseEvent(
-      crn, convictionId
-    )
-
-    // Then
-    hmppsDomainSnsClient.publish(
-      PublishRequest(hmppsDomainTopicArn, jsonString(unallocatedCase))
-        .withMessageAttributes(
-          mapOf(
-            "eventType" to MessageAttributeValue().withDataType("String").withStringValue(unallocatedCase.eventType)
-          )
-        )
-    )
-    await untilCallTo { repository.count() } matches { it!! > 0 }
-
-    val case = repository.findAll().first()
-
     assertThat(case.offenderManagerGrade).isEqualTo("PSO")
+    assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
+    assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
   }
 
   @Test
