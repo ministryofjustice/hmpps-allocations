@@ -20,6 +20,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 
@@ -38,6 +39,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
     assertThat(case.status).isEqualTo("New to probation")
+    assertThat(case.offenderManagerGrade).isEqualTo("PSO")
+    assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
+    assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
   }
 
   @Test
@@ -140,6 +144,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
     offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 
