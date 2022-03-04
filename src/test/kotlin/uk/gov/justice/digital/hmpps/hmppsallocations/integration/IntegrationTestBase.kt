@@ -491,7 +491,7 @@ abstract class IntegrationTestBase {
   }
 
   protected fun allDeliusResponses(crn: String) {
-    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
     unallocatedConvictionResponse(crn, 123456789)
     singleActiveInductionResponse(crn)
     offenderSummaryResponse(crn)

@@ -16,7 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 
@@ -52,12 +51,9 @@ class UploadUnallocatedCasesService(
 
   private fun publishToHmppsDomainTopic(unallocatedCase: UnallocatedCaseCsv): Mono<Any> {
     log.info("Processing CRN {}", unallocatedCase.crn)
-    return communityApiClient.getActiveConvictions(unallocatedCase.crn!!)
+    return communityApiClient.getAllConvictions(unallocatedCase.crn!!)
       .map { convictions ->
-        convictions.filter { conviction ->
-          conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }!!
-            .staffCode.endsWith("U") && conviction.sentence != null
-        }
+        convictions
           .map { conviction ->
             val hmppsEvent = HmppsEvent(
               "ALLOCATION_REQUIRED", 0, "Generated Allocated Event", "http://dummy.com",
