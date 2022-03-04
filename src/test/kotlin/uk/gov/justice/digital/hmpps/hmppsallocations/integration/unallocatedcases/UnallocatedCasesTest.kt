@@ -65,6 +65,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo("PO")
       .jsonPath("$.[0].convictionId")
       .isEqualTo(123456789)
+      .jsonPath("$.[0].caseType")
+      .isEqualTo("CUSTODY")
   }
 
   @Test

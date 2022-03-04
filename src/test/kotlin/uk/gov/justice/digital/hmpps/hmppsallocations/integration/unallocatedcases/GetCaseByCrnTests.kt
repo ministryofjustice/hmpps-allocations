@@ -84,6 +84,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("LAYER_3")
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
+      .jsonPath("$.caseType")
+      .isEqualTo("CUSTODY")
   }
 
   @Test

@@ -20,7 +20,9 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
   val rosh: UnallocatedCaseRosh?,
   val rsr: UnallocatedCaseRsr?,
   val ogrs: UnallocatedCaseOgrs?,
-  val convictionId: Long
+  val convictionId: Long,
+  @Schema(description = "Case Type")
+  val caseType: CaseTypes
 ) {
   companion object {
     fun from(
@@ -38,7 +40,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor (
         riskSummary?.let { it.overallRiskLevel?.let { riskLevel -> UnallocatedCaseRosh(riskLevel, it.assessedOn!!.toLocalDate()) } },
         riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) },
         offenderAssessment?.let { UnallocatedCaseOgrs(it.ogrsLastUpdate!!, it.ogrsScore!!) },
-        case.convictionId
+        case.convictionId,
+        case.caseType
       )
     }
   }
