@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigProperties
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.transaction.Transactional
 
@@ -24,11 +26,13 @@ class JpaBasedUpsertUnallocatedCaseService(
     repository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       updateExistingCase(it)
     } ?: run {
-      insertNewCase(crn, convictionId)
+      updateExistingCase(UnallocatedCaseEntity(null, "", crn, "", LocalDate.now(), null, "", null, null, null, null, convictionId, CaseTypes.COMMUNITY))?.let {
+        repository.save(it)
+      }
     }
   }
 
-  private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity) {
+  private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity): UnallocatedCaseEntity? {
     communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
       .block()!!.orElse(null)?.let { conviction ->
       if (isUnallocatedIncluded(conviction) && conviction.active) {
@@ -49,49 +53,28 @@ class JpaBasedUpsertUnallocatedCaseService(
             unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
             unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
             unallocatedCaseEntity.caseType = caseType
+            return unallocatedCaseEntity
           }
         } ?: run {
-          repository.deleteById(unallocatedCaseEntity.id!!)
+          log.info("no sentence for crn ${unallocatedCaseEntity.crn} so unable to allocate")
+          unallocatedCaseEntity.id?.let {
+            repository.deleteById(it)
+          }
+          return null
         }
       } else {
-        repository.deleteById(unallocatedCaseEntity.id!!)
+        log.info("Case for crn ${unallocatedCaseEntity.crn} already allocated")
+        unallocatedCaseEntity.id?.let {
+          repository.deleteById(it)
+        }
+        return null
       }
     } ?: run {
-      repository.deleteById(unallocatedCaseEntity.id!!)
-    }
-  }
-
-  private fun insertNewCase(crn: String, convictionId: Long) {
-    communityApiClient.getConviction(crn, convictionId)
-      .block()!!.ifPresent { conviction ->
-      if (isUnallocatedIncluded(conviction) && conviction.active) {
-        conviction.sentence?.let { sentence ->
-          enrichEventService.getTier(crn)?.let { tier ->
-            val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentence.startDate)
-            val name = enrichEventService.getOffenderName(crn)
-            val activeConvictions = enrichEventService.getActiveConvictions(crn)
-            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(crn, activeConvictions)
-            val caseType = caseTypeEngine.getCaseType(activeConvictions, convictionId)
-            val unallocatedCase = UnallocatedCaseEntity(
-              null, name,
-              crn, tier, sentence.startDate, initialAppointment, status.status, previousConvictionDate,
-              offenderManagerSurname = offenderManagerDetails?.surname,
-              offenderManagerForename = offenderManagerDetails?.forenames,
-              offenderManagerGrade = offenderManagerDetails?.grade,
-              convictionId = convictionId,
-              caseType = caseType
-            )
-
-            repository.save(unallocatedCase)
-          } ?: run {
-            log.info("no tier for crn $crn so unable to allocate")
-          }
-        } ?: run {
-          log.info("No sentence for crn $crn so unable to allocate")
-        }
-      } else {
-        log.info("crn $crn already allocated")
+      log.info("Unable to retrieve case for crn ${unallocatedCaseEntity.crn}")
+      unallocatedCaseEntity.id?.let {
+        repository.deleteById(it)
       }
+      return null
     }
   }
 
