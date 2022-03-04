@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 fun twoActiveConvictionsResponse() = """
 [
     {
-        "convictionId": 2500292516,
+        "convictionId": 123456789,
         "index": "1",
         "active": true,
         "inBreach": false,

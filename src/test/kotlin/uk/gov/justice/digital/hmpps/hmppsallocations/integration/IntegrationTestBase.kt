@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
@@ -73,9 +74,9 @@ abstract class IntegrationTestBase {
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
 
-  val firstSentenceDate = LocalDate.now().minusDays(4)
-  val firstInitialAppointment = LocalDate.now().plusDays(1)
-  val previousConvictionEndDate = LocalDate.now().minusDays(60)
+  val firstSentenceDate: LocalDate = LocalDate.now().minusDays(4)
+  val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
+  val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
 
   val previouslyManagedCase = UnallocatedCaseEntity(
     null,
@@ -86,7 +87,8 @@ abstract class IntegrationTestBase {
     null,
     "Previously managed",
     previousConvictionEndDate,
-    convictionId = 987654321
+    convictionId = 987654321,
+    caseType = CaseTypes.CUSTODY
   )
 
   fun insertCases() {
@@ -96,7 +98,8 @@ abstract class IntegrationTestBase {
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
-          123456789
+          123456789,
+          caseType = CaseTypes.COMMUNITY
         ),
         UnallocatedCaseEntity(
           null,
@@ -106,14 +109,15 @@ abstract class IntegrationTestBase {
           LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
           "New to probation",
-          convictionId = 23456789
+          convictionId = 23456789,
+          caseType = CaseTypes.LICENSE
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
-          56785493
+          56785493, CaseTypes.CUSTODY
         )
 
       )
@@ -501,7 +505,7 @@ abstract class IntegrationTestBase {
   protected fun getImpactToOffenderManagerWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
     val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode/potentialCases")
       .withMethod("POST")
-      .withBody(gson.toJson(PotentialCaseRequest("C1", "CUSTODY")))
+      .withBody(gson.toJson(PotentialCaseRequest("C1", CaseTypes.CUSTODY)))
 
     workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagersPotentialCaseResponse())

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 
 class CommunityCaseTypeRuleTests {
   private val communityCaseTypeRule = CommunityCaseTypeRule()
@@ -27,6 +28,6 @@ class CommunityCaseTypeRuleTests {
   @Test
   fun `must return community case type when getting case type`() {
     val result = communityCaseTypeRule.getCaseType()
-    Assertions.assertEquals("COMMUNITY", result)
+    Assertions.assertEquals(CaseTypes.COMMUNITY, result)
   }
 }
