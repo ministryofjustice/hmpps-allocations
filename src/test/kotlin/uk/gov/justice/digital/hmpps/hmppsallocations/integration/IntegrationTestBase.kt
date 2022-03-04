@@ -99,7 +99,7 @@ abstract class IntegrationTestBase {
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
           123456789,
-          caseType = CaseTypes.COMMUNITY
+          caseType = CaseTypes.CUSTODY
         ),
         UnallocatedCaseEntity(
           null,
