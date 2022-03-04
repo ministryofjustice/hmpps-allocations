@@ -39,5 +39,7 @@ class GetCaseAllocateImpactByCrnTest : IntegrationTestBase() {
       .isEqualTo(87.2)
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
+      .jsonPath("$.caseType")
+      .isEqualTo("CUSTODY")
   }
 }

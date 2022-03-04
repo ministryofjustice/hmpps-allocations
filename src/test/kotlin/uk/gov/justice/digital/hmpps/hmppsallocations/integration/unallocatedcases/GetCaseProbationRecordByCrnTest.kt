@@ -40,6 +40,8 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .isEqualTo("Abstracting electricity - 04300")
       .jsonPath("$.previous[0].offences[0].mainOffence")
       .isEqualTo(true)
+      .jsonPath("$.caseType")
+      .isEqualTo("CUSTODY")
   }
 
   @Test

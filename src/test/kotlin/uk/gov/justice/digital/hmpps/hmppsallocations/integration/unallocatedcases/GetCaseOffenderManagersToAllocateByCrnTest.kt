@@ -48,5 +48,7 @@ class GetCaseOffenderManagersToAllocateByCrnTest : IntegrationTestBase() {
       .isEqualTo("OM1")
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
+      .jsonPath("$.caseType")
+      .isEqualTo("CUSTODY")
   }
 }

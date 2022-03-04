@@ -63,6 +63,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo(85)
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
+      .jsonPath("$.caseType")
+      .isEqualTo("CUSTODY")
   }
 
   @Test
