@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 
 @Service
 class CommunityCaseTypeRule : CaseTypeRule {
@@ -9,5 +10,5 @@ class CommunityCaseTypeRule : CaseTypeRule {
 
   override fun isCaseType(sentenceTypeCode: String, custodialStatusCode: String?): Boolean = communitySentenceCodes.contains(sentenceTypeCode)
 
-  override fun getCaseType(): String = "COMMUNITY"
+  override fun getCaseType(): CaseTypes = CaseTypes.COMMUNITY
 }

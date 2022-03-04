@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 
 class CustodyCaseTypeRuleTests {
   private val custodyCaseTypeRule = CustodyCaseTypeRule()
@@ -33,6 +34,6 @@ class CustodyCaseTypeRuleTests {
   @Test
   fun `must return custody case type when getting case type`() {
     val result = custodyCaseTypeRule.getCaseType()
-    Assertions.assertEquals("CUSTODY", result)
+    Assertions.assertEquals(CaseTypes.CUSTODY, result)
   }
 }

@@ -7,6 +7,7 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import java.time.LocalDate
 
@@ -42,6 +43,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.offenderManagerGrade).isEqualTo("PSO")
     assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
     assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
+    assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
   }
 
   @Test

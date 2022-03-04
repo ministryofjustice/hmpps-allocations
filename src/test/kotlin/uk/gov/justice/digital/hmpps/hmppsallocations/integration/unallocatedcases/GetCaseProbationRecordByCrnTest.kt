@@ -63,7 +63,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .jsonPath("$.active[0].lengthUnit")
       .isEqualTo("Months")
       .jsonPath("$.active[0].startDate")
-      .isEqualTo("2019-11-17")
+      .isEqualTo("2021-11-22")
       .jsonPath("$.active[0].offenderManager.name")
       .isEqualTo("A Staff Name")
       .jsonPath("$.active[0].offenderManager.grade")

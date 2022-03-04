@@ -7,6 +7,7 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.mockserver.verify.VerificationTimes
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -40,7 +41,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         name = "foo",
         status = "active",
         sentenceDate = LocalDate.now(),
-        convictionId = 1234
+        convictionId = 1234,
+        caseType = CaseTypes.CUSTODY
       )
     )
   }

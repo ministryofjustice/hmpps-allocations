@@ -7,6 +7,7 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -25,7 +26,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         status = "New to probation",
-        convictionId = convictionId
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
       )
     )
 
@@ -67,7 +69,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         status = "New to probation",
-        convictionId = convictionId
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
       )
     )
     allocatedConvictionResponse(crn, convictionId)
@@ -101,7 +104,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         status = "New to probation",
-        convictionId = convictionId
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
       )
     )
     convictionWithNoSentenceResponse(crn, convictionId)
@@ -135,7 +139,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         status = "New to probation",
-        convictionId = convictionId
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
       )
     )
     inactiveConvictionResponse(crn, convictionId)
@@ -169,7 +174,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         status = "New to probation",
-        convictionId = convictionId
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
       )
     )
     notFoundConvictionResponse(crn, convictionId)

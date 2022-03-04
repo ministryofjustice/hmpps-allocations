@@ -1,0 +1,1 @@
+alter table unallocated_cases add column case_type VARCHAR;

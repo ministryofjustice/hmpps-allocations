@@ -16,7 +16,8 @@ class JpaBasedUpsertUnallocatedCaseService(
   private val repository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService,
-  private val caseOfficerConfigProperties: CaseOfficerConfigProperties
+  private val caseOfficerConfigProperties: CaseOfficerConfigProperties,
+  private val caseTypeEngine: CaseTypeEngine
 ) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
@@ -35,8 +36,9 @@ class JpaBasedUpsertUnallocatedCaseService(
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
             val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
-            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn)
-
+            val activeConvictions = enrichEventService.getActiveConvictions(unallocatedCaseEntity.crn)
+            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn, activeConvictions)
+            val caseType = caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionId)
             unallocatedCaseEntity.sentenceDate = sentence.startDate
             unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
@@ -46,6 +48,7 @@ class JpaBasedUpsertUnallocatedCaseService(
             unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
             unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
             unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
+            unallocatedCaseEntity.caseType = caseType
           }
         } ?: run {
           repository.deleteById(unallocatedCaseEntity.id!!)
@@ -66,15 +69,17 @@ class JpaBasedUpsertUnallocatedCaseService(
           enrichEventService.getTier(crn)?.let { tier ->
             val initialAppointment = enrichEventService.getInitialAppointmentDate(crn, sentence.startDate)
             val name = enrichEventService.getOffenderName(crn)
-            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(crn)
-
+            val activeConvictions = enrichEventService.getActiveConvictions(crn)
+            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(crn, activeConvictions)
+            val caseType = caseTypeEngine.getCaseType(activeConvictions, convictionId)
             val unallocatedCase = UnallocatedCaseEntity(
               null, name,
               crn, tier, sentence.startDate, initialAppointment, status.status, previousConvictionDate,
               offenderManagerSurname = offenderManagerDetails?.surname,
               offenderManagerForename = offenderManagerDetails?.forenames,
               offenderManagerGrade = offenderManagerDetails?.grade,
-              convictionId = convictionId
+              convictionId = convictionId,
+              caseType = caseType
             )
 
             repository.save(unallocatedCase)

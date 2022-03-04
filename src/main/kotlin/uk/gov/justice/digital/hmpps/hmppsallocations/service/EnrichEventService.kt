@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import java.time.LocalDate
@@ -15,16 +16,6 @@ class EnrichEventService(
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val gradeMapper: GradeMapper
 ) {
-
-  fun getSentenceDate(crn: String, convictionId: Long): LocalDate? {
-    return communityApiClient
-      .getConviction(crn, convictionId)
-      .map { conviction ->
-        conviction
-          .map { it.sentence?.startDate }
-          .orElse(null)
-      }.block()!!
-  }
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
     return communityApiClient.getInductionContacts(crn, contactsFromDate)
@@ -45,8 +36,11 @@ class EnrichEventService(
     return hmppsTierApiClient.getTierByCrn(crn)
   }
 
-  fun getProbationStatus(crn: String): ProbationStatus {
-    val activeConvictions = (communityApiClient.getActiveConvictions(crn).block() ?: emptyList()).size
+  fun getActiveConvictions(crn: String): List<Conviction> {
+    return communityApiClient.getActiveConvictions(crn).block() ?: emptyList()
+  }
+
+  fun getProbationStatus(crn: String, activeConvictions: List<Conviction>): ProbationStatus {
     val offenderManager = communityApiClient.getOffenderManagerName(crn)
       .map { offenderManager ->
         val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
@@ -57,7 +51,7 @@ class EnrichEventService(
         )
       }.block()!!
     return when {
-      activeConvictions > 1 -> {
+      activeConvictions.size > 1 -> {
         ProbationStatus(
           ProbationStatusType.CURRENTLY_MANAGED,
           offenderManagerDetails = offenderManager
