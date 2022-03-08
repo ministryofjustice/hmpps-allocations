@@ -33,9 +33,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerOverviewResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerPotentialCaseResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagersPotentialCaseResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagersToAllocateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
@@ -508,7 +509,15 @@ abstract class IntegrationTestBase {
       .withBody(gson.toJson(PotentialCaseRequest("C1", CaseTypes.CUSTODY)))
 
     workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagersPotentialCaseResponse())
+      response().withContentType(APPLICATION_JSON).withBody(offenderManagerPotentialCaseResponse())
+    )
+  }
+
+  protected fun getOffenderManagerOverviewWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
+    val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode")
+
+    workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(offenderManagerOverviewResponse())
     )
   }
 
