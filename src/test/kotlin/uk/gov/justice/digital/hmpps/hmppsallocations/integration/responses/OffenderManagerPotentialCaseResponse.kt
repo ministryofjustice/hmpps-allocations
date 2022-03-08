@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun offenderManagersPotentialCaseResponse() = """
+fun offenderManagerPotentialCaseResponse() = """
   {
     "forename": "John",
     "surname": "Smith",

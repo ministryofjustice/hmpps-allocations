@@ -4,6 +4,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerWorkloads
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialOffenderManagerWorkload
@@ -28,5 +29,13 @@ class WorkloadApiClient(private val webClient: WebClient) {
       }
       .retrieve()
       .bodyToMono(PotentialOffenderManagerWorkload::class.java)
+  }
+
+  fun getOffenderManagerOverview(offenderManagerCode: String): Mono<OffenderManagerOverview> {
+    return webClient
+      .get()
+      .uri("/team/N03F01/offenderManagers/$offenderManagerCode")
+      .retrieve()
+      .bodyToMono(OffenderManagerOverview::class.java)
   }
 }
