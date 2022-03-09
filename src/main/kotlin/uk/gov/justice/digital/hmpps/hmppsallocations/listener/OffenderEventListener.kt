@@ -6,19 +6,24 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
-  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService
+  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
+  private val enrichEventService: EnrichEventService
 ) {
 
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val case = getCase(rawMessage)
     log.info("received event for crn: {}", case.crn)
-    upsertUnallocatedCaseService.upsertUnallocatedCase(case.crn, case.sourceId)
+    enrichEventService.getAllConvictionIdsAssociatedToCrn(case.crn)
+      .forEach { convictionId ->
+        upsertUnallocatedCaseService.upsertUnallocatedCase(case.crn, convictionId)
+      }
   }
 
   @MessageExceptionHandler()

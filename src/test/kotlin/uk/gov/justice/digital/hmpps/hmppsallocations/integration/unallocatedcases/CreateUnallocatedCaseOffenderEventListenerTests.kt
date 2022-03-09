@@ -17,6 +17,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `retrieve event with minimum required data will save`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -50,6 +51,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction allocated to actual officer`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     allocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -73,6 +75,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not sentenced yet`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     convictionWithNoSentenceResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -96,6 +99,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not active`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     inactiveConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -119,6 +123,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not found`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     notFoundConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -142,6 +147,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is with unallocated bucket not on include list`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
     unallocatedConvictionResponse(crn, convictionId, "STFFCDEOTHERU")
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
