@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import java.time.LocalDate
 
@@ -14,7 +15,8 @@ import java.time.LocalDate
 class EnrichEventService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
-  private val gradeMapper: GradeMapper
+  private val gradeMapper: GradeMapper,
+  private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
@@ -72,6 +74,15 @@ class EnrichEventService(
       }
     }
   }
+
+  fun getAllConvictionIdsAssociatedToCrn(crn: String): Set<Long> =
+    unallocatedCasesRepository.findConvictionIdsByCrn(crn).let {
+      val storedConvictionIds = it.map { it.getConvictionId() }
+      val convictionIds = communityApiClient.getAllConvictions(crn)
+        .map { convictions -> convictions.map { it.convictionId } }
+        .block()!!
+      return listOf(storedConvictionIds, convictionIds).flatten().toSet()
+    }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

@@ -30,7 +30,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         caseType = CaseTypes.CUSTODY
       )
     )
-
+    singleActiveConvictionResponseForAllConvictions(crn)
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -73,6 +73,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         caseType = CaseTypes.CUSTODY
       )
     )
+    singleActiveConvictionResponseForAllConvictions(crn)
     allocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -108,6 +109,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         caseType = CaseTypes.CUSTODY
       )
     )
+    singleActiveConvictionResponseForAllConvictions(crn)
     convictionWithNoSentenceResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -143,6 +145,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         caseType = CaseTypes.CUSTODY
       )
     )
+    singleActiveConvictionResponseForAllConvictions(crn)
     inactiveConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
@@ -178,6 +181,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         caseType = CaseTypes.CUSTODY
       )
     )
+    singleActiveConvictionResponseForAllConvictions(crn)
     notFoundConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
