@@ -19,8 +19,8 @@ data class Conviction @JsonCreator constructor(
 
 data class OrderManager @JsonCreator constructor (
   val dateStartOfAllocation: LocalDateTime?,
-  val name: String,
-  val staffCode: String,
+  val name: String?,
+  val staffCode: String?,
   val gradeCode: String?,
 )
 
