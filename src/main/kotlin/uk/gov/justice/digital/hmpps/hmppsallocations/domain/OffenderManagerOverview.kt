@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDateTime
 
 data class OffenderManagerOverview @JsonCreator constructor(
   val forename: String,
@@ -16,5 +17,6 @@ data class OffenderManagerOverview @JsonCreator constructor(
   val totalReductionHours: BigDecimal,
   val pointsAvailable: BigInteger,
   val pointsUsed: BigInteger,
-  val pointsRemaining: BigInteger
+  val pointsRemaining: BigInteger,
+  val lastUpdatedOn: LocalDateTime?
 )

@@ -13,6 +13,7 @@ fun offenderManagerOverviewResponse() = """
     "totalReductionHours": 10,
     "pointsAvailable": 1265,
     "pointsUsed": 1580,
-    "pointsRemaining": -315
+    "pointsRemaining": -315,
+    "lastUpdatedOn": "2013-11-03T09:00:00"
   }
 """.trimIndent()
