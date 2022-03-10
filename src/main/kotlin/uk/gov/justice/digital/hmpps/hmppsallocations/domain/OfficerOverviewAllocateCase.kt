@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDateTime
 
 data class OfficerOverviewAllocateCase @JsonCreator constructor(
   @Schema(description = "Offender Name", example = "John Smith")
@@ -37,7 +38,9 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
   @Schema(description = "Offender Manager Points Used", example = "35")
   val offenderManagerPointsUsed: BigInteger,
   @Schema(description = "Offender Manager Points Remaining", example = "35")
-  val offenderManagerPointsRemaining: BigInteger
+  val offenderManagerPointsRemaining: BigInteger,
+  @Schema(description = "Last time the Capacity was updated", example = "2013-11-03T09:00:00")
+  val lastUpdatedOn: LocalDateTime?
 ) {
   companion object {
     fun from(unallocatedCaseEntity: UnallocatedCaseEntity, offenderManagerOverview: OffenderManagerOverview, grade: String): OfficerOverviewAllocateCase {
@@ -57,7 +60,8 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
         offenderManagerOverview.totalReductionHours,
         offenderManagerOverview.pointsAvailable,
         offenderManagerOverview.pointsUsed,
-        offenderManagerOverview.pointsRemaining
+        offenderManagerOverview.pointsRemaining,
+        offenderManagerOverview.lastUpdatedOn
       )
     }
   }
