@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
@@ -143,6 +145,14 @@ class CommunityApiClient(private val webClient: WebClient) {
           else -> Mono.error(ex)
         }
       }
+  }
+
+  fun getDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/documents/$documentId")
+      .retrieve()
+      .toEntity(Resource::class.java)
   }
 
   data class Staff @JsonCreator constructor(
