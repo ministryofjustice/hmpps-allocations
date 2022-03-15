@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -65,7 +66,7 @@ data class UnallocatedCase @JsonCreator constructor(
       expectedSentenceEndDate: LocalDate?,
       sentenceDescription: String?,
       requirements: List<ConvictionRequirement>?,
-      courtReport: CourtReport?,
+      courtReport: Document?,
       assessment: Assessment?,
     ): UnallocatedCase {
       return UnallocatedCase(
@@ -151,15 +152,18 @@ data class UnallocatedCaseCourtReport @JsonCreator constructor(
   val description: String,
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val completedDate: LocalDateTime?
+  val completedDate: LocalDateTime?,
+  @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
+  val documentId: String
 ) {
   companion object {
-    fun from(courtReport: CourtReport?): UnallocatedCaseCourtReport? {
+    fun from(courtReport: Document?): UnallocatedCaseCourtReport? {
       return courtReport?.let {
         UnallocatedCaseCourtReport(
-          it.courtReportType.code,
-          it.courtReportType.description,
-          it.completedDate
+          it.subType.code,
+          it.subType.description,
+          it.reportDocumentDates.completedDate,
+          it.id
         )
       }
     }

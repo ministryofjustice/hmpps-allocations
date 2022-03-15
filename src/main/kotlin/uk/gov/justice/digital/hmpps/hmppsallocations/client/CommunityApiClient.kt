@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
@@ -113,6 +115,18 @@ class CommunityApiClient(private val webClient: WebClient) {
       .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
       .retrieve()
       .bodyToMono(responseType)
+  }
+
+  fun getPreSentenceReportDocument(crn: String, convictionId: Long): Mono<List<Document>> {
+    return webClient
+      .get()
+      .uri("/offenders/crn/$crn/documents/grouped?subtype=PSR&type=COURT_REPORT_DOCUMENT")
+      .retrieve()
+      .bodyToMono(Documents::class.java)
+      .map {
+        it.convictions.filter { documentConviction -> documentConviction.convictionId.toLong() == convictionId }
+          .flatMap { documentConviction -> documentConviction.documents }
+      }
   }
 
   fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {

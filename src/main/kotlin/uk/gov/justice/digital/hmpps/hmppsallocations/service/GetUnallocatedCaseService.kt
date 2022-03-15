@@ -38,6 +38,17 @@ class GetUnallocatedCaseService(
       val conviction = communityApiClient.getConviction(crn, convictionId)
 
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
+      val courtReportDocument = communityApiClient.getPreSentenceReportDocument(crn, convictionId)
+        .map { documents ->
+          Optional.ofNullable(
+            documents
+              .map { document ->
+                document.subType.description = courtReportMapper.deliusToReportType(document.subType.code, document.subType.description)
+                document
+              }
+              .maxByOrNull { document -> document.reportDocumentDates.completedDate ?: LocalDateTime.MIN }
+          )
+        }
       val courtReport = communityApiClient.getCourtReports(crn, convictionId)
         .map { courtReports ->
           Optional.ofNullable(
@@ -53,7 +64,7 @@ class GetUnallocatedCaseService(
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
 
-      val results = Mono.zip(offenderSummary, requirements, courtReport, assessment, conviction).block()!!
+      val results = Mono.zip(offenderSummary, requirements, courtReportDocument, assessment, conviction).block()!!
 
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
