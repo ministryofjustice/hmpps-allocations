@@ -6,10 +6,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CourtReport
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
@@ -105,14 +106,16 @@ class CommunityApiClient(private val webClient: WebClient) {
       .map { it.first() }
   }
 
-  fun getCourtReports(crn: String, convictionId: Long): Mono<List<CourtReport>> {
-    val responseType = object : ParameterizedTypeReference<List<CourtReport>>() {}
-
+  fun getPreSentenceReportDocument(crn: String, convictionId: Long): Mono<List<Document>> {
     return webClient
       .get()
-      .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
+      .uri("/offenders/crn/$crn/documents/grouped?subtype=PSR&type=COURT_REPORT_DOCUMENT")
       .retrieve()
-      .bodyToMono(responseType)
+      .bodyToMono(Documents::class.java)
+      .map {
+        it.convictions.filter { documentConviction -> documentConviction.convictionId.toLong() == convictionId }
+          .flatMap { documentConviction -> documentConviction.documents }
+      }
   }
 
   fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {

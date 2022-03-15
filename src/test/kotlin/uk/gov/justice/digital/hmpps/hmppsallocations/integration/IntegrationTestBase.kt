@@ -47,7 +47,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleCourtReportResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singlePreSentenceReportDocumentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -363,19 +363,21 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun singleCourtReportResponse(crn: String, convictionId: Long) {
-    val courtReportsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
-    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleCourtReportResponse())
+  protected fun singlePreSentenceReportDocumentResponse(crn: String, convictionId: Long) {
+    val preSentenceReportRequest =
+      request().withPath("/offenders/crn/$crn/documents/grouped").withQueryStringParameter(Parameter("subtype", "PSR"))
+        .withQueryStringParameter(Parameter("type", "COURT_REPORT_DOCUMENT"))
+    communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(singlePreSentenceReportDocumentResponse(convictionId))
     )
   }
 
-  protected fun noCourtReportResponse(crn: String, convictionId: Long) {
-    val courtReportsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId/courtReports")
-    communityApi.`when`(courtReportsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("[]")
+  protected fun noPreSentenceReportDocumentResponse(crn: String, convictionId: Long) {
+    val preSentenceReportRequest =
+      request().withPath("/offenders/crn/$crn/documents/grouped").withQueryStringParameter(Parameter("subtype", "PSR"))
+        .withQueryStringParameter(Parameter("type", "COURT_REPORT_DOCUMENT"))
+    communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("{\"convictions\":[]}")
     )
   }
 
@@ -411,15 +413,6 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/registrations")
 
     communityApi.`when`(registrationsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{}")
-    )
-  }
-
-  protected fun noOgrsFromDelius(crn: String) {
-    val ogrsRequest =
-      request().withPath("/offenders/crn/$crn/assessments")
-
-    communityApi.`when`(ogrsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("{}")
     )
   }
