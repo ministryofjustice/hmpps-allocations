@@ -49,17 +49,6 @@ class GetUnallocatedCaseService(
               .maxByOrNull { document -> document.reportDocumentDates.completedDate ?: LocalDateTime.MIN }
           )
         }
-      val courtReport = communityApiClient.getCourtReports(crn, convictionId)
-        .map { courtReports ->
-          Optional.ofNullable(
-            courtReports
-              .map { cr ->
-                cr.courtReportType.description = courtReportMapper.deliusToReportType(cr.courtReportType.code, cr.courtReportType.description)
-                cr
-              }
-              .maxByOrNull { cr -> cr.completedDate ?: LocalDateTime.MIN }
-          )
-        }
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }

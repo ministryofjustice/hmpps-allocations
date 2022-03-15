@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CourtReport
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
@@ -105,16 +104,6 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(responseType)
       .map { it.first() }
-  }
-
-  fun getCourtReports(crn: String, convictionId: Long): Mono<List<CourtReport>> {
-    val responseType = object : ParameterizedTypeReference<List<CourtReport>>() {}
-
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/convictions/$convictionId/courtReports")
-      .retrieve()
-      .bodyToMono(responseType)
   }
 
   fun getPreSentenceReportDocument(crn: String, convictionId: Long): Mono<List<Document>> {
