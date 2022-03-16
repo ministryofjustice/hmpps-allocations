@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
@@ -116,6 +118,10 @@ class GetUnallocatedCaseService(
       val results = Mono.zip(registrations, riskSummary, latestRiskPredictor, ogrs).block()!!
       return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null), results.t4.orElse(null))
     }
+
+  fun getCaseDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
+    return communityApiClient.getDocument(crn, documentId)
+  }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

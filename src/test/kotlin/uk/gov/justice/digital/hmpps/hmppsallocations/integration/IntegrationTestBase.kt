@@ -22,6 +22,7 @@ import org.mockserver.model.Parameter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
@@ -511,6 +512,22 @@ abstract class IntegrationTestBase {
 
     workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerOverviewResponse())
+    )
+  }
+
+  protected fun getDocument(crn: String, documentId: String) {
+    val documentRequest = request().withPath("/offenders/crn/$crn/documents/$documentId")
+    communityApi.`when`(documentRequest, exactly(1)).respond(
+      response()
+        .withHeader(HttpHeaders.CONTENT_TYPE, "application/msword;charset=UTF-8")
+        .withHeader(HttpHeaders.ACCEPT_RANGES, "bytes")
+        .withHeader(HttpHeaders.CACHE_CONTROL, "max-age=0, must-revalidate")
+        .withHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"sample_word_doc.doc\"")
+        .withHeader(HttpHeaders.DATE, "Fri, 05 Jan 2018 09:50:45 GMT")
+        .withHeader(HttpHeaders.ETAG, "9514985635950")
+        .withHeader(HttpHeaders.LAST_MODIFIED, "Wed, 03 Jan 2018 13:20:35 GMT")
+        .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
+        .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes())
     )
   }
 
