@@ -50,7 +50,7 @@ fun documentsResponse(convictionId: Long) = """
                         "description": "Crown Prosecution Service case pack"
                     },
                     "extendedDescription": "Crown Prosecution Service case pack for 29/10/2021",
-                    "createdAt": "2021-12-03T00:00:00"
+                    "createdAt": "2021-10-17T00:00:00"
                 }
               ]
           }

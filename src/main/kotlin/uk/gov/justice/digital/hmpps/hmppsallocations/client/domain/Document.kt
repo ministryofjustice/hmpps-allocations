@@ -7,7 +7,9 @@ data class Document @JsonCreator constructor(
   val id: String,
   val type: DocumentType,
   val subType: DocumentType?,
-  val reportDocumentDates: DocumentDates?
+  val reportDocumentDates: DocumentDates?,
+  val createdAt: LocalDateTime,
+  val lastModifiedAt: LocalDateTime?
 )
 
 data class DocumentType @JsonCreator constructor(

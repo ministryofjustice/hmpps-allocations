@@ -45,17 +45,18 @@ data class UnallocatedCase @JsonCreator constructor(
   val requirements: List<UnallocatedCaseRequirement>?,
   @Schema(description = "PNC Number")
   val pncNumber: String?,
-  val courtReport: UnallocatedCaseCourtReport?,
+  val courtReport: UnallocatedCaseDocument?,
   val assessment: UnallocatedAssessment?,
   @Schema(description = "Conviction Id")
   val convictionId: Long,
   @Schema(description = "Case Type")
-  val caseType: CaseTypes
+  val caseType: CaseTypes,
+  val cpsPack: UnallocatedCaseDocument?
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return from(case, null, null, null, null, null, null, null, null)
+      return from(case, null, null, null, null, null, null, emptyMap(), null)
     }
 
     fun from(
@@ -66,7 +67,7 @@ data class UnallocatedCase @JsonCreator constructor(
       expectedSentenceEndDate: LocalDate?,
       sentenceDescription: String?,
       requirements: List<ConvictionRequirement>?,
-      courtReport: Document?,
+      documents: Map<String, UnallocatedCaseDocument?>,
       assessment: Assessment?,
     ): UnallocatedCase {
       return UnallocatedCase(
@@ -86,10 +87,11 @@ data class UnallocatedCase @JsonCreator constructor(
         sentenceDescription,
         requirements?.map { UnallocatedCaseRequirement.from(it) },
         offenderSummary?.otherIds?.pncNumber,
-        UnallocatedCaseCourtReport.from(courtReport),
+        documents["COURT_REPORT_DOCUMENT"],
         UnallocatedAssessment.from(assessment),
         case.convictionId,
-        case.caseType
+        case.caseType,
+        documents["CPSPACK_DOCUMENT"]
       )
     }
   }
@@ -145,24 +147,24 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
   }
 }
 
-data class UnallocatedCaseCourtReport @JsonCreator constructor(
+data class UnallocatedCaseDocument @JsonCreator constructor(
   @Schema(description = "code", example = "CJF")
-  val code: String,
+  val code: String?,
   @Schema(description = "Description", example = "Fast")
-  val description: String,
+  var description: String?,
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val completedDate: LocalDateTime?,
   @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
-  val documentId: String
+  val documentId: String,
 ) {
   companion object {
-    fun from(courtReport: Document?): UnallocatedCaseCourtReport? {
-      return courtReport?.let {
-        UnallocatedCaseCourtReport(
-          it.subType!!.code,
-          it.subType.description,
-          it.reportDocumentDates!!.completedDate,
+    fun from(document: Document?): UnallocatedCaseDocument? {
+      return document?.let {
+        UnallocatedCaseDocument(
+          it.subType?.code,
+          it.subType?.description,
+          it.reportDocumentDates?.completedDate ?: it.lastModifiedAt ?: it.createdAt,
           it.id
         )
       }
