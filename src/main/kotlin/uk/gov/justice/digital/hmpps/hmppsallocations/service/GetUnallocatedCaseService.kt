@@ -40,15 +40,18 @@ class GetUnallocatedCaseService(
       val conviction = communityApiClient.getConviction(crn, convictionId)
 
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
-      val courtReportDocument = communityApiClient.getPreSentenceReportDocument(crn, convictionId)
+      val courtReportDocument = communityApiClient.getDocuments(crn, convictionId)
         .map { documents ->
           Optional.ofNullable(
             documents
+              .filter { document ->
+                document.type.code == "COURT_REPORT_DOCUMENT"
+              }
               .map { document ->
-                document.subType.description = courtReportMapper.deliusToReportType(document.subType.code, document.subType.description)
+                document.subType!!.description = courtReportMapper.deliusToReportType(document.subType.code, document.subType.description)
                 document
               }
-              .maxByOrNull { document -> document.reportDocumentDates.completedDate ?: LocalDateTime.MIN }
+              .maxByOrNull { document -> document.reportDocumentDates!!.completedDate ?: LocalDateTime.MIN }
           )
         }
 
@@ -120,7 +123,7 @@ class GetUnallocatedCaseService(
     }
 
   fun getCaseDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
-    return communityApiClient.getDocument(crn, documentId)
+    return communityApiClient.getDocuments(crn, documentId)
   }
 
   companion object {

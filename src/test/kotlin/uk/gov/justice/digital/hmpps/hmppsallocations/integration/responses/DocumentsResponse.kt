@@ -1,8 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun singlePreSentenceReportDocumentResponse(convictionId: Long) = """
+fun documentsResponse(convictionId: Long) = """
   {
-      "documents": [],
+      "documents": [
+      {
+            "id": "626aa1d1-71c6-4b76-92a1-bf2f9250c143",
+            "documentName": "Pre Cons.pdf",
+            "author": "Sally Socks",
+            "type": {
+                "code": "PRECONS_DOCUMENT",
+                "description": "PNC previous convictions"
+            },
+            "extendedDescription": "Previous convictions as of 27/07/2021",
+            "createdAt": "2021-11-17T00:00:00"
+        }
+      ],
       "convictions": [
           {
               "convictionId": "$convictionId",
@@ -28,7 +40,18 @@ fun singlePreSentenceReportDocumentResponse(convictionId: Long) = """
                           "requiredDate": "2021-11-17",
                           "completedDate": "2021-12-03T00:00:00"
                       }
-                  }
+                  },
+                  {
+                    "id": "efb7a4e8-3f4a-449c-bf6f-b1fc8def3410",
+                    "documentName": "cps.pdf",
+                    "author": "Sally Socks",
+                    "type": {
+                        "code": "CPSPACK_DOCUMENT",
+                        "description": "Crown Prosecution Service case pack"
+                    },
+                    "extendedDescription": "Crown Prosecution Service case pack for 29/10/2021",
+                    "createdAt": "2021-12-03T00:00:00"
+                }
               ]
           }
       ]

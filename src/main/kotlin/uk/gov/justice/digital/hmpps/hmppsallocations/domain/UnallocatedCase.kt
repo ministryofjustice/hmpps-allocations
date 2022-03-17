@@ -160,9 +160,9 @@ data class UnallocatedCaseCourtReport @JsonCreator constructor(
     fun from(courtReport: Document?): UnallocatedCaseCourtReport? {
       return courtReport?.let {
         UnallocatedCaseCourtReport(
-          it.subType.code,
+          it.subType!!.code,
           it.subType.description,
-          it.reportDocumentDates.completedDate,
+          it.reportDocumentDates!!.completedDate,
           it.id
         )
       }

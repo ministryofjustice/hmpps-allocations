@@ -19,7 +19,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
-    singlePreSentenceReportDocumentResponse(crn, convictionId)
+    documentsResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId")
@@ -98,7 +98,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
-    noPreSentenceReportDocumentResponse(crn, convictionId)
+    noDocumentsResponse(crn, convictionId)
     getAssessmentsForCrn(crn)
 
     webTestClient.get()
@@ -120,7 +120,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     offenderSummaryResponse(crn)
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
-    singlePreSentenceReportDocumentResponse(crn, convictionId)
+    documentsResponse(crn, convictionId)
     notFoundAssessmentForCrn(crn)
 
     webTestClient.get()

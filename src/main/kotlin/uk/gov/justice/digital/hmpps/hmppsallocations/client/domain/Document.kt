@@ -5,8 +5,9 @@ import java.time.LocalDateTime
 
 data class Document @JsonCreator constructor(
   val id: String,
-  val subType: DocumentType,
-  val reportDocumentDates: DocumentDates
+  val type: DocumentType,
+  val subType: DocumentType?,
+  val reportDocumentDates: DocumentDates?
 )
 
 data class DocumentType @JsonCreator constructor(

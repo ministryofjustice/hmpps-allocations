@@ -32,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerOverviewResponse
@@ -48,7 +49,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singlePreSentenceReportDocumentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -364,21 +364,19 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun singlePreSentenceReportDocumentResponse(crn: String, convictionId: Long) {
+  protected fun documentsResponse(crn: String, convictionId: Long) {
     val preSentenceReportRequest =
-      request().withPath("/offenders/crn/$crn/documents/grouped").withQueryStringParameter(Parameter("subtype", "PSR"))
-        .withQueryStringParameter(Parameter("type", "COURT_REPORT_DOCUMENT"))
+      request().withPath("/offenders/crn/$crn/documents/grouped")
     communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singlePreSentenceReportDocumentResponse(convictionId))
+      response().withContentType(APPLICATION_JSON).withBody(documentsResponse(convictionId))
     )
   }
 
-  protected fun noPreSentenceReportDocumentResponse(crn: String, convictionId: Long) {
+  protected fun noDocumentsResponse(crn: String, convictionId: Long) {
     val preSentenceReportRequest =
-      request().withPath("/offenders/crn/$crn/documents/grouped").withQueryStringParameter(Parameter("subtype", "PSR"))
-        .withQueryStringParameter(Parameter("type", "COURT_REPORT_DOCUMENT"))
+      request().withPath("/offenders/crn/$crn/documents/grouped")
     communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{\"convictions\":[]}")
+      response().withContentType(APPLICATION_JSON).withBody("{\"documents\": [], \"convictions\":[]}")
     )
   }
 
