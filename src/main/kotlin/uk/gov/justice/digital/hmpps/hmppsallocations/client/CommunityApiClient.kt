@@ -108,10 +108,10 @@ class CommunityApiClient(private val webClient: WebClient) {
       .map { it.first() }
   }
 
-  fun getPreSentenceReportDocument(crn: String, convictionId: Long): Mono<List<Document>> {
+  fun getDocuments(crn: String, convictionId: Long): Mono<List<Document>> {
     return webClient
       .get()
-      .uri("/offenders/crn/$crn/documents/grouped?subtype=PSR&type=COURT_REPORT_DOCUMENT")
+      .uri("/offenders/crn/$crn/documents/grouped")
       .retrieve()
       .bodyToMono(Documents::class.java)
       .map {
@@ -147,7 +147,7 @@ class CommunityApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
+  fun getDocuments(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/documents/$documentId")
