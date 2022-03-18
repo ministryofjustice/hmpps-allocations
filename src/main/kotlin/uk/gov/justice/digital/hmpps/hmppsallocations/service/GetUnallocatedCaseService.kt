@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
@@ -42,17 +43,14 @@ class GetUnallocatedCaseService(
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
       val courtReportDocument = communityApiClient.getDocuments(crn, convictionId)
         .map { documents ->
-          Optional.ofNullable(
-            documents
-              .filter { document ->
-                document.type.code == "COURT_REPORT_DOCUMENT"
-              }
-              .map { document ->
-                document.subType!!.description = courtReportMapper.deliusToReportType(document.subType.code, document.subType.description)
-                document
-              }
-              .maxByOrNull { document -> document.reportDocumentDates!!.completedDate ?: LocalDateTime.MIN }
-          )
+          val documentTypes = documents.groupBy({ document -> document.type.code }, { document ->
+            document.subType?.let { subType ->
+              subType.description = courtReportMapper.deliusToReportType(subType.code, subType.description)
+            }
+            UnallocatedCaseDocument.from(document)
+          })
+            .mapValues { entry -> entry.value.maxByOrNull { document -> document?.completedDate ?: LocalDateTime.MIN } }
+          documentTypes
         }
 
       val assessment = assessmentApiClient.getAssessment(crn)
@@ -64,7 +62,7 @@ class GetUnallocatedCaseService(
       return UnallocatedCase.from(
         it, results.t1, age, results.t5.get().offences,
         results.t5.map { it.sentence?.expectedSentenceEndDate }.orElse(null), results.t5.map { it.sentence?.description }.orElse(null), results.t2.requirements,
-        results.t3.orElse(null),
+        results.t3,
         results.t4.orElse(null)
       )
     }
