@@ -52,7 +52,7 @@ data class UnallocatedCase @JsonCreator constructor(
   @Schema(description = "Case Type")
   val caseType: CaseTypes,
   val cpsPack: UnallocatedCaseDocument?,
-  val preConvictionReport: UnallocatedCaseDocument?
+  val preConvictionDocument: UnallocatedCaseDocument?
 ) {
 
   companion object {
@@ -93,7 +93,7 @@ data class UnallocatedCase @JsonCreator constructor(
         case.convictionId,
         case.caseType,
         documents?.cpsPack,
-        documents?.preConvictionReport
+        documents?.preConvictionDocument
       )
     }
   }
