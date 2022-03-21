@@ -92,6 +92,10 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo(convictionId)
       .jsonPath("$.caseType")
       .isEqualTo("CUSTODY")
+      .jsonPath("$.preConvictionReport.completedDate")
+      .isEqualTo("2021-11-17")
+      .jsonPath("$.preConvictionReport.documentId")
+      .isEqualTo("626aa1d1-71c6-4b76-92a1-bf2f9250c143")
   }
 
   @Test
