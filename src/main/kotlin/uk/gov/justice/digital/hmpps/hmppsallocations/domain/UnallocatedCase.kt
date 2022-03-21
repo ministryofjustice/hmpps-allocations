@@ -51,12 +51,13 @@ data class UnallocatedCase @JsonCreator constructor(
   val convictionId: Long,
   @Schema(description = "Case Type")
   val caseType: CaseTypes,
-  val cpsPack: UnallocatedCaseDocument?
+  val cpsPack: UnallocatedCaseDocument?,
+  val preConvictionReport: UnallocatedCaseDocument?
 ) {
 
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return from(case, null, null, null, null, null, null, emptyMap(), null)
+      return from(case, null, null, null, null, null, null, null, null)
     }
 
     fun from(
@@ -67,7 +68,7 @@ data class UnallocatedCase @JsonCreator constructor(
       expectedSentenceEndDate: LocalDate?,
       sentenceDescription: String?,
       requirements: List<ConvictionRequirement>?,
-      documents: Map<String, UnallocatedCaseDocument?>,
+      documents: Documents?,
       assessment: Assessment?,
     ): UnallocatedCase {
       return UnallocatedCase(
@@ -87,11 +88,12 @@ data class UnallocatedCase @JsonCreator constructor(
         sentenceDescription,
         requirements?.map { UnallocatedCaseRequirement.from(it) },
         offenderSummary?.otherIds?.pncNumber,
-        documents["COURT_REPORT_DOCUMENT"],
+        documents?.preSentenceReport,
         UnallocatedAssessment.from(assessment),
         case.convictionId,
         case.caseType,
-        documents["CPSPACK_DOCUMENT"]
+        documents?.cpsPack,
+        documents?.preConvictionReport
       )
     }
   }

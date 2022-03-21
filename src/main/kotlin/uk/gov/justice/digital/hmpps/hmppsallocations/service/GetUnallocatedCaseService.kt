@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
@@ -50,7 +51,7 @@ class GetUnallocatedCaseService(
             UnallocatedCaseDocument.from(document)
           })
             .mapValues { entry -> entry.value.maxByOrNull { document -> document?.completedDate ?: LocalDateTime.MIN } }
-          documentTypes
+          Documents(documentTypes["COURT_REPORT_DOCUMENT"], documentTypes["CPSPACK_DOCUMENT"], documentTypes["PRECONS_DOCUMENT"])
         }
 
       val assessment = assessmentApiClient.getAssessment(crn)
