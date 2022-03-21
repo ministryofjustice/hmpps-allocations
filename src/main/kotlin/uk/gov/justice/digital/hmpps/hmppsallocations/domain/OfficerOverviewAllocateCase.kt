@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 data class OfficerOverviewAllocateCase @JsonCreator constructor(
   @Schema(description = "Offender Name", example = "John Smith")
@@ -40,7 +41,9 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
   @Schema(description = "Offender Manager Points Remaining", example = "35")
   val offenderManagerPointsRemaining: BigInteger,
   @Schema(description = "Last time the Capacity was updated", example = "2013-11-03T09:00:00")
-  val lastUpdatedOn: LocalDateTime?
+  val lastUpdatedOn: LocalDateTime?,
+  @Schema(description = "Next time the reduction total will change", example = "2022-11-03T09:00:00Z")
+  val nextReductionChange: ZonedDateTime?
 ) {
   companion object {
     fun from(unallocatedCaseEntity: UnallocatedCaseEntity, offenderManagerOverview: OffenderManagerOverview, grade: String): OfficerOverviewAllocateCase {
@@ -61,7 +64,8 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
         offenderManagerOverview.pointsAvailable,
         offenderManagerOverview.pointsUsed,
         offenderManagerOverview.pointsRemaining,
-        offenderManagerOverview.lastUpdatedOn
+        offenderManagerOverview.lastUpdatedOn,
+        offenderManagerOverview.nextReductionChange
       )
     }
   }

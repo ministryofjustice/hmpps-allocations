@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 data class OffenderManagerOverview @JsonCreator constructor(
   val forename: String,
@@ -18,5 +19,6 @@ data class OffenderManagerOverview @JsonCreator constructor(
   val pointsAvailable: BigInteger,
   val pointsUsed: BigInteger,
   val pointsRemaining: BigInteger,
-  val lastUpdatedOn: LocalDateTime?
+  val lastUpdatedOn: LocalDateTime?,
+  val nextReductionChange: ZonedDateTime?
 )
