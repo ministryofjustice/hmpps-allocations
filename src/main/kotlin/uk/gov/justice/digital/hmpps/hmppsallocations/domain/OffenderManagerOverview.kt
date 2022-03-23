@@ -25,9 +25,9 @@ data class OffenderManagerOverview @JsonCreator constructor(
 )
 
 data class CaseTotals @JsonCreator constructor(
-  val A: BigDecimal,
-  val B: BigDecimal,
-  val C: BigDecimal,
-  val D: BigDecimal,
+  val a: BigDecimal,
+  val b: BigDecimal,
+  val c: BigDecimal,
+  val d: BigDecimal,
   val untiered: BigDecimal
 )
