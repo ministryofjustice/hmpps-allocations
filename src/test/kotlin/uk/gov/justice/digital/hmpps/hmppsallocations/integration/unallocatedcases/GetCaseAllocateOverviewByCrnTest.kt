@@ -55,5 +55,15 @@ class GetCaseAllocateOverviewByCrnTest : IntegrationTestBase() {
       .isEqualTo("2013-11-03T09:00:00")
       .jsonPath("$.nextReductionChange")
       .isEqualTo("2022-11-03T09:00:00Z")
+      .jsonPath("$.caseTotals.a")
+      .isEqualTo(6)
+      .jsonPath("$.caseTotals.b")
+      .isEqualTo(10)
+      .jsonPath("$.caseTotals.c")
+      .isEqualTo(12)
+      .jsonPath("$.caseTotals.d")
+      .isEqualTo(14)
+      .jsonPath("$.caseTotals.untiered")
+      .isEqualTo(2)
   }
 }

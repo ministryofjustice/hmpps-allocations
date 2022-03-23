@@ -20,5 +20,14 @@ data class OffenderManagerOverview @JsonCreator constructor(
   val pointsUsed: BigInteger,
   val pointsRemaining: BigInteger,
   val lastUpdatedOn: LocalDateTime?,
-  val nextReductionChange: ZonedDateTime?
+  val nextReductionChange: ZonedDateTime?,
+  val caseTotals: CaseTotals
+)
+
+data class CaseTotals @JsonCreator constructor(
+  val a: BigDecimal,
+  val b: BigDecimal,
+  val c: BigDecimal,
+  val d: BigDecimal,
+  val untiered: BigDecimal
 )

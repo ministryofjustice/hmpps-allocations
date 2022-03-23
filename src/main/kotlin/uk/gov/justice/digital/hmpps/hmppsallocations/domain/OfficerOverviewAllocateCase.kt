@@ -43,7 +43,8 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
   @Schema(description = "Last time the Capacity was updated", example = "2013-11-03T09:00:00")
   val lastUpdatedOn: LocalDateTime?,
   @Schema(description = "Next time the reduction total will change", example = "2022-11-03T09:00:00Z")
-  val nextReductionChange: ZonedDateTime?
+  val nextReductionChange: ZonedDateTime?,
+  val caseTotals: CaseTotals
 ) {
   companion object {
     fun from(unallocatedCaseEntity: UnallocatedCaseEntity, offenderManagerOverview: OffenderManagerOverview, grade: String): OfficerOverviewAllocateCase {
@@ -65,7 +66,8 @@ data class OfficerOverviewAllocateCase @JsonCreator constructor(
         offenderManagerOverview.pointsUsed,
         offenderManagerOverview.pointsRemaining,
         offenderManagerOverview.lastUpdatedOn,
-        offenderManagerOverview.nextReductionChange
+        offenderManagerOverview.nextReductionChange,
+        offenderManagerOverview.caseTotals
       )
     }
   }
