@@ -58,12 +58,12 @@ class GetCaseAllocateOverviewByCrnTest : IntegrationTestBase() {
       .jsonPath("$.caseTotals.a")
       .isEqualTo(6)
       .jsonPath("$.caseTotals.b")
-      .isEqualTo(6)
+      .isEqualTo(10)
       .jsonPath("$.caseTotals.c")
-      .isEqualTo(6)
+      .isEqualTo(12)
       .jsonPath("$.caseTotals.d")
-      .isEqualTo(6)
+      .isEqualTo(14)
       .jsonPath("$.caseTotals.untiered")
-      .isEqualTo(6)
+      .isEqualTo(2)
   }
 }
