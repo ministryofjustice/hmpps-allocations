@@ -68,6 +68,11 @@ class GetUnallocatedCaseService(
       )
     }
 
+  fun getCaseOverview(crn: String, convictionId: Long): UnallocatedCase? =
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+      UnallocatedCase.from(it)
+    }
+
   fun getAll(): List<UnallocatedCase> {
     return unallocatedCasesRepository.findAll().map {
       UnallocatedCase.from(it)
