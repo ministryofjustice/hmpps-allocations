@@ -46,7 +46,7 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
   @Test
   fun `get 404 if crn not found`() {
     webTestClient.get()
-      .uri("/cases/unallocated/J678912/convictions/51245325")
+      .uri("/cases/unallocated/J678912/convictions/51245325/overview")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
