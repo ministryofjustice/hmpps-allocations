@@ -39,7 +39,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offen
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerPotentialCaseResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagersToAllocateResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
@@ -78,7 +77,7 @@ abstract class IntegrationTestBase {
 
   val firstSentenceDate: LocalDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
-  val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
+  final val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
 
   val previouslyManagedCase = UnallocatedCaseEntity(
     null,
@@ -484,14 +483,6 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(ogrsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(ogrsResponse())
-    )
-  }
-
-  protected fun getOffenderManagersToAllocateForCrn() {
-    var offenderManagerRequest = request().withPath("/team/N03F01/offenderManagers")
-
-    workloadApi.`when`(offenderManagerRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagersToAllocateResponse())
     )
   }
 
