@@ -1,7 +1,7 @@
 
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.2"
   kotlin("plugin.spring") version "1.6.10"
   kotlin("plugin.jpa") version "1.6.10"
   id("io.gitlab.arturbosch.detekt").version("1.17.1")
@@ -19,23 +19,23 @@ allOpen {
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.2")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.3")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.3")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.3")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.6")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.6")
 
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("com.opencsv:opencsv:5.2")
+  implementation("com.opencsv:opencsv:5.6")
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.3.2")
+  runtimeOnly("org.postgresql:postgresql:42.3.3")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
-  testImplementation("org.mock-server:mockserver-netty:5.11.1")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
+  testImplementation("org.mock-server:mockserver-netty:5.13.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
 }
 
