@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentenacedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
@@ -232,6 +233,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
+    )
+  }
+
+  protected fun activeSentenacedAndPreConvictionResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(activeSentenacedAndPreConvictionResponse())
     )
   }
 
