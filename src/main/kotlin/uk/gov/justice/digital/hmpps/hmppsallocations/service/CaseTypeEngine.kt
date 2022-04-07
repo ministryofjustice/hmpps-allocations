@@ -24,9 +24,9 @@ class CaseTypeEngine(
   }
 
   fun convictionToCaseType(conviction: Conviction): CaseTypes? {
-    var caseType: CaseTypes? = null
+    var caseType: CaseTypes = CaseTypes.UNKNOWN
     for (caseTypeRule in caseTypeRules) {
-      if (caseTypeRule.isCaseType(conviction.sentence!!.sentenceType.code, conviction.custody?.status?.code)) {
+      if (caseTypeRule.isCaseType(conviction.sentence?.sentenceType?.code, conviction.custody?.status?.code)) {
         caseType = caseTypeRule.getCaseType()
         break
       }

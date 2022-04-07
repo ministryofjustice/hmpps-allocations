@@ -167,4 +167,35 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
   }
+
+  @Test
+  fun `create case when one conviction is sentenced and other is still being sentenced`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderSummaryResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    activeSentenacedAndPreConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
+    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
+    assertThat(case.name).isEqualTo("Tester TestSurname")
+    assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.status).isEqualTo("Currently managed")
+    assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
+  }
 }
