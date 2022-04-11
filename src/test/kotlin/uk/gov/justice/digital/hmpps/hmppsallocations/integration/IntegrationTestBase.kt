@@ -28,7 +28,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.PotentialCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentenacedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
@@ -36,8 +35,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerOverviewResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerPotentialCaseResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
@@ -68,7 +65,6 @@ import java.util.UUID
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
-  var workloadApi: ClientAndServer = startClientAndServer(8087)
   var assessRisksNeedsApi: ClientAndServer = startClientAndServer(8085)
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
@@ -137,7 +133,6 @@ abstract class IntegrationTestBase {
     hmppsTier.reset()
     offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
-    workloadApi.reset()
     setupOauth()
   }
 
@@ -217,7 +212,6 @@ abstract class IntegrationTestBase {
     oauthMock.stop()
     offenderAssessmentApi.stop()
     assessRisksNeedsApi.stop()
-    workloadApi.stop()
     repository.deleteAll()
   }
 
@@ -493,24 +487,6 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(ogrsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(ogrsResponse())
-    )
-  }
-
-  protected fun getImpactToOffenderManagerWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
-    val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode/potentialCases")
-      .withMethod("POST")
-      .withBody(gson.toJson(PotentialCaseRequest("C1", CaseTypes.CUSTODY)))
-
-    workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagerPotentialCaseResponse())
-    )
-  }
-
-  protected fun getOffenderManagerOverviewWhenAllocatingForCrn(crn: String, offenderManagerCode: String) {
-    val offenderManagerAllocateImpactRequest = request().withPath("/team/N03F01/offenderManagers/$offenderManagerCode")
-
-    workloadApi.`when`(offenderManagerAllocateImpactRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagerOverviewResponse())
     )
   }
 

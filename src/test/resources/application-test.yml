@@ -53,10 +53,6 @@ assess-risks-needs:
   endpoint:
     url: http://localhost:8085
 
-workload:
-  endpoint:
-    url: http://localhost:8087
-
 unallocated:
   cases:
     officer:
