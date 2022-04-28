@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -9,6 +10,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration.Companion.INDUCTION_APPOINTMENT_CACHE_NAME
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
@@ -81,7 +83,8 @@ class GetUnallocatedCaseService(
     }.map { it.map { unallocatedCase -> UnallocatedCase.from(unallocatedCase) }.block()!! }
   }
 
-  private fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
+  @Cacheable(INDUCTION_APPOINTMENT_CACHE_NAME)
+  fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
     if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
       return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate).map { contacts ->
         unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.minByOrNull { it }?.toLocalDate()
