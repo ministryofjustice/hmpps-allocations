@@ -36,6 +36,8 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   @Test
   fun `can get unallocated cases`() {
     insertCases()
+    noActiveInductionResponse("C3333333")
+    noActiveInductionResponse("J680648")
     webTestClient.get()
       .uri("/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -44,7 +46,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(4)
+      .isEqualTo(5)
       .jsonPath("$.[0].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].initialAppointment")
@@ -67,6 +69,22 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isEqualTo(123456789)
       .jsonPath("$.[0].caseType")
       .isEqualTo("CUSTODY")
+  }
+
+  @Test
+  fun `must get induction appointments for all required`() {
+    insertCases()
+    singleActiveInductionResponse("C3333333")
+    noActiveInductionResponse("J680648")
+    webTestClient.get()
+      .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[4].initialAppointment")
+      .isEqualTo("2021-11-30")
   }
 
   @Test

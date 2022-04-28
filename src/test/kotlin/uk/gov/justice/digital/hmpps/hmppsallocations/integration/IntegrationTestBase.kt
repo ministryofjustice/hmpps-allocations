@@ -116,6 +116,17 @@ abstract class IntegrationTestBase {
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
           56785493, CaseTypes.CUSTODY
+        ),
+        UnallocatedCaseEntity(
+          null,
+          "Jim Doe",
+          "C3333333",
+          "B1",
+          LocalDate.now().minusDays(3),
+          null,
+          "New to probation",
+          convictionId = 86472147892,
+          caseType = CaseTypes.COMMUNITY
         )
 
       )

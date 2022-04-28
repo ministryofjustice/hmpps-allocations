@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
@@ -16,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
@@ -74,9 +76,19 @@ class GetUnallocatedCaseService(
     }
 
   fun getAll(): List<UnallocatedCase> {
-    return unallocatedCasesRepository.findAll().map {
-      UnallocatedCase.from(it)
+    return unallocatedCasesRepository.findAll().map { unallocatedCase ->
+      enrichInductionAppointment(unallocatedCase)
+    }.map { it.map { unallocatedCase -> UnallocatedCase.from(unallocatedCase) }.block()!! }
+  }
+
+  private fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
+    if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
+      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate).map { contacts ->
+        unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.minByOrNull { it }?.toLocalDate()
+        unallocatedCaseEntity
+      }
     }
+    return Mono.just(unallocatedCaseEntity)
   }
 
   fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
@@ -132,5 +144,6 @@ class GetUnallocatedCaseService(
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val inductionCaseTypes = setOf(CaseTypes.COMMUNITY, CaseTypes.LICENSE)
   }
 }
