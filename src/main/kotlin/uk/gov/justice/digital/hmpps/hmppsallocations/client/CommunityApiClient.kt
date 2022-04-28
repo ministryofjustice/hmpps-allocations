@@ -6,7 +6,6 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Documents
@@ -40,7 +39,7 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .onStatus(
         { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingConvictionError("No tier found for $crn")) }
+        { Mono.error(MissingConvictionError("No conviction found for $crn")) }
       )
       .bodyToMono(Conviction::class.java)
       .map { Optional.of(it) }
@@ -86,7 +85,17 @@ class CommunityApiClient(private val webClient: WebClient) {
       .get()
       .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
+        { Mono.error(MissingInductionError("No induction countact found for $crn")) }
+      )
       .bodyToMono(responseType)
+      .onErrorResume { ex ->
+        when (ex) {
+          is MissingInductionError -> Mono.just(emptyList())
+          else -> Mono.error(ex)
+        }
+      }
   }
 
   fun getOffenderSummary(crn: String): Mono<OffenderSummary> {
@@ -168,4 +177,5 @@ class CommunityApiClient(private val webClient: WebClient) {
 }
 
 private class MissingConvictionError(msg: String) : RuntimeException(msg)
+private class MissingInductionError(msg: String) : RuntimeException(msg)
 private class MissingOffenderAssessmentError(msg: String) : RuntimeException(msg)

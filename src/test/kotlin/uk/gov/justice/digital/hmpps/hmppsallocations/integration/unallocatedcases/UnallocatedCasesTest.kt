@@ -88,6 +88,22 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `must get induction appointments even if one is not found`() {
+    insertCases()
+    notFoundInductionResponse("C3333333")
+    noActiveInductionResponse("J680648")
+    webTestClient.get()
+      .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[4].initialAppointment")
+      .doesNotExist()
+  }
+
+  @Test
   fun `can get previous conviction end date`() {
     repository.save(previouslyManagedCase)
     webTestClient.get()

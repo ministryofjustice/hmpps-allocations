@@ -344,6 +344,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun notFoundInductionResponse(crn: String) {
+    val inductionRequest =
+      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
+
+    communityApi.`when`(inductionRequest, exactly(1)).respond(
+      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+    )
+  }
+
   protected fun tierCalculationResponse(crn: String): HttpRequest {
     val request = request().withPath("/crn/$crn/tier")
     hmppsTier.`when`(request).respond(
