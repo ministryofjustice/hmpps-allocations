@@ -88,7 +88,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `must get induction appointments even if one is not found`() {
+  fun `must return unallocated cases even if induction appointments is not found`() {
     insertCases()
     notFoundInductionResponse("C3333333")
     noActiveInductionResponse("J680648")
