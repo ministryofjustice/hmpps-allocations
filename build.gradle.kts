@@ -5,7 +5,7 @@ plugins {
   kotlin("plugin.spring") version "1.6.21"
   kotlin("plugin.jpa") version "1.6.21"
   id("io.gitlab.arturbosch.detekt") version "1.20.0"
-  id("org.jetbrains.kotlin.plugin.allopen")version "1.6.0"
+  id("org.jetbrains.kotlin.plugin.allopen")version "1.6.21"
 }
 
 configurations {
