@@ -79,7 +79,11 @@ class EnrichEventService(
     unallocatedCasesRepository.findConvictionIdsByCrn(crn).let {
       val storedConvictionIds = it.map { it.getConvictionId() }
       val convictionIds = communityApiClient.getAllConvictions(crn)
-        .map { convictions -> convictions.map { it.convictionId } }
+        .map { convictions ->
+          convictions
+            .filter { conviction -> conviction.active || storedConvictionIds.contains(conviction.convictionId) }
+            .map { conviction -> conviction.convictionId }
+        }
         .block()!!
       return listOf(storedConvictionIds, convictionIds).flatten().toSet()
     }
