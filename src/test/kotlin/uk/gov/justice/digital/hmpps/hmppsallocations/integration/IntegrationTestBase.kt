@@ -210,7 +210,7 @@ abstract class IntegrationTestBase {
     HmppsUnallocatedCase(crn, convictionId)
   )
 
-  protected fun offenderEvent(crn: String, convictionId: Long) = HmppsOffenderEvent(crn, convictionId)
+  protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn)
 
   protected fun tierCalculationEvent(
     crn: String
