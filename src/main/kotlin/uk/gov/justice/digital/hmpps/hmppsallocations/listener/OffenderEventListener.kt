@@ -43,8 +43,7 @@ class OffenderEventListener(
 }
 
 data class HmppsOffenderEvent(
-  val crn: String,
-  val sourceId: Long
+  val crn: String
 )
 
 data class SQSMessage(

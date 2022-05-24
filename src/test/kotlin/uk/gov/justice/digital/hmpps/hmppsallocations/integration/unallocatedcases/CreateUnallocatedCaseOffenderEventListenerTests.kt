@@ -27,7 +27,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -60,7 +60,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -84,7 +84,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -108,7 +108,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -132,7 +132,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -157,7 +157,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
@@ -182,7 +182,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn, convictionId))).withMessageAttributes(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
         mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
       )
     )
