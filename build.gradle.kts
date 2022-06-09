@@ -33,7 +33,7 @@ dependencies {
   implementation("com.opencsv:opencsv:5.6")
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.3.6")
+  runtimeOnly("org.postgresql:postgresql:42.4.0")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
