@@ -19,7 +19,6 @@ class OffenderEventListener(
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val case = getCase(rawMessage)
-    log.info("received event for crn: {}", case.crn)
     enrichEventService.getAllConvictionIdsAssociatedToCrn(case.crn)
       .forEach { convictionId ->
         upsertUnallocatedCaseService.upsertUnallocatedCase(case.crn, convictionId)
@@ -33,8 +32,10 @@ class OffenderEventListener(
   }
 
   private fun getCase(rawMessage: String): HmppsOffenderEvent {
-    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
-    return objectMapper.readValue(message, HmppsOffenderEvent::class.java)
+    val sqsMessage = objectMapper.readValue(rawMessage, SQSMessage::class.java)
+    val offenderEvent = objectMapper.readValue(sqsMessage.message, HmppsOffenderEvent::class.java)
+    log.info("received event for crn: {} with type: {}", offenderEvent.crn, sqsMessage.messageAttributes.eventType.value)
+    return offenderEvent
   }
 
   companion object {
@@ -48,5 +49,14 @@ data class HmppsOffenderEvent(
 
 data class SQSMessage(
   @JsonProperty("Message") val message: String,
+  @JsonProperty("MessageAttributes") val messageAttributes: SQSMessageAttributes
 
+)
+
+data class SQSMessageAttributes(
+  val eventType: SQSMessageAttribute
+)
+
+data class SQSMessageAttribute(
+  @JsonProperty("Value") val value: String
 )

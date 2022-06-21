@@ -29,7 +29,7 @@ hmpps.sqs:
       queueName: hmpps_offender_event_queue
       dlqName: hmpps_offender_event_dlq
       subscribeTopicId: hmppsoffendertopic
-      subscribeFilter: '{"eventType":[ "CONVICTION_CHANGED"] }'
+      subscribeFilter: '{"eventType":[ "CONVICTION_CHANGED", "OFFENDER_MANAGER_CHANGED"] }'
   topics:
     hmppsdomaintopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}

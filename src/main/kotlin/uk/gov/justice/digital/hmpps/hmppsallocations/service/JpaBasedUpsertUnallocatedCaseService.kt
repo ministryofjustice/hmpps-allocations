@@ -85,7 +85,9 @@ class JpaBasedUpsertUnallocatedCaseService(
   }
 
   private fun isUnallocatedIncluded(conviction: Conviction): Boolean {
-    return caseOfficerConfigProperties.includes.contains(conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode)
+    val currentOrderManagerCode = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode
+    log.info("current order manager: {}", currentOrderManagerCode)
+    return caseOfficerConfigProperties.includes.contains(currentOrderManagerCode)
   }
 
   companion object {
