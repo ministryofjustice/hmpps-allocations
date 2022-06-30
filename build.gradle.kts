@@ -1,11 +1,11 @@
 
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.2.0"
-  kotlin("plugin.spring") version "1.6.21"
-  kotlin("plugin.jpa") version "1.6.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0"
+  kotlin("plugin.spring") version "1.7.0"
+  kotlin("plugin.jpa") version "1.7.0"
   id("io.gitlab.arturbosch.detekt") version "1.20.0"
-  id("org.jetbrains.kotlin.plugin.allopen")version "1.6.21"
+  id("org.jetbrains.kotlin.plugin.allopen")version "1.7.0"
 }
 
 configurations {
@@ -21,7 +21,7 @@ val springDocVersion by extra("1.6.7")
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.5")
 
   implementation("org.springdoc:springdoc-openapi-ui:$springDocVersion")
   implementation("org.springdoc:springdoc-openapi-kotlin:$springDocVersion")
@@ -33,7 +33,7 @@ dependencies {
   implementation("com.opencsv:opencsv:5.6")
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.3.6")
+  runtimeOnly("org.postgresql:postgresql:42.4.0")
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
@@ -42,13 +42,13 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "16"
+      jvmTarget = "17"
     }
   }
   getByName("check") {
@@ -57,7 +57,7 @@ tasks {
 }
 
 tasks.named<JavaExec>("bootRun") {
-  systemProperty("spring.profiles.active", "dev,localstack,docker")
+  systemProperty("spring.profiles.active", "dev,docker")
 }
 repositories {
   mavenCentral()
