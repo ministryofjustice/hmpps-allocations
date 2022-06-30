@@ -23,7 +23,7 @@ class EnrichEventService(
     return communityApiClient.getInductionContacts(crn, contactsFromDate)
       .mapNotNull { contacts ->
         log.info("contacts from com-api : {}", contacts.size)
-        contacts.minByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
+        contacts.maxByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
       }
       .block()
   }

@@ -116,7 +116,7 @@ class EventListenerTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `retrieve first initialAppointmentDate from delius`() {
+  fun `retrieve latest initialAppointmentDate from delius`() {
     // Given
     val crn = "J678910"
     val convictionId = 123456789L
@@ -135,7 +135,7 @@ class EventListenerTest : IntegrationTestBase() {
         .withContentType(APPLICATION_JSON).withBody(twoActiveInductionResponse())
     )
 
-    val deliusInitialAppointmentDate = LocalDate.parse("2021-10-30")
+    val deliusInitialAppointmentDate = LocalDate.parse("2021-11-30")
     val unallocatedCase = unallocatedCaseEvent(
       crn, convictionId
     )
