@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-import java.util.Optional
 
 class HmppsTierApiClient(private val webClient: WebClient) {
 
@@ -19,15 +18,14 @@ class HmppsTierApiClient(private val webClient: WebClient) {
       { Mono.error(MissingTierError("No tier found for $crn")) }
     )
     .bodyToMono(TierDto::class.java)
-    .map { Optional.of(it) }
+    .map { it.tierScore }
     .onErrorResume { ex ->
       when (ex) {
-        is MissingTierError -> Mono.just(Optional.empty())
+        is MissingTierError -> Mono.empty()
         else -> Mono.error(ex)
       }
     }
-    .block()?.map { it.tierScore }
-    ?.orElse(null)
+    .block()
     .also {
       log.info("Fetching Tier for $crn")
     }
