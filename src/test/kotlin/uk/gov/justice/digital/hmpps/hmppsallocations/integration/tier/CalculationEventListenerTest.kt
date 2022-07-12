@@ -17,10 +17,11 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `change tier after event calculation is consumed`() {
     val crn = "X123456"
+    val convictionId = 1234L
     tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0")
+    writeUnallocatedCaseToDatabase(crn, "D0", convictionId)
     publishTierCalculationCompleteMessage(crn)
-    checkTierHasBeenUpdated(crn, "B3")
+    checkTierHasBeenUpdated(crn, "B3", convictionId)
   }
 
   @Test
@@ -33,7 +34,20 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     hmppsTier.verify(tierCalculationRequest, VerificationTimes.exactly(0))
   }
 
-  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String) {
+  @Test
+  fun `updates all occurrences of crn after event calculation is consumed`() {
+    val crn = "X123456"
+    val firstConvictionId = 1234L
+    val secondConvictionId = 5678L
+    tierCalculationResponse(crn)
+    writeUnallocatedCaseToDatabase(crn, "D0", firstConvictionId)
+    writeUnallocatedCaseToDatabase(crn, "D0", secondConvictionId)
+    publishTierCalculationCompleteMessage(crn)
+    checkTierHasBeenUpdated(crn, "B3", firstConvictionId)
+    checkTierHasBeenUpdated(crn, "B3", secondConvictionId)
+  }
+
+  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long) {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
@@ -41,14 +55,14 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         name = "foo",
         status = "active",
         sentenceDate = LocalDate.now(),
-        convictionId = 1234,
+        convictionId = convictionId,
         caseType = CaseTypes.CUSTODY
       )
     )
   }
 
-  private fun checkTierHasBeenUpdated(crn: String, tier: String) {
-    await untilCallTo { repository.findFirstByCrn(crn) } matches { it!!.get().tier.equals(tier) }
+  private fun checkTierHasBeenUpdated(crn: String, tier: String, convictionId: Long) {
+    await untilCallTo { repository.findCaseByCrnAndConvictionId(crn, convictionId) } matches { it!!.tier.equals(tier) }
   }
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
