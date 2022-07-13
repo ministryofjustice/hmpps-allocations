@@ -20,7 +20,6 @@ class CalculationEventListener(
     val fullMessage = objectMapper.readValue(rawMessage, Message::class.java)
     val event = objectMapper.readValue(fullMessage.message, CalculationEventData::class.java)
     calculationTierService.updateTier(event.crn)
-    log.info("Tier calculation update consumed successfully for crn: ${event.crn}")
   }
 
   companion object {

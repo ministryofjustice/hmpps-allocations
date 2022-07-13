@@ -33,9 +33,7 @@ class OffenderEventListener(
 
   private fun getCase(rawMessage: String): HmppsOffenderEvent {
     val sqsMessage = objectMapper.readValue(rawMessage, SQSMessage::class.java)
-    val offenderEvent = objectMapper.readValue(sqsMessage.message, HmppsOffenderEvent::class.java)
-    log.info("received event for crn: {} with type: {}", offenderEvent.crn, sqsMessage.messageAttributes.eventType.value)
-    return offenderEvent
+    return objectMapper.readValue(sqsMessage.message, HmppsOffenderEvent::class.java)
   }
 
   companion object {

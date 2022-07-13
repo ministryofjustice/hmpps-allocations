@@ -21,7 +21,7 @@ import javax.validation.ValidationException
 class HmppsAllocationsExceptionHandler {
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
-    log.info("Validation exception: {}", e.message)
+    log.error("Validation exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -35,7 +35,7 @@ class HmppsAllocationsExceptionHandler {
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleMethodNotAllowed(e: Exception): ResponseEntity<ErrorResponse> {
-    log.info("Method not allowed exception: {}", e.message)
+    log.error("Method not allowed exception: {}", e.message)
     return ResponseEntity
       .status(METHOD_NOT_ALLOWED)
       .body(
@@ -63,7 +63,7 @@ class HmppsAllocationsExceptionHandler {
   @ExceptionHandler(EntityNotFoundException::class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   fun handle(e: EntityNotFoundException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
-    log.debug("Not found (404) returned with message {}", e.message)
+    log.error("Not found (404) returned with message {}", e.message)
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 404,
