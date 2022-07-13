@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
@@ -22,7 +21,6 @@ class EnrichEventService(
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
     return communityApiClient.getInductionContacts(crn, contactsFromDate)
       .mapNotNull { contacts ->
-        log.info("contacts from com-api : {}", contacts.size)
         contacts.maxByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
       }
       .block()
@@ -87,10 +85,6 @@ class EnrichEventService(
         .block()!!
       return listOf(storedConvictionIds, convictionIds).flatten().toSet()
     }
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
 }
 
 data class ProbationStatus(

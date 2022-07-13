@@ -17,7 +17,6 @@ class EventListener(
   @JmsListener(destination = "hmppsdomainqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val case = getCase(rawMessage)
-    log.info("received event for crn: {}", case.crn)
     upsertUnallocatedCaseService.upsertUnallocatedCase(case.crn, case.convictionId)
   }
 
