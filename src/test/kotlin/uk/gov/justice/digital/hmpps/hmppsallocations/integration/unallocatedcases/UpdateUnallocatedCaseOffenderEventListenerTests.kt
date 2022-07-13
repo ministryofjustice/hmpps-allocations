@@ -204,6 +204,36 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `delete when crn is not found`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        sentenceDate = LocalDate.parse("2019-11-17"),
+        initialAppointment = LocalDate.parse("2021-11-30"),
+        name = "Tester TestSurname",
+        tier = "B3",
+        status = "New to probation",
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY
+      )
+    )
+    notFoundAllConvictionResponse(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
+    assertThat(repository.count()).isEqualTo(0)
+  }
+
+  @Test
   fun `should not be able to insert more than one row of crn conviction id combination`() {
     val crn = "J678910"
     val convictionId = 123456789L

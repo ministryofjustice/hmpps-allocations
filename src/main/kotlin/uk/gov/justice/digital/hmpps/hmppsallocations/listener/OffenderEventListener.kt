@@ -46,15 +46,6 @@ data class HmppsOffenderEvent(
 )
 
 data class SQSMessage(
-  @JsonProperty("Message") val message: String,
-  @JsonProperty("MessageAttributes") val messageAttributes: SQSMessageAttributes
+  @JsonProperty("Message") val message: String
 
-)
-
-data class SQSMessageAttributes(
-  val eventType: SQSMessageAttribute
-)
-
-data class SQSMessageAttribute(
-  @JsonProperty("Value") val value: String
 )
