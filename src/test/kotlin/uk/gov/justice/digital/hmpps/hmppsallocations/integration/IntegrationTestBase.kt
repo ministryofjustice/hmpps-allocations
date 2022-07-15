@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
+import com.ninjasquad.springmockk.MockkBean
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -186,6 +188,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
+
+  @MockkBean
+  lateinit var telemetryClient: TelemetryClient
 
   internal fun HttpHeaders.authToken(roles: List<String> = emptyList()) {
     this.setBearerAuth(

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -12,7 +13,9 @@ import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
@@ -94,6 +97,19 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
+
+    verify(exactly = 1) {
+      telemetryClient.trackEvent(
+        "EventAllocated",
+        mapOf(
+          "crn" to crn,
+          "teamCode" to "TM1",
+          "providerCode" to "PAC1",
+          "wmtPeriod" to getWmtPeriod(LocalDateTime.now())
+        ),
+        null
+      )
+    }
   }
 
   @Test
