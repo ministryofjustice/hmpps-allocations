@@ -115,6 +115,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "officerId": 123456789,
                 "name": "A Staff Name",
                 "staffCode": "STFFCDEU",
+                "gradeCode": "PSP",
                 "dateStartOfAllocation": "2014-05-29T20:50:18"
             }
         ]
