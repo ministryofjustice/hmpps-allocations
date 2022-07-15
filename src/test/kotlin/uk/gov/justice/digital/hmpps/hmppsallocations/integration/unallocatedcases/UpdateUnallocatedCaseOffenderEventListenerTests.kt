@@ -67,7 +67,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `delete when conviction allocated to actual officer`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    repository.save(
+    val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         sentenceDate = LocalDate.parse("2019-11-17"),
@@ -76,7 +76,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = ""
+        caseType = CaseTypes.CUSTODY,
+        providerCode = "PC1",
+        teamCode = "TC1"
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -102,9 +104,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       telemetryClient.trackEvent(
         "EventAllocated",
         mapOf(
-          "crn" to crn,
-          "teamCode" to "TM1",
-          "providerCode" to "PAC1",
+          "crn" to savedEntity.crn,
+          "teamCode" to savedEntity.teamCode,
+          "providerCode" to savedEntity.providerCode,
           "wmtPeriod" to getWmtPeriod(LocalDateTime.now())
         ),
         null

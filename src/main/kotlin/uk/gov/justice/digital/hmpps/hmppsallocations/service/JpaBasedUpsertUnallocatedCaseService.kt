@@ -20,8 +20,10 @@ class JpaBasedUpsertUnallocatedCaseService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService,
   private val caseOfficerConfigProperties: CaseOfficerConfigProperties,
-  private val caseTypeEngine: CaseTypeEngine
-) : UpsertUnallocatedCaseService {
+  private val caseTypeEngine: CaseTypeEngine,
+  private val telemetryService: TelemetryService,
+
+  ) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
     updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
@@ -59,8 +61,8 @@ class JpaBasedUpsertUnallocatedCaseService(
         log.info("Case for crn ${unallocatedCaseEntity.crn} is not requiring allocation")
         unallocatedCaseEntity.id?.let {
           // previously unallocated now allocated
-
           repository.deleteById(it)
+          telemetryService.trackUnallocatedCaseAllocated(unallocatedCaseEntity)
         }
         return null
       }
