@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
-import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.DefaultGradeMapper
+import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Optional
@@ -175,7 +175,7 @@ class CommunityApiClient(private val webClient: WebClient) {
   )
 
   data class OffenderManager @JsonCreator constructor(val staff: Staff, val grade: Grade?) {
-    val staffGrade: String? = DefaultGradeMapper().deliusToStaffGrade(this.grade?.code)
+    val staffGrade: String? = deliusToStaffGrade(this.grade?.code)
   }
 }
 

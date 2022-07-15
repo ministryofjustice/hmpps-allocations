@@ -9,12 +9,10 @@ import java.util.stream.Stream
 
 class DefaultGradeMapperTest {
 
-  private val gradeMapper = DefaultGradeMapper()
-
   @ParameterizedTest
   @MethodSource("deliusGradeMap")
   fun `delius code should map to`(deliusCode: String?, expectedResult: String?) {
-    assertThat(gradeMapper.deliusToStaffGrade(deliusCode)).isEqualTo(expectedResult)
+    assertThat(deliusToStaffGrade(deliusCode)).isEqualTo(expectedResult)
   }
 
   companion object {
