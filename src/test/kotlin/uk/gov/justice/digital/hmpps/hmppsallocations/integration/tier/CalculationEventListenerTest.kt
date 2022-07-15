@@ -49,16 +49,15 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long) {
     repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        tier = tier,
-        name = "foo",
-        status = "active",
-        sentenceDate = LocalDate.now(),
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
-        providerCode = ""
-      )
+      UnallocatedCaseEntity.Builder()
+        .crn(crn)
+        .tier(tier)
+        .name("foo")
+        .status("active")
+        .sentenceDate(LocalDate.now())
+        .convictionId(convictionId)
+        .caseType(CaseTypes.CUSTODY)
+        .providerCode("").build()
     )
   }
 
