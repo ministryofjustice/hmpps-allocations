@@ -44,11 +44,7 @@ class EnrichEventService(
     val offenderManager = communityApiClient.getOffenderManagerName(crn)
       .map { offenderManager ->
         val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
-        OffenderManagerDetails(
-          forenames = offenderManager.staff.forenames,
-          surname = offenderManager.staff.surname,
-          grade = grade
-        )
+        OffenderManagerDetails(forenames = offenderManager.staff.forenames, surname = offenderManager.staff.surname, grade = grade)
       }.block()!!
     return when {
       activeConvictions.size > 1 -> {
