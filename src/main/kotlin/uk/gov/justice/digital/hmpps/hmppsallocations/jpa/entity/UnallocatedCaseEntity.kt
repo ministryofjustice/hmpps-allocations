@@ -64,4 +64,46 @@ data class UnallocatedCaseEntity(
 
   @Column
   var providerCode: String
-)
+) {
+  data class Builder(
+    var id: Long? = null,
+    var name: String? = null,
+    var crn: String? = null,
+    var tier: String? = null,
+    var sentenceDate: LocalDate? = null,
+    var initialAppointment: LocalDate? = null,
+    var status: String? = null,
+    var previousConvictionDate: LocalDate? = null,
+    var offenderManagerForename: String? = null,
+    var offenderManagerSurname: String? = null,
+    var offenderManagerGrade: String? = null,
+    var convictionId: Long? = null,
+    var caseType: CaseTypes? = null,
+    var teamCode: String? = null,
+    var providerCode: String? = null
+  ) {
+    fun id(id: Long) = apply { this.id = id }
+    fun name(name: String) = apply { this.name = name }
+    fun crn(crn: String) = apply { this.crn = crn }
+    fun tier(tier: String) = apply { this.tier = tier }
+    fun sentenceDate(sentenceDate: LocalDate) = apply { this.sentenceDate = sentenceDate }
+
+    fun initialAppointment(initialAppointment: LocalDate) = apply { this.initialAppointment = initialAppointment }
+    fun status(status: String) = apply { this.status = status }
+    fun previousConvictionDate(previousConvictionDate: LocalDate) = apply { this.previousConvictionDate = previousConvictionDate }
+    fun offenderManagerForename(offenderManagerForename: String) = apply { this.offenderManagerForename = offenderManagerForename }
+    fun offenderManagerSurname(offenderManagerSurname: String) = apply { this.offenderManagerSurname = offenderManagerSurname }
+    fun offenderManagerGrade(offenderManagerGrade: String) = apply { this.offenderManagerGrade = offenderManagerGrade }
+    fun convictionId(convictionId: Long) = apply { this.convictionId = convictionId }
+
+    fun caseType(caseType: CaseTypes) = apply { this.caseType = caseType }
+    fun teamCode(teamCode: String) = apply { this.teamCode = teamCode }
+    fun providerCode(providerCode: String) = apply { this.providerCode = providerCode }
+
+    fun build() = UnallocatedCaseEntity(
+      id, name ?: "", crn!!, tier ?: "", sentenceDate!!, initialAppointment, status ?: "",
+      previousConvictionDate, offenderManagerForename, offenderManagerSurname, offenderManagerGrade, convictionId!!,
+      caseType ?: CaseTypes.UNKNOWN, teamCode, providerCode ?: ""
+    )
+  }
+}

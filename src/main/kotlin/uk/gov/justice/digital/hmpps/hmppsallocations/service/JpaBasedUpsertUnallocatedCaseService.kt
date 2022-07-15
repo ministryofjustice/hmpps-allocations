@@ -73,7 +73,17 @@ class JpaBasedUpsertUnallocatedCaseService(
     return null
   }
 
-  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(name = "", crn = crn, tier = "", sentenceDate = LocalDate.now(), status = "", convictionId = convictionId, caseType = CaseTypes.UNKNOWN, providerCode = "PC1")
+  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId)
+    ?: UnallocatedCaseEntity.Builder()
+      .name("")
+      .crn(crn)
+      .tier("")
+      .sentenceDate(LocalDate.now())
+      .status("")
+      .convictionId(convictionId)
+      .caseType(CaseTypes.UNKNOWN)
+      .providerCode("PC1")
+      .build()
 
   private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
     return caseOfficerConfigProperties.includes.contains(currentOrderManager?.staffCode) && conviction.active && conviction.sentence != null
