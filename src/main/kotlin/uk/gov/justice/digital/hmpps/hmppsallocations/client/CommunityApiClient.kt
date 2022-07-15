@@ -32,7 +32,7 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(responseType)
   }
 
-  fun getConviction(crn: String, convictionId: Long): Mono<Optional<Conviction>> {
+  fun getConviction(crn: String, convictionId: Long): Mono<Conviction?> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions/$convictionId")
@@ -42,10 +42,9 @@ class CommunityApiClient(private val webClient: WebClient) {
         { Mono.error(MissingConvictionError("No Conviction found for $crn")) }
       )
       .bodyToMono(Conviction::class.java)
-      .map { Optional.of(it) }
       .onErrorResume { ex ->
         when (ex) {
-          is MissingConvictionError -> Mono.just(Optional.empty())
+          is MissingConvictionError -> Mono.empty()
           else -> Mono.error(ex)
         }
       }

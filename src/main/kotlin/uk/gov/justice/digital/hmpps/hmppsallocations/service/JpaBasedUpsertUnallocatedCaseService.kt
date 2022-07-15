@@ -25,69 +25,50 @@ class JpaBasedUpsertUnallocatedCaseService(
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
     repository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       updateExistingCase(it)
-    } ?: run {
-      updateExistingCase(UnallocatedCaseEntity(null, "", crn, "", LocalDate.now(), null, "", null, null, null, null, convictionId, CaseTypes.COMMUNITY))?.let {
-        repository.save(it)
-      }
+    } ?: updateExistingCase(UnallocatedCaseEntity(null, "", crn, "", LocalDate.now(), null, "", null, null, null, null, convictionId, CaseTypes.COMMUNITY))?.let {
+      repository.save(it)
     }
   }
 
-  private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity): UnallocatedCaseEntity? {
-    communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
-      .block()!!.orElse(null)?.let { conviction ->
-      if (isUnallocatedIncluded(conviction) && conviction.active) {
-        conviction.sentence?.let { sentence ->
-          enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
-            val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
-            val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
-            val activeConvictions = enrichEventService.getActiveConvictions(unallocatedCaseEntity.crn)
-            val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn, activeConvictions)
-            val caseType = caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionId)
-            unallocatedCaseEntity.sentenceDate = sentence.startDate
-            unallocatedCaseEntity.initialAppointment = initialAppointment
-            unallocatedCaseEntity.tier = tier
-            unallocatedCaseEntity.name = name
-            unallocatedCaseEntity.status = status.status
-            unallocatedCaseEntity.previousConvictionDate = previousConvictionDate
-            unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
-            unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
-            unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
-            unallocatedCaseEntity.caseType = caseType
-            return unallocatedCaseEntity
-          } ?: run {
-            log.info("no tier for crn ${unallocatedCaseEntity.crn} so unable to allocate")
-            unallocatedCaseEntity.id?.let {
-              repository.deleteById(it)
-            }
-            return null
-          }
-        } ?: run {
-          log.info("no sentence for crn ${unallocatedCaseEntity.crn} so unable to allocate")
-          unallocatedCaseEntity.id?.let {
-            repository.deleteById(it)
-          }
-          return null
+  private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity): UnallocatedCaseEntity? = communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
+    .block()?.let { conviction ->
+      if (isUnallocated(conviction)) {
+        val sentence = conviction.sentence!!
+        enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
+          val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
+          val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
+          val activeConvictions = enrichEventService.getActiveConvictions(unallocatedCaseEntity.crn)
+          val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn, activeConvictions)
+          val caseType = caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionId)
+          unallocatedCaseEntity.sentenceDate = sentence.startDate
+          unallocatedCaseEntity.initialAppointment = initialAppointment
+          unallocatedCaseEntity.tier = tier
+          unallocatedCaseEntity.name = name
+          unallocatedCaseEntity.status = status.status
+          unallocatedCaseEntity.previousConvictionDate = previousConvictionDate
+          unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
+          unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
+          unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
+          unallocatedCaseEntity.caseType = caseType
+          return unallocatedCaseEntity
         }
       } else {
-        log.info("Case for crn ${unallocatedCaseEntity.crn} already allocated")
+        log.info("Case for crn ${unallocatedCaseEntity.crn} is not requiring allocation")
         unallocatedCaseEntity.id?.let {
+          // previously unallocated now allocated
           repository.deleteById(it)
         }
         return null
       }
-    } ?: run {
-      log.info("Unable to retrieve case for crn ${unallocatedCaseEntity.crn}")
-      unallocatedCaseEntity.id?.let {
-        repository.deleteById(it)
-      }
-      return null
-    }
+    } ?: unallocatedCaseEntity.id?.let {
+    log.info("Case for crn ${unallocatedCaseEntity.crn} is not found")
+    repository.deleteById(it)
+    return null
   }
 
-  private fun isUnallocatedIncluded(conviction: Conviction): Boolean {
+  private fun isUnallocated(conviction: Conviction): Boolean {
     val currentOrderManagerCode = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode
-    log.info("current order manager: {}", currentOrderManagerCode)
-    return caseOfficerConfigProperties.includes.contains(currentOrderManagerCode)
+    return caseOfficerConfigProperties.includes.contains(currentOrderManagerCode) && conviction.active && conviction.sentence != null
   }
 
   companion object {
