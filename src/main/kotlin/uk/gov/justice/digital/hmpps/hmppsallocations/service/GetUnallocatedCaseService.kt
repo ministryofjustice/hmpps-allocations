@@ -66,7 +66,7 @@ class GetUnallocatedCaseService(
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
         it, results.t1, age, results.t5?.offences,
-        results.t5.let { it?.sentence?.expectedSentenceEndDate }, results.t5.let { it?.sentence?.description }, results.t2.requirements,
+        results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
         results.t3,
         results.t4.orElse(null)
       )
