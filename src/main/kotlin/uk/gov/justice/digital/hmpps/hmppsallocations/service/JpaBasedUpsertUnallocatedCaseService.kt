@@ -61,6 +61,7 @@ class JpaBasedUpsertUnallocatedCaseService(
         log.info("Case for crn ${unallocatedCaseEntity.crn} is not requiring allocation")
         unallocatedCaseEntity.id?.let {
           // previously unallocated now allocated
+
           repository.deleteById(it)
           telemetryService.trackUnallocatedCaseAllocated(unallocatedCaseEntity)
         }
