@@ -34,6 +34,8 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .doesNotExist()
       .jsonPath("$.previous[0].offenderManager.name")
       .isEqualTo("A Staff Name")
+      .jsonPath("$.previous[0].offenderManager.grade")
+      .isEqualTo("PQiP")
       .jsonPath("$.previous[0].endDate")
       .isEqualTo("2009-10-12")
       .jsonPath("$.previous[0].offences[0].description")
