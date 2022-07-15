@@ -57,5 +57,11 @@ data class UnallocatedCaseEntity(
 
   @Column(name = "case_type")
   @Enumerated(EnumType.STRING)
-  var caseType: CaseTypes
+  var caseType: CaseTypes,
+
+  @Column
+  var teamCode: String? = null,
+
+  @Column
+  var providerCode: String
 )

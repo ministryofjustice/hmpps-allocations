@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -12,7 +13,9 @@ import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
@@ -29,7 +32,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY,
+        providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -63,7 +67,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `delete when conviction allocated to actual officer`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    repository.save(
+    val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         sentenceDate = LocalDate.parse("2019-11-17"),
@@ -72,7 +76,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY,
+        providerCode = "PC1",
+        teamCode = "TC1"
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -93,6 +99,19 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
+
+    verify(exactly = 1) {
+      telemetryClient.trackEvent(
+        "EventAllocated",
+        mapOf(
+          "crn" to savedEntity.crn,
+          "teamCode" to savedEntity.teamCode,
+          "providerCode" to savedEntity.providerCode,
+          "wmtPeriod" to getWmtPeriod(LocalDateTime.now())
+        ),
+        null
+      )
+    }
   }
 
   @Test
@@ -108,7 +127,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -144,7 +163,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -180,7 +199,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -216,7 +235,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     notFoundAllConvictionResponse(crn)
@@ -246,7 +265,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
 
@@ -260,7 +279,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           tier = "B3",
           status = "New to probation",
           convictionId = convictionId,
-          caseType = CaseTypes.CUSTODY
+          caseType = CaseTypes.CUSTODY,
+          providerCode = ""
         )
       )
     }

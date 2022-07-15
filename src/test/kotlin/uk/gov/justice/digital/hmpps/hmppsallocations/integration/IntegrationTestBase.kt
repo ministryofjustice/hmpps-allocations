@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
+import com.ninjasquad.springmockk.MockkBean
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -86,7 +88,8 @@ abstract class IntegrationTestBase {
     "Previously managed",
     previousConvictionEndDate,
     convictionId = 987654321,
-    caseType = CaseTypes.CUSTODY
+    caseType = CaseTypes.CUSTODY,
+    providerCode = ""
   )
 
   fun insertCases() {
@@ -97,7 +100,8 @@ abstract class IntegrationTestBase {
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
           123456789,
-          caseType = CaseTypes.CUSTODY
+          caseType = CaseTypes.CUSTODY,
+          providerCode = ""
         ),
         UnallocatedCaseEntity(
           null,
@@ -108,14 +112,16 @@ abstract class IntegrationTestBase {
           LocalDate.now().plusDays(2),
           "New to probation",
           convictionId = 23456789,
-          caseType = CaseTypes.LICENSE
+          caseType = CaseTypes.LICENSE,
+          providerCode = ""
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
-          56785493, CaseTypes.CUSTODY
+          56785493, CaseTypes.CUSTODY,
+          providerCode = ""
         ),
         UnallocatedCaseEntity(
           null,
@@ -126,7 +132,8 @@ abstract class IntegrationTestBase {
           null,
           "New to probation",
           convictionId = 86472147892,
-          caseType = CaseTypes.COMMUNITY
+          caseType = CaseTypes.COMMUNITY,
+          providerCode = ""
         )
 
       )
@@ -181,6 +188,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
+
+  @MockkBean
+  lateinit var telemetryClient: TelemetryClient
 
   internal fun HttpHeaders.authToken(roles: List<String> = emptyList()) {
     this.setBearerAuth(

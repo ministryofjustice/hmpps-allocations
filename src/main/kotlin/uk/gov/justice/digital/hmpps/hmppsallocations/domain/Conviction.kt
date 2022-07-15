@@ -23,6 +23,8 @@ data class OrderManager @JsonCreator constructor (
   val name: String?,
   val staffCode: String?,
   val gradeCode: String?,
+  val teamCode: String?,
+  val probationAreaCode: String
 ) {
   val staffGrade: String? = deliusToStaffGrade(this.gradeCode)
 }

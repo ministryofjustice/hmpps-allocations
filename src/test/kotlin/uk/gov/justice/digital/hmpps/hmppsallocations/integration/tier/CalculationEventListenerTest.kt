@@ -56,7 +56,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         status = "active",
         sentenceDate = LocalDate.now(),
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY,
+        providerCode = ""
       )
     )
   }

@@ -116,7 +116,9 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "name": "A Staff Name",
                 "staffCode": "STFFCDEU",
                 "gradeCode": "PSP",
-                "dateStartOfAllocation": "2014-05-29T20:50:18"
+                "dateStartOfAllocation": "2014-05-29T20:50:18",
+                "teamCode": "TM1",
+                "probationAreaCode": "PAC1"
             }
         ]
     },
@@ -236,7 +238,9 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "name": "A Staff Name",
                 "gradeCode": "PSQ",
                 "staffCode": "STFFCDEU",
-                "dateStartOfAllocation": "2014-05-29T20:50:18"
+                "dateStartOfAllocation": "2014-05-29T20:50:18",
+                "teamCode": "TM1",
+                "probationAreaCode": "PAC1"
             }
         ]
     }
