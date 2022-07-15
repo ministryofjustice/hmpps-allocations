@@ -23,10 +23,9 @@ class JpaBasedUpsertUnallocatedCaseService(
 ) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
-    repository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      updateExistingCase(it)
-    } ?: updateExistingCase(UnallocatedCaseEntity(null, "", crn, "", LocalDate.now(), null, "", null, null, null, null, convictionId, CaseTypes.COMMUNITY))?.let {
-      repository.save(it)
+    updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
+      if (it.id == null)
+        repository.save(it)
     }
   }
 
@@ -65,6 +64,8 @@ class JpaBasedUpsertUnallocatedCaseService(
     repository.deleteById(it)
     return null
   }
+
+  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(name = "", crn = crn, tier = "", sentenceDate = LocalDate.now(), status = "", convictionId = convictionId, caseType = CaseTypes.UNKNOWN)
 
   private fun isUnallocated(conviction: Conviction): Boolean {
     val currentOrderManagerCode = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode
