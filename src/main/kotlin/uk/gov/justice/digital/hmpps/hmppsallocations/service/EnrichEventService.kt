@@ -7,14 +7,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import java.time.LocalDate
 
 @Service
 class EnrichEventService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
-  private val gradeMapper: GradeMapper,
   private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
 
@@ -43,8 +41,11 @@ class EnrichEventService(
   fun getProbationStatus(crn: String, activeConvictions: List<Conviction>): ProbationStatus {
     val offenderManager = communityApiClient.getOffenderManagerName(crn)
       .map { offenderManager ->
-        val grade = gradeMapper.deliusToStaffGrade(offenderManager.grade?.code)
-        OffenderManagerDetails(forenames = offenderManager.staff.forenames, surname = offenderManager.staff.surname, grade = grade)
+        OffenderManagerDetails(
+          forenames = offenderManager.staff.forenames,
+          surname = offenderManager.staff.surname,
+          grade = offenderManager.staffGrade
+        )
       }.block()!!
     return when {
       activeConvictions.size > 1 -> {
