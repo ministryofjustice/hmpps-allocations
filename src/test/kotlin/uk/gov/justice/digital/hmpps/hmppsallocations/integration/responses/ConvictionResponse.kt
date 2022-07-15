@@ -116,13 +116,16 @@ fun convictionResponse(staffCode: String) = """
                 "officerId": 123456789,
                 "name": "A Unallocated Staff Name",
                 "staffCode": "$staffCode",
-                "dateStartOfAllocation": "2014-05-29T20:50:18"
+                "dateStartOfAllocation": "2014-05-29T20:50:18",
+                "teamCode": "TM1",
+                "probationAreaCode": "PAC1"
             },
             {
                 "probationAreaId": 123456789,
                 "officerId": 123456789,
                 "dateStartOfAllocation": "2011-05-29T20:50:18",
-                "dateEndOfAllocation": "2014-05-29T20:49:18"
+                "dateEndOfAllocation": "2014-05-29T20:49:18",
+                "probationAreaCode": "PAC1"
             }
         ]
     }

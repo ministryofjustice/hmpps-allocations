@@ -45,6 +45,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.offenderManagerForename).isEqualTo("Sheila Linda")
     assertThat(case.offenderManagerSurname).isEqualTo("Hancock")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
+    assertThat(case.teamCode).isEqualTo("TM1")
+    assertThat(case.providerCode).isEqualTo("PAC1")
   }
 
   @Test

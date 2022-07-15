@@ -22,6 +22,8 @@ data class OrderManager @JsonCreator constructor (
   val name: String?,
   val staffCode: String?,
   val gradeCode: String?,
+  val teamCode: String?,
+  val probationAreaCode: String
 )
 
 data class Custody @JsonCreator constructor(

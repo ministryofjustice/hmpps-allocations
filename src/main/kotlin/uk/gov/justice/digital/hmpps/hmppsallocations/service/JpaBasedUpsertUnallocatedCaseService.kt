@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OrderManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
@@ -31,7 +32,8 @@ class JpaBasedUpsertUnallocatedCaseService(
 
   private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity): UnallocatedCaseEntity? = communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
     .block()?.let { conviction ->
-      if (isUnallocated(conviction)) {
+      val currentOrderManager = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }
+      if (isUnallocated(conviction, currentOrderManager)) {
         val sentence = conviction.sentence!!
         enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
           val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
@@ -49,12 +51,15 @@ class JpaBasedUpsertUnallocatedCaseService(
           unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
           unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
           unallocatedCaseEntity.caseType = caseType
+          unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
+          unallocatedCaseEntity.providerCode = currentOrderManager.probationAreaCode
           return unallocatedCaseEntity
         }
       } else {
         log.info("Case for crn ${unallocatedCaseEntity.crn} is not requiring allocation")
         unallocatedCaseEntity.id?.let {
           // previously unallocated now allocated
+
           repository.deleteById(it)
         }
         return null
@@ -65,11 +70,10 @@ class JpaBasedUpsertUnallocatedCaseService(
     return null
   }
 
-  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(name = "", crn = crn, tier = "", sentenceDate = LocalDate.now(), status = "", convictionId = convictionId, caseType = CaseTypes.UNKNOWN)
+  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(name = "", crn = crn, tier = "", sentenceDate = LocalDate.now(), status = "", convictionId = convictionId, caseType = CaseTypes.UNKNOWN, providerCode = "PC1")
 
-  private fun isUnallocated(conviction: Conviction): Boolean {
-    val currentOrderManagerCode = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }?.staffCode
-    return caseOfficerConfigProperties.includes.contains(currentOrderManagerCode) && conviction.active && conviction.sentence != null
+  private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
+    return caseOfficerConfigProperties.includes.contains(currentOrderManager?.staffCode) && conviction.active && conviction.sentence != null
   }
 
   companion object {

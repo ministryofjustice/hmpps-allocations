@@ -29,7 +29,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY,
+        providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -72,7 +73,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -108,7 +109,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -144,7 +145,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -180,7 +181,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -216,7 +217,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
     notFoundAllConvictionResponse(crn)
@@ -246,7 +247,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         status = "New to probation",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY
+        caseType = CaseTypes.CUSTODY, providerCode = ""
       )
     )
 
@@ -260,7 +261,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           tier = "B3",
           status = "New to probation",
           convictionId = convictionId,
-          caseType = CaseTypes.CUSTODY
+          caseType = CaseTypes.CUSTODY,
+          providerCode = ""
         )
       )
     }

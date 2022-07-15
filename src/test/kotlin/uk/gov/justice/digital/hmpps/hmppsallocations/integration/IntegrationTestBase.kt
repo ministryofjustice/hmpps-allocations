@@ -86,7 +86,8 @@ abstract class IntegrationTestBase {
     "Previously managed",
     previousConvictionEndDate,
     convictionId = 987654321,
-    caseType = CaseTypes.CUSTODY
+    caseType = CaseTypes.CUSTODY,
+    providerCode = ""
   )
 
   fun insertCases() {
@@ -97,7 +98,8 @@ abstract class IntegrationTestBase {
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
           123456789,
-          caseType = CaseTypes.CUSTODY
+          caseType = CaseTypes.CUSTODY,
+          providerCode = ""
         ),
         UnallocatedCaseEntity(
           null,
@@ -108,14 +110,16 @@ abstract class IntegrationTestBase {
           LocalDate.now().plusDays(2),
           "New to probation",
           convictionId = 23456789,
-          caseType = CaseTypes.LICENSE
+          caseType = CaseTypes.LICENSE,
+          providerCode = ""
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
           null, "Antonio", "LoSardo", "PO",
-          56785493, CaseTypes.CUSTODY
+          56785493, CaseTypes.CUSTODY,
+          providerCode = ""
         ),
         UnallocatedCaseEntity(
           null,
@@ -126,7 +130,8 @@ abstract class IntegrationTestBase {
           null,
           "New to probation",
           convictionId = 86472147892,
-          caseType = CaseTypes.COMMUNITY
+          caseType = CaseTypes.COMMUNITY,
+          providerCode = ""
         )
 
       )
