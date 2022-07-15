@@ -22,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
-import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.GradeMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -34,7 +33,6 @@ class GetUnallocatedCaseService(
   @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
-  private val gradeMapper: GradeMapper,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
 
@@ -105,14 +103,14 @@ class GetUnallocatedCaseService(
         .filter { c -> c.sentence != null }
         .filter { c -> c.convictionId != excludeConvictionId }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, gradeMapper.deliusToStaffGrade(orderManager.gradeCode)) }
+          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
           UnallocatedCaseConviction.from(conviction, conviction.sentence!!.startDate, null, practitioner)
         }
 
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, gradeMapper.deliusToStaffGrade(orderManager.gradeCode)) }
+          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
           UnallocatedCaseConviction.from(conviction, null, conviction.sentence!!.terminationDate, practitioner)
         }
 
