@@ -23,7 +23,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private val caseTypeEngine: CaseTypeEngine,
   private val telemetryService: TelemetryService,
 
-  ) : UpsertUnallocatedCaseService {
+) : UpsertUnallocatedCaseService {
   @Transactional
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
     updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
