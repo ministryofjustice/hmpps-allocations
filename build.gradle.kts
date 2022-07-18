@@ -2,8 +2,8 @@
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.2"
-  kotlin("plugin.spring") version "1.7.0"
-  kotlin("plugin.jpa") version "1.7.0"
+  kotlin("plugin.spring") version "1.7.10"
+  kotlin("plugin.jpa") version "1.7.10"
   id("io.gitlab.arturbosch.detekt") version "1.20.0"
   id("org.jetbrains.kotlin.plugin.allopen")version "1.7.10"
 }
