@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.*
 import java.time.LocalDate
 
 @Service
@@ -44,16 +45,10 @@ class EnrichEventService(
         OffenderManagerDetails(
           forenames = offenderManager.staff.forenames,
           surname = offenderManager.staff.surname,
-          grade = offenderManager.staffGrade
-        )
-      }.block()!!
+          grade = offenderManager.staffGrade) }.block()!!
     return when {
       activeConvictions.size > 1 -> {
-        ProbationStatus(
-          ProbationStatusType.CURRENTLY_MANAGED,
-          offenderManagerDetails = offenderManager
-        )
-      }
+        ProbationStatus(CURRENTLY_MANAGED, offenderManagerDetails = offenderManager) }
       else -> {
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
         return when {
@@ -62,9 +57,9 @@ class EnrichEventService(
               inactiveConvictions.filter { c -> c.sentence.terminationDate != null }
                 .map { c -> c.sentence.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus(ProbationStatusType.PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, offenderManager)
+            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, offenderManager)
           }
-          else -> ProbationStatus(ProbationStatusType.NEW_TO_PROBATION, offenderManagerDetails = offenderManager)
+          else -> ProbationStatus(NEW_TO_PROBATION, offenderManagerDetails = offenderManager)
         }
       }
     }
