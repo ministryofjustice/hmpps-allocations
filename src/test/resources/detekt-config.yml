@@ -1,5 +1,5 @@
 build:
-  maxIssues: 16
+  maxIssues: 11
   excludeCorrectable: false
 
 complexity:
@@ -13,31 +13,31 @@ complexity:
   LargeClass:
     active: true
     threshold: 200
-    excludes: ['**/test/**']
+    excludes: [ '**/test/**' ]
   LongMethod:
     active: true
     threshold: 30
-    excludes: ['**/test/**']
+    excludes: [ '**/test/**' ]
   LongParameterList:
     active: true
     functionThreshold: 4
     constructorThreshold: 7
     ignoreDefaultParameters: false
     ignoreDataClasses: true
-    ignoreAnnotated: []
+    ignoreAnnotated: [ ]
   NestedBlockDepth:
     active: true
     threshold: 4
   StringLiteralDuplication:
     active: true
-    excludes: ['**/test/**']
+    excludes: [ '**/test/**' ]
     threshold: 3
     ignoreAnnotation: true
     excludeStringsWithLessThan5Characters: true
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
-    excludes: ['**/test/**']
+    excludes: [ '**/test/**' ]
     thresholdInFiles: 11
     thresholdInClasses: 11
     thresholdInInterfaces: 11
