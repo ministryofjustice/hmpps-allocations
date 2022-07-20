@@ -144,6 +144,8 @@ class GetUnallocatedCaseService(
     return communityApiClient.getDocuments(crn, documentId)
   }
 
+  fun getAllCount(): Long = unallocatedCasesRepository.count()
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val inductionCaseTypes = setOf(CaseTypes.COMMUNITY, CaseTypes.LICENSE)
