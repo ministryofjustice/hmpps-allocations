@@ -13,6 +13,16 @@ fun documentsResponse(convictionId: Long) = """
             },
             "extendedDescription": "Previous convictions as of 27/07/2021",
             "createdAt": "2021-11-17T00:00:00"
+        },
+        {
+            "documentName": "No Document.pdf",
+            "author": "Sally Socks",
+            "type": {
+                "code": "PRECONS_DOCUMENT",
+                "description": "PNC previous convictions"
+            },
+            "extendedDescription": "Previous convictions as of 27/07/2021",
+            "createdAt": "2021-11-17T00:00:00"
         }
       ],
       "convictions": [

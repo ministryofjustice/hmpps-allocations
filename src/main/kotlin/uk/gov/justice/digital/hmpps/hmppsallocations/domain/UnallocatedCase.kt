@@ -167,7 +167,7 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
           it.subType?.code,
           it.subType?.description,
           it.reportDocumentDates?.completedDate ?: it.lastModifiedAt ?: it.createdAt,
-          it.id
+          it.id!!
         )
       }
     }

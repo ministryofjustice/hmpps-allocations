@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.time.LocalDateTime
 
 data class Document @JsonCreator constructor(
-  val id: String,
+  val id: String?,
   val type: DocumentType,
   val subType: DocumentType?,
   val reportDocumentDates: DocumentDates?,

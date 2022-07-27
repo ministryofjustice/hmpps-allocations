@@ -124,8 +124,10 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(Documents::class.java)
       .map {
-        it.convictions.filter { documentConviction -> documentConviction.convictionId.toLong() == convictionId }
-          .flatMap { documentConviction -> documentConviction.documents } + it.documents
+        (
+          it.convictions.filter { documentConviction -> documentConviction.convictionId.toLong() == convictionId }
+            .flatMap { documentConviction -> documentConviction.documents } + it.documents
+          ).filter { document -> document.id != null }
       }
   }
 
