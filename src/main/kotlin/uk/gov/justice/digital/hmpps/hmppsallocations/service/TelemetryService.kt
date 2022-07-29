@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 private const val CRN = "crn"
 
@@ -26,7 +27,7 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
         PROVIDER_CODE to unallocatedCaseEntity.providerCode,
         "wmtPeriod" to getWmtPeriod(LocalDateTime.now()),
         "startTime" to unallocatedCaseEntity.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-        "endTime" to ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        "endTime" to ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
       )
     )
   }
