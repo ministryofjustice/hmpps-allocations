@@ -27,6 +27,17 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
     )
   }
 
+  fun trackAllocationDemandRaised(unallocatedCaseEntity: UnallocatedCaseEntity) {
+    trackEvent(
+      TelemetryEventType.ALLOCATION_DEMAND_RAISED,
+      mapOf(
+        CRN to unallocatedCaseEntity.crn,
+        TEAM_CODE to unallocatedCaseEntity.teamCode,
+        PROVIDER_CODE to unallocatedCaseEntity.providerCode
+      )
+    )
+  }
+
   private fun trackEvent(eventType: TelemetryEventType, customDimensions: Map<String, String?>) {
     telemetryClient.trackEvent(eventType.eventName, customDimensions, null)
   }

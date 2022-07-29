@@ -28,7 +28,9 @@ class JpaBasedUpsertUnallocatedCaseService(
   override fun upsertUnallocatedCase(crn: String, convictionId: Long) {
     updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
       if (it.id == null)
-        repository.save(it)
+        repository.save(it).also { savedEntity ->
+          telemetryService.trackAllocationDemandRaised(savedEntity)
+        }
     }
   }
 

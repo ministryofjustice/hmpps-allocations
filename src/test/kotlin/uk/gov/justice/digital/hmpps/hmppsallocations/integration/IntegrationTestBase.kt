@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.justRun
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -151,6 +152,7 @@ abstract class IntegrationTestBase {
     hmppsTier.reset()
     offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
+    justRun { telemetryClient.trackEvent(any(), any(), any()) }
     setupOauth()
   }
 
