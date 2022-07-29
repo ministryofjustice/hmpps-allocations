@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
+import io.mockk.Called
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -47,6 +49,18 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
+
+    verify(exactly = 1) {
+      telemetryClient.trackEvent(
+        "AllocationDemandRaised",
+        mapOf(
+          "crn" to crn,
+          "teamCode" to "TM1",
+          "providerCode" to "PAC1"
+        ),
+        null
+      )
+    }
   }
 
   @Test
@@ -71,6 +85,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
+
+    verify { telemetryClient wasNot Called }
   }
 
   @Test
