@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
+import io.mockk.slot
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -16,6 +17,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
@@ -99,19 +102,24 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
-
+    val parameters = slot<MutableMap<String, String>>()
     verify(exactly = 1) {
       telemetryClient.trackEvent(
         "EventAllocated",
-        mapOf(
-          "crn" to savedEntity.crn,
-          "teamCode" to savedEntity.teamCode,
-          "providerCode" to savedEntity.providerCode,
-          "wmtPeriod" to getWmtPeriod(LocalDateTime.now())
-        ),
+        capture(parameters),
         null
       )
     }
+    val endTime = ZonedDateTime.parse(parameters.captured["endTime"])
+    Assertions.assertAll(
+      { Assertions.assertEquals(savedEntity.crn, parameters.captured["crn"]) },
+      { Assertions.assertEquals(savedEntity.teamCode, parameters.captured["teamCode"]) },
+      { Assertions.assertEquals(savedEntity.providerCode, parameters.captured["providerCode"]) },
+      { Assertions.assertEquals(getWmtPeriod(LocalDateTime.now()), parameters.captured["wmtPeriod"]) },
+      { Assertions.assertEquals(savedEntity.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), parameters.captured["startTime"]) },
+      { Assertions.assertTrue(endTime.isAfter(savedEntity.createdDate)) },
+      { Assertions.assertTrue(endTime.isBefore(ZonedDateTime.now())) },
+    )
   }
 
   @Test

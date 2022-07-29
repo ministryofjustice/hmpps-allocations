@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 private const val CRN = "crn"
 
@@ -22,7 +24,9 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
         CRN to unallocatedCaseEntity.crn,
         TEAM_CODE to unallocatedCaseEntity.teamCode,
         PROVIDER_CODE to unallocatedCaseEntity.providerCode,
-        "wmtPeriod" to getWmtPeriod(LocalDateTime.now())
+        "wmtPeriod" to getWmtPeriod(LocalDateTime.now()),
+        "startTime" to unallocatedCaseEntity.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        "endTime" to ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
       )
     )
   }

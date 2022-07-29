@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -63,5 +64,8 @@ data class UnallocatedCaseEntity(
   var teamCode: String? = null,
 
   @Column
-  var providerCode: String
+  var providerCode: String,
+
+  @Column
+  val createdDate: ZonedDateTime = ZonedDateTime.now()
 )
