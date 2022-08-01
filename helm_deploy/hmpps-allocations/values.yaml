@@ -15,7 +15,7 @@ generic-service:
     tlsSecretName: hmpps-allocations-cert
     contextColour: green
     v1_2_enabled: true
-    v0_47_enabled: true
+    v0_47_enabled: false
     annotations:
       nginx.ingress.kubernetes.io/custom-http-errors: "418"
       external-dns.alpha.kubernetes.io/aws-weight: "100"
