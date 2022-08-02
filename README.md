@@ -20,7 +20,7 @@ https://app.circleci.com/pipelines/github/ministryofjustice/hmpps-allocations
 
 
 ### Prerequisites
-* Java JDK 16+
+* Java JDK 18+
 * An editor/IDE
 * Gradle
 * Docker
