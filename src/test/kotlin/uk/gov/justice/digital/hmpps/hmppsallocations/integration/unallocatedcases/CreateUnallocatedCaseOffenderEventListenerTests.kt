@@ -230,7 +230,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
-    assertThat(case.status).isEqualTo("Currently managed")
+    assertThat(case.status).isEqualTo("New to probation")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
   }
 }

@@ -163,8 +163,8 @@ fun activeSentenacedAndPreConvictionResponse() = """
             "courtCode": "STHWCC",
             "courtName": "Southwark Crown Court",
             "appearanceType": {
-                "code": "S",
-                "description": "Sentence"
+                "code": "T",
+                "description": "Trial/Adjournment"
             },
             "crn": "X320741"
         },

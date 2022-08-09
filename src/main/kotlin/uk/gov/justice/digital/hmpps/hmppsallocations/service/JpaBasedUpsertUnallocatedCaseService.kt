@@ -42,7 +42,7 @@ class JpaBasedUpsertUnallocatedCaseService(
         enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
           val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
           val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
-          val activeConvictions = enrichEventService.getActiveConvictions(unallocatedCaseEntity.crn)
+          val activeConvictions = enrichEventService.getActiveSentencedConvictions(unallocatedCaseEntity.crn)
           val (status, previousConvictionDate, offenderManagerDetails) = enrichEventService.getProbationStatus(unallocatedCaseEntity.crn, activeConvictions)
           val caseType = caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionId)
           unallocatedCaseEntity.sentenceDate = sentence.startDate

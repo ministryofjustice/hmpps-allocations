@@ -37,8 +37,10 @@ class EnrichEventService(
     return hmppsTierApiClient.getTierByCrn(crn)
   }
 
-  fun getActiveConvictions(crn: String): List<Conviction> {
-    return communityApiClient.getActiveConvictions(crn).block() ?: emptyList()
+  fun getActiveSentencedConvictions(crn: String): List<Conviction> {
+    return communityApiClient.getActiveConvictions(crn)
+      .map { convictions -> convictions.filter { conviction -> conviction.sentence != null } }
+      .block() ?: emptyList()
   }
 
   fun getProbationStatus(crn: String, activeConvictions: List<Conviction>): ProbationStatus {
