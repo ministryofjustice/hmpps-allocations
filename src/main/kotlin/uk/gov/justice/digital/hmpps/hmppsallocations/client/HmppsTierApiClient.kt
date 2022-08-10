@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -14,7 +15,10 @@ class HmppsTierApiClient(private val webClient: WebClient) {
     .retrieve()
     .onStatus(
       { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-      { Mono.error(MissingTierError("No tier found for $crn")) }
+      {
+        log.info("No tier found for $crn")
+        Mono.error(MissingTierError("No tier found for $crn"))
+      }
     )
     .bodyToMono(TierDto::class.java)
     .map { it.tierScore }
@@ -25,6 +29,10 @@ class HmppsTierApiClient(private val webClient: WebClient) {
       }
     }
     .block()
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 }
 
 private class MissingTierError(msg: String) : RuntimeException(msg)

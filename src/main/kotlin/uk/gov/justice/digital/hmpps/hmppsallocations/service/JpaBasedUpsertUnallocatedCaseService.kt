@@ -39,7 +39,7 @@ class JpaBasedUpsertUnallocatedCaseService(
       val currentOrderManager = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }
       if (isUnallocated(conviction, currentOrderManager)) {
         val sentence = conviction.sentence!!
-        log.info("${unallocatedCaseEntity.crn} Is in unallocated")
+        log.info("${unallocatedCaseEntity.crn} is in unallocated")
         enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
           val initialAppointment = enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
           val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
