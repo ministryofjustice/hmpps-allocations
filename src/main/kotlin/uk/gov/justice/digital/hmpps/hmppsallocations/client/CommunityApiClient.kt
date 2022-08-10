@@ -175,7 +175,7 @@ class CommunityApiClient(private val webClient: WebClient) {
     val code: String
   )
 
-  data class OffenderManager @JsonCreator constructor(val staff: Staff, val grade: Grade?) {
+  data class OffenderManager @JsonCreator constructor(val staff: Staff, val grade: Grade?, val isUnallocated: Boolean) {
     val staffGrade: String? = deliusToStaffGrade(this.grade?.code)
   }
 }

@@ -10,7 +10,7 @@ fun offenderManagerResponse() = """
     },
     "isPrisonOffenderManager": true,
     "isResponsibleOfficer": true,
-    "isUnallocated": true,
+    "isUnallocated": false,
     "probationArea": {
       "code": "N01",
       "description": "NPS North West",

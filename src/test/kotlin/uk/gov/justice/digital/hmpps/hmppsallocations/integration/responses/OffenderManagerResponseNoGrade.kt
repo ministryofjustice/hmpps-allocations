@@ -6,7 +6,7 @@ fun offenderManagerResponseNoGrade() = """
     "fromDate": "2019-12-04",
     "isPrisonOffenderManager": true,
     "isResponsibleOfficer": true,
-    "isUnallocated": true,
+    "isUnallocated": false,
     "probationArea": {
       "code": "N01",
       "description": "NPS North West",

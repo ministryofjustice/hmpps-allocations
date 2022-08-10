@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -106,7 +107,19 @@ data class OffenderManagerDetails @JsonCreator constructor(
   val surname: String?,
   @Schema(description = "Grade", example = "PSO")
   val grade: String?
-)
+) {
+
+  companion object {
+
+    fun from(offenderManager: CommunityApiClient.OffenderManager): OffenderManagerDetails {
+      return OffenderManagerDetails(
+        forenames = offenderManager.staff.forenames,
+        surname = offenderManager.staff.surname,
+        grade = offenderManager.staffGrade
+      )
+    }
+  }
+}
 
 data class UnallocatedCaseOffence @JsonCreator constructor(
   @Schema(description = "Main Offence", example = "True")

@@ -45,16 +45,10 @@ class EnrichEventService(
 
   fun getProbationStatus(crn: String, activeConvictions: List<Conviction>): ProbationStatus {
     val offenderManager = communityApiClient.getOffenderManagerName(crn)
-      .map { offenderManager ->
-        OffenderManagerDetails(
-          forenames = offenderManager.staff.forenames,
-          surname = offenderManager.staff.surname,
-          grade = offenderManager.staffGrade
-        )
-      }.block()!!
+      .block()!!
     return when {
-      activeConvictions.size > 1 -> {
-        ProbationStatus(CURRENTLY_MANAGED, offenderManagerDetails = offenderManager)
+      activeConvictions.size > 1 && !offenderManager.isUnallocated -> {
+        ProbationStatus(CURRENTLY_MANAGED, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
       }
       else -> {
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
@@ -64,9 +58,9 @@ class EnrichEventService(
               inactiveConvictions.filter { c -> c.sentence?.terminationDate != null }
                 .map { c -> c.sentence!!.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, offenderManager)
+            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, OffenderManagerDetails.from(offenderManager))
           }
-          else -> ProbationStatus(NEW_TO_PROBATION, offenderManagerDetails = offenderManager)
+          else -> ProbationStatus(NEW_TO_PROBATION, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
         }
       }
     }
