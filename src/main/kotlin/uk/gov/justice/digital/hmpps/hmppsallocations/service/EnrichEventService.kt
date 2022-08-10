@@ -61,8 +61,8 @@ class EnrichEventService(
         return when {
           inactiveConvictions.isNotEmpty() -> {
             val mostRecentInactiveConvictionEndDate =
-              inactiveConvictions.filter { c -> c.sentence.terminationDate != null }
-                .map { c -> c.sentence.terminationDate!! }
+              inactiveConvictions.filter { c -> c.sentence?.terminationDate != null }
+                .map { c -> c.sentence!!.terminationDate!! }
                 .maxByOrNull { it }
             ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, offenderManager)
           }
