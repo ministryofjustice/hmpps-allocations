@@ -322,7 +322,10 @@ abstract class IntegrationTestBase {
 
   protected fun singleActiveRequirementResponse(crn: String, convictionId: Long) {
     val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId/requirements").withQueryStringParameter(Parameter("activeOnly", "true"))
+      request().withPath("/offenders/crn/$crn/convictions/$convictionId/requirements").withQueryStringParameters(
+        Parameter("activeOnly", "true"),
+        Parameter("excludeSoftDeleted", "true")
+      )
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(singleActiveRequirementResponse())
