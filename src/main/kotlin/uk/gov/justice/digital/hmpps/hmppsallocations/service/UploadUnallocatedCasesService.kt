@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.UnallocatedCaseCsv
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -23,7 +22,6 @@ import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 class UploadUnallocatedCasesService(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
-  private val unallocatedCasesRepository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient
 ) {
   companion object {
@@ -37,7 +35,6 @@ class UploadUnallocatedCasesService(
 
   @Async
   fun sendEvents(unallocatedCases: List<UnallocatedCaseCsv>) {
-    unallocatedCasesRepository.deleteAll()
     unallocatedCases
       .map { publishToHmppsDomainTopic(it) }
       .forEach {
