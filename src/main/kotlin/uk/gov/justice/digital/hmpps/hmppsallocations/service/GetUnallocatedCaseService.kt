@@ -84,11 +84,12 @@ class GetUnallocatedCaseService(
   @Cacheable(INDUCTION_APPOINTMENT_CACHE_NAME)
   fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
     if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
-      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate).map { contacts ->
-        unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
-        unallocatedCasesRepository.save(unallocatedCaseEntity)
-        unallocatedCaseEntity
-      }
+      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate)
+        .filter { unallocatedCasesRepository.existsById(unallocatedCaseEntity.id!!) }
+        .map { contacts ->
+          unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
+          unallocatedCasesRepository.save(unallocatedCaseEntity)
+        }
     }
     return Mono.just(unallocatedCaseEntity)
   }
