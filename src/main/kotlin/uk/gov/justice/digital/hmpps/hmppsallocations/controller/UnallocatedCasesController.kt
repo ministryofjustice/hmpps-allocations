@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
@@ -40,7 +41,7 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated")
-  fun getUnallocatedCases(): ResponseEntity<List<UnallocatedCase>> {
+  fun getUnallocatedCases(): ResponseEntity<List<Mono<UnallocatedCase>>> {
     return ResponseEntity.ok(
       getUnallocatedCaseService.getAll()
     )
@@ -75,7 +76,8 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionId: Long
   ): ResponseEntity<UnallocatedCase> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCase(crn, convictionId) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCase(crn, convictionId)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")
@@ -92,7 +94,8 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionId: Long
   ): ResponseEntity<UnallocatedCase> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseOverview(crn, convictionId) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCaseOverview(crn, convictionId)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case convictions by crn")
@@ -104,9 +107,13 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions")
-  fun getUnallocatedCaseConvictions(@PathVariable(required = true) crn: String, @RequestParam(required = false) excludeConvictionId: Long?): ResponseEntity<UnallocatedCaseConvictions> =
+  fun getUnallocatedCaseConvictions(
+    @PathVariable(required = true) crn: String,
+    @RequestParam(required = false) excludeConvictionId: Long?
+  ): ResponseEntity<UnallocatedCaseConvictions> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionId) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionId)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
@@ -123,7 +130,8 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionId: Long
   ): ResponseEntity<UnallocatedCaseRisks> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseRisks(crn, convictionId) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+      getUnallocatedCaseService.getCaseRisks(crn, convictionId)
+        ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 
   @PostMapping("/cases/unallocated/upload")

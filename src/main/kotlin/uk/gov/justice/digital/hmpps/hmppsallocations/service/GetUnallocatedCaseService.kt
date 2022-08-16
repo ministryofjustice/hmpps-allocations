@@ -44,23 +44,11 @@ class GetUnallocatedCaseService(
       val conviction = communityApiClient.getConviction(crn, convictionId)
 
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
-      val courtReportDocument = communityApiClient.getDocuments(crn, convictionId)
-        .map { documents ->
-          val documentTypes = documents.groupBy({ document -> document.type.code }, { document ->
-            document.subType?.let { subType ->
-              subType.description = courtReportMapper.deliusToReportType(subType.code, subType.description)
-            }
-            UnallocatedCaseDocument.from(document)
-          })
-            .mapValues { entry -> entry.value.maxByOrNull { document -> document?.completedDate ?: LocalDateTime.MIN } }
-          Documents(documentTypes["COURT_REPORT_DOCUMENT"], documentTypes["CPSPACK_DOCUMENT"], documentTypes["PRECONS_DOCUMENT"])
-        }
+      val courtReportDocuments = getDocuments(crn, convictionId)
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
-
-      val results = Mono.zip(offenderSummary, requirements, courtReportDocument, assessment, conviction).block()!!
-
+      val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, assessment, conviction).block()!!
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCase.from(
         it, results.t1, age, results.t5?.offences,
@@ -70,15 +58,36 @@ class GetUnallocatedCaseService(
       )
     }
 
+  private fun getDocuments(
+    crn: String,
+    convictionId: Long
+  ) = communityApiClient.getDocuments(crn, convictionId)
+    .map { documents ->
+      val documentTypes = documents.groupBy({ document -> document.type.code }, { document ->
+        document.subType?.let { subType ->
+          subType.description = courtReportMapper.deliusToReportType(subType.code, subType.description)
+        }
+        UnallocatedCaseDocument.from(document)
+      })
+        .mapValues { entry -> entry.value.maxByOrNull { document -> document?.completedDate ?: LocalDateTime.MIN } }
+      Documents(
+        documentTypes["COURT_REPORT_DOCUMENT"],
+        documentTypes["CPSPACK_DOCUMENT"],
+        documentTypes["PRECONS_DOCUMENT"]
+      )
+    }
+
   fun getCaseOverview(crn: String, convictionId: Long): UnallocatedCase? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       UnallocatedCase.from(it)
     }
 
-  fun getAll(): List<UnallocatedCase> {
+  fun getAll(): List<Mono<UnallocatedCase>> {
     return unallocatedCasesRepository.findAll().map { unallocatedCase ->
       enrichInductionAppointment(unallocatedCase)
-    }.map { it.map { unallocatedCase -> UnallocatedCase.from(unallocatedCase) }.block()!! }
+    }.map {
+      it.map { unallocatedCase -> UnallocatedCase.from(unallocatedCase) }
+    }
   }
 
   @Cacheable(INDUCTION_APPOINTMENT_CACHE_NAME)
@@ -104,14 +113,18 @@ class GetUnallocatedCaseService(
         .filter { c -> c.sentence != null }
         .filter { c -> c.convictionId != excludeConvictionId }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
+          val practitioner = conviction.orderManagers.maxByOrNull { orderManager ->
+            orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
+          }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
           UnallocatedCaseConviction.from(conviction, conviction.sentence!!.startDate, null, practitioner)
         }
 
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager -> orderManager.dateStartOfAllocation ?: LocalDateTime.MIN }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
+          val practitioner = conviction.orderManagers.maxByOrNull { orderManager ->
+            orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
+          }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
           UnallocatedCaseConviction.from(conviction, null, conviction.sentence!!.terminationDate, practitioner)
         }
 
@@ -138,7 +151,14 @@ class GetUnallocatedCaseService(
       val ogrs = communityApiClient.getAssessment(crn)
 
       val results = Mono.zip(registrations, riskSummary, latestRiskPredictor, ogrs).block()!!
-      return UnallocatedCaseRisks.from(it, results.t1.getOrDefault(true, emptyList()), results.t1.getOrDefault(false, emptyList()), results.t2.orElse(null), results.t3.orElse(null), results.t4.orElse(null))
+      return UnallocatedCaseRisks.from(
+        it,
+        results.t1.getOrDefault(true, emptyList()),
+        results.t1.getOrDefault(false, emptyList()),
+        results.t2.orElse(null),
+        results.t3.orElse(null),
+        results.t4.orElse(null)
+      )
     }
 
   fun getCaseDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
