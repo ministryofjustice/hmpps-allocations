@@ -17,7 +17,7 @@ internal class GetUnallocatedCaseServiceTest {
   private val mockRepo: UnallocatedCasesRepository = mockk()
 
   @Test
-  fun getAll() {
+  fun `must not return unallocated cases which get deleted during enrichment`() {
     val crn = "X123456"
     val sentenceDate = LocalDate.now()
     val id = 2L
@@ -35,7 +35,7 @@ internal class GetUnallocatedCaseServiceTest {
     every { mockRepo.findAll() } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
     every { mockClient.getInductionContacts(crn, sentenceDate) } returns Mono.just(listOf())
-    val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk()).getAll()
-    assertEquals(cases.size, 1)
+    val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk()).getAll().collectList().block()
+    assertEquals(0, cases.size)
   }
 }

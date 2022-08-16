@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import reactor.core.publisher.Mono
+import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
@@ -41,7 +41,7 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated")
-  fun getUnallocatedCases(): ResponseEntity<List<Mono<UnallocatedCase>>> {
+  fun getUnallocatedCases(): ResponseEntity<Flux<UnallocatedCase>> {
     return ResponseEntity.ok(
       getUnallocatedCaseService.getAll()
     )

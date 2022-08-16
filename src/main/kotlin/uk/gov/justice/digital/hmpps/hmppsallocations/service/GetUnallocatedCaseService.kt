@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
@@ -82,11 +83,11 @@ class GetUnallocatedCaseService(
       UnallocatedCase.from(it)
     }
 
-  fun getAll(): List<Mono<UnallocatedCase>> {
-    return unallocatedCasesRepository.findAll().map { unallocatedCase ->
+  fun getAll(): Flux<UnallocatedCase> {
+    return Flux.fromIterable(unallocatedCasesRepository.findAll()).flatMap { unallocatedCase ->
       enrichInductionAppointment(unallocatedCase)
-    }.map {
-      it.map { unallocatedCase -> UnallocatedCase.from(unallocatedCase) }
+    }.map { unallocatedCase ->
+      UnallocatedCase.from(unallocatedCase)
     }
   }
 
