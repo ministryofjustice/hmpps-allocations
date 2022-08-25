@@ -83,7 +83,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.[4].initialAppointment")
+      .jsonPath("$.[?(@.convictionId == 86472147892)].initialAppointment")
       .isEqualTo("2021-11-30")
   }
 
