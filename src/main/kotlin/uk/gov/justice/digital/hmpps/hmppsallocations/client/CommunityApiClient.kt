@@ -14,8 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -103,12 +103,12 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(responseType)
   }
 
-  fun getOffenderSummary(crn: String): Mono<OffenderSummary> {
+  fun getOffenderDetails(crn: String): Mono<OffenderDetails> {
     return webClient
       .get()
-      .uri("/offenders/crn/$crn")
+      .uri("/offenders/crn/$crn/all")
       .retrieve()
-      .bodyToMono(OffenderSummary::class.java)
+      .bodyToMono(OffenderDetails::class.java)
   }
 
   fun getOffenderManagerName(crn: String): Mono<OffenderManager> {

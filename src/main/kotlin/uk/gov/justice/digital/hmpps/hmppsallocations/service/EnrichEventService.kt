@@ -28,7 +28,7 @@ class EnrichEventService(
   }
 
   fun getOffenderName(crn: String): String {
-    return communityApiClient.getOffenderSummary(crn)
+    return communityApiClient.getOffenderDetails(crn)
       .map { "${it.firstName} ${it.surname}" }
       .block()!!
   }

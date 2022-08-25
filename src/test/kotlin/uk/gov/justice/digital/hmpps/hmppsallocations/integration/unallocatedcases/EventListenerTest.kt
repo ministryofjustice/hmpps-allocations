@@ -22,7 +22,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -54,7 +54,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -88,7 +88,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -121,7 +121,7 @@ class EventListenerTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -162,7 +162,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -195,7 +195,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -228,7 +228,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -264,7 +264,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     tierCalculationResponse(crn)
     twoActiveConvictionsResponse(crn)
     getStaffWithGradeFromDelius(crn)
@@ -299,7 +299,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)
@@ -336,7 +336,7 @@ class EventListenerTest : IntegrationTestBase() {
     val convictionId = 123456789L
     unallocatedConvictionResponse(crn, convictionId)
     noActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     tierCalculationResponse(crn)
     twoActiveConvictionsResponse(crn)
     getStaffWithoutGradeFromDelius(crn)

@@ -40,7 +40,7 @@ class GetUnallocatedCaseService(
   fun getCase(crn: String, convictionId: Long): UnallocatedCase? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       log.info("Found unallocated case for $crn")
-      val offenderSummary = communityApiClient.getOffenderSummary(crn)
+      val offenderSummary = communityApiClient.getOffenderDetails(crn)
 
       val conviction = communityApiClient.getConviction(crn, convictionId)
 

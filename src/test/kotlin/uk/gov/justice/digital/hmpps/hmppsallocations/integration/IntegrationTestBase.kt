@@ -38,9 +38,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryNoLevelResponse
@@ -350,12 +350,12 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun offenderSummaryResponse(crn: String) {
+  protected fun offenderDetailsResponse(crn: String) {
     val summaryRequest =
-      request().withPath("/offenders/crn/$crn")
+      request().withPath("/offenders/crn/$crn/all")
 
     communityApi.`when`(summaryRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderSummaryResponse())
+      response().withContentType(APPLICATION_JSON).withBody(offenderDetailsResponse())
     )
   }
 
@@ -545,7 +545,7 @@ abstract class IntegrationTestBase {
     singleActiveConvictionResponseForAllConvictions(crn)
     unallocatedConvictionResponse(crn, 123456789)
     singleActiveInductionResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     tierCalculationResponse(crn)
     singleActiveConvictionResponse(crn)

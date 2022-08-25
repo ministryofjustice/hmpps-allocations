@@ -42,7 +42,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
@@ -87,7 +87,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     allocatedConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 
@@ -141,7 +141,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     convictionWithNoSentenceResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 
@@ -177,7 +177,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     inactiveConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 
@@ -213,7 +213,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     notFoundConvictionResponse(crn, convictionId)
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
-    offenderSummaryResponse(crn)
+    offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
     singleActiveConvictionResponseForAllConvictions(crn)
 

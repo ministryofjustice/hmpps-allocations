@@ -63,7 +63,7 @@ data class UnallocatedCase @JsonCreator constructor(
 
     fun from(
       case: UnallocatedCaseEntity,
-      offenderSummary: OffenderSummary?,
+      offenderDetails: OffenderDetails?,
       age: Int?,
       offences: List<Offence>?,
       expectedSentenceEndDate: LocalDate?,
@@ -81,14 +81,14 @@ data class UnallocatedCase @JsonCreator constructor(
           case.offenderManagerSurname,
           case.offenderManagerGrade
         ),
-        offenderSummary?.gender,
-        offenderSummary?.dateOfBirth,
+        offenderDetails?.gender,
+        offenderDetails?.dateOfBirth,
         age,
         offences?.map { UnallocatedCaseOffence.from(it) },
         expectedSentenceEndDate,
         sentenceDescription,
         requirements?.map { UnallocatedCaseRequirement.from(it) },
-        offenderSummary?.otherIds?.pncNumber,
+        offenderDetails?.otherIds?.pncNumber,
         documents?.preSentenceReport,
         UnallocatedAssessment.from(assessment),
         case.convictionId,

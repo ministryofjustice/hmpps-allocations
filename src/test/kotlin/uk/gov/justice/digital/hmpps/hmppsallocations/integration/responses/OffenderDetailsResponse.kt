@@ -1,15 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun offenderDetailResponse() = """
+fun offenderDetailsResponse() = """
   {
-    "offenderId": 1502372205,
     "title": "Mr",
-    "firstName": "Titus",
-    "surname": "Salt",
-    "dateOfBirth": "1995-01-12",
-    "gender": "Male",
+    "offenderId": 9999999999,
+      "firstName": "Tester",
+      "middleNames": [
+          "hi",
+          "hi"
+      ],
+      "surname": "TestSurname",
+      "dateOfBirth": "2001-11-17",
+      "gender": "Male",
     "otherIds": {
-        "crn": "E499787"
+        "crn": "E499787",
+          "pncNumber": "9999/1234567A"
     },
     "contactDetails": {
         "addresses": [
