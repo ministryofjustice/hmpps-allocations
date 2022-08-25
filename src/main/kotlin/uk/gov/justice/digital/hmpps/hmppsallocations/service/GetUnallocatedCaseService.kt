@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -37,7 +38,7 @@ class GetUnallocatedCaseService(
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
 
-  fun getCase(crn: String, convictionId: Long): UnallocatedCase? =
+  fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       log.info("Found unallocated case for $crn")
       val offenderSummary = communityApiClient.getOffenderDetails(crn)
@@ -51,7 +52,7 @@ class GetUnallocatedCaseService(
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
       val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, assessment, conviction).block()!!
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
-      return UnallocatedCase.from(
+      return UnallocatedCaseDetails.from(
         it, results.t1, age, results.t5?.offences,
         results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
         results.t3,

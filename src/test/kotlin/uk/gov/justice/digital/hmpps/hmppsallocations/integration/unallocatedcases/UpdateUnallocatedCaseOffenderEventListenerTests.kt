@@ -109,7 +109,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         null
       )
     }
-    val endTime = ZonedDateTime.parse(parameters.captured["endTime"])
     val startTime = ZonedDateTime.parse(parameters.captured["startTime"])
     Assertions.assertAll(
       { Assertions.assertEquals(savedEntity.crn, parameters.captured["crn"]) },

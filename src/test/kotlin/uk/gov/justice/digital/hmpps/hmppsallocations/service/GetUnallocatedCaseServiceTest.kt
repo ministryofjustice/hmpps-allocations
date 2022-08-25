@@ -36,6 +36,6 @@ internal class GetUnallocatedCaseServiceTest {
     every { mockRepo.existsById(id) } returns false
     every { mockClient.getInductionContacts(crn, sentenceDate) } returns Mono.just(listOf())
     val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk()).getAll().collectList().block()
-    assertEquals(0, cases.size)
+    assertEquals(0, cases!!.size)
   }
 }

@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
@@ -74,7 +75,7 @@ class UnallocatedCasesController(
   fun getUnallocatedCase(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionId: Long
-  ): ResponseEntity<UnallocatedCase> =
+  ): ResponseEntity<UnallocatedCaseDetails> =
     ResponseEntity.ok(
       getUnallocatedCaseService.getCase(crn, convictionId)
         ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
