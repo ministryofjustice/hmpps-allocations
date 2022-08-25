@@ -151,4 +151,58 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectStatus()
       .isNotFound
   }
+
+  @Test
+  fun `retrieve main address`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+
+    offenderDetailsResponse(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    documentsResponse(crn, convictionId)
+    getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.address.addressNumber")
+      .isEqualTo("22")
+      .jsonPath("$.address.buildingName")
+      .isEqualTo("Sheffield Towers")
+      .jsonPath("$.address.streetName")
+      .isEqualTo("Sheffield Street")
+      .jsonPath("$.address.town")
+      .isEqualTo("Sheffield")
+      .jsonPath("$.address.county")
+      .isEqualTo("Yorkshire")
+      .jsonPath("$.address.postcode")
+      .isEqualTo("S2 4SU")
+  }
+
+  @Test
+  fun `do not return a no fixed abode address`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+
+    offenderDetailsNoFixedAbodeResponse(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    documentsResponse(crn, convictionId)
+    getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.address")
+      .doesNotExist()
+  }
 }

@@ -38,6 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsNoFixedAbodeResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
@@ -356,6 +357,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(summaryRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderDetailsResponse())
+    )
+  }
+
+  protected fun offenderDetailsNoFixedAbodeResponse(crn: String) {
+    val summaryRequest =
+      request().withPath("/offenders/crn/$crn/all")
+
+    communityApi.`when`(summaryRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(offenderDetailsNoFixedAbodeResponse())
     )
   }
 
