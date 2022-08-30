@@ -26,7 +26,7 @@ data class Address @JsonCreator constructor(
   val streetName: String?,
   val town: String?,
   val county: String?,
-  val postcode: String,
+  val postcode: String?,
   val status: AddressStatus,
   val noFixedAbode: Boolean
 )
