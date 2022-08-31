@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseTeamCount
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
@@ -168,6 +169,8 @@ class GetUnallocatedCaseService(
   }
 
   fun getAllCount(): Long = unallocatedCasesRepository.count()
+  fun getUnallocatedCasesTeamCount(teamCodes: List<String>): Flux<UnallocatedCaseTeamCount> = Flux.fromIterable(unallocatedCasesRepository.countByTeamCodes(teamCodes))
+    .map { UnallocatedCaseTeamCount(it.getTeamCode(), it.getCaseCount()) }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

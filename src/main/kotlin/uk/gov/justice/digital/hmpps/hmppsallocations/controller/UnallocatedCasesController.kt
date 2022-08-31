@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseTeamCount
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
@@ -61,6 +62,19 @@ class UnallocatedCasesController(
     return ResponseEntity.ok(
       UnallocatedCaseCount(getUnallocatedCaseService.getAllCount())
     )
+  }
+
+  @Operation(summary = "Retrieve count of all unallocated cases by team")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/teamCount")
+  fun getUnallocatedCasesTeamCount(@RequestParam(required = true) teams: List<String>): Flux<UnallocatedCaseTeamCount> {
+    return getUnallocatedCaseService.getUnallocatedCasesTeamCount(teams)
   }
 
   @Operation(summary = "Retrieve unallocated case by crn and conviction id")
