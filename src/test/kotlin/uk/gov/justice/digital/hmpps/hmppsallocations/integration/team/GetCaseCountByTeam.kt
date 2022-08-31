@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.team
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 
-class GetTeamCaseCount : IntegrationTestBase() {
+class GetCaseCountByTeam : IntegrationTestBase() {
 
   @Test
   fun `must get team count of unallocated cases`() {

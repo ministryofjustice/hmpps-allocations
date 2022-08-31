@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiC
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration.Companion.INDUCTION_APPOINTMENT_CACHE_NAME
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
@@ -21,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseTeamCount
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
@@ -169,8 +169,8 @@ class GetUnallocatedCaseService(
   }
 
   fun getAllCount(): Long = unallocatedCasesRepository.count()
-  fun getUnallocatedCasesTeamCount(teamCodes: List<String>): Flux<UnallocatedCaseTeamCount> = Flux.fromIterable(unallocatedCasesRepository.countByTeamCodes(teamCodes))
-    .map { UnallocatedCaseTeamCount(it.getTeamCode(), it.getCaseCount()) }
+  fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> = Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
+    .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
