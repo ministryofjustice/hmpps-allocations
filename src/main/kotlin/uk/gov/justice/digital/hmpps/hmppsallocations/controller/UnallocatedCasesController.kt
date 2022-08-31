@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import reactor.core.publisher.Flux
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
@@ -61,6 +62,18 @@ class UnallocatedCasesController(
     return ResponseEntity.ok(
       UnallocatedCaseCount(getUnallocatedCaseService.getAllCount())
     )
+  }
+
+  @Operation(summary = "Retrieve count of all unallocated cases by team")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/teamCount")
+  fun getCaseCountByTeam(@RequestParam(required = true) teams: List<String>): Flux<CaseCountByTeam> {
+    return getUnallocatedCaseService.getCaseCountByTeam(teams)
   }
 
   @Operation(summary = "Retrieve unallocated case by crn and conviction id")

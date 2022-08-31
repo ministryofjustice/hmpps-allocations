@@ -72,3 +72,9 @@ The column order for the csv is `<crn>` with no headers
 [ktlint](https://github.com/pinterest/ktlint) is the authority on style and is enforced on build.
 
 Run `./gradlew ktlintFormat` to fix formatting errors in your code before commit.
+
+To apply the formatting to Intellij and add a pre-commit hook run the following commands:
+
+```shell
+./gradlew ktlintApplyToIdea addKtlintFormatGitPreCommitHook
+```
