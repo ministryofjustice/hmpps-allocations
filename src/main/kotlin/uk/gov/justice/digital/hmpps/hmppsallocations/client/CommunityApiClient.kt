@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import io.netty.handler.timeout.ReadTimeoutException
+import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -23,6 +24,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Optional
 
 class CommunityApiClient(private val webClient: WebClient) {
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   fun getActiveConvictions(crn: String): Mono<List<Conviction>> {
     val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
@@ -103,6 +108,7 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(responseType)
       .onErrorResume {
+        log.warn("Error retrieving induction contacts", it)
         Mono.just(emptyList())
       }
   }
