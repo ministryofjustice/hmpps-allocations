@@ -19,6 +19,7 @@ import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.matchers.Times.exactly
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpRequest.request
+import org.mockserver.model.HttpResponse.notFoundResponse
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType.APPLICATION_JSON
 import org.mockserver.model.Parameter
@@ -381,6 +382,13 @@ abstract class IntegrationTestBase {
     communityApi.`when`(inductionRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")
     )
+  }
+
+  protected fun erroredInductionResponse(crn: String) {
+    val inductionRequest =
+      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
+
+    communityApi.`when`(inductionRequest, exactly(1)).respond(notFoundResponse())
   }
 
   protected fun tierCalculationResponse(crn: String): HttpRequest {

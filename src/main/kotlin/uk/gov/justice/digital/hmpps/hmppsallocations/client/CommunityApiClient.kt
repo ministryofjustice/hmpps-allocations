@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import io.netty.handler.timeout.ReadTimeoutException
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -101,6 +102,9 @@ class CommunityApiClient(private val webClient: WebClient) {
       .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
       .bodyToMono(responseType)
+      .onErrorResume {
+        Mono.just(emptyList())
+      }
   }
 
   fun getOffenderDetails(crn: String): Mono<OffenderDetails> {

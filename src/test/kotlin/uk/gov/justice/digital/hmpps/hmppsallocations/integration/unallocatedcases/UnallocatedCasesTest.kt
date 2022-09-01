@@ -85,6 +85,24 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.[?(@.convictionId == 86472147892)].initialAppointment")
       .isEqualTo("2021-11-30")
+      .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
+      .isEqualTo(null)
+  }
+
+  @Test
+  fun `return empty induction appointment on API call error`() {
+    insertCases()
+    singleActiveInductionResponse("C3333333")
+    erroredInductionResponse("J680648")
+    webTestClient.get()
+      .uri("/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
+      .isEqualTo(null)
   }
 
   @Test
