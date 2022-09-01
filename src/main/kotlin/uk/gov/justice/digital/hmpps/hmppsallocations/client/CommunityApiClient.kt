@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import io.netty.handler.timeout.ReadTimeoutException
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.Resource
