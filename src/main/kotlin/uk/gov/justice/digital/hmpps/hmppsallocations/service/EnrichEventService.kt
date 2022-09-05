@@ -1,11 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
@@ -78,6 +83,23 @@ class EnrichEventService(
         .block()!!
       return listOf(storedConvictionIds, convictionIds).flatten().toSet()
     }
+
+  @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
+  fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
+    if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
+      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate)
+        .filter { unallocatedCasesRepository.existsById(unallocatedCaseEntity.id!!) }
+        .map { contacts ->
+          unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
+          unallocatedCasesRepository.save(unallocatedCaseEntity)
+        }
+    }
+    return Mono.just(unallocatedCaseEntity)
+  }
+
+  companion object {
+    private val inductionCaseTypes = setOf(CaseTypes.COMMUNITY, CaseTypes.LICENSE)
+  }
 }
 
 data class ProbationStatus(

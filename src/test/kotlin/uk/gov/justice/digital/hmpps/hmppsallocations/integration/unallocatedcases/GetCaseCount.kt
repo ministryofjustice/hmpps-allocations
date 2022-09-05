@@ -16,6 +16,6 @@ class GetCaseCount : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.count")
-      .isEqualTo(5)
+      .isEqualTo(6)
   }
 }

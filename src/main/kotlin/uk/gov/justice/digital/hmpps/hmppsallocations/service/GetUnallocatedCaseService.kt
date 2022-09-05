@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -11,9 +10,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration.Companion.INDUCTION_APPOINTMENT_CACHE_NAME
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
@@ -22,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import java.time.LocalDate
@@ -37,6 +33,7 @@ class GetUnallocatedCaseService(
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
+  private val enrichEventService: EnrichEventService,
 ) {
 
   fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
@@ -87,23 +84,18 @@ class GetUnallocatedCaseService(
 
   fun getAll(): Flux<UnallocatedCase> {
     return Flux.fromIterable(unallocatedCasesRepository.findAll()).flatMap { unallocatedCase ->
-      enrichInductionAppointment(unallocatedCase)
+      enrichEventService.enrichInductionAppointment(unallocatedCase)
     }.map { unallocatedCase ->
       UnallocatedCase.from(unallocatedCase)
     }
   }
 
-  @Cacheable(INDUCTION_APPOINTMENT_CACHE_NAME)
-  fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
-    if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
-      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate)
-        .filter { unallocatedCasesRepository.existsById(unallocatedCaseEntity.id!!) }
-        .map { contacts ->
-          unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
-          unallocatedCasesRepository.save(unallocatedCaseEntity)
-        }
+  fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
+    return Flux.fromIterable(unallocatedCasesRepository.findByTeamCode(teamCode)).flatMap { unallocatedCase ->
+      enrichEventService.enrichInductionAppointment(unallocatedCase)
+    }.map { unallocatedCase ->
+      UnallocatedCase.from(unallocatedCase)
     }
-    return Mono.just(unallocatedCaseEntity)
   }
 
   fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
@@ -174,6 +166,5 @@ class GetUnallocatedCaseService(
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val inductionCaseTypes = setOf(CaseTypes.COMMUNITY, CaseTypes.LICENSE)
   }
 }

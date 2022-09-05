@@ -46,7 +46,7 @@ class UnallocatedCasesTest : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(5)
+      .isEqualTo(6)
       .jsonPath("$.[0].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].initialAppointment")

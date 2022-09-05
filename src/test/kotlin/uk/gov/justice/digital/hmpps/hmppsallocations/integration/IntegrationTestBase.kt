@@ -121,6 +121,19 @@ abstract class IntegrationTestBase {
           providerCode = "",
           teamCode = "TEAM1"
         ),
+        UnallocatedCaseEntity(
+          null,
+          "William Jones",
+          "X4565764",
+          "C1",
+          LocalDate.now().minusDays(3),
+          LocalDate.now().plusDays(2),
+          "New to probation",
+          convictionId = 68793954,
+          caseType = CaseTypes.COMMUNITY,
+          providerCode = "",
+          teamCode = "TEAM1"
+        ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
