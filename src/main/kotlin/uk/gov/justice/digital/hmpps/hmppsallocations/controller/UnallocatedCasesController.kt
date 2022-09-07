@@ -19,7 +19,6 @@ import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseCount
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
@@ -46,21 +45,6 @@ class UnallocatedCasesController(
   fun getUnallocatedCases(): ResponseEntity<Flux<UnallocatedCase>> {
     return ResponseEntity.ok(
       getUnallocatedCaseService.getAll()
-    )
-  }
-
-  @Operation(summary = "Retrieve count of all unallocated cases")
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
-  )
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/count")
-  fun getUnallocatedCasesCount(): ResponseEntity<UnallocatedCaseCount> {
-    return ResponseEntity.ok(
-      UnallocatedCaseCount(getUnallocatedCaseService.getAllCount())
     )
   }
 

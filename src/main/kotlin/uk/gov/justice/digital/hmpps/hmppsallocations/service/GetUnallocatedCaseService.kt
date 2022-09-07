@@ -160,7 +160,6 @@ class GetUnallocatedCaseService(
     return communityApiClient.getDocuments(crn, documentId)
   }
 
-  fun getAllCount(): Long = unallocatedCasesRepository.count()
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> = Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
     .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
