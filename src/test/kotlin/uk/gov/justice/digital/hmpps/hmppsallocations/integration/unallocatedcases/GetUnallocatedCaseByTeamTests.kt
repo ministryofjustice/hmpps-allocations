@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import java.time.format.DateTimeFormatter
 
@@ -80,6 +81,49 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `cannot get unallocated cases by team when no auth token supplied`() {
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .exchange()
+      .expectStatus()
+      .isUnauthorized
+  }
+  @Test
+  fun `not found`() {
+    webTestClient.post()
+      .uri("/cases/someotherurl")
+      .headers { it.authToken(roles = listOf("ROLE_QUEUE_WORKLOAD_ADMIN")) }
+      .exchange()
+      .expectStatus()
+      .isEqualTo(HttpStatus.NOT_FOUND)
+  }
+  @Test
+  fun `method not allowed`() {
+    webTestClient.post()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_QUEUE_WORKLOAD_ADMIN")) }
+      .exchange()
+      .expectStatus()
+      .isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+  }
+
+  @Test
+  fun `can get previous conviction end date`() {
+    repository.save(previouslyManagedCase)
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[0].status")
+      .isEqualTo(previouslyManagedCase.status)
+      .jsonPath("$.[0].previousConvictionEndDate")
+      .isEqualTo((previouslyManagedCase.previousConvictionDate!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+  }
+
+  @Test
+  fun `cannot get unallocated cases when no auth token supplied`() {
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .exchange()

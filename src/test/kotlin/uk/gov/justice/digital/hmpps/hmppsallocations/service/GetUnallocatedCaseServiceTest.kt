@@ -32,10 +32,10 @@ internal class GetUnallocatedCaseServiceTest {
       tier = "C2",
       id = id
     )
-    every { mockRepo.findAll() } returns listOf(unallocatedCaseEntity)
+    every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
     every { mockClient.getInductionContacts(crn, sentenceDate) } returns Mono.just(listOf())
-    val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk(), EnrichEventService(mockClient, mockk(), mockRepo)).getAll().collectList().block()
+    val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk(), EnrichEventService(mockClient, mockk(), mockRepo)).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }
 }
