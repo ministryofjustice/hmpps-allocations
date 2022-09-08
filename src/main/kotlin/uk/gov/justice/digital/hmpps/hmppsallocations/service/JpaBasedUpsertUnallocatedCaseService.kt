@@ -78,7 +78,7 @@ class JpaBasedUpsertUnallocatedCaseService(
   private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity = repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(name = "", crn = crn, tier = "", sentenceDate = LocalDate.now(), status = "", convictionId = convictionId, caseType = CaseTypes.UNKNOWN, providerCode = "PC1")
 
   private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
-    return caseOfficerConfigProperties.includes.contains(currentOrderManager?.staffCode) && conviction.active && conviction.sentence != null
+    return currentOrderManager?.staffCode?.endsWith("U") ?: false && conviction.active && conviction.sentence != null
   }
 
   companion object {

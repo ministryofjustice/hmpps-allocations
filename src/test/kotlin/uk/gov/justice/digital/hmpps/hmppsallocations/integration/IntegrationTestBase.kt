@@ -282,11 +282,7 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long) {
-    unallocatedConvictionResponse(crn, convictionId, "STFFCDEU")
-  }
-
-  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long, staffCode: String) {
+  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long, staffCode: String = "STFFCDEU") {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions/$convictionId")
 
