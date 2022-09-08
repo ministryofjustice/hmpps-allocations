@@ -82,14 +82,6 @@ class GetUnallocatedCaseService(
       UnallocatedCase.from(it)
     }
 
-  fun getAll(): Flux<UnallocatedCase> {
-    return Flux.fromIterable(unallocatedCasesRepository.findAll()).flatMap { unallocatedCase ->
-      enrichEventService.enrichInductionAppointment(unallocatedCase)
-    }.map { unallocatedCase ->
-      UnallocatedCase.from(unallocatedCase)
-    }
-  }
-
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
     return Flux.fromIterable(unallocatedCasesRepository.findByTeamCode(teamCode)).flatMap { unallocatedCase ->
       enrichEventService.enrichInductionAppointment(unallocatedCase)

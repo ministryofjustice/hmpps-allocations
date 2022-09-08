@@ -33,21 +33,6 @@ class UnallocatedCasesController(
   private val getUnallocatedCaseService: GetUnallocatedCaseService
 ) {
 
-  @Operation(summary = "Retrieve all unallocated cases")
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
-  )
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated")
-  fun getUnallocatedCases(): ResponseEntity<Flux<UnallocatedCase>> {
-    return ResponseEntity.ok(
-      getUnallocatedCaseService.getAll()
-    )
-  }
-
   @Operation(summary = "Retrieve count of all unallocated cases by team")
   @ApiResponses(
     value = [
