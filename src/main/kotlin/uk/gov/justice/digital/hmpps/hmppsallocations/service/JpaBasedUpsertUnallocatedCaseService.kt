@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.config.CaseOfficerConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OrderManager
@@ -19,7 +18,6 @@ class JpaBasedUpsertUnallocatedCaseService(
   private val repository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService,
-  private val caseOfficerConfigProperties: CaseOfficerConfigProperties,
   private val caseTypeEngine: CaseTypeEngine,
   private val telemetryService: TelemetryService,
 
