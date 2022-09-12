@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 
-data class UnallocatedCaseRisks @JsonCreator constructor (
+data class UnallocatedCaseRisks @JsonCreator constructor(
   @Schema(description = "Offender Name", example = "John Smith")
   val name: String,
   @Schema(description = "CRN", example = "J111111")

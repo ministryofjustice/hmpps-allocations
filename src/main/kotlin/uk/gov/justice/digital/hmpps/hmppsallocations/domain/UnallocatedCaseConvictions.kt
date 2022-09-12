@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 
-data class UnallocatedCaseConvictions @JsonCreator constructor (
+data class UnallocatedCaseConvictions @JsonCreator constructor(
   @Schema(description = "Offender Name", example = "John Smith")
   val name: String,
   @Schema(description = "CRN", example = "J111111")
