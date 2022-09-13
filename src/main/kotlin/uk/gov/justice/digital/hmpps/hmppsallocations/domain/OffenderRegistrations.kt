@@ -13,8 +13,6 @@ data class OffenderRegistration @JsonCreator constructor(
   val type: OffenderRegistrationType,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val startDate: LocalDate,
-  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val nextReviewDate: LocalDate?,
   val notes: String?,
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val endDate: LocalDate?
