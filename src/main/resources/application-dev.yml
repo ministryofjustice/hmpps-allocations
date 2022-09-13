@@ -1,11 +1,6 @@
 hmpps.sqs:
   provider: localstack
   queues:
-    hmppsdomainqueue:
-      queueName: hmpps_domain_event_queue
-      dlqName: hmpps_domain_event_dlq
-      subscribeTopicId: hmppsdomaintopic
-      subscribeFilter: '{"eventType":[ "ALLOCATION_REQUIRED"] }'
     tiercalculationqueue:
       queueName: hmpps_tier_event_queue
       dlqName: hmpps_tier_event_dlq
