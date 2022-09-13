@@ -18,7 +18,7 @@ class OffenderEventListener(
 
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
-    val crn = getCase(rawMessage)
+    val crn = getCrn(rawMessage)
     try {
       enrichEventService.getAllConvictionIdsAssociatedToCrn(crn)
         .forEach { convictionId ->
@@ -29,7 +29,7 @@ class OffenderEventListener(
     }
   }
 
-  private fun getCase(rawMessage: String): String {
+  private fun getCrn(rawMessage: String): String {
     val (message) = objectMapper.readValue(rawMessage, SQSMessage::class.java)
     return objectMapper.readValue(message, HmppsOffenderEvent::class.java).crn
   }
