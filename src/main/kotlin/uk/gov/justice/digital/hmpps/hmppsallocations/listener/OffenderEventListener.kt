@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
@@ -28,12 +27,6 @@ class OffenderEventListener(
     } catch (e: ForbiddenOffenderError) {
       log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
     }
-  }
-
-  @MessageExceptionHandler()
-  fun errorHandler(e: Exception, msg: String) {
-    log.warn("Failed to create an unallocated case  with CRN ${getCase(msg)} with error: ${e.message}")
-    throw e
   }
 
   private fun getCase(rawMessage: String): String {
