@@ -55,14 +55,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoAc
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
-import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
-import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsUnallocatedCase
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -164,7 +160,6 @@ abstract class IntegrationTestBase {
   @BeforeEach
   fun `clear queues and database`() {
     repository.deleteAll()
-    hmppsDomainSqsClient.purgeQueue(PurgeQueueRequest(hmppsDomainQueue.queueUrl))
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.queueUrl))
     hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
@@ -176,16 +171,26 @@ abstract class IntegrationTestBase {
     setupOauth()
   }
 
-  private val hmppsDomainQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") ?: throw MissingQueueException("HmppsQueue hmppsdomainqueue not found") }
-  private val tierCalculationQueue by lazy { hmppsQueueService.findByQueueId("tiercalculationqueue") ?: throw MissingQueueException("HmppsQueue tiercalculationqueue not found") }
-  private val hmppsOffenderQueue by lazy { hmppsQueueService.findByQueueId("hmppsoffenderqueue") ?: throw MissingQueueException("HmppsQueue hmppsoffenderqueue not found") }
+  private val tierCalculationQueue by lazy {
+    hmppsQueueService.findByQueueId("tiercalculationqueue")
+      ?: throw MissingQueueException("HmppsQueue tiercalculationqueue not found")
+  }
+  private val hmppsOffenderQueue by lazy {
+    hmppsQueueService.findByQueueId("hmppsoffenderqueue")
+      ?: throw MissingQueueException("HmppsQueue hmppsoffenderqueue not found")
+  }
 
-  private val hmppsDomainTopic by lazy { hmppsQueueService.findByTopicId("hmppsdomaintopic") ?: throw MissingQueueException("HmppsTopic hmppsdomaintopic not found") }
-  private val hmppsOffenderTopic by lazy { hmppsQueueService.findByTopicId("hmppsoffendertopic") ?: throw MissingQueueException("HmppsTopic hmppsoffendertopic not found") }
+  private val hmppsDomainTopic by lazy {
+    hmppsQueueService.findByTopicId("hmppsdomaintopic")
+      ?: throw MissingQueueException("HmppsTopic hmppsdomaintopic not found")
+  }
+  private val hmppsOffenderTopic by lazy {
+    hmppsQueueService.findByTopicId("hmppsoffendertopic")
+      ?: throw MissingQueueException("HmppsTopic hmppsoffendertopic not found")
+  }
 
   private val hmppsOffenderSqsDlqClient by lazy { hmppsOffenderQueue.sqsDlqClient as AmazonSQS }
 
-  protected val hmppsDomainSqsClient by lazy { hmppsDomainQueue.sqsClient }
   protected val tierCalculationSqsClient by lazy { tierCalculationQueue.sqsClient }
   protected val hmppsOffenderSqsClient by lazy { hmppsOffenderQueue.sqsClient }
 
@@ -225,22 +230,22 @@ abstract class IntegrationTestBase {
   }
 
   protected fun countMessagesOnOffenderEventQueue(): Int =
-    hmppsOffenderSqsClient.getQueueAttributes(hmppsOffenderQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-      .let { (it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0) + (it.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0) }
+    hmppsOffenderSqsClient.getQueueAttributes(
+      hmppsOffenderQueue.queueUrl,
+      listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible")
+    )
+      .let {
+        (
+          it.attributes["ApproximateNumberOfMessages"]?.toInt()
+            ?: 0
+          ) + (it.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0)
+      }
 
   protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int =
     hmppsOffenderSqsDlqClient.getQueueAttributes(hmppsOffenderQueue.dlqUrl, listOf("ApproximateNumberOfMessages"))
       .let { it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0 }
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
-
-  protected fun unallocatedCaseEvent(crn: String, convictionId: Long) = HmppsEvent(
-    "ALLOCATION_REQUIRED", 0, "some event description", "http://dummy.com",
-    ZonedDateTime.now().format(
-      ISO_ZONED_DATE_TIME
-    ),
-    HmppsUnallocatedCase(crn, convictionId)
-  )
 
   protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn)
 
@@ -488,7 +493,8 @@ abstract class IntegrationTestBase {
 
   protected fun getAssessmentsForCrn(crn: String) {
     val needsRequest =
-      request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+      request().withPath("/offenders/crn/$crn/assessments/summary")
+        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
 
     offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(assessmentResponse())
@@ -497,7 +503,8 @@ abstract class IntegrationTestBase {
 
   protected fun notFoundAssessmentForCrn(crn: String) {
     val needsRequest =
-      request().withPath("/offenders/crn/$crn/assessments/summary").withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+      request().withPath("/offenders/crn/$crn/assessments/summary")
+        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
       response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
@@ -588,6 +595,7 @@ abstract class IntegrationTestBase {
     val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
+
   protected fun whenCalculationQueueIsEmpty() {
     await untilCallTo {
       getNumberOfMessagesCurrentlyOnQueue(
