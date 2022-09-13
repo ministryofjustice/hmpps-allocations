@@ -19,26 +19,26 @@ class OffenderEventListener(
 
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
-    val case = getCase(rawMessage)
+    val crn = getCase(rawMessage)
     try {
-      enrichEventService.getAllConvictionIdsAssociatedToCrn(case.crn)
+      enrichEventService.getAllConvictionIdsAssociatedToCrn(crn)
         .forEach { convictionId ->
-          upsertUnallocatedCaseService.upsertUnallocatedCase(case.crn, convictionId)
+          upsertUnallocatedCaseService.upsertUnallocatedCase(crn, convictionId)
         }
     } catch (e: ForbiddenOffenderError) {
-      log.warn("Unable to access offender with CRN ${case.crn} with error: ${e.message}")
+      log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
     }
   }
 
   @MessageExceptionHandler()
   fun errorHandler(e: Exception, msg: String) {
-    log.warn("Failed to create an unallocated case  with CRN ${getCase(msg).crn} with error: ${e.message}")
+    log.warn("Failed to create an unallocated case  with CRN ${getCase(msg)} with error: ${e.message}")
     throw e
   }
 
-  private fun getCase(rawMessage: String): HmppsOffenderEvent {
-    val sqsMessage = objectMapper.readValue(rawMessage, SQSMessage::class.java)
-    return objectMapper.readValue(sqsMessage.message, HmppsOffenderEvent::class.java)
+  private fun getCase(rawMessage: String): String {
+    val (message) = objectMapper.readValue(rawMessage, SQSMessage::class.java)
+    return objectMapper.readValue(message, HmppsOffenderEvent::class.java).crn
   }
 
   companion object {
@@ -52,5 +52,4 @@ data class HmppsOffenderEvent(
 
 data class SQSMessage(
   @JsonProperty("Message") val message: String
-
 )
