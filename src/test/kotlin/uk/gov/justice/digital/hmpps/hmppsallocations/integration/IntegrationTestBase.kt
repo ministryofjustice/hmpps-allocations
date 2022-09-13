@@ -380,6 +380,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun offenderDetailsForbiddenResponse(crn: String) {
+    val summaryRequest =
+      request().withPath("/offenders/crn/$crn/all")
+
+    communityApi.`when`(summaryRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withStatusCode(403)
+    )
+  }
+
   protected fun offenderDetailsNoFixedAbodeResponse(crn: String) {
     val summaryRequest =
       request().withPath("/offenders/crn/$crn/all")

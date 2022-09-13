@@ -107,6 +107,29 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `do not save when restricted case`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderDetailsForbiddenResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+    await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
+  }
+
+  @Test
   fun `do not save when conviction is not sentenced yet`() {
     val crn = "J678910"
     val convictionId = 123456789L

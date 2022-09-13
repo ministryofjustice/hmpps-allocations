@@ -117,6 +117,10 @@ class CommunityApiClient(private val webClient: WebClient) {
       .get()
       .uri("/offenders/crn/$crn/all")
       .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.FORBIDDEN == httpStatus },
+        { Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn")) }
+      )
       .bodyToMono(OffenderDetails::class.java)
   }
 
@@ -196,3 +200,4 @@ class CommunityApiClient(private val webClient: WebClient) {
 
 private class MissingConvictionError(msg: String) : RuntimeException(msg)
 private class MissingOffenderAssessmentError(msg: String) : RuntimeException(msg)
+class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
