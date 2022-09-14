@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
@@ -78,13 +79,12 @@ class EnrichEventService(
     }
   }
 
-  fun getAllConvictionIdsAssociatedToCrn(crn: String): Set<Long> =
-    unallocatedCasesRepository.findConvictionIdsByCrn(crn).let { storedConvictions ->
-      val storedConvictionIds = storedConvictions.map { it.getConvictionId() }
-      val convictionIds = communityApiClient.getActiveConvictions(crn)
-        .map { conviction -> conviction.convictionId }.collectList().block()
-      return listOf(storedConvictionIds, convictionIds).flatten().toSet()
-    }
+  fun getAllConvictionIdsAssociatedToCrn(crn: String): Flux<Long> =
+    Flux.merge(
+      Flux.fromIterable(unallocatedCasesRepository.findConvictionIdsByCrn(crn)).map { it.getConvictionId() },
+      communityApiClient.getActiveConvictions(crn)
+        .map { conviction -> conviction.convictionId }
+    ).distinct()
 
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
   fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {

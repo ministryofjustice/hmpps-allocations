@@ -21,6 +21,8 @@ class OffenderEventListener(
     val crn = getCrn(rawMessage)
     try {
       enrichEventService.getAllConvictionIdsAssociatedToCrn(crn)
+        .collectList()
+        .block()!!
         .forEach { convictionId ->
           upsertUnallocatedCaseService.upsertUnallocatedCase(crn, convictionId)
         }
