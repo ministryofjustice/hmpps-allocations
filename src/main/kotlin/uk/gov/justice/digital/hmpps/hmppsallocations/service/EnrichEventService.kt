@@ -43,7 +43,7 @@ class EnrichEventService(
   }
 
   fun getActiveSentencedConvictions(crn: String): List<Conviction> {
-    return communityApiClient.getActiveConvictions(crn)
+    return communityApiClient.getActiveConvictions(crn).collectList()
       .map { convictions -> convictions.filter { conviction -> conviction.sentence != null } }
       .block() ?: emptyList()
   }
@@ -63,24 +63,26 @@ class EnrichEventService(
               inactiveConvictions.filter { c -> c.sentence?.terminationDate != null }
                 .map { c -> c.sentence!!.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, OffenderManagerDetails.from(offenderManager))
+            ProbationStatus(
+              PREVIOUSLY_MANAGED,
+              mostRecentInactiveConvictionEndDate,
+              OffenderManagerDetails.from(offenderManager)
+            )
           }
-          else -> ProbationStatus(NEW_TO_PROBATION, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
+          else -> ProbationStatus(
+            NEW_TO_PROBATION,
+            offenderManagerDetails = OffenderManagerDetails.from(offenderManager)
+          )
         }
       }
     }
   }
 
   fun getAllConvictionIdsAssociatedToCrn(crn: String): Set<Long> =
-    unallocatedCasesRepository.findConvictionIdsByCrn(crn).let {
-      val storedConvictionIds = it.map { it.getConvictionId() }
-      val convictionIds = communityApiClient.getAllConvictions(crn)
-        .map { convictions ->
-          convictions
-            .filter { conviction -> conviction.active || storedConvictionIds.contains(conviction.convictionId) }
-            .map { conviction -> conviction.convictionId }
-        }
-        .block()!!
+    unallocatedCasesRepository.findConvictionIdsByCrn(crn).let { storedConvictions ->
+      val storedConvictionIds = storedConvictions.map { it.getConvictionId() }
+      val convictionIds = communityApiClient.getActiveConvictions(crn)
+        .map { conviction -> conviction.convictionId }.collectList().block()
       return listOf(storedConvictionIds, convictionIds).flatten().toSet()
     }
 

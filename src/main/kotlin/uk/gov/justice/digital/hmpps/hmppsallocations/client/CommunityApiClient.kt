@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.domain.Documents
@@ -28,14 +29,24 @@ class CommunityApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getActiveConvictions(crn: String): Mono<List<Conviction>> {
-    val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
+  fun getActiveConvictions(crn: String): Flux<Conviction> {
+    val responseType = object : ParameterizedTypeReference<Conviction>() {}
 
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions?activeOnly=true")
       .retrieve()
-      .bodyToMono(responseType)
+      .onStatus(
+        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
+        { Mono.error(MissingConvictionError("No active convictions found for $crn")) }
+      )
+      .bodyToFlux(responseType)
+      .onErrorResume { ex ->
+        when (ex) {
+          is MissingConvictionError -> Mono.empty()
+          else -> Mono.error(ex)
+        }
+      }
   }
 
   fun getConviction(crn: String, convictionId: Long): Mono<Conviction?> {
@@ -55,6 +66,7 @@ class CommunityApiClient(private val webClient: WebClient) {
         }
       }
   }
+
   fun getActiveRequirements(crn: String, convictionId: Long): Mono<ConvictionRequirements> {
     return webClient
       .get()

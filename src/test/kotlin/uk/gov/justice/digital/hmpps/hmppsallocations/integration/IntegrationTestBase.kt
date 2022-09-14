@@ -28,7 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
@@ -328,7 +328,7 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/convictions/$convictionId")
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(HttpStatus.NOT_FOUND.value())
+      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
     )
   }
 
@@ -337,7 +337,16 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/convictions")
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(HttpStatus.NOT_FOUND.value())
+      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
+    )
+  }
+
+  protected fun notFoundActiveConvictionsResponse(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
     )
   }
 
@@ -515,7 +524,7 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/assessments/summary")
         .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
-      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 
@@ -542,7 +551,7 @@ abstract class IntegrationTestBase {
       request().withPath("/risks/crn/$crn/summary")
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 
@@ -551,7 +560,7 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/crn/$crn/assessments")
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(APPLICATION_JSON)
+      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 
