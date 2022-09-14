@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
@@ -43,8 +44,8 @@ class EnrichEventService(
   }
 
   fun getActiveSentencedConvictions(crn: String): List<Conviction> {
-    return communityApiClient.getActiveConvictions(crn)
-      .map { convictions -> convictions.filter { conviction -> conviction.sentence != null } }
+    return communityApiClient.getActiveConvictions(crn).filter { conviction -> conviction.sentence != null }
+      .collectList()
       .block() ?: emptyList()
   }
 
@@ -63,26 +64,27 @@ class EnrichEventService(
               inactiveConvictions.filter { c -> c.sentence?.terminationDate != null }
                 .map { c -> c.sentence!!.terminationDate!! }
                 .maxByOrNull { it }
-            ProbationStatus(PREVIOUSLY_MANAGED, mostRecentInactiveConvictionEndDate, OffenderManagerDetails.from(offenderManager))
+            ProbationStatus(
+              PREVIOUSLY_MANAGED,
+              mostRecentInactiveConvictionEndDate,
+              OffenderManagerDetails.from(offenderManager)
+            )
           }
-          else -> ProbationStatus(NEW_TO_PROBATION, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
+          else -> ProbationStatus(
+            NEW_TO_PROBATION,
+            offenderManagerDetails = OffenderManagerDetails.from(offenderManager)
+          )
         }
       }
     }
   }
 
-  fun getAllConvictionIdsAssociatedToCrn(crn: String): Set<Long> =
-    unallocatedCasesRepository.findConvictionIdsByCrn(crn).let {
-      val storedConvictionIds = it.map { it.getConvictionId() }
-      val convictionIds = communityApiClient.getAllConvictions(crn)
-        .map { convictions ->
-          convictions
-            .filter { conviction -> conviction.active || storedConvictionIds.contains(conviction.convictionId) }
-            .map { conviction -> conviction.convictionId }
-        }
-        .block()!!
-      return listOf(storedConvictionIds, convictionIds).flatten().toSet()
-    }
+  fun getAllConvictionIdsAssociatedToCrn(crn: String): Flux<Long> =
+    Flux.merge(
+      Flux.fromIterable(unallocatedCasesRepository.findConvictionIdsByCrn(crn)).map { it.getConvictionId() },
+      communityApiClient.getActiveConvictions(crn)
+        .map { conviction -> conviction.convictionId }
+    ).distinct()
 
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
   fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {

@@ -92,7 +92,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when crn is not found`() {
     val crn = "J678910"
-    notFoundAllConvictionResponse(crn)
+    notFoundActiveConvictionsResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
