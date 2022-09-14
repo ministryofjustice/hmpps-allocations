@@ -43,8 +43,8 @@ class EnrichEventService(
   }
 
   fun getActiveSentencedConvictions(crn: String): List<Conviction> {
-    return communityApiClient.getActiveConvictions(crn).collectList()
-      .map { convictions -> convictions.filter { conviction -> conviction.sentence != null } }
+    return communityApiClient.getActiveConvictions(crn).filter { conviction -> conviction.sentence != null }
+      .collectList()
       .block() ?: emptyList()
   }
 
