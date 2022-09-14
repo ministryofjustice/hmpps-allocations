@@ -30,7 +30,6 @@ class CommunityApiClient(private val webClient: WebClient) {
   }
 
   fun getActiveConvictions(crn: String): Flux<Conviction> {
-    val responseType = object : ParameterizedTypeReference<Conviction>() {}
 
     return webClient
       .get()
@@ -38,13 +37,13 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .onStatus(
         { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingConvictionError("No active convictions found for $crn")) }
+        { Mono.error(MissingConvictionError("No Convictions found for $crn")) }
       )
-      .bodyToFlux(responseType)
+      .bodyToFlux(Conviction::class.java)
       .onErrorResume { ex ->
         when (ex) {
-          is MissingConvictionError -> Mono.empty()
-          else -> Mono.error(ex)
+          is MissingConvictionError -> Flux.empty()
+          else -> Flux.error(ex)
         }
       }
   }
