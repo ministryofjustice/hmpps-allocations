@@ -20,7 +20,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     documentsResponse(crn, convictionId)
-    getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -84,10 +83,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("2021-10-17")
       .jsonPath("$.cpsPack.documentId")
       .isEqualTo("efb7a4e8-3f4a-449c-bf6f-b1fc8def3410")
-      .jsonPath("$.assessment.lastAssessedOn")
-      .isEqualTo("2014-03-28")
-      .jsonPath("$.assessment.type")
-      .isEqualTo("LAYER_3")
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
       .jsonPath("$.caseType")
@@ -107,7 +102,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     noDocumentsResponse(crn, convictionId)
-    getAssessmentsForCrn(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId")
@@ -117,28 +111,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.courtReport")
-      .doesNotExist()
-  }
-
-  @Test
-  fun `can get case by crn missing assessment`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    insertCases()
-    offenderDetailsResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn, convictionId)
-    notFoundAssessmentForCrn(crn)
-
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.assessment")
       .doesNotExist()
   }
 
@@ -162,7 +134,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     documentsResponse(crn, convictionId)
-    getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -194,7 +165,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     unallocatedConvictionResponse(crn, convictionId)
     singleActiveRequirementResponse(crn, convictionId)
     documentsResponse(crn, convictionId)
-    getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
