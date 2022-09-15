@@ -40,6 +40,10 @@ hmpps-tier:
   endpoint:
     url: http://localhost:8082
 
+assessment:
+  endpoint:
+    url: http://localhost:8072
+
 assess-risks-needs:
   endpoint:
     url: http://localhost:8085

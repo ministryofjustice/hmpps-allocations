@@ -11,4 +11,5 @@ generic-service:
     OAUTH_ENDPOINT_URL: https://sign-in.hmpps.service.justice.gov.uk/auth
     COMMUNITY_ENDPOINT_URL: https://community-api-secure.probation.service.justice.gov.uk/secure
     HMPPS_TIER_ENDPOINT_URL: https://hmpps-tier.hmpps.service.justice.gov.uk
+    ASSESSMENT_ENDPOINT_URL: https://offender-prod.aks-live-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs.hmpps.service.justice.gov.uk
