@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.utils.UserContext
 @Configuration
 class WebClientUserEnhancementConfiguration(
   @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
+  @Value("\${assessment.endpoint.url}") private val assessmentApiRootUri: String,
   @Value("\${assess-risks-needs.endpoint.url}") private val assessRisksNeedsApiRootUri: String,
 ) {
 
