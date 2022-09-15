@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
@@ -30,6 +31,7 @@ class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   private val courtReportMapper: CourtReportMapper,
+  @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   private val enrichEventService: EnrichEventService,
 ) {
@@ -44,12 +46,15 @@ class GetUnallocatedCaseService(
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
       val courtReportDocuments = getDocuments(crn, convictionId)
 
-      val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, conviction).block()!!
+      val assessment = assessmentApiClient.getAssessment(crn)
+        .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
+      val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, assessment, conviction).block()!!
       val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCaseDetails.from(
-        it, results.t1, age, results.t4?.offences,
-        results.t4?.sentence?.expectedSentenceEndDate, results.t4?.sentence?.description, results.t2.requirements,
-        results.t3
+        it, results.t1, age, results.t5?.offences,
+        results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
+        results.t3,
+        results.t4.orElse(null)
       )
     }
 

@@ -33,6 +33,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentenacedAndPreConvictionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
@@ -66,6 +67,7 @@ import java.util.UUID
 abstract class IntegrationTestBase {
 
   var assessRisksNeedsApi: ClientAndServer = startClientAndServer(8085)
+  var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
@@ -163,6 +165,7 @@ abstract class IntegrationTestBase {
     hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
     communityApi.reset()
     hmppsTier.reset()
+    offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
     justRun { telemetryClient.trackEvent(any(), any(), any()) }
     setupOauth()
@@ -255,6 +258,7 @@ abstract class IntegrationTestBase {
     communityApi.stop()
     hmppsTier.stop()
     oauthMock.stop()
+    offenderAssessmentApi.stop()
     assessRisksNeedsApi.stop()
     repository.deleteAll()
   }
@@ -502,6 +506,25 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(registrationsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("{}")
+    )
+  }
+
+  protected fun getAssessmentsForCrn(crn: String) {
+    val needsRequest =
+      request().withPath("/offenders/crn/$crn/assessments/summary")
+        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+
+    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(assessmentResponse())
+    )
+  }
+
+  protected fun notFoundAssessmentForCrn(crn: String) {
+    val needsRequest =
+      request().withPath("/offenders/crn/$crn/assessments/summary")
+        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
+    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
+      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
     )
   }
 

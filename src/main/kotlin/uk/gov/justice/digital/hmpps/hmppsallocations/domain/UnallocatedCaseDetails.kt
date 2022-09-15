@@ -47,6 +47,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   @Schema(description = "PNC Number")
   val pncNumber: String?,
   val courtReport: UnallocatedCaseDocument?,
+  val assessment: UnallocatedAssessment?,
   @Schema(description = "Conviction Id")
   val convictionId: Long,
   @Schema(description = "Case Type")
@@ -67,6 +68,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       sentenceDescription: String?,
       requirements: List<ConvictionRequirement>?,
       documents: Documents?,
+      assessment: Assessment?,
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         case.name,
@@ -86,6 +88,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         requirements?.map { UnallocatedCaseRequirement.from(it) },
         offenderDetails.otherIds?.pncNumber,
         documents?.preSentenceReport,
+        UnallocatedAssessment.from(assessment),
         case.convictionId,
         case.caseType,
         documents?.cpsPack,
@@ -178,6 +181,21 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
           it.reportDocumentDates?.completedDate ?: it.lastModifiedAt ?: it.createdAt,
           it.id!!
         )
+      }
+    }
+  }
+}
+
+data class UnallocatedAssessment @JsonCreator constructor(
+  @Schema(description = "Completed Date", example = "2019-11-11")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
+  val lastAssessedOn: LocalDateTime,
+  val type: String,
+) {
+  companion object {
+    fun from(assessment: Assessment?): UnallocatedAssessment? {
+      return assessment?.let {
+        UnallocatedAssessment(assessment.completed, assessment.assessmentType)
       }
     }
   }

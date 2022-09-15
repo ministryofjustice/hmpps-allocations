@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.utils.UserContext
 
@@ -45,6 +46,20 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient {
     return AssessRisksNeedsApiClient(webClient)
+  }
+
+  @Bean
+  @RequestScope
+  fun assessmentWebClientUserEnhancedAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository,
+    builder: WebClient.Builder
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository), builder, assessmentApiRootUri, "assessment-api")
+  }
+
+  @Bean
+  fun assessmentApiClientUserEnhanced(@Qualifier("assessmentWebClientUserEnhancedAppScope") webClient: WebClient): AssessmentApiClient {
+    return AssessmentApiClient(webClient)
   }
 
   @Bean
