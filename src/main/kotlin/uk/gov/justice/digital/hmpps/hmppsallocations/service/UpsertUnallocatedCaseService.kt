@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OrderManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Sentence
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
@@ -61,6 +62,7 @@ class UpsertUnallocatedCaseService(
             unallocatedCaseEntity.caseType = caseType
             unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
             unallocatedCaseEntity.providerCode = currentOrderManager.probationAreaCode
+            unallocatedCaseEntity.sentenceLength = getSentenceLength(sentence)
             return unallocatedCaseEntity
           }
         } else {
@@ -90,6 +92,7 @@ class UpsertUnallocatedCaseService(
       providerCode = "PC1"
     )
 
+  private fun getSentenceLength(sentence: Sentence): String? = sentence.originalLengthUnits?.let { "${sentence.originalLength} $it" }
   private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
     return currentOrderManager?.staffCode?.endsWith("U") ?: false && conviction.active && conviction.sentence != null
   }

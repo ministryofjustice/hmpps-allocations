@@ -68,5 +68,8 @@ data class UnallocatedCaseEntity(
   var providerCode: String,
 
   @Column
-  val createdDate: ZonedDateTime = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+  val createdDate: ZonedDateTime = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+
+  @Column
+  var sentenceLength: String? = null
 )
