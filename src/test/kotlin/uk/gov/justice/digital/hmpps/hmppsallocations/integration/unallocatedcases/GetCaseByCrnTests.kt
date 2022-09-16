@@ -205,4 +205,26 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.address")
       .doesNotExist()
   }
+
+  @Test
+  fun `must return sentence length`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+
+    offenderDetailsNoFixedAbodeResponse(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    documentsResponse(crn, convictionId)
+    getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.sentenceLength")
+      .isEqualTo("5 Weeks")
+  }
 }

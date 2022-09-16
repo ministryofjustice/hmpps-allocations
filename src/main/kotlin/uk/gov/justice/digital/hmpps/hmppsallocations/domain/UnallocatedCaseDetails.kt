@@ -54,7 +54,9 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val caseType: CaseTypes,
   val cpsPack: UnallocatedCaseDocument?,
   val preConvictionDocument: UnallocatedCaseDocument?,
-  val address: Address?
+  val address: Address?,
+  @Schema(description = "Sentence Length")
+  val sentenceLength: String?
 ) {
 
   companion object {
@@ -93,7 +95,8 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         case.caseType,
         documents?.cpsPack,
         documents?.preConvictionDocument,
-        offenderDetails.contactDetails.addresses?.firstOrNull { !it.noFixedAbode && it.status.code == "M" }
+        offenderDetails.contactDetails.addresses?.firstOrNull { !it.noFixedAbode && it.status.code == "M" },
+        case.sentenceLength
       )
     }
   }
