@@ -102,7 +102,8 @@ abstract class IntegrationTestBase {
           123456789,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
-          teamCode = "TEAM1"
+          teamCode = "TEAM1",
+          sentenceLength = "5 Weeks"
         ),
         UnallocatedCaseEntity(
           null,
@@ -115,7 +116,8 @@ abstract class IntegrationTestBase {
           convictionId = 23456789,
           caseType = CaseTypes.LICENSE,
           providerCode = "",
-          teamCode = "TEAM1"
+          teamCode = "TEAM1",
+          sentenceLength = "36 Days"
         ),
         UnallocatedCaseEntity(
           null,
@@ -128,7 +130,8 @@ abstract class IntegrationTestBase {
           convictionId = 68793954,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
-          teamCode = "TEAM1"
+          teamCode = "TEAM1",
+          sentenceLength = "16 Months"
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
