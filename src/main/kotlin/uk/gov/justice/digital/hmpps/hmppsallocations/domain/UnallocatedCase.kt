@@ -29,6 +29,8 @@ data class UnallocatedCase @JsonCreator constructor(
   val convictionId: Long,
   @Schema(description = "Case Type")
   val caseType: CaseTypes,
+  @Schema(description = "Sentence Length")
+  val sentenceLength: String?
 ) {
   companion object {
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
@@ -43,6 +45,7 @@ data class UnallocatedCase @JsonCreator constructor(
         ),
         case.convictionId,
         case.caseType,
+        case.sentenceLength
       )
     }
   }

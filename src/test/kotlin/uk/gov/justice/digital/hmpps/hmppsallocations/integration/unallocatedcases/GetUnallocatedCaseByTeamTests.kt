@@ -130,4 +130,18 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .expectStatus()
       .isUnauthorized
   }
+
+  @Test
+  fun `must return sentence length`() {
+    insertCases()
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[?(@.convictionId == 123456789)].sentenceLength")
+      .isEqualTo("5 Weeks")
+  }
 }
