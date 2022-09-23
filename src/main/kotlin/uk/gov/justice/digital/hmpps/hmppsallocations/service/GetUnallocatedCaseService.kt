@@ -21,9 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocum
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import java.util.Optional
 
 @Service
@@ -38,7 +36,6 @@ class GetUnallocatedCaseService(
 
   fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      log.info("Found unallocated case for $crn")
       val offenderSummary = communityApiClient.getOffenderDetails(crn)
 
       val conviction = communityApiClient.getConviction(crn, convictionId)
@@ -49,9 +46,8 @@ class GetUnallocatedCaseService(
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
       val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, assessment, conviction).block()!!
-      val age = Period.between(results.t1.dateOfBirth, LocalDate.now()).years
       return UnallocatedCaseDetails.from(
-        it, results.t1, age, results.t5?.offences,
+        it, results.t1, results.t5?.offences,
         results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
         results.t3,
         results.t4.orElse(null)

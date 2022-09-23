@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import java.time.LocalDate
+import java.time.Period
 
 data class OffenderDetails @JsonCreator constructor(
   val firstName: String,
@@ -10,7 +11,9 @@ data class OffenderDetails @JsonCreator constructor(
   val dateOfBirth: LocalDate,
   val otherIds: OffenderDetailsOtherIds?,
   val contactDetails: ContactDetails
-)
+) {
+  fun getAge(): Int = Period.between(dateOfBirth, LocalDate.now()).years
+}
 
 data class OffenderDetailsOtherIds @JsonCreator constructor(
   val pncNumber: String?
