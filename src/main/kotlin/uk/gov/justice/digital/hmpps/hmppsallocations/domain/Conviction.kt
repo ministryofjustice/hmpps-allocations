@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
+import com.fasterxml.jackson.annotation.JsonProperty
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,6 +17,8 @@ data class Conviction @JsonCreator constructor(
   val convictionId: Long,
   val orderManagers: List<OrderManager>,
   val custody: Custody?,
+  @JsonProperty("index")
+  val convictionNumber: Int
 )
 
 data class OrderManager @JsonCreator constructor(

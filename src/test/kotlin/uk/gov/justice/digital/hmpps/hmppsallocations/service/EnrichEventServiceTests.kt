@@ -42,6 +42,6 @@ class EnrichEventServiceTests {
     orderManagers = listOf(
       OrderManager(LocalDateTime.now(), "Unallocated", "STAFFU", "GRADE", "TEAM", "REGION1")
     ),
-    null
+    null, 1
   )
 }

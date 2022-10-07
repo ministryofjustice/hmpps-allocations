@@ -50,6 +50,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
     assertThat(case.sentenceLength).isEqualTo("6 Months")
+    assertThat(case.convictionNumber).isEqualTo(1)
 
     verify(exactly = 1) {
       telemetryClient.trackEvent(
