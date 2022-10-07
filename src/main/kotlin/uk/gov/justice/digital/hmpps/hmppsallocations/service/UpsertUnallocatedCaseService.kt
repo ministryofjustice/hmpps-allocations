@@ -26,12 +26,15 @@ class UpsertUnallocatedCaseService(
   @Transactional
   fun upsertUnallocatedCase(crn: String, convictionId: Long) {
     updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
-      if (it.id == null)
+      if (isNewAllocationDemand(it))
         repository.save(it).also { savedEntity ->
           telemetryService.trackAllocationDemandRaised(savedEntity)
         }
     }
   }
+
+  private fun isNewAllocationDemand(it: UnallocatedCaseEntity) =
+    it.id == null
 
   private fun updateExistingCase(unallocatedCaseEntity: UnallocatedCaseEntity): UnallocatedCaseEntity? =
     communityApiClient.getConviction(unallocatedCaseEntity.crn, unallocatedCaseEntity.convictionId)
@@ -63,6 +66,7 @@ class UpsertUnallocatedCaseService(
             unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
             unallocatedCaseEntity.providerCode = currentOrderManager.probationAreaCode
             unallocatedCaseEntity.sentenceLength = getSentenceLength(sentence)
+            unallocatedCaseEntity.convictionNumber = conviction.convictionNumber
             return unallocatedCaseEntity
           }
         } else {
@@ -92,7 +96,9 @@ class UpsertUnallocatedCaseService(
       providerCode = "PC1"
     )
 
-  private fun getSentenceLength(sentence: Sentence): String? = sentence.originalLengthUnits?.let { "${sentence.originalLength} $it" }
+  private fun getSentenceLength(sentence: Sentence): String? =
+    sentence.originalLengthUnits?.let { "${sentence.originalLength} $it" }
+
   private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
     return currentOrderManager?.staffCode?.endsWith("U") ?: false && conviction.active && conviction.sentence != null
   }
