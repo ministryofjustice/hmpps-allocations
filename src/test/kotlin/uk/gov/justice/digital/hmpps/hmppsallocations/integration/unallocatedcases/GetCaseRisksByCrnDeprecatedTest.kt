@@ -1,10 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 
-class GetCaseRisksByCrnTest : IntegrationTestBase() {
+class GetCaseRisksByCrnDeprecatedTest : IntegrationTestBase() {
 
   @Test
   fun `can get case risks`() {
@@ -16,7 +15,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -48,14 +47,6 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("HIGH")
       .jsonPath("$.rosh.lastUpdatedOn")
       .isEqualTo("2022-02-02")
-      .jsonPath("$.rosh.riskInCommunity.Children")
-      .isEqualTo("LOW")
-      .jsonPath("$.rosh.riskInCommunity.Public")
-      .isEqualTo("MEDIUM")
-      .jsonPath("$.rosh.riskInCommunity.['Known Adult']")
-      .isEqualTo("HIGH")
-      .jsonPath("$.rosh.riskInCommunity.['Staff']")
-      .isEqualTo("VERY_HIGH")
       .jsonPath("$.rsr.level")
       .isEqualTo("MEDIUM")
       .jsonPath("$.rsr.lastUpdatedOn")
@@ -82,7 +73,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -95,7 +86,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `get case risks with no ROSH summary`(): Unit = runBlocking {
+  fun `get case risks with no ROSH summary`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()
@@ -104,7 +95,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -123,7 +114,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     notFoundOgrsForCrn(crn)
     getRiskPredictorsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -143,7 +134,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -161,7 +152,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     noRegistrationsFromDelius(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/risksNew")
+      .uri("/cases/unallocated/$crn/convictions/$convictionId/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()

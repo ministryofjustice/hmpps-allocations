@@ -3,9 +3,13 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchange
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskSummary
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import java.util.Optional
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
@@ -26,6 +30,22 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           is MissingRiskError -> Mono.just(Optional.empty())
           else -> Mono.error(ex)
         }
+      }
+  }
+
+  suspend fun getRosh(crn: String): RoshSummary? {
+
+    return webClient
+      .get()
+      .uri("/risks/crn/$crn/widget")
+      .awaitExchange {
+        if (it.statusCode() == HttpStatus.NOT_FOUND) {
+          null
+        }
+        if (it.statusCode() == HttpStatus.OK) {
+          it.awaitBody<RoshSummary>()
+        }
+        throw it.createExceptionAndAwait()
       }
   }
 

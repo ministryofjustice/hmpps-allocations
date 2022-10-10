@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksDeprecated
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -91,7 +92,7 @@ class UnallocatedCasesController(
         ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
-  @Operation(summary = "Retrieve unallocated case risks by crn")
+  @Operation(summary = "Retrieve unallocated case risks by crn DEPRECATED")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -100,7 +101,25 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/risks")
-  fun getUnallocatedCaseRisks(
+  fun getUnallocatedCaseRisksDeprecated(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionId: Long
+  ): ResponseEntity<UnallocatedCaseRisksDeprecated> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseRisksDeprecated(crn, convictionId)
+        ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+    )
+
+  @Operation(summary = "Retrieve unallocated case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/risksNew")
+  suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionId: Long
   ): ResponseEntity<UnallocatedCaseRisks> =
