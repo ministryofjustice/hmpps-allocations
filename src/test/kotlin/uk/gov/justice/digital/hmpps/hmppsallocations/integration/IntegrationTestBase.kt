@@ -47,6 +47,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsR
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryNoLevelResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
@@ -537,6 +538,15 @@ abstract class IntegrationTestBase {
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(riskSummaryResponse())
+    )
+  }
+
+  protected fun getRoshForCrn(crn: String) {
+    val riskRequest =
+      request().withPath("/risks/crn/$crn/widget")
+
+    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(roshResponse())
     )
   }
 

@@ -21,9 +21,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.0")
-  
   implementation("org.springdoc:springdoc-openapi-ui:$springDocVersion")
   implementation("org.springdoc:springdoc-openapi-kotlin:$springDocVersion")
   implementation("org.springdoc:springdoc-openapi-data-rest:$springDocVersion")
@@ -38,7 +35,6 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
 
   testImplementation("org.mock-server:mockserver-netty:5.14.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")

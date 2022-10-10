@@ -65,7 +65,6 @@ data class UnallocatedCaseRisksDeprecated @JsonCreator constructor(
   }
 }
 
-
 data class UnallocatedCaseRosh @JsonCreator constructor(
   @Schema(description = "Level", example = "HIGH")
   val level: String,
@@ -73,4 +72,3 @@ data class UnallocatedCaseRosh @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val lastUpdatedOn: LocalDate
 )
-

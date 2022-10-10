@@ -3,9 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
-import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskSummary
@@ -33,19 +30,22 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       }
   }
 
-  suspend fun getRosh(crn: String): RoshSummary? {
-
+  fun getRosh(crn: String): Mono<Optional<RoshSummary>> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/widget")
-      .awaitExchange {
-        if (it.statusCode() == HttpStatus.NOT_FOUND) {
-          null
+      .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
+        { Mono.error(MissingRiskError("No risk summary found for $crn")) }
+      )
+      .bodyToMono(RoshSummary::class.java)
+      .map { Optional.of(it) }
+      .onErrorResume { ex ->
+        when (ex) {
+          is MissingRiskError -> Mono.just(Optional.empty())
+          else -> Mono.error(ex)
         }
-        if (it.statusCode() == HttpStatus.OK) {
-          it.awaitBody<RoshSummary>()
-        }
-        throw it.createExceptionAndAwait()
       }
   }
 

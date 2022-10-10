@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 
@@ -12,7 +11,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionId = 123456789L
     insertCases()
     getRegistrationsFromDelius(crn)
-    getRiskSummaryForCrn(crn)
+    getRoshForCrn(crn)
     getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
@@ -44,16 +43,16 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("Some Notes.")
       .jsonPath("$.inactiveRegistrations[0].endDate")
       .isEqualTo("2021-08-30")
-      .jsonPath("$.rosh.level")
-      .isEqualTo("HIGH")
-      .jsonPath("$.rosh.lastUpdatedOn")
-      .isEqualTo("2022-02-02")
+      .jsonPath("$.rosh.overallRisk")
+      .isEqualTo("VERY_HIGH")
+      .jsonPath("$.rosh.assessedOn")
+      .isEqualTo("2022-10-07")
       .jsonPath("$.rosh.riskInCommunity.Children")
       .isEqualTo("LOW")
       .jsonPath("$.rosh.riskInCommunity.Public")
-      .isEqualTo("MEDIUM")
-      .jsonPath("$.rosh.riskInCommunity.['Known Adult']")
       .isEqualTo("HIGH")
+      .jsonPath("$.rosh.riskInCommunity.['Known Adult']")
+      .isEqualTo("MEDIUM")
       .jsonPath("$.rosh.riskInCommunity.['Staff']")
       .isEqualTo("VERY_HIGH")
       .jsonPath("$.rsr.level")
@@ -95,7 +94,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `get case risks with no ROSH summary`(): Unit = runBlocking {
+  fun `get case risks with no ROSH summary`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()

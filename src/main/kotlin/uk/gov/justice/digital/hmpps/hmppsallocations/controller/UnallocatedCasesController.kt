@@ -119,7 +119,7 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/risksNew")
-  suspend fun getUnallocatedCaseRisks(
+  fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionId: Long
   ): ResponseEntity<UnallocatedCaseRisks> =

@@ -115,7 +115,7 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConvictions.from(it, activeConvictions, inactiveConvictions)
     }
 
-  suspend fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
+  fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
@@ -134,14 +134,14 @@ class GetUnallocatedCaseService(
 
       val ogrs = communityApiClient.getAssessment(crn)
 
-      val results = Mono.zip(registrations, rsr, ogrs).block()!!
+      val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
       return UnallocatedCaseRisks.from(
         it,
         results.t1.getOrDefault(true, emptyList()),
         results.t1.getOrDefault(false, emptyList()),
-        rosh,
         results.t2.orElse(null),
-        results.t3.orElse(null)
+        results.t3.orElse(null),
+        results.t4.orElse(null)
       )
     }
 
