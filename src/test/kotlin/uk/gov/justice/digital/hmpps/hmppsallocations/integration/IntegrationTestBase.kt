@@ -45,9 +45,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offen
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryNoLevelResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponseNoOverallRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
@@ -532,15 +531,6 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getRiskSummaryForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/risks/crn/$crn/summary")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(riskSummaryResponse())
-    )
-  }
-
   protected fun getRoshForCrn(crn: String) {
     val riskRequest =
       request().withPath("/risks/crn/$crn/widget")
@@ -550,18 +540,18 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun getRiskSummaryNoLevelForCrn(crn: String) {
+  protected fun getRoshNoLevelForCrn(crn: String) {
     val riskRequest =
-      request().withPath("/risks/crn/$crn/summary")
+      request().withPath("/risks/crn/$crn/widget")
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(riskSummaryNoLevelResponse())
+      response().withContentType(APPLICATION_JSON).withBody(roshResponseNoOverallRisk())
     )
   }
 
-  protected fun notFoundRiskSummaryForCrn(crn: String) {
+  protected fun getRoshNotFoundForCrn(crn: String) {
     val riskRequest =
-      request().withPath("/risks/crn/$crn/summary")
+      request().withPath("/risks/crn/$crn/widget")
 
     assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
       response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)

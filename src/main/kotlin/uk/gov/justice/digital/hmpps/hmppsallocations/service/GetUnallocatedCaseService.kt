@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksDeprecated
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.CourtReportMapper
 import java.time.LocalDateTime
@@ -121,6 +120,7 @@ class GetUnallocatedCaseService(
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
         }
+
       val rosh = assessRisksNeedsApiClient.getRosh(crn)
 
       val rsr = assessRisksNeedsApiClient.getRiskPredictors(crn)
@@ -136,36 +136,6 @@ class GetUnallocatedCaseService(
 
       val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
       return UnallocatedCaseRisks.from(
-        it,
-        results.t1.getOrDefault(true, emptyList()),
-        results.t1.getOrDefault(false, emptyList()),
-        results.t2.orElse(null),
-        results.t3.orElse(null),
-        results.t4.orElse(null)
-      )
-    }
-
-  fun getCaseRisksDeprecated(crn: String, convictionId: Long): UnallocatedCaseRisksDeprecated? =
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      val registrations = communityApiClient.getAllRegistrations(crn)
-        .map { registrations ->
-          registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
-        }
-      val rosh = assessRisksNeedsApiClient.getRiskSummary(crn)
-
-      val rsr = assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .map { riskPredictors ->
-          Optional.ofNullable(
-            riskPredictors
-              .filter { riskPredictor -> riskPredictor.rsrScoreLevel != null && riskPredictor.rsrPercentageScore != null }
-              .maxByOrNull { riskPredictor -> riskPredictor.completedDate ?: LocalDateTime.MIN }
-          )
-        }
-
-      val ogrs = communityApiClient.getAssessment(crn)
-
-      val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
-      return UnallocatedCaseRisksDeprecated.from(
         it,
         results.t1.getOrDefault(true, emptyList()),
         results.t1.getOrDefault(false, emptyList()),
