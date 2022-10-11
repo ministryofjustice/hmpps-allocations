@@ -120,9 +120,10 @@ class GetUnallocatedCaseService(
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
         }
-      val riskSummary = assessRisksNeedsApiClient.getRiskSummary(crn)
 
-      val latestRiskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
+      val rosh = assessRisksNeedsApiClient.getRosh(crn)
+
+      val rsr = assessRisksNeedsApiClient.getRiskPredictors(crn)
         .map { riskPredictors ->
           Optional.ofNullable(
             riskPredictors
@@ -133,7 +134,7 @@ class GetUnallocatedCaseService(
 
       val ogrs = communityApiClient.getAssessment(crn)
 
-      val results = Mono.zip(registrations, riskSummary, latestRiskPredictor, ogrs).block()!!
+      val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
       return UnallocatedCaseRisks.from(
         it,
         results.t1.getOrDefault(true, emptyList()),
@@ -148,8 +149,9 @@ class GetUnallocatedCaseService(
     return communityApiClient.getDocuments(crn, documentId)
   }
 
-  fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> = Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
-    .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
+  fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
+    Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
+      .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

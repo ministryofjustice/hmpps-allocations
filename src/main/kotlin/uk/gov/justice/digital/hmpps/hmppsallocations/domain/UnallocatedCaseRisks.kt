@@ -18,6 +18,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val activeRegistrations: List<UnallocatedCaseRegistration>,
   val inactiveRegistrations: List<UnallocatedCaseRegistration>,
   val rosh: UnallocatedCaseRosh?,
+  val roshRisk: RoshSummary?,
   val rsr: UnallocatedCaseRsr?,
   val ogrs: UnallocatedCaseOgrs?,
   val convictionId: Long,
@@ -29,7 +30,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
       case: UnallocatedCaseEntity,
       activeRegistrations: List<OffenderRegistration>,
       inactiveRegistrations: List<OffenderRegistration>,
-      riskSummary: RiskSummary?,
+      rosh: RoshSummary?,
       riskPredictor: RiskPredictor?,
       offenderAssessment: OffenderAssessment?
     ): UnallocatedCaseRisks {
@@ -37,9 +38,30 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
         case.name, case.crn, case.tier,
         activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
         inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        riskSummary?.let { it.overallRiskLevel?.let { riskLevel -> UnallocatedCaseRosh(riskLevel, it.assessedOn!!.toLocalDate()) } },
-        riskPredictor?.let { UnallocatedCaseRsr(it.rsrScoreLevel!!, it.completedDate!!.toLocalDate(), it.rsrPercentageScore!!) },
-        offenderAssessment?.let { assessment -> assessment.ogrsScore?.let { score -> UnallocatedCaseOgrs(assessment.ogrsLastUpdate, score) } },
+        rosh?.let {
+          it.overallRisk?.let { riskLevel ->
+            UnallocatedCaseRosh(
+              riskLevel,
+              it.assessedOn!!
+            )
+          }
+        },
+        rosh,
+        riskPredictor?.let {
+          UnallocatedCaseRsr(
+            it.rsrScoreLevel!!,
+            it.completedDate!!.toLocalDate(),
+            it.rsrPercentageScore!!
+          )
+        },
+        offenderAssessment?.let { assessment ->
+          assessment.ogrsScore?.let { score ->
+            UnallocatedCaseOgrs(
+              assessment.ogrsLastUpdate,
+              score
+            )
+          }
+        },
         case.convictionId,
         case.caseType
       )
@@ -71,14 +93,6 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
   }
 }
 
-data class UnallocatedCaseRosh @JsonCreator constructor(
-  @Schema(description = "Level", example = "HIGH")
-  val level: String,
-  @Schema(description = "last updated on Date", example = "2020-01-16")
-  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val lastUpdatedOn: LocalDate
-)
-
 data class UnallocatedCaseRsr @JsonCreator constructor(
   @Schema(description = "Level", example = "HIGH")
   val level: String,
@@ -94,4 +108,12 @@ data class UnallocatedCaseOgrs @JsonCreator constructor(
   val lastUpdatedOn: LocalDate?,
   @Schema(description = "Score", example = "62")
   val score: BigInteger?
+)
+
+data class UnallocatedCaseRosh @JsonCreator constructor(
+  @Schema(description = "Level", example = "HIGH")
+  val level: String,
+  @Schema(description = "last updated on Date", example = "2020-01-16")
+  @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+  val lastUpdatedOn: LocalDate
 )
