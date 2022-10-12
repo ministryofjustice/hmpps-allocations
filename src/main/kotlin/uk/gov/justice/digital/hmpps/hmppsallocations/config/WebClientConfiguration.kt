@@ -13,11 +13,13 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
 @Configuration
 class WebClientConfiguration(
   @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
+  @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 
   @Bean
@@ -58,6 +60,18 @@ class WebClientConfiguration(
   @Bean
   fun hmppsTierApiClient(@Qualifier("hmppsTierWebClientAppScope") webClient: WebClient): HmppsTierApiClient {
     return HmppsTierApiClient(webClient)
+  }
+
+  @Bean
+  fun workforceAllocationsToDeliusApiClientWebClientAppScope(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManager, builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
+  }
+  @Bean
+  fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient) : WorkforceAllocationsToDeliusApiClient {
+    return WorkforceAllocationsToDeliusApiClient(webClient)
   }
 
   private fun getOAuthWebClient(

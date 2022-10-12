@@ -5,8 +5,11 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Case
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
@@ -17,10 +20,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Service
 class EnrichEventService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
+  private val workforceAllocationToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
@@ -87,16 +92,17 @@ class EnrichEventService(
     ).distinct()
 
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
-  fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
-    if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
-      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate)
-        .filter { unallocatedCasesRepository.existsById(unallocatedCaseEntity.id!!) }
-        .map { contacts ->
-          unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
-          unallocatedCasesRepository.save(unallocatedCaseEntity)
-        }
-    }
-    return Mono.just(unallocatedCaseEntity)
+  fun enrichInductionAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
+
+    val casesWithInitialAppt: List<UnallocatedCase> = workforceAllocationToDeliusApiClient.getInductionContacts(unallocatedCaseEntities).block().cases
+
+    return Flux.fromIterable(
+    unallocatedCaseEntities.filter { unallocatedCasesRepository.existsById(it.id!!) }
+      .map {
+      it.initialAppointment =
+        casesWithInitialAppt.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
+      it }
+    )
   }
 
   companion object {

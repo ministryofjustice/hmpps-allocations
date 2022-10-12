@@ -50,6 +50,10 @@ assess-risks-needs:
   endpoint:
     url: http://localhost:8085
 
+workforce-allocations-to-delius:
+  endpoint:
+    url: http://localhost:8084
+
 oauth:
   endpoint:
     url: http://localhost:9090/auth

@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
@@ -10,8 +11,8 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team`() {
     insertCases()
-    noActiveInductionResponse("C3333333")
-    noActiveInductionResponse("J680648")
+    val initialAppointment = LocalDate.of(2022, 10, 11)
+    unallocatedConvictionResponseInitialAppointment("J678910", initialAppointment)
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -24,7 +25,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[0].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].initialAppointment")
-      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.[0].crn")

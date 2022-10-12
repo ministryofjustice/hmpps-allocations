@@ -10,6 +10,7 @@ import io.mockk.justRun
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.joda.time.DateTime
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -38,6 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.initialAppointmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsNoFixedAbodeResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
@@ -70,6 +72,7 @@ abstract class IntegrationTestBase {
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
+  var workforceAllocationsToDelius: ClientAndServer = startClientAndServer(8084)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
 
@@ -103,7 +106,8 @@ abstract class IntegrationTestBase {
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "5 Weeks"
+          sentenceLength = "5 Weeks",
+          convictionNumber = 3
         ),
         UnallocatedCaseEntity(
           null,
@@ -168,6 +172,7 @@ abstract class IntegrationTestBase {
     hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
     communityApi.reset()
     hmppsTier.reset()
+    workforceAllocationsToDelius.reset()
     offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
     justRun { telemetryClient.trackEvent(any(), any(), any()) }
@@ -260,6 +265,7 @@ abstract class IntegrationTestBase {
   fun tearDownServer() {
     communityApi.stop()
     hmppsTier.stop()
+    workforceAllocationsToDelius.stop()
     oauthMock.stop()
     offenderAssessmentApi.stop()
     assessRisksNeedsApi.stop()
@@ -296,6 +302,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(convictionResponse(staffCode))
+    )
+  }
+
+  protected fun unallocatedConvictionResponseInitialAppointment(crn: String, initialAppointment: LocalDate) {
+    val initialAppointmentRequest =
+      request().withPath("/allocation-demand")
+
+    workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(initialAppointmentResponse(crn, initialAppointment))
     )
   }
 
