@@ -93,7 +93,8 @@ class UpsertUnallocatedCaseService(
       status = "",
       convictionId = convictionId,
       caseType = CaseTypes.UNKNOWN,
-      providerCode = "PC1"
+      providerCode = "PC1",
+      convictionNumber = -1
     )
 
   private fun getSentenceLength(sentence: Sentence): String? =

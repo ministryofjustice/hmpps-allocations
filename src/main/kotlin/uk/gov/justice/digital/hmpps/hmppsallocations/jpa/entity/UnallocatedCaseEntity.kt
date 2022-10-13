@@ -74,5 +74,5 @@ data class UnallocatedCaseEntity(
   var sentenceLength: String? = null,
 
   @Column
-  var convictionNumber: Int? = null
+  var convictionNumber: Int
 )

@@ -19,7 +19,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     val crn = "X123456"
     val convictionId = 1234L
     tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", convictionId)
+    writeUnallocatedCaseToDatabase(crn, "D0", convictionId, 1)
     publishTierCalculationCompleteMessage(crn)
     checkTierHasBeenUpdated(crn, "B3", convictionId)
   }
@@ -40,14 +40,14 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     val firstConvictionId = 1234L
     val secondConvictionId = 5678L
     tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", firstConvictionId)
-    writeUnallocatedCaseToDatabase(crn, "D0", secondConvictionId)
+    writeUnallocatedCaseToDatabase(crn, "D0", firstConvictionId, 1)
+    writeUnallocatedCaseToDatabase(crn, "D0", secondConvictionId, 2)
     publishTierCalculationCompleteMessage(crn)
     checkTierHasBeenUpdated(crn, "B3", firstConvictionId)
     checkTierHasBeenUpdated(crn, "B3", secondConvictionId)
   }
 
-  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long) {
+  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long, convictionNumber: Int) {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
@@ -57,7 +57,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         sentenceDate = LocalDate.now(),
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY,
-        providerCode = ""
+        providerCode = "",
+        convictionNumber = convictionNumber
       )
     )
   }
