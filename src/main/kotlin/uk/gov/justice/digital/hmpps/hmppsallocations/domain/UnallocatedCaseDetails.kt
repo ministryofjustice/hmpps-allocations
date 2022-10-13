@@ -147,9 +147,9 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
   @Schema(description = "Sub Category", example = "Regular")
   val subCategory: String,
   @Schema(description = "Length", example = "100")
-  val length: Long,
+  val length: Long?,
   @Schema(description = "Length Unit", example = "Hours")
-  val lengthUnit: String,
+  val lengthUnit: String?,
 ) {
   companion object {
     fun from(requirement: ConvictionRequirement): UnallocatedCaseRequirement {
