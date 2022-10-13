@@ -5,8 +5,8 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
@@ -90,7 +90,7 @@ class EnrichEventService(
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
   fun enrichInductionAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
 
-    val casesWithInitialAppt: List<UnallocatedCase> = workforceAllocationToDeliusApiClient.getInductionContacts(unallocatedCaseEntities).block().cases
+    val casesWithInitialAppt: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getInductionContacts(unallocatedCaseEntities).block().cases
 
     return Flux.fromIterable(
       unallocatedCaseEntities

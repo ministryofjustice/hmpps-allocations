@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.UnallocatedCases
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -37,7 +37,7 @@ internal class GetUnallocatedCaseServiceTest {
     )
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
-    every { mockWorkforceAllocationsToDeliusApiClientClient.getInductionContacts(listOf(unallocatedCaseEntity)) } returns Mono.just(UnallocatedCases(emptyList()))
+    every { mockWorkforceAllocationsToDeliusApiClientClient.getInductionContacts(listOf(unallocatedCaseEntity)) } returns Mono.just(DeliusCaseDetails(emptyList()))
     val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), mockk(), EnrichEventService(mockCommunityClient, mockWorkforceAllocationsToDeliusApiClientClient, mockk(), mockRepo)).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }

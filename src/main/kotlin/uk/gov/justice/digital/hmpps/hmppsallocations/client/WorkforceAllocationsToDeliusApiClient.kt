@@ -11,25 +11,25 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getInductionContacts(cases: List<UnallocatedCaseEntity>): Mono<UnallocatedCases> {
-    val casesList = Cases(cases.map { Case(it.crn, it.convictionNumber.toString()) })
+  fun getInductionContacts(cases: List<UnallocatedCaseEntity>): Mono<DeliusCaseDetails> {
+    val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()
       .uri("/allocation-demand")
-      .body(Mono.just(casesList), Cases::class.java)
+      .body(Mono.just(getCaseDetails), GetCaseDetails::class.java)
       .retrieve()
-      .bodyToMono(UnallocatedCases::class.java)
+      .bodyToMono(DeliusCaseDetails::class.java)
       .onErrorResume {
         log.warn("Error retrieving induction contacts", it)
-        Mono.empty()
+        Mono.just(DeliusCaseDetails(emptyList()))
       }
   }
 }
 
-data class Case(val crn: String, val eventNumber: String)
-data class Cases(val cases: List<Case>)
+data class CaseIdentifier(val crn: String, val eventNumber: String)
+data class GetCaseDetails(val cases: List<CaseIdentifier>)
 
-data class UnallocatedCase(val crn: String, val event: Event, val initialAppointment: InitialAppointment)
+data class DeliusCaseDetail(val crn: String, val event: Event, val initialAppointment: InitialAppointment)
 data class Event(val number: String)
 data class InitialAppointment(val date: LocalDate)
-data class UnallocatedCases(val cases: List<UnallocatedCase>)
+data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
