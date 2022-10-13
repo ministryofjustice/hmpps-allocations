@@ -89,10 +89,6 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-application:
-  cache:
-    induction:
-      cron: '0 */15 * * * *'
 
 oauth:
   endpoint.url: http://localhost:8090/auth
