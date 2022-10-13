@@ -26,7 +26,6 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
           "/v3/api-docs/**",
           "/swagger-ui/**",
           "/swagger-ui.html",
-          "/cases/unallocated/upload",
           "/queue-admin/**"
         )
           .permitAll().anyRequest().authenticated()
