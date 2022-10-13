@@ -1,12 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import java.time.format.DateTimeFormatter
 
-
-class PractitionerCaseControllerTest : IntegrationTestBase(){
+class PractitionerCaseControllerTest : IntegrationTestBase() {
   @Test
   fun `get practitioner case with previously managed staff`() {
     val crn = "J680660"

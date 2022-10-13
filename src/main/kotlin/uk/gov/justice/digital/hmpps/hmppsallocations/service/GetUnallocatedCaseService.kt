@@ -155,7 +155,9 @@ class GetUnallocatedCaseService(
 
   fun getPractitionerCase(crn: String, convictionId: Long): PractitionerCase? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      PractitionerCase(it.name, it.crn, it.tier, it.status,
-        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade), convictionId)
+      PractitionerCase(
+        it.name, it.crn, it.tier, it.status,
+        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade), convictionId
+      )
     }
 }

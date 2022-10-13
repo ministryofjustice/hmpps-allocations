@@ -40,7 +40,7 @@ class PractitionerCaseController(
     )
 }
 
-data class PractitionerCase @JsonCreator constructor (
+data class PractitionerCase @JsonCreator constructor(
   @Schema(description = "name", example = "John William")
   val name: String,
   @Schema(description = "crn", example = "J678910")
@@ -49,7 +49,7 @@ data class PractitionerCase @JsonCreator constructor (
   val tier: String,
   @Schema(description = "status", example = "Currently managed")
   val status: String,
-  val offenderManager : OffenderManagerDetails?,
+  val offenderManager: OffenderManagerDetails?,
   @Schema(description = "convictionId", example = "123456789")
   val convictionId: Long
-  )
+)
