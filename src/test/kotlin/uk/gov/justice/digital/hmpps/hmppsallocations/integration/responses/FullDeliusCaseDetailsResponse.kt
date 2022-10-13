@@ -1,20 +1,26 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-import java.time.LocalDate
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
 import java.time.format.DateTimeFormatter
 
-fun fullDeliusCaseDetailsResponse(crn: String, InitialAppointment: LocalDate) = """
+fun fullDeliusCaseDetailsResponse(vararg caseDetailsInitialAppointments: CaseDetailsInitialAppointment) = """
 {
   "cases": [
-    {
-      "crn": "$crn",
+    ${caseDetailsInitialAppointments.map { deliusCaseDetail(it) }.joinToString(",")}
+  ]
+}
+""".trimIndent()
+
+private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAppointment) = """
+  {
+      "crn": "${caseDetailsInitialAppointment.crn}",
       "name": {
         "forename": "string",
         "middleName": "string",
         "surname": "string"
       },
       "event": {
-        "number": "3",
+        "number": "${caseDetailsInitialAppointment.eventNumber}",
         "manager": {
           "code": "string",
           "name": {
@@ -31,9 +37,7 @@ fun fullDeliusCaseDetailsResponse(crn: String, InitialAppointment: LocalDate) = 
         "length": "string"
       },
       "initialAppointment": {
-        "date": "${InitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}"
+        "date": ${caseDetailsInitialAppointment.initialAppointment?.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))}
       }
     }
-  ]
-}
 """.trimIndent()
