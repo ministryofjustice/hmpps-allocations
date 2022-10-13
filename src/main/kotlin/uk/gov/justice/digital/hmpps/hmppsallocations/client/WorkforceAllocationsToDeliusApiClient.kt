@@ -20,7 +20,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
       .onErrorResume {
-        log.warn("Error retrieving induction contacts", it)
+        log.warn("Error retrieving delius case details", it)
         Mono.just(DeliusCaseDetails(emptyList()))
       }
   }
