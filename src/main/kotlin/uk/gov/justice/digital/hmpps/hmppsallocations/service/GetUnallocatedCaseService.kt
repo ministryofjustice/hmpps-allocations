@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
