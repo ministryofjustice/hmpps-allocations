@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -13,7 +14,8 @@ import java.time.LocalDate
 
 internal class GetUnallocatedCaseServiceTest {
 
-  private val mockClient: CommunityApiClient = mockk()
+  private val mockCommunityClient: CommunityApiClient = mockk()
+  private val mockWorkforceAllocationsToDeliusApiClientClient: WorkforceAllocationsToDeliusApiClient = mockk()
   private val mockRepo: UnallocatedCasesRepository = mockk()
 
   @Test
@@ -34,8 +36,8 @@ internal class GetUnallocatedCaseServiceTest {
     )
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
-    every { mockClient.getInductionContacts(crn, sentenceDate) } returns Mono.just(listOf())
-    val cases = GetUnallocatedCaseService(mockRepo, mockClient, mockk(), mockk(), mockk(), EnrichEventService(mockClient, mockk(), mockRepo)).getAllByTeam("TM1").collectList().block()
+    every { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns Mono.just(emptyList())
+    val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), mockk(), EnrichEventService(mockCommunityClient, mockWorkforceAllocationsToDeliusApiClientClient, mockk(), mockRepo)).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }
 }

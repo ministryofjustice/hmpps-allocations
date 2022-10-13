@@ -11,5 +11,6 @@ generic-service:
     OAUTH_ENDPOINT_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
     COMMUNITY_ENDPOINT_URL: https://community-api-secure.pre-prod.delius.probation.hmpps.dsd.io/secure
     HMPPS_TIER_ENDPOINT_URL: https://hmpps-tier-preprod.hmpps.service.justice.gov.uk
+    WORKFORCE_ALLOCATIONS_TO_DELIUS_ENDPOINT_URL: https://workforce-allocations-to-delius.pre-prod.delius.probation.hmpps.dsd.io
     ASSESSMENT_ENDPOINT_URL: https://offender-prprod.aks-live-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs-preprod.hmpps.service.justice.gov.uk

@@ -32,17 +32,18 @@ import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentenacedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.fullDeliusCaseDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsNoFixedAbodeResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponseNoGrade
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
@@ -70,6 +71,7 @@ abstract class IntegrationTestBase {
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
+  var workforceAllocationsToDelius: ClientAndServer = startClientAndServer(8084)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
 
@@ -89,7 +91,8 @@ abstract class IntegrationTestBase {
     convictionId = 987654321,
     caseType = CaseTypes.CUSTODY,
     providerCode = "",
-    teamCode = "TEAM1"
+    teamCode = "TEAM1",
+    convictionNumber = 4
   )
 
   fun insertCases() {
@@ -103,7 +106,8 @@ abstract class IntegrationTestBase {
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "5 Weeks"
+          sentenceLength = "5 Weeks",
+          convictionNumber = 1
         ),
         UnallocatedCaseEntity(
           null,
@@ -117,7 +121,8 @@ abstract class IntegrationTestBase {
           caseType = CaseTypes.LICENSE,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "36 Days"
+          sentenceLength = "36 Days",
+          convictionNumber = 2
         ),
         UnallocatedCaseEntity(
           null,
@@ -131,7 +136,8 @@ abstract class IntegrationTestBase {
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "16 Months"
+          sentenceLength = "16 Months",
+          convictionNumber = 3
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
@@ -140,7 +146,8 @@ abstract class IntegrationTestBase {
           null, "Antonio", "LoSardo", "PO",
           56785493, CaseTypes.CUSTODY,
           providerCode = "",
-          teamCode = "TEAM2"
+          teamCode = "TEAM2",
+          convictionNumber = 5
         ),
         UnallocatedCaseEntity(
           null,
@@ -153,7 +160,8 @@ abstract class IntegrationTestBase {
           convictionId = 86472147892,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
-          teamCode = "TEAM3"
+          teamCode = "TEAM3",
+          convictionNumber = 6
         )
 
       )
@@ -168,6 +176,7 @@ abstract class IntegrationTestBase {
     hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
     communityApi.reset()
     hmppsTier.reset()
+    workforceAllocationsToDelius.reset()
     offenderAssessmentApi.reset()
     assessRisksNeedsApi.reset()
     justRun { telemetryClient.trackEvent(any(), any(), any()) }
@@ -260,6 +269,7 @@ abstract class IntegrationTestBase {
   fun tearDownServer() {
     communityApi.stop()
     hmppsTier.stop()
+    workforceAllocationsToDelius.stop()
     oauthMock.stop()
     offenderAssessmentApi.stop()
     assessRisksNeedsApi.stop()
@@ -297,6 +307,22 @@ abstract class IntegrationTestBase {
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(convictionResponse(staffCode))
     )
+  }
+
+  protected fun deliusCaseDetailsResponse(vararg caseDetailsInitialAppointments: CaseDetailsInitialAppointment) {
+    val initialAppointmentRequest =
+      request().withPath("/allocation-demand")
+
+    workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(fullDeliusCaseDetailsResponse(*caseDetailsInitialAppointments))
+    )
+  }
+
+  protected fun errorDeliusCaseDetailsResponse() {
+    val initialAppointmentRequest =
+      request().withPath("/allocation-demand")
+
+    workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(notFoundResponse())
   }
 
   protected fun allocatedConvictionResponse(crn: String, convictionId: Long) {
@@ -410,22 +436,6 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun noActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    communityApi.`when`(inductionRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("[]")
-    )
-  }
-
-  protected fun erroredInductionResponse(crn: String) {
-    val inductionRequest =
-      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    communityApi.`when`(inductionRequest, exactly(1)).respond(notFoundResponse())
-  }
-
   protected fun tierCalculationResponse(crn: String): HttpRequest {
     val request = request().withPath("/crn/$crn/tier")
     hmppsTier.`when`(request).respond(
@@ -482,15 +492,6 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponse())
-    )
-  }
-
-  protected fun getStaffWithoutGradeFromDelius(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/allOffenderManagers")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponseNoGrade())
     )
   }
 
@@ -599,17 +600,6 @@ abstract class IntegrationTestBase {
         .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
         .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes())
     )
-  }
-
-  protected fun allDeliusResponses(crn: String) {
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, 123456789)
-    singleActiveInductionResponse(crn)
-    offenderDetailsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
-    tierCalculationResponse(crn)
-    singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
   }
 
   private fun getNumberOfMessagesCurrentlyOnQueue(client: AmazonSQS, queueUrl: String): Int? {

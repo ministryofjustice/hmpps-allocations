@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
@@ -10,8 +12,8 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team`() {
     insertCases()
-    noActiveInductionResponse("C3333333")
-    noActiveInductionResponse("J680648")
+    val initialAppointment = LocalDate.of(2022, 10, 11)
+    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("J678910", "1", initialAppointment))
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -24,7 +26,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[0].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].initialAppointment")
-      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[0].name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.[0].crn")
@@ -46,10 +48,10 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `must get induction appointments for all required`() {
+  fun `must get initial appointments for all required`() {
     insertCases()
-    singleActiveInductionResponse("X4565764")
-    noActiveInductionResponse("J680648")
+    val initialAppointment = LocalDate.of(2021, 11, 30)
+    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("X4565764", "3", initialAppointment), CaseDetailsInitialAppointment("J680648", "2", null))
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -58,16 +60,15 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.[?(@.convictionId == 68793954)].initialAppointment")
-      .isEqualTo("2021-11-30")
+      .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
       .isEqualTo(null)
   }
 
   @Test
-  fun `return empty induction appointment on API call error`() {
+  fun `return empty initial appointment on API call error`() {
     insertCases()
-    singleActiveInductionResponse("X4565764")
-    erroredInductionResponse("J680648")
+    errorDeliusCaseDetailsResponse()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
