@@ -70,7 +70,7 @@ class WebClientConfiguration(
     return getOAuthWebClient(authorizedClientManager, builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
   }
   @Bean
-  fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient) : WorkforceAllocationsToDeliusApiClient {
+  fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
     return WorkforceAllocationsToDeliusApiClient(webClient)
   }
 

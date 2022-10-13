@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import io.mockk.every
 import io.mockk.mockk
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
