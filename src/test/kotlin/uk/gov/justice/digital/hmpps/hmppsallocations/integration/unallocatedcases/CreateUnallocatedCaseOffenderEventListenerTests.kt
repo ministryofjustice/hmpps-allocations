@@ -233,4 +233,54 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.status).isEqualTo("New to probation")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
   }
+
+  @Test
+  fun `save event with no offender manager when unallocated officer`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    singleActiveConvictionResponseForAllConvictions(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderDetailsResponse(crn)
+    getUnallocatedManagerFromDelius(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveAndInactiveConvictionsResponse(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+
+    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
+    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
+    assertThat(case.name).isEqualTo("Tester TestSurname")
+    assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.status).isEqualTo("Previously managed")
+    assertThat(case.offenderManagerGrade).isNull()
+    assertThat(case.offenderManagerForename).isNull()
+    assertThat(case.offenderManagerSurname).isNull()
+    assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
+    assertThat(case.teamCode).isEqualTo("TM1")
+    assertThat(case.providerCode).isEqualTo("PAC1")
+    assertThat(case.sentenceLength).isEqualTo("6 Months")
+    assertThat(case.convictionNumber).isEqualTo(1)
+
+    verify(exactly = 1) {
+      telemetryClient.trackEvent(
+        "AllocationDemandRaised",
+        mapOf(
+          "crn" to crn,
+          "teamCode" to "TM1",
+          "providerCode" to "PAC1"
+        ),
+        null
+      )
+    }
+  }
 }

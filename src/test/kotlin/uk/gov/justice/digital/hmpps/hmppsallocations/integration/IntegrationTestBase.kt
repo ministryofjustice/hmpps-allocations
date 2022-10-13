@@ -53,6 +53,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.unallocatedOffenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
@@ -492,6 +493,15 @@ abstract class IntegrationTestBase {
 
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponse())
+    )
+  }
+
+  protected fun getUnallocatedManagerFromDelius(crn: String) {
+    val convictionsRequest =
+      request().withPath("/offenders/crn/$crn/allOffenderManagers")
+
+    communityApi.`when`(convictionsRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(unallocatedOffenderManagerResponse())
     )
   }
 
