@@ -88,15 +88,15 @@ class EnrichEventService(
     ).distinct()
 
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
-  fun enrichInductionAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
+  fun enrichInitialAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
 
-    val casesWithInitialAppt: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getInductionContacts(unallocatedCaseEntities).block().cases
+    val deliusCaseDetails: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities).block().cases
 
     return Flux.fromIterable(
       unallocatedCaseEntities
         .filter { unallocatedCasesRepository.existsById(it.id!!) }
         .map {
-          it.initialAppointment = casesWithInitialAppt.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
+          it.initialAppointment = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
           it
         }
     )

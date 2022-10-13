@@ -11,7 +11,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getInductionContacts(cases: List<UnallocatedCaseEntity>): Mono<DeliusCaseDetails> {
+  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Mono<DeliusCaseDetails> {
     val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()

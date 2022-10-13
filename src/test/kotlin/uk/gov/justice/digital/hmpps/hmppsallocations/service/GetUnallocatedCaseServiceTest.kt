@@ -37,7 +37,7 @@ internal class GetUnallocatedCaseServiceTest {
     )
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
-    every { mockWorkforceAllocationsToDeliusApiClientClient.getInductionContacts(listOf(unallocatedCaseEntity)) } returns Mono.just(DeliusCaseDetails(emptyList()))
+    every { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns Mono.just(DeliusCaseDetails(emptyList()))
     val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), mockk(), EnrichEventService(mockCommunityClient, mockWorkforceAllocationsToDeliusApiClientClient, mockk(), mockRepo)).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }
