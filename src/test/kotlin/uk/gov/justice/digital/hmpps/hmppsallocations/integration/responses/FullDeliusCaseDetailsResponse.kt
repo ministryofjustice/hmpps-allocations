@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun fullDeliusCaseDetailsResponse(vararg caseDetailsInitialAppointments: CaseDetailsInitialAppointment) = """
@@ -35,9 +36,17 @@ private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAp
         "type": "string",
         "date": "2022-10-12",
         "length": "string"
-      },
-      "initialAppointment": {
-        "date": ${caseDetailsInitialAppointment.initialAppointment?.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))}
       }
-    }
-""".trimIndent()
+  """ +
+  initialAppointment(caseDetailsInitialAppointment.initialAppointment) +
+  "}".trimIndent()
+
+private fun initialAppointment(initialAppointment: LocalDate?): String {
+  return initialAppointment?.let {
+    """
+      ,"initialAppointment": {
+        "date": ${initialAppointment.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))}
+      }
+    """.trimIndent()
+  } ?: ""
+}

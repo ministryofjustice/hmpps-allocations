@@ -30,7 +30,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
 
-data class DeliusCaseDetail(val crn: String, val event: Event, val initialAppointment: InitialAppointment)
+data class DeliusCaseDetail(val crn: String, val event: Event, val initialAppointment: InitialAppointment?)
 data class Event(val number: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
