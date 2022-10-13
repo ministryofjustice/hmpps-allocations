@@ -90,7 +90,7 @@ class EnrichEventService(
   @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
   fun enrichInitialAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
 
-    val deliusCaseDetails: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities).block().cases
+    val deliusCaseDetails: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities).block()
 
     return Flux.fromIterable(
       unallocatedCaseEntities
