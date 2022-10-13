@@ -97,7 +97,7 @@ class EnrichEventService(
         .filter { unallocatedCasesRepository.existsById(it.id!!) }
         .map {
           it.initialAppointment = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
-          it
+          unallocatedCasesRepository.save(it)
         }
     )
   }
