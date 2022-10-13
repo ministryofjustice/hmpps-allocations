@@ -37,8 +37,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.asses
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.fullDeliusCaseDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.initialAppointmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsNoFixedAbodeResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
@@ -304,12 +304,12 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun unallocatedConvictionResponseInitialAppointment(crn: String, initialAppointment: LocalDate) {
+  protected fun deliusCaseDetailsResponse(crn: String, initialAppointment: LocalDate) {
     val initialAppointmentRequest =
       request().withPath("/allocation-demand")
 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(initialAppointmentResponse(crn, initialAppointment))
+      response().withContentType(APPLICATION_JSON).withBody(fullDeliusCaseDetailsResponse(crn, initialAppointment))
     )
   }
 

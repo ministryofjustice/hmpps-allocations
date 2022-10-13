@@ -12,7 +12,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   fun `Get unallocated cases by team`() {
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
-    unallocatedConvictionResponseInitialAppointment("J678910", initialAppointment)
+    deliusCaseDetailsResponse("J678910", initialAppointment)
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

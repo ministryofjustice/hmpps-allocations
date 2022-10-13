@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-fun initialAppointmentResponse(crn: String, InitialAppointment: LocalDate) = """
+fun fullDeliusCaseDetailsResponse(crn: String, InitialAppointment: LocalDate) = """
 {
   "cases": [
     {
