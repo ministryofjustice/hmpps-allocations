@@ -18,13 +18,11 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvi
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.UploadUnallocatedCasesService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
-  private val uploadUnallocatedCasesService: UploadUnallocatedCasesService,
   private val getUnallocatedCaseService: GetUnallocatedCaseService
 ) {
   @Operation(summary = "Retrieve count of all unallocated cases by team")
@@ -110,10 +108,4 @@ class UnallocatedCasesController(
       getUnallocatedCaseService.getCaseRisks(crn, convictionId)
         ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
-
-  @GetMapping("/cases/unallocated/upload")
-  fun uploadUnallocatedCases(): ResponseEntity<Void> {
-    uploadUnallocatedCasesService.sendEvents()
-    return ResponseEntity.ok().build()
-  }
 }
