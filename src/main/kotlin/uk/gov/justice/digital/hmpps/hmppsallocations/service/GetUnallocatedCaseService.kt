@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
@@ -10,6 +9,8 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
@@ -152,7 +153,8 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+      from(it)
+    }
 }

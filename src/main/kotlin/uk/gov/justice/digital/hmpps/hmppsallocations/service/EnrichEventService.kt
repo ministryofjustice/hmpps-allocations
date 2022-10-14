@@ -66,7 +66,7 @@ class EnrichEventService(
             ProbationStatus(
               PREVIOUSLY_MANAGED,
               mostRecentInactiveConvictionEndDate,
-              OffenderManagerDetails.from(offenderManager)
+              OffenderManagerDetails.from(offenderManager).takeUnless { offenderManager.isUnallocated }
             )
           }
           else -> ProbationStatus(
