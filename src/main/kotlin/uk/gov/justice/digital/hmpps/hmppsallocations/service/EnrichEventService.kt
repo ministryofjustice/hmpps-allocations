@@ -1,14 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.config.CacheConfiguration
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -21,6 +19,7 @@ import java.time.LocalDate
 @Service
 class EnrichEventService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
+  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
@@ -67,7 +66,7 @@ class EnrichEventService(
             ProbationStatus(
               PREVIOUSLY_MANAGED,
               mostRecentInactiveConvictionEndDate,
-              OffenderManagerDetails.from(offenderManager)
+              OffenderManagerDetails.from(offenderManager).takeUnless { offenderManager.isUnallocated }
             )
           }
           else -> ProbationStatus(
@@ -86,21 +85,18 @@ class EnrichEventService(
         .map { conviction -> conviction.convictionId }
     ).distinct()
 
-  @Cacheable(CacheConfiguration.INDUCTION_APPOINTMENT_CACHE_NAME)
-  fun enrichInductionAppointment(unallocatedCaseEntity: UnallocatedCaseEntity): Mono<UnallocatedCaseEntity> {
-    if (inductionCaseTypes.contains(unallocatedCaseEntity.caseType)) {
-      return communityApiClient.getInductionContacts(unallocatedCaseEntity.crn, unallocatedCaseEntity.sentenceDate)
-        .filter { unallocatedCasesRepository.existsById(unallocatedCaseEntity.id!!) }
-        .map { contacts ->
-          unallocatedCaseEntity.initialAppointment = contacts.map { it.contactStart }.maxByOrNull { it }?.toLocalDate()
-          unallocatedCasesRepository.save(unallocatedCaseEntity)
-        }
-    }
-    return Mono.just(unallocatedCaseEntity)
-  }
+  fun enrichInitialAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCaseEntity> {
 
-  companion object {
-    private val inductionCaseTypes = setOf(CaseTypes.COMMUNITY, CaseTypes.LICENSE)
+    val deliusCaseDetails: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities).block()
+
+    return Flux.fromIterable(
+      unallocatedCaseEntities
+        .filter { unallocatedCasesRepository.existsById(it.id!!) }
+        .map {
+          it.initialAppointment = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
+          unallocatedCasesRepository.save(it)
+        }
+    )
   }
 }
 

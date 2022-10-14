@@ -47,6 +47,11 @@ spring:
             client-id: ${oauth.client.id}
             client-secret: ${oauth.client.secret}
             authorization-grant-type: client_credentials
+          workforce-allocations-to-delius-api:
+            provider: hmpps-auth
+            client-id: ${oauth.client.id}
+            client-secret: ${oauth.client.secret}
+            authorization-grant-type: client_credentials
         provider:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
@@ -84,10 +89,6 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-application:
-  cache:
-    induction:
-      cron: '0 */15 * * * *'
 
 oauth:
   endpoint.url: http://localhost:8090/auth

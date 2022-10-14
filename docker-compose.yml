@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=dev
       - POSTGRES_USER=root
   localstack:
-    image: localstack/localstack:0.14.4
+    image: localstack/localstack:1.2.0
     networks:
       - hmpps
     container_name: hmpps-allocations-localstack
@@ -27,16 +27,5 @@ services:
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-  wiremock:
-    image: rodolpheche/wiremock
-    networks:
-      - hmpps
-    container_name: hmpps-allocations-wiremock
-    restart: always
-    ports:
-      - "8099:8099"
-    command: ["--port","8099","--global-response-templating"]
-    volumes:
-      - $PWD/wiremock:/home/wiremock:rw
 networks:
   hmpps:

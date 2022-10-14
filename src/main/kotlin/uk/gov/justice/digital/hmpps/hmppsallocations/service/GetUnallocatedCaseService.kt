@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
@@ -10,8 +9,10 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.controller.PractitionerCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
@@ -79,11 +80,10 @@ class GetUnallocatedCaseService(
     }
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
-    return Flux.fromIterable(unallocatedCasesRepository.findByTeamCode(teamCode)).flatMap { unallocatedCase ->
-      enrichEventService.enrichInductionAppointment(unallocatedCase)
-    }.map { unallocatedCase ->
-      UnallocatedCase.from(unallocatedCase)
-    }
+    return enrichEventService.enrichInitialAppointment(unallocatedCasesRepository.findByTeamCode(teamCode))
+      .map { unallocatedCase ->
+        UnallocatedCase.from(unallocatedCase)
+      }
   }
 
   fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
@@ -153,7 +153,11 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+  fun getPractitionerCase(crn: String, convictionId: Long): PractitionerCase? =
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+      PractitionerCase(
+        it.name, it.crn, it.tier, it.status,
+        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade), convictionId
+      )
+    }
 }
