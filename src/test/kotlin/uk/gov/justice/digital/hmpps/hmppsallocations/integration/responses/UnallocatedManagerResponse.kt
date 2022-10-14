@@ -70,7 +70,7 @@ fun unallocatedOffenderManagerResponse() = """
       "phoneNumber": "0123411278",
       "surname": "STAFF"
     },
-    "staffCode": "CHSE75U",
+    "staffCode": "STFFCDEU",
     "staffId": 123455,
     "team": {
       "borough": {
