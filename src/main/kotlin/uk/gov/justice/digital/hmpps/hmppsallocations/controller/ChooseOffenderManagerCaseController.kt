@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,11 +17,11 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseS
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
 @RestController
-@RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class PractitionerCaseController(
+@RequestMapping(produces = [APPLICATION_JSON_VALUE])
+class ChooseOffenderManagerCaseController(
   private val getUnallocatedCaseService: GetUnallocatedCaseService
 ) {
-  @Operation(summary = "Retrieve unallocated case for practitioner case")
+  @Operation(summary = "Retrieve unallocated case for choose practitioner page")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -30,17 +30,17 @@ class PractitionerCaseController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/practitionerCase")
-  fun getPractitionerCase(
+  fun getOffenderManagerCase(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionId: Long
-  ): ResponseEntity<PractitionerCase> =
+  ): ResponseEntity<ChooseOffenderManagerCase> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getPractitionerCase(crn, convictionId)
-        ?: throw EntityNotFoundException("Practitioner Case Not Found for $crn")
+      getUnallocatedCaseService.getChooseOffenderManagerCase(crn, convictionId)
+        ?: throw EntityNotFoundException("OffenderManager Case Not Found for $crn")
     )
 }
 
-data class PractitionerCase @JsonCreator constructor(
+data class ChooseOffenderManagerCase @JsonCreator constructor(
   @Schema(description = "name", example = "John William")
   val name: String,
   @Schema(description = "crn", example = "J678910")

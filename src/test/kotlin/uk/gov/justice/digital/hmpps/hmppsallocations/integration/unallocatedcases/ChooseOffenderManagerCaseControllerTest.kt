@@ -3,9 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 
-class PractitionerCaseControllerTest : IntegrationTestBase() {
+class ChooseOffenderManagerCaseControllerTest : IntegrationTestBase() {
   @Test
-  fun `get practitioner case with previously managed staff`() {
+  fun `get case with previously managed staff`() {
     val crn = "J680660"
     val convictionId = 987654321
     insertCases()
@@ -30,7 +30,7 @@ class PractitionerCaseControllerTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `get practitioner case with offender manager`() {
+  fun `get case with offender manager`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()

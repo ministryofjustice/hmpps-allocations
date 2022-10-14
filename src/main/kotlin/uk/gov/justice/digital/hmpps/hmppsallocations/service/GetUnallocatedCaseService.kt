@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.controller.PractitionerCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
@@ -153,11 +153,15 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  fun getPractitionerCase(crn: String, convictionId: Long): PractitionerCase? =
+  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      PractitionerCase(
-        it.name, it.crn, it.tier, it.status,
-        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade), convictionId
+      ChooseOffenderManagerCase(
+        it.name,
+        it.crn,
+        it.tier,
+        it.status,
+        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade),
+        convictionId
       )
     }
 }
