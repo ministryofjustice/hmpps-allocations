@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 
 class ChooseOffenderManagerCaseControllerTest : IntegrationTestBase() {
   @Test
-  fun `get case with previously managed staff`() {
+  fun `get previously managed case with no offender manager`() {
     val crn = "J680660"
     val convictionId = 987654321
     insertCases()
@@ -27,6 +27,8 @@ class ChooseOffenderManagerCaseControllerTest : IntegrationTestBase() {
       .isEqualTo("Previously managed")
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
+      .jsonPath("$.offenderManager")
+      .doesNotExist()
   }
 
   @Test
