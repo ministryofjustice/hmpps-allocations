@@ -10,9 +10,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiC
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
@@ -155,13 +155,6 @@ class GetUnallocatedCaseService(
 
   fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      ChooseOffenderManagerCase(
-        it.name,
-        it.crn,
-        it.tier,
-        it.status,
-        OffenderManagerDetails(it.offenderManagerForename, it.offenderManagerSurname, it.offenderManagerGrade),
-        convictionId
-      )
+      from(it)
     }
 }

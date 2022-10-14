@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -49,7 +51,29 @@ data class ChooseOffenderManagerCase @JsonCreator constructor(
   val tier: String,
   @Schema(description = "status", example = "Currently managed")
   val status: String,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   val offenderManager: OffenderManagerDetails?,
   @Schema(description = "convictionId", example = "123456789")
   val convictionId: Long
-)
+) {
+  companion object {
+    fun from(e: UnallocatedCaseEntity): ChooseOffenderManagerCase {
+      var offenderManager: OffenderManagerDetails? = null
+      e.offenderManagerSurname?.let {
+        offenderManager = OffenderManagerDetails(
+          e.offenderManagerForename,
+          e.offenderManagerSurname,
+          e.offenderManagerGrade
+        )
+      }
+      return ChooseOffenderManagerCase(
+        e.name,
+        e.crn,
+        e.tier,
+        e.status,
+        offenderManager,
+        e.convictionId
+      )
+    }
+  }
+}
