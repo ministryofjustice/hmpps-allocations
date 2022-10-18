@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
-import java.util.UUID
 
 @Component
 class CalculationEventListener(
@@ -15,12 +14,12 @@ class CalculationEventListener(
 
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    val fullMessage = objectMapper.readValue(rawMessage, Message::class.java)
-    val (crn) = objectMapper.readValue(fullMessage.message, CalculationEventData::class.java)
+    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
+    val (crn) = objectMapper.readValue(message, CalculationEventData::class.java)
     calculationTierService.updateTier(crn)
   }
 
-  data class CalculationEventData(val crn: String, val calculationId: UUID)
+  data class CalculationEventData(val crn: String)
 
   data class Message(@JsonProperty("Message") val message: String)
 }

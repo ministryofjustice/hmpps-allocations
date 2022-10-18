@@ -56,7 +56,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoAc
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.unallocatedOffenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
@@ -264,7 +263,7 @@ abstract class IntegrationTestBase {
 
   protected fun tierCalculationEvent(
     crn: String
-  ) = CalculationEventListener.CalculationEventData(crn, UUID.randomUUID())
+  ) = TierCalculationEvent(crn, UUID.randomUUID(), PersonReference(listOf(PersonReferenceType("CRN", crn))))
 
   @AfterAll
   fun tearDownServer() {
@@ -315,7 +314,8 @@ abstract class IntegrationTestBase {
       request().withPath("/allocation-demand")
 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(fullDeliusCaseDetailsResponse(*caseDetailsInitialAppointments))
+      response().withContentType(APPLICATION_JSON)
+        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsInitialAppointments))
     )
   }
 
@@ -442,7 +442,7 @@ abstract class IntegrationTestBase {
     hmppsTier.`when`(request).respond(
       response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
     )
-    return request!!
+    return request
   }
 
   protected fun twoActiveConvictionsResponse(crn: String) {
@@ -640,3 +640,14 @@ abstract class IntegrationTestBase {
     return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()
   }
 }
+
+data class TierCalculationEvent(val crn: String, val calculationId: UUID, val personReference: PersonReference)
+
+data class PersonReference(
+  val identifiers: List<PersonReferenceType>
+)
+
+data class PersonReferenceType(
+  val type: String,
+  val value: String
+)
