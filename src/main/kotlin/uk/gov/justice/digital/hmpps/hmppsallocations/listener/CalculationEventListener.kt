@@ -18,13 +18,13 @@ class CalculationEventListener(
     calculationTierService.updateTier(crnFrom(calculationEventData))
   }
 
-  private fun readMessage(rawMessage: String?): CalculationEventData {
-    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
+  private fun readMessage(wrapper: String?): CalculationEventData {
+    val (message) = objectMapper.readValue(wrapper, Message::class.java)
     return objectMapper.readValue(message, CalculationEventData::class.java)
   }
 
   private fun crnFrom(calculationEventData: CalculationEventData) =
-    calculationEventData.personReference.identifiers[0].value
+    calculationEventData.personReference.identifiers.first { it.type == "CRN" }.value
 
   data class CalculationEventData(val personReference: PersonReference)
 
