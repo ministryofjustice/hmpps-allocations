@@ -56,11 +56,13 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoAc
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.unallocatedOffenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.CalculationEventData
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.PersonReference
+import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.PersonReferenceType
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
-import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -77,7 +79,7 @@ abstract class IntegrationTestBase {
 
   val firstSentenceDate: LocalDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
-  final val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
+  private final val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
 
   val previouslyManagedCase = UnallocatedCaseEntity(
     null,
@@ -261,9 +263,9 @@ abstract class IntegrationTestBase {
 
   protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn)
 
-  protected fun tierCalculationEvent(
-    crn: String
-  ) = TierCalculationEvent(crn, UUID.randomUUID(), PersonReference(listOf(PersonReferenceType("CRN", crn))))
+  protected fun tierCalculationEvent(crn: String) = CalculationEventData(
+    PersonReference(listOf(PersonReferenceType("CRN", crn)))
+  )
 
   @AfterAll
   fun tearDownServer() {
@@ -640,14 +642,3 @@ abstract class IntegrationTestBase {
     return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()
   }
 }
-
-data class TierCalculationEvent(val crn: String, val calculationId: UUID, val personReference: PersonReference)
-
-data class PersonReference(
-  val identifiers: List<PersonReferenceType>
-)
-
-data class PersonReferenceType(
-  val type: String,
-  val value: String
-)
