@@ -14,12 +14,26 @@ class CalculationEventListener(
 
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
-    val (crn) = objectMapper.readValue(message, CalculationEventData::class.java)
-    calculationTierService.updateTier(crn)
+    val calculationEventData = readMessage(rawMessage)
+    calculationTierService.updateTier(crnFrom(calculationEventData))
   }
 
-  data class CalculationEventData(val crn: String)
+  private fun readMessage(rawMessage: String?): CalculationEventData {
+    val (message) = objectMapper.readValue(rawMessage, Message::class.java)
+    return objectMapper.readValue(message, CalculationEventData::class.java)
+  }
+
+  private fun crnFrom(calculationEventData: CalculationEventData) =
+    calculationEventData.personReference.identifiers[0].value
+
+  data class CalculationEventData(val personReference: PersonReference)
+
+  data class PersonReference(val identifiers: List<PersonReferenceType>)
+
+  data class PersonReferenceType(
+    val type: String,
+    val value: String
+  )
 
   data class Message(@JsonProperty("Message") val message: String)
 }
