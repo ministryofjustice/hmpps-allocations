@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
-import java.util.UUID
 
 @Component
 class CalculationEventListener(
@@ -15,12 +14,26 @@ class CalculationEventListener(
 
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    val fullMessage = objectMapper.readValue(rawMessage, Message::class.java)
-    val (crn) = objectMapper.readValue(fullMessage.message, CalculationEventData::class.java)
-    calculationTierService.updateTier(crn)
+    val calculationEventData = readMessage(rawMessage)
+    calculationTierService.updateTier(crnFrom(calculationEventData))
   }
 
-  data class CalculationEventData(val crn: String, val calculationId: UUID)
+  private fun readMessage(wrapper: String?): CalculationEventData {
+    val (message) = objectMapper.readValue(wrapper, Message::class.java)
+    return objectMapper.readValue(message, CalculationEventData::class.java)
+  }
+
+  private fun crnFrom(calculationEventData: CalculationEventData) =
+    calculationEventData.personReference.identifiers.first { it.type == "CRN" }.value
+
+  data class CalculationEventData(val personReference: PersonReference)
+
+  data class PersonReference(val identifiers: List<PersonReferenceType>)
+
+  data class PersonReferenceType(
+    val type: String,
+    val value: String
+  )
 
   data class Message(@JsonProperty("Message") val message: String)
 }
