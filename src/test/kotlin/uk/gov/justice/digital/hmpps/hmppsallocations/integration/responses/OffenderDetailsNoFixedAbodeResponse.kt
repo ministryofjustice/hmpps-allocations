@@ -26,6 +26,10 @@ fun offenderDetailsNoFixedAbodeResponse() = """
                     "code": "M",
                     "description": "Main"
                 },
+                "type": {
+                  "code": "ABC123",
+                  "description": "Homeless - rough sleeping"
+                },
                 "typeVerified": false,
                 "createdDatetime": "2022-08-25T16:20:09",
                 "lastUpdatedDatetime": "2022-08-25T16:20:09"
