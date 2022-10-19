@@ -31,9 +31,16 @@ data class Address @JsonCreator constructor(
   val county: String?,
   val postcode: String?,
   val status: AddressStatus,
-  val noFixedAbode: Boolean
+  val noFixedAbode: Boolean,
+  val typeVerified: Boolean,
+  val type: AddressType?,
+  val from: LocalDate
 )
 
 data class AddressStatus @JsonCreator constructor(
   val code: String
+)
+
+data class AddressType @JsonCreator constructor(
+  val description: String
 )

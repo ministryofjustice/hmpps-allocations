@@ -50,6 +50,10 @@ fun offenderDetailsResponse() = """
                     "code": "M",
                     "description": "Main"
                 },
+                "type": {
+                  "code": "ABC123",
+                  "description": "Supported Housing"
+                },
                 "typeVerified": false,
                 "createdDatetime": "2022-08-25T15:15:02",
                 "lastUpdatedDatetime": "2022-08-25T15:15:02"

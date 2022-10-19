@@ -94,7 +94,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         case.caseType,
         documents?.cpsPack,
         documents?.preConvictionDocument,
-        offenderDetails.contactDetails.addresses?.firstOrNull { !it.noFixedAbode && it.status.code == "M" },
+        offenderDetails.contactDetails.addresses?.firstOrNull { it.status.code == "M" },
         case.sentenceLength
       )
     }

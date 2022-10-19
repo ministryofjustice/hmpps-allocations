@@ -182,10 +182,16 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("Yorkshire")
       .jsonPath("$.address.postcode")
       .isEqualTo("S2 4SU")
+      .jsonPath("$.address.type.description")
+      .isEqualTo("Supported Housing")
+      .jsonPath("$.address.from")
+      .isEqualTo("2022-08-25")
+      .jsonPath("$.address.noFixedAbode")
+      .isEqualTo(false)
   }
 
   @Test
-  fun `do not return a no fixed abode address`() {
+  fun `return a no fixed abode address`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()
@@ -202,8 +208,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.address")
-      .doesNotExist()
+      .jsonPath("$.address.type.description")
+      .isEqualTo("Homeless - rough sleeping")
+      .jsonPath("$.address.from")
+      .isEqualTo("2022-08-22")
+      .jsonPath("$.address.noFixedAbode")
+      .isEqualTo(true)
   }
 
   @Test
