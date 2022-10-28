@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@6.1.0
+  hmpps: ministryofjustice/hmpps@6.2.0
   slack: circleci/slack@4.10.1
 
 parameters:
@@ -78,6 +78,7 @@ workflows:
             - validate
             - build_docker
             - helm_lint
+          helm_timeout: 5m
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -88,6 +89,7 @@ workflows:
             - hmpps-allocations-preprod
           requires:
             - deploy_dev
+          helm_timeout: 5m
       - request-prod-approval:
           type: approval
           requires:
@@ -104,7 +106,7 @@ workflows:
             - hmpps-allocations-prod
           requires:
             - request-prod-approval
-
+          helm_timeout: 5m
   security:
     triggers:
       - schedule:
