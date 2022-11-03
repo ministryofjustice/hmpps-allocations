@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun singleActiveAndInactiveConvictionsResponse() = """
+fun singleActiveAndInactiveConvictionsResponse(staffCode: String) = """
 [
     {
         "convictionId": 2500292516,
@@ -114,7 +114,7 @@ fun singleActiveAndInactiveConvictionsResponse() = """
                 "teamId": 123456789,
                 "officerId": 123456789,
                 "name": "A Staff Name",
-                "staffCode": "STFFCDEU",
+                "staffCode": "$staffCode",
                 "gradeCode": "PSP",
                 "dateStartOfAllocation": "2014-05-29T20:50:18",
                 "teamCode": "TM1",

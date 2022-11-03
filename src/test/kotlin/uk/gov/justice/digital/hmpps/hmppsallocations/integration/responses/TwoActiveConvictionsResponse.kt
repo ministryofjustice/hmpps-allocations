@@ -239,7 +239,7 @@ fun twoActiveConvictionsResponse() = """
                 "officerId": 123456789,
                 "name": "A Staff Name",
                 "gradeCode": "PSQ",
-                "staffCode": "STFFCDEU",
+                "staffCode": "STFFCDE1",
                 "dateStartOfAllocation": "2014-05-29T20:50:18",
                 "teamCode": "TM1",
                 "probationAreaCode": "PAC1"

@@ -10,7 +10,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()
-    singleActiveAndInactiveConvictionsResponse(crn)
+    singleActiveAndInactiveConvictionsResponse(crn, "STAFF1")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -95,5 +95,22 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .isEmpty
       .jsonPath("$.previous")
       .isEmpty
+  }
+
+  @Test
+  fun `do not return unallocated order managers`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+    singleActiveAndInactiveConvictionsResponse(crn, "STAFFU")
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionId")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.previous[0].offenderManager")
+      .doesNotExist()
   }
 }

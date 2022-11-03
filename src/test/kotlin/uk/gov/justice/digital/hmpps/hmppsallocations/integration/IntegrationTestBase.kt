@@ -465,11 +465,11 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun singleActiveAndInactiveConvictionsResponse(crn: String) {
+  protected fun singleActiveAndInactiveConvictionsResponse(crn: String, staffCode: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
     communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse())
+      response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse(staffCode))
     )
   }
 

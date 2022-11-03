@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
@@ -96,23 +97,26 @@ class GetUnallocatedCaseService(
         .filter { c -> c.sentence != null }
         .filter { c -> c.convictionId != excludeConvictionId }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager ->
-            orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
-          }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
+          val practitioner = getCurrentOrderManager(conviction)
+
           UnallocatedCaseConviction.from(conviction, conviction.sentence!!.startDate, null, practitioner)
         }
 
       val inactiveConvictions = convictions.getOrDefault(false, emptyList())
         .filter { c -> c.sentence != null }
         .map { conviction ->
-          val practitioner = conviction.orderManagers.maxByOrNull { orderManager ->
-            orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
-          }?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
+          val practitioner = getCurrentOrderManager(conviction)
           UnallocatedCaseConviction.from(conviction, null, conviction.sentence!!.terminationDate, practitioner)
         }
 
       return UnallocatedCaseConvictions.from(it, activeConvictions, inactiveConvictions)
     }
+
+  private fun getCurrentOrderManager(conviction: Conviction): UnallocatedCaseConvictionPractitioner? =
+    conviction.orderManagers.maxByOrNull { orderManager ->
+      orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
+    }?.takeUnless { orderManager -> orderManager.isUnallocated }
+      ?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
 
   fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {

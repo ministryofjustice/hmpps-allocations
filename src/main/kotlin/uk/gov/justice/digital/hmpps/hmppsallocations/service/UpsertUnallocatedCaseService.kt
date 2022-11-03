@@ -101,7 +101,7 @@ class UpsertUnallocatedCaseService(
     sentence.originalLengthUnits?.let { "${sentence.originalLength} $it" }
 
   private fun isUnallocated(conviction: Conviction, currentOrderManager: OrderManager?): Boolean {
-    return currentOrderManager?.staffCode?.endsWith("U") ?: false && conviction.active && conviction.sentence != null
+    return currentOrderManager?.isUnallocated ?: false && conviction.active && conviction.sentence != null
   }
 
   companion object {

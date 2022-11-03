@@ -245,7 +245,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     offenderDetailsResponse(crn)
     getUnallocatedManagerFromDelius(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveAndInactiveConvictionsResponse(crn)
+    singleActiveAndInactiveConvictionsResponse(crn, "STAFFU")
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(

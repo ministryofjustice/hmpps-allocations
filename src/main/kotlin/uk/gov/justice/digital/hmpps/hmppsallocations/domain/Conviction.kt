@@ -30,6 +30,7 @@ data class OrderManager @JsonCreator constructor(
   val probationAreaCode: String
 ) {
   val staffGrade: String? = deliusToStaffGrade(this.gradeCode)
+  val isUnallocated: Boolean = staffCode?.endsWith("U") ?: false
 }
 
 data class Custody @JsonCreator constructor(
