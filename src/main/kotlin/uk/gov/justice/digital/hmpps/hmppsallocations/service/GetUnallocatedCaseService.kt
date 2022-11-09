@@ -82,9 +82,6 @@ class GetUnallocatedCaseService(
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
     return enrichEventService.enrichInitialAppointment(unallocatedCasesRepository.findByTeamCode(teamCode))
-      .map { unallocatedCase ->
-        UnallocatedCase.from(unallocatedCase)
-      }
   }
 
   fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
