@@ -14,3 +14,13 @@ generic-service:
     WORKFORCE_ALLOCATIONS_TO_DELIUS_ENDPOINT_URL: https://workforce-allocations-to-delius.probation.service.justice.gov.uk
     ASSESSMENT_ENDPOINT_URL: https://offender-prod.aks-live-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs.hmpps.service.justice.gov.uk
+
+generic-prometheus-alerts:
+  sqsOldestAlertQueueNames:
+    - "Digital-Prison-Services-prod-hmpps_tier_calculation_allocation_queue"
+    - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue"
+  sqsNumberAlertQueueNames:
+    - "Digital-Prison-Services-prod-hmpps_tier_calculation_allocation_dlq"
+    - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue_dl"
+  sqsAlertsOldestThreshold: 2
+  sqsAlertsTotalMessagesThreshold: 1
