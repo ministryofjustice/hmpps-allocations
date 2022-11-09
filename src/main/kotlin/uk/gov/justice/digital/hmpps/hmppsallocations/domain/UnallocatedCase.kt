@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 
@@ -33,6 +34,22 @@ data class UnallocatedCase @JsonCreator constructor(
   val sentenceLength: String?
 ) {
   companion object {
+    fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail?): UnallocatedCase {
+      return UnallocatedCase(
+        "${deliusCaseDetail!!.name.forename} ${deliusCaseDetail.name.surname}",
+        case.crn, case.tier, case.sentenceDate, deliusCaseDetail.initialAppointment?.date, case.status,
+        case.previousConvictionDate,
+        OffenderManagerDetails(
+          case.offenderManagerForename,
+          case.offenderManagerSurname,
+          case.offenderManagerGrade
+        ),
+        case.convictionId,
+        case.caseType,
+        case.sentenceLength
+      )
+    }
+
     fun from(case: UnallocatedCaseEntity): UnallocatedCase {
       return UnallocatedCase(
         case.name,

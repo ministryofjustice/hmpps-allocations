@@ -16,9 +16,9 @@ private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAp
   {
       "crn": "${caseDetailsInitialAppointment.crn}",
       "name": {
-        "forename": "string",
+        "forename": "Dylan Adam",
         "middleName": "string",
-        "surname": "string"
+        "surname": "Armstrong"
       },
       "event": {
         "number": "${caseDetailsInitialAppointment.eventNumber}",
