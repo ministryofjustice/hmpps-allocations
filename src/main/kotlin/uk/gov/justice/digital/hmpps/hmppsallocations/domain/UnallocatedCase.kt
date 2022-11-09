@@ -36,8 +36,8 @@ data class UnallocatedCase @JsonCreator constructor(
   companion object {
     fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail?): UnallocatedCase {
       return UnallocatedCase(
-        case.name,
-        case.crn, case.tier, case.sentenceDate, deliusCaseDetail?.initialAppointment?.date, case.status,
+        "${deliusCaseDetail!!.name.forename} ${deliusCaseDetail.name.surname}",
+        case.crn, case.tier, case.sentenceDate, deliusCaseDetail.initialAppointment?.date, case.status,
         case.previousConvictionDate,
         OffenderManagerDetails(
           case.offenderManagerForename,

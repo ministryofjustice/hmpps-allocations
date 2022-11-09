@@ -8,12 +8,18 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
-
   @Test
   fun `Get unallocated cases by team`() {
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
-    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("J678910", "1", initialAppointment))
+    deliusCaseDetailsResponse(
+      CaseDetailsInitialAppointment("J678910", "1", initialAppointment),
+      CaseDetailsInitialAppointment("J680648", "2", LocalDate.now()),
+      CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
+      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
+      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
+      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
+    )
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -51,7 +57,14 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   fun `must get initial appointments for all required`() {
     insertCases()
     val initialAppointment = LocalDate.of(2021, 11, 30)
-    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("X4565764", "3", initialAppointment), CaseDetailsInitialAppointment("J680648", "2", null))
+    deliusCaseDetailsResponse(
+      CaseDetailsInitialAppointment("J678910", "1", LocalDate.now()),
+      CaseDetailsInitialAppointment("J680648", "2", null),
+      CaseDetailsInitialAppointment("X4565764", "3", initialAppointment),
+      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
+      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
+      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
+    )
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -66,7 +79,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `return empty initial appointment on API call error`() {
+  fun `return error when error on API call`() {
     insertCases()
     errorDeliusCaseDetailsResponse()
     webTestClient.get()
@@ -74,10 +87,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
-      .isEqualTo(null)
+      .is5xxServerError
   }
 
   @Test
@@ -110,6 +120,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   @Test
   fun `can get previous conviction end date`() {
     repository.save(previouslyManagedCase)
+    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()))
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -134,6 +145,15 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
+    deliusCaseDetailsResponse(
+      CaseDetailsInitialAppointment("J678910", "1", LocalDate.now()),
+      CaseDetailsInitialAppointment("J680648", "2", LocalDate.now()),
+      CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
+      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
+      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
+      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
+    )
+
     insertCases()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
