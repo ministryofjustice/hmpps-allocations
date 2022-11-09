@@ -94,10 +94,12 @@ class EnrichEventService(
       unallocatedCaseEntities
         .filter { unallocatedCasesRepository.existsById(it.id!!) }
         .map {
-          it.initialAppointment = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }?.initialAppointment?.date
+          val deliusCaseDetail = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }
+            it.initialAppointment = deliusCaseDetail?.initialAppointment?.date
           unallocatedCasesRepository.save(it)
-        }.map { unallocatedCase ->
-        UnallocatedCase.from(unallocatedCase) }
+        UnallocatedCase.from(it, deliusCaseDetail
+          )
+        }
     )
   }
 }
