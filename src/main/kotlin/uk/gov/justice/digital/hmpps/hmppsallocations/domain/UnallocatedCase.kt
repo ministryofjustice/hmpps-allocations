@@ -46,7 +46,7 @@ data class UnallocatedCase @JsonCreator constructor(
         ),
         case.convictionId,
         case.caseType,
-        case.sentenceLength
+        deliusCaseDetail.sentence.length
       )
     }
 

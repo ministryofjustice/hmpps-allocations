@@ -35,7 +35,7 @@ private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAp
       "sentence": {
         "type": "string",
         "date": "2022-11-05",
-        "length": "string"
+        "length": "5 Weeks"
       }
   """ +
   initialAppointment(caseDetailsInitialAppointment.initialAppointment) +
