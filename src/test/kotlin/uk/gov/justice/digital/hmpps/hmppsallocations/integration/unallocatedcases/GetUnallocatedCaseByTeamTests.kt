@@ -12,6 +12,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   fun `Get unallocated cases by team`() {
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
+    val firstSentenceDate = LocalDate.of(2022, 11, 5)
     deliusCaseDetailsResponse(
       CaseDetailsInitialAppointment("J678910", "1", initialAppointment),
       CaseDetailsInitialAppointment("J680648", "2", LocalDate.now()),
