@@ -19,9 +19,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.13")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.7")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.7")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
 
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
