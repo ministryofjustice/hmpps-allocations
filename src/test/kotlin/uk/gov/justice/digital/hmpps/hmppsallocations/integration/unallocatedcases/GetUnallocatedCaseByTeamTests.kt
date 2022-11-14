@@ -119,23 +119,6 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `can get previous conviction end date`() {
-    repository.save(previouslyManagedCase)
-    deliusCaseDetailsResponse(CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()))
-    webTestClient.get()
-      .uri("/team/TEAM1/cases/unallocated")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.[0].status")
-      .isEqualTo(previouslyManagedCase.status)
-      .jsonPath("$.[0].previousConvictionEndDate")
-      .isEqualTo((previouslyManagedCase.previousConvictionDate!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
-  }
-
-  @Test
   fun `cannot get unallocated cases when no auth token supplied`() {
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")

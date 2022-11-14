@@ -79,7 +79,6 @@ abstract class IntegrationTestBase {
 
   val firstSentenceDate: LocalDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
-  private final val previousConvictionEndDate: LocalDate = LocalDate.now().minusDays(60)
 
   val previouslyManagedCase = UnallocatedCaseEntity(
     null,
@@ -89,7 +88,6 @@ abstract class IntegrationTestBase {
     LocalDate.now().minusDays(1),
     null,
     "Previously managed",
-    previousConvictionEndDate,
     convictionId = 987654321,
     caseType = CaseTypes.CUSTODY,
     providerCode = "",
