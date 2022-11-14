@@ -597,8 +597,8 @@ abstract class IntegrationTestBase {
   }
 
   protected fun getDocument(crn: String, documentId: String) {
-    val documentRequest = request().withPath("/offenders/crn/$crn/documents/$documentId")
-    communityApi.`when`(documentRequest, exactly(1)).respond(
+    val documentRequest = request().withPath("/offenders/$crn/documents/$documentId")
+    workforceAllocationsToDelius.`when`(documentRequest, exactly(1)).respond(
       response()
         .withHeader(HttpHeaders.CONTENT_TYPE, "application/msword;charset=UTF-8")
         .withHeader(HttpHeaders.ACCEPT_RANGES, "bytes")
