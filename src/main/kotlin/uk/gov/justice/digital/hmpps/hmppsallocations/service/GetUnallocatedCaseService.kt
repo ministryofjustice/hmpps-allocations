@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -31,7 +33,7 @@ class GetUnallocatedCaseService(
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
-  private val enrichEventService: EnrichEventService
+  private val enrichEventService: EnrichEventService,
 ) {
 
   fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
@@ -143,6 +145,10 @@ class GetUnallocatedCaseService(
         results.t4.orElse(null)
       )
     }
+
+  fun getCaseDocument(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
+    return communityApiClient.getDocuments(crn, documentId)
+  }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))

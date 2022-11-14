@@ -1,8 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import org.slf4j.LoggerFactory
-import org.springframework.core.io.Resource
-import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -26,14 +24,6 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         log.warn("Error retrieving delius case details", it)
         Mono.just(emptyList())
       }
-  }
-
-  fun getDocuments(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
-    return webClient
-      .get()
-      .uri("/offenders/$crn/documents/$documentId")
-      .retrieve()
-      .toEntity(Resource::class.java)
   }
 }
 
