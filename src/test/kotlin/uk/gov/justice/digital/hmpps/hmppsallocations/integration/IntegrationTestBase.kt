@@ -473,17 +473,17 @@ abstract class IntegrationTestBase {
 
   protected fun documentsResponse(crn: String, convictionId: Long) {
     val preSentenceReportRequest =
-      request().withPath("/offenders/crn/$crn/documents/grouped")
-    communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
+      request().withPath("/offenders/$crn/documents")
+    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(documentsResponse(convictionId))
     )
   }
 
-  protected fun noDocumentsResponse(crn: String, convictionId: Long) {
+  protected fun noDocumentsResponse(crn: String) {
     val preSentenceReportRequest =
-      request().withPath("/offenders/crn/$crn/documents/grouped")
-    communityApi.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{\"documents\": [], \"convictions\":[]}")
+      request().withPath("/offenders/$crn/documents")
+    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
     )
   }
 
