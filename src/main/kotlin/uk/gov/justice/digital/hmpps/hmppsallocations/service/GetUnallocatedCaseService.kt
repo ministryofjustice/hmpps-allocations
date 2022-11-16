@@ -43,11 +43,11 @@ class GetUnallocatedCaseService(
       val conviction = communityApiClient.getConviction(crn, convictionId)
 
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
-      val courtReportDocuments = getDocuments(crn, it.convictionNumber.toString())
+      val associatedDocuments = getDocuments(crn, it.convictionNumber.toString())
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
-      val results = Mono.zip(offenderSummary, requirements, courtReportDocuments, assessment, conviction).block()!!
+      val results = Mono.zip(offenderSummary, requirements, associatedDocuments, assessment, conviction).block()!!
       return UnallocatedCaseDetails.from(
         it, results.t1, results.t5?.offences,
         results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
