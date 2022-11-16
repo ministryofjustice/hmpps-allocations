@@ -37,9 +37,6 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/offenders/$crn/documents")
       .retrieve()
       .bodyToFlux(Document::class.java)
-      .filter { document ->
-        document.relatedTo.event == null || document.relatedTo.event.eventNumber == convictionNumber
-      }
   }
 
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {

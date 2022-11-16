@@ -60,6 +60,9 @@ class GetUnallocatedCaseService(
     crn: String,
     convictionNumber: String
   ) = workforceAllocationsToDeliusApiClient.getDocuments(crn, convictionNumber)
+    .filter { document ->
+      document.relatedTo.event == null || document.relatedTo.event.eventNumber == convictionNumber
+    }
     .collectList()
     .map { documents ->
       val cpsPack = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "CPSPACK" }.maxByOrNull { it.dateCreated })
