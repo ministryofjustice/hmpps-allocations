@@ -24,6 +24,18 @@ class GetCaseDocumentsTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `must error when retrieving documents errors`() {
+    val crn = "X123456"
+    documentsErrorResponse(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/documents")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .is5xxServerError
+  }
+
+  @Test
   fun `cannot get all documents when no auth token supplied`() {
     webTestClient.get()
       .uri("/cases/unallocated/X123456/documents")

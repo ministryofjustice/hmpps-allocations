@@ -479,6 +479,14 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun documentsErrorResponse(crn: String) {
+    val preSentenceReportRequest =
+      request().withPath("/offenders/$crn/documents")
+    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
+      response().withStatusCode(NOT_FOUND.value())
+    )
+  }
+
   protected fun noDocumentsResponse(crn: String) {
     val preSentenceReportRequest =
       request().withPath("/offenders/$crn/documents")
