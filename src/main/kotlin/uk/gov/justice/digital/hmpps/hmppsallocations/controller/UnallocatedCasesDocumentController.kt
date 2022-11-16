@@ -31,6 +31,6 @@ class UnallocatedCasesDocumentController(@Qualifier("workforceAllocationsToDeliu
     @PathVariable(required = true) convictionId: Long,
     @PathVariable(required = true) documentId: String
   ): Mono<ResponseEntity<Resource>> {
-    return workforceAllocationsToDeliusApiClient.getDocuments(crn, documentId)
+    return workforceAllocationsToDeliusApiClient.getDocumentById(crn, documentId)
   }
 }

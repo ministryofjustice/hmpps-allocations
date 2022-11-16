@@ -1,12 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
@@ -28,7 +31,18 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getDocuments(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
+  fun getDocuments(crn: String, convictionNumber: String): Flux<Document> {
+    return webClient
+      .get()
+      .uri("/offenders/$crn/documents")
+      .retrieve()
+      .bodyToFlux(Document::class.java)
+      .filter { document ->
+        document.relatedTo.event == null || document.relatedTo.event.eventNumber == convictionNumber
+      }
+  }
+
+  fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
     return webClient
       .get()
       .uri("/offenders/$crn/documents/$documentId")
@@ -47,3 +61,24 @@ data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 data class Name(val forename: String, val surname: String)
 
 data class Sentence(val date: LocalDate, val length: String)
+
+data class Document @JsonCreator constructor(
+  val id: String,
+  val name: String,
+  val dateCreated: ZonedDateTime,
+  val sensitive: Boolean,
+  val relatedTo: DocumentRelatedTo
+)
+
+data class DocumentRelatedTo @JsonCreator constructor(
+  val type: String,
+  val name: String,
+  val description: String,
+  val event: DocumentEvent?
+)
+
+data class DocumentEvent @JsonCreator constructor(
+  val eventType: String,
+  val eventNumber: String,
+  val mainOffence: String,
+)

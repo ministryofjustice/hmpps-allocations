@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
@@ -31,7 +32,8 @@ class GetUnallocatedCaseService(
   private val courtReportMapper: CourtReportMapper,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
-  private val enrichEventService: EnrichEventService
+  private val enrichEventService: EnrichEventService,
+  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
   fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
@@ -41,7 +43,7 @@ class GetUnallocatedCaseService(
       val conviction = communityApiClient.getConviction(crn, convictionId)
 
       val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
-      val courtReportDocuments = getDocuments(crn, convictionId)
+      val courtReportDocuments = getDocuments(crn, it.convictionNumber.toString())
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
@@ -56,21 +58,14 @@ class GetUnallocatedCaseService(
 
   private fun getDocuments(
     crn: String,
-    convictionId: Long
-  ) = communityApiClient.getDocuments(crn, convictionId)
+    convictionNumber: String
+  ) = workforceAllocationsToDeliusApiClient.getDocuments(crn, convictionNumber)
+    .collectList()
     .map { documents ->
-      val documentTypes = documents.groupBy({ document -> document.type.code }, { document ->
-        document.subType?.let { subType ->
-          subType.description = courtReportMapper.deliusToReportType(subType.code, subType.description)
-        }
-        UnallocatedCaseDocument.from(document)
-      })
-        .mapValues { entry -> entry.value.maxByOrNull { document -> document?.completedDate ?: LocalDateTime.MIN } }
-      Documents(
-        documentTypes["COURT_REPORT_DOCUMENT"],
-        documentTypes["CPSPACK_DOCUMENT"],
-        documentTypes["PRECONS_DOCUMENT"]
-      )
+      val cpsPack = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "CPSPACK" }.maxByOrNull { it.dateCreated })
+      val preConviction = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "PRECONS" }.maxByOrNull { it.dateCreated })
+      val courtReport = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "COURT_REPORT" }.maxByOrNull { it.dateCreated })
+      Documents(courtReport, cpsPack, preConviction)
     }
 
   fun getCaseOverview(crn: String, convictionId: Long): UnallocatedCase? =
