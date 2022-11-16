@@ -31,7 +31,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getDocuments(crn: String, convictionNumber: String): Flux<Document> {
+  fun getDocuments(crn: String): Flux<Document> {
     return webClient
       .get()
       .uri("/offenders/$crn/documents")

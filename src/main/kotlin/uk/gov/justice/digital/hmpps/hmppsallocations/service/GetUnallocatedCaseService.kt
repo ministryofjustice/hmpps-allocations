@@ -57,7 +57,7 @@ class GetUnallocatedCaseService(
   private fun getDocuments(
     crn: String,
     convictionNumber: String
-  ) = workforceAllocationsToDeliusApiClient.getDocuments(crn, convictionNumber)
+  ) = workforceAllocationsToDeliusApiClient.getDocuments(crn)
     .filter { document ->
       document.relatedTo.event == null || document.relatedTo.event.eventNumber == convictionNumber
     }
