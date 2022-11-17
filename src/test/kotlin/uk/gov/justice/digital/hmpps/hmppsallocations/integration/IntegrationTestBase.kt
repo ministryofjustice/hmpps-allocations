@@ -471,11 +471,19 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun documentsResponse(crn: String, convictionId: Long) {
+  protected fun documentsResponse(crn: String) {
     val preSentenceReportRequest =
       request().withPath("/offenders/$crn/documents")
     workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(documentsResponse(convictionId))
+      response().withContentType(APPLICATION_JSON).withBody(documentsResponse())
+    )
+  }
+
+  protected fun documentsErrorResponse(crn: String) {
+    val preSentenceReportRequest =
+      request().withPath("/offenders/$crn/documents")
+    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
+      response().withStatusCode(NOT_FOUND.value())
     )
   }
 

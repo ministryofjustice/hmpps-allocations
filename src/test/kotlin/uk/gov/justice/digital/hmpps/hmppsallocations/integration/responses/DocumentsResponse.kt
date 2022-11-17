@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-fun documentsResponse(convictionId: Long) = """
+fun documentsResponse() = """
   [
     {
         "id": "efb7a4e8-3f4a-449c-bf6f-b1fc8def3410",
