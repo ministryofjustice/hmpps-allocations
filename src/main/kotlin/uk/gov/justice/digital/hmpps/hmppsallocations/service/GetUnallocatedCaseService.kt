@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocum
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Optional
 
 @Service
@@ -63,9 +64,27 @@ class GetUnallocatedCaseService(
     }
     .collectList()
     .map { documents ->
-      val cpsPack = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "CPSPACK" }.maxByOrNull { it.dateCreated })
-      val preConviction = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "PRECONS" }.maxByOrNull { it.dateCreated })
-      val courtReport = UnallocatedCaseDocument.from(documents.filter { it.relatedTo.type == "COURT_REPORT" }.maxByOrNull { it.dateCreated })
+      val cpsPack = UnallocatedCaseDocument.from(
+        documents.filter { it.relatedTo.type == "CPSPACK" }.maxByOrNull {
+          it.dateCreated ?: LocalDateTime.MIN.atZone(
+            ZoneId.systemDefault()
+          )
+        }
+      )
+      val preConviction = UnallocatedCaseDocument.from(
+        documents.filter { it.relatedTo.type == "PRECONS" }.maxByOrNull {
+          it.dateCreated ?: LocalDateTime.MIN.atZone(
+            ZoneId.systemDefault()
+          )
+        }
+      )
+      val courtReport = UnallocatedCaseDocument.from(
+        documents.filter { it.relatedTo.type == "COURT_REPORT" }.maxByOrNull {
+          it.dateCreated ?: LocalDateTime.MIN.atZone(
+            ZoneId.systemDefault()
+          )
+        }
+      )
       Documents(courtReport, cpsPack, preConviction)
     }
 
