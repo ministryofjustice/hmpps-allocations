@@ -165,7 +165,7 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
   var description: String?,
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val completedDate: ZonedDateTime,
+  val completedDate: ZonedDateTime?,
   @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
   val documentId: String,
 ) {

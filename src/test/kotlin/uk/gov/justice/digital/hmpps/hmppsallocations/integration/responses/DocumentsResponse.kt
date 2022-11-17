@@ -43,7 +43,6 @@ fun documentsResponse() = """
             "name": "",
             "description": "PNC previous convictions"
         },
-        "dateCreated": "2021-11-17T00:00:00+01:00",
         "sensitive": false
     }
   ]
