@@ -21,7 +21,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.13")
 
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
