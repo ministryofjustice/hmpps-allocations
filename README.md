@@ -41,7 +41,7 @@ docker-compose up -d
 Execute the following commands:
 
 ```shell
-docker compose up -d localstack postgres
+docker compose up -d
 ./gradlew check
 ```
 

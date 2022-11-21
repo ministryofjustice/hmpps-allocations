@@ -168,6 +168,8 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
   val completedDate: ZonedDateTime?,
   @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
   val documentId: String,
+  @Schema(description = "Name of document")
+  val name: String
 ) {
   companion object {
     fun from(document: Document?): UnallocatedCaseDocument? {
@@ -175,7 +177,8 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
         UnallocatedCaseDocument(
           it.relatedTo.name,
           it.dateCreated,
-          it.id
+          it.id,
+          it.name
         )
       }
     }

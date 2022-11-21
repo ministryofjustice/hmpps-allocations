@@ -78,10 +78,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("2021-12-07")
       .jsonPath("$.courtReport.documentId")
       .isEqualTo("6c50048a-c647-4598-8fae-0b84c69ef31a")
+      .jsonPath("$.courtReport.name")
+      .isEqualTo("doc.pdf")
       .jsonPath("$.cpsPack.completedDate")
       .isEqualTo("2021-10-16")
       .jsonPath("$.cpsPack.documentId")
       .isEqualTo("efb7a4e8-3f4a-449c-bf6f-b1fc8def3410")
+      .jsonPath("$.cpsPack.name")
+      .isEqualTo("cps.pdf")
       .jsonPath("$.assessment.lastAssessedOn")
       .isEqualTo("2014-03-28")
       .jsonPath("$.assessment.type")
@@ -94,6 +98,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .doesNotExist()
       .jsonPath("$.preConvictionDocument.documentId")
       .isEqualTo("626aa1d1-71c6-4b76-92a1-bf2f9250c143")
+      .jsonPath("$.preConvictionDocument.name")
+      .isEqualTo("Pre Cons.pdf")
   }
 
   @Test
