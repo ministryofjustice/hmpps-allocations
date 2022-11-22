@@ -41,9 +41,6 @@ data class UnallocatedCaseEntity(
   @Column
   var status: String,
 
-  @Column(name = "previous_conviction_date")
-  var previousConvictionDate: LocalDate? = null,
-
   @Column(name = "offender_manager_forename")
   var offenderManagerForename: String? = null,
 

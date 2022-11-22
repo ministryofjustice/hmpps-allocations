@@ -60,13 +60,8 @@ class EnrichEventService(
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
         return when {
           inactiveConvictions.isNotEmpty() -> {
-            val mostRecentInactiveConvictionEndDate =
-              inactiveConvictions.filter { c -> c.sentence?.terminationDate != null }
-                .map { c -> c.sentence!!.terminationDate!! }
-                .maxByOrNull { it }
             ProbationStatus(
               PREVIOUSLY_MANAGED,
-              mostRecentInactiveConvictionEndDate,
               OffenderManagerDetails.from(offenderManager).takeUnless { offenderManager.isUnallocated }
             )
           }
@@ -107,7 +102,6 @@ class EnrichEventService(
 
 data class ProbationStatus(
   val status: ProbationStatusType,
-  val previousConvictionDate: LocalDate? = null,
   val offenderManagerDetails: OffenderManagerDetails? = null
 )
 
