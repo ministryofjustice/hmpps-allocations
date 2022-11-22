@@ -5,21 +5,14 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.CURRENTLY_MANAGED
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.NEW_TO_PROBATION
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.ProbationStatusType.PREVIOUSLY_MANAGED
 import java.time.LocalDate
 
 @Service
 class EnrichEventService(
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
-  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val unallocatedCasesRepository: UnallocatedCasesRepository
 ) {
@@ -53,19 +46,19 @@ class EnrichEventService(
       .block()!!
     return when {
       activeConvictions.size > 1 && !offenderManager.isUnallocated -> {
-        ProbationStatus(CURRENTLY_MANAGED, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
+        ProbationStatus(ProbationStatusType.CURRENTLY_MANAGED, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
       }
       else -> {
         val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
         return when {
           inactiveConvictions.isNotEmpty() -> {
             ProbationStatus(
-              PREVIOUSLY_MANAGED,
+              ProbationStatusType.PREVIOUSLY_MANAGED,
               OffenderManagerDetails.from(offenderManager).takeUnless { offenderManager.isUnallocated }
             )
           }
           else -> ProbationStatus(
-            NEW_TO_PROBATION,
+            ProbationStatusType.NEW_TO_PROBATION,
             offenderManagerDetails = OffenderManagerDetails.from(offenderManager)
           )
         }
@@ -79,20 +72,6 @@ class EnrichEventService(
       communityApiClient.getActiveConvictions(crn)
         .map { conviction -> conviction.convictionId }
     ).distinct()
-
-  fun enrichInitialAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCase> {
-
-    return workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities)
-      .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
-      .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCaseEntities.first { unallocatedCase -> unallocatedCase.crn == deliusCaseDetail.crn && unallocatedCase.convictionNumber.toString() == deliusCaseDetail.event.number }
-        unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
-        unallocatedCasesRepository.save(unallocatedCase)
-        UnallocatedCase.from(
-          unallocatedCase, deliusCaseDetail
-        )
-      }
-  }
 }
 
 data class ProbationStatus(

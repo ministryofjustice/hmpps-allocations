@@ -38,7 +38,7 @@ internal class GetUnallocatedCaseServiceTest {
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
     every { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns Flux.empty()
-    val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), EnrichEventService(mockCommunityClient, mockWorkforceAllocationsToDeliusApiClientClient, mockk(), mockRepo), mockk()).getAllByTeam("TM1").collectList().block()
+    val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }
 }

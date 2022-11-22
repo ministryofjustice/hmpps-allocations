@@ -31,7 +31,6 @@ class GetUnallocatedCaseService(
   @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
-  private val enrichEventService: EnrichEventService,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
@@ -94,7 +93,16 @@ class GetUnallocatedCaseService(
     }
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
-    return enrichEventService.enrichInitialAppointment(unallocatedCasesRepository.findByTeamCode(teamCode))
+    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCasesRepository.findByTeamCode(teamCode))
+      .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
+      .map { deliusCaseDetail ->
+        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(deliusCaseDetail.crn, deliusCaseDetail.event.number.toInt())
+        unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
+        unallocatedCasesRepository.save(unallocatedCase)
+        UnallocatedCase.from(
+          unallocatedCase, deliusCaseDetail
+        )
+      }
   }
 
   fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =

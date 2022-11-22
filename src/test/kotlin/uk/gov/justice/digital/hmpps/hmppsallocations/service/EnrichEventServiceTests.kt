@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 class EnrichEventServiceTests {
 
   private val communityApiClient = mockk<CommunityApiClient>()
-  private val enrichEventService = EnrichEventService(communityApiClient, mockk(), mockk(), mockk())
+  private val enrichEventService = EnrichEventService(communityApiClient, mockk(), mockk())
 
   @BeforeEach
   fun setupMocks() {
