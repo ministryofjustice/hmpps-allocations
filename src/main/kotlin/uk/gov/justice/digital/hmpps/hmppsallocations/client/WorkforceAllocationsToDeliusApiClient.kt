@@ -25,10 +25,6 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
       .map { it.cases }
-      .onErrorResume {
-        log.warn("Error retrieving delius case details", it)
-        Mono.just(emptyList())
-      }
   }
 
   fun getDocuments(crn: String): Flux<Document> {
