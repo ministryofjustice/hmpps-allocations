@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
@@ -83,20 +82,16 @@ class EnrichEventService(
 
   fun enrichInitialAppointment(unallocatedCaseEntities: List<UnallocatedCaseEntity>): Flux<UnallocatedCase> {
 
-    val deliusCaseDetails: List<DeliusCaseDetail> = workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities).block()
-
-    return Flux.fromIterable(
-      unallocatedCaseEntities
-        .filter { unallocatedCasesRepository.existsById(it.id!!) }
-        .map {
-          val deliusCaseDetail = deliusCaseDetails.firstOrNull { i -> (i.crn == it.crn) && (i.event.number == it.convictionNumber.toString()) }
-          it.initialAppointment = deliusCaseDetail?.initialAppointment?.date
-          unallocatedCasesRepository.save(it)
-          UnallocatedCase.from(
-            it, deliusCaseDetail
-          )
-        }
-    )
+    return workforceAllocationToDeliusApiClient.getDeliusCaseDetails(unallocatedCaseEntities)
+      .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
+      .map { deliusCaseDetail ->
+        val unallocatedCase = unallocatedCaseEntities.first { unallocatedCase -> unallocatedCase.crn == deliusCaseDetail.crn && unallocatedCase.convictionNumber.toString() == deliusCaseDetail.event.number }
+        unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
+        unallocatedCasesRepository.save(unallocatedCase)
+        UnallocatedCase.from(
+          unallocatedCase, deliusCaseDetail
+        )
+      }
   }
 }
 

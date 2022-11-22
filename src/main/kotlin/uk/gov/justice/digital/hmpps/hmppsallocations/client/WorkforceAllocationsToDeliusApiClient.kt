@@ -16,7 +16,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Mono<List<DeliusCaseDetail>> {
+  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flux<DeliusCaseDetail> {
     val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()
@@ -24,7 +24,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .body(Mono.just(getCaseDetails), GetCaseDetails::class.java)
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
-      .map { it.cases }
+      .flatMapIterable { it.cases }
   }
 
   fun getDocuments(crn: String): Flux<Document> {

@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionId
 @Repository
 interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
   fun existsByCrn(crn: String): Boolean
+
+  fun existsByCrnAndConvictionNumber(crn: String, convictionNumber: Int): Boolean
   fun findByCrn(crn: String): List<UnallocatedCaseEntity>
   fun findFirstCaseByCrn(crn: String): UnallocatedCaseEntity?
   fun findCaseByCrnAndConvictionId(crn: String, convictionId: Long): UnallocatedCaseEntity?

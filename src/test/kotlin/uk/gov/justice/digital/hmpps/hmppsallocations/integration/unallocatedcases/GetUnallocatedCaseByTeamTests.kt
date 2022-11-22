@@ -13,14 +13,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
-    deliusCaseDetailsResponse(
-      CaseDetailsInitialAppointment("J678910", "1", initialAppointment),
-      CaseDetailsInitialAppointment("J680648", "2", LocalDate.now()),
-      CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
-      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
-      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
-      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
-    )
+    setupTeam1CaseDetails()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -30,51 +23,26 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.length()")
       .isEqualTo(4)
-      .jsonPath("$.[0].sentenceDate")
+      .jsonPath("$.[?(@.convictionId == 123456789)].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-      .jsonPath("$.[0].initialAppointment")
+      .jsonPath("$.[?(@.convictionId == 123456789)].initialAppointment")
       .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-      .jsonPath("$.[0].name")
+      .jsonPath("$.[?(@.convictionId == 123456789)].name")
       .isEqualTo("Dylan Adam Armstrong")
-      .jsonPath("$.[0].crn")
+      .jsonPath("$.[?(@.convictionId == 123456789)].crn")
       .isEqualTo("J678910")
-      .jsonPath("$.[0].tier")
+      .jsonPath("$.[?(@.convictionId == 123456789)].tier")
       .isEqualTo("C1")
-      .jsonPath("$.[0].status")
+      .jsonPath("$.[?(@.convictionId == 123456789)].status")
       .isEqualTo("Currently managed")
-      .jsonPath("$.[0].offenderManager.forenames")
+      .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.forenames")
       .isEqualTo("Antonio")
-      .jsonPath("$.[0].offenderManager.surname")
+      .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.surname")
       .isEqualTo("LoSardo")
-      .jsonPath("$.[0].offenderManager.grade")
+      .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.grade")
       .isEqualTo("PO")
-      .jsonPath("$.[0].convictionId")
-      .isEqualTo(123456789)
-      .jsonPath("$.[0].caseType")
+      .jsonPath("$.[?(@.convictionId == 123456789)].caseType")
       .isEqualTo("CUSTODY")
-  }
-
-  @Test
-  fun `must get initial appointments for all required`() {
-    insertCases()
-    val initialAppointment = LocalDate.of(2021, 11, 30)
-    deliusCaseDetailsResponse(
-      CaseDetailsInitialAppointment("J678910", "1", LocalDate.now()),
-      CaseDetailsInitialAppointment("J680648", "2", null),
-      CaseDetailsInitialAppointment("X4565764", "3", initialAppointment),
-      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
-      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
-      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
-    )
-    webTestClient.get()
-      .uri("/team/TEAM1/cases/unallocated")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.[?(@.convictionId == 68793954)].initialAppointment")
-      .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
       .isEqualTo(null)
   }
@@ -129,14 +97,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
-    deliusCaseDetailsResponse(
-      CaseDetailsInitialAppointment("J678910", "1", LocalDate.now()),
-      CaseDetailsInitialAppointment("J680648", "2", LocalDate.now()),
-      CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
-      CaseDetailsInitialAppointment("J680660", "4", LocalDate.now()),
-      CaseDetailsInitialAppointment("J678910", "5", LocalDate.now()),
-      CaseDetailsInitialAppointment("C3333333", "6", LocalDate.now())
-    )
+    setupTeam1CaseDetails()
 
     insertCases()
     webTestClient.get()
@@ -149,4 +110,11 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionId == 123456789)].sentenceLength")
       .isEqualTo("5 Weeks")
   }
+
+  fun setupTeam1CaseDetails() = deliusCaseDetailsResponse(
+    CaseDetailsInitialAppointment("J678910", "1", LocalDate.of(2022, 10, 11)),
+    CaseDetailsInitialAppointment("J680648", "2", null),
+    CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
+    CaseDetailsInitialAppointment("J680660", "4", LocalDate.now())
+  )
 }

@@ -31,9 +31,9 @@ data class UnallocatedCase @JsonCreator constructor(
   val sentenceLength: String?
 ) {
   companion object {
-    fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail?): UnallocatedCase {
+    fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail): UnallocatedCase {
       return UnallocatedCase(
-        "${deliusCaseDetail!!.name.forename} ${deliusCaseDetail.name.surname}",
+        "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
         deliusCaseDetail.crn, case.tier, deliusCaseDetail.sentence.date, deliusCaseDetail.initialAppointment?.date, case.status,
         OffenderManagerDetails(
           case.offenderManagerForename,
