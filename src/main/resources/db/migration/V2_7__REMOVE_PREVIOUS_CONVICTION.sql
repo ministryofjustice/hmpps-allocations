@@ -1,0 +1,1 @@
+ALTER TABLE unallocated_cases DROP COLUMN previous_conviction_date;

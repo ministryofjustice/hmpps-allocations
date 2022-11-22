@@ -101,7 +101,7 @@ abstract class IntegrationTestBase {
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
-          null, "Antonio", "LoSardo", "PO",
+          "Antonio", "LoSardo", "PO",
           123456789,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
@@ -143,7 +143,7 @@ abstract class IntegrationTestBase {
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
           firstSentenceDate, firstInitialAppointment, "Currently managed",
-          null, "Antonio", "LoSardo", "PO",
+          "Antonio", "LoSardo", "PO",
           56785493, CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM2",
