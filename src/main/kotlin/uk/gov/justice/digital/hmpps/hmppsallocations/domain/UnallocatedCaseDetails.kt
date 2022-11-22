@@ -116,6 +116,12 @@ data class OffenderManagerDetails @JsonCreator constructor(
         grade = offenderManager.staffGrade
       )
     }
+
+    fun from(case: UnallocatedCaseEntity): OffenderManagerDetails? {
+      return case.offenderManagerForename?.let {
+        OffenderManagerDetails(case.offenderManagerForename, case.offenderManagerSurname, case.offenderManagerGrade)
+      }
+    }
   }
 }
 

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -22,7 +23,8 @@ data class UnallocatedCase @JsonCreator constructor(
   val initialAppointment: LocalDate?,
   @Schema(description = "Probation Status", example = "Currently managed")
   val status: String,
-  val offenderManager: OffenderManagerDetails,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  val offenderManager: OffenderManagerDetails?,
   @Schema(description = "Conviction Id")
   val convictionId: Long,
   @Schema(description = "Case Type")
@@ -35,11 +37,7 @@ data class UnallocatedCase @JsonCreator constructor(
       return UnallocatedCase(
         "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
         deliusCaseDetail.crn, case.tier, deliusCaseDetail.sentence.date, deliusCaseDetail.initialAppointment?.date, case.status,
-        OffenderManagerDetails(
-          case.offenderManagerForename,
-          case.offenderManagerSurname,
-          case.offenderManagerGrade
-        ),
+        OffenderManagerDetails.from(case),
         case.convictionId,
         case.caseType,
         deliusCaseDetail.sentence.length

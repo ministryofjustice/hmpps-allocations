@@ -45,6 +45,8 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
       .isEqualTo(null)
+      .jsonPath("$.[?(@.convictionId == 987654321)].offenderManager")
+      .doesNotExist()
   }
 
   @Test
