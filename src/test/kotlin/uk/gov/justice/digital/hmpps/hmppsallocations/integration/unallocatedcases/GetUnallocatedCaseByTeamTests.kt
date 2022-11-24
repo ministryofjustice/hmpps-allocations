@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -34,7 +34,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionId == 123456789)].tier")
       .isEqualTo("C1")
       .jsonPath("$.[?(@.convictionId == 123456789)].status")
-      .isEqualTo("Currently managed")
+      .isEqualTo("New to Probation")
       .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.forenames")
       .isEqualTo("Antonio")
       .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.surname")
@@ -114,9 +114,9 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   }
 
   fun setupTeam1CaseDetails() = deliusCaseDetailsResponse(
-    CaseDetailsInitialAppointment("J678910", "1", LocalDate.of(2022, 10, 11)),
-    CaseDetailsInitialAppointment("J680648", "2", null),
-    CaseDetailsInitialAppointment("X4565764", "3", LocalDate.now()),
-    CaseDetailsInitialAppointment("J680660", "4", LocalDate.now())
+    CaseDetailsIntegration("J678910", "1", LocalDate.of(2022, 10, 11), "New to Probation"),
+    CaseDetailsIntegration("J680648", "2", null, "Currently managed"),
+    CaseDetailsIntegration("X4565764", "3", LocalDate.now(), "Currently managed"),
+    CaseDetailsIntegration("J680660", "4", LocalDate.now(), "Currently managed")
   )
 }

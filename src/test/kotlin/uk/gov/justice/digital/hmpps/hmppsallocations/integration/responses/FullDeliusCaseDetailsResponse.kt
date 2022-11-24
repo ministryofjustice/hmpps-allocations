@@ -1,27 +1,27 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
 
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-fun fullDeliusCaseDetailsResponse(vararg caseDetailsInitialAppointments: CaseDetailsInitialAppointment) = """
+fun fullDeliusCaseDetailsResponse(vararg caseDetailsIntegrations: CaseDetailsIntegration) = """
 {
   "cases": [
-    ${caseDetailsInitialAppointments.map { deliusCaseDetail(it) }.joinToString(",")}
+    ${caseDetailsIntegrations.map { deliusCaseDetail(it) }.joinToString(",")}
   ]
 }
 """.trimIndent()
 
-private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAppointment) = """
+private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = """
   {
-      "crn": "${caseDetailsInitialAppointment.crn}",
+      "crn": "${caseDetailsIntegration.crn}",
       "name": {
         "forename": "Dylan Adam",
         "middleName": "string",
         "surname": "Armstrong"
       },
       "event": {
-        "number": "${caseDetailsInitialAppointment.eventNumber}",
+        "number": "${caseDetailsIntegration.eventNumber}",
         "manager": {
           "code": "string",
           "name": {
@@ -36,9 +36,13 @@ private fun deliusCaseDetail(caseDetailsInitialAppointment: CaseDetailsInitialAp
         "type": "string",
         "date": "2022-11-05",
         "length": "5 Weeks"
+      },
+      "probationStatus": {
+         "status": "STATUS",
+         "description": "${caseDetailsIntegration.probationStatusDescription}"
       }
   """ +
-  initialAppointment(caseDetailsInitialAppointment.initialAppointment) +
+  initialAppointment(caseDetailsIntegration.initialAppointment) +
   "}".trimIndent()
 
 private fun initialAppointment(initialAppointment: LocalDate?): String {

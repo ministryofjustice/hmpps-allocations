@@ -32,7 +32,7 @@ import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsInitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentenacedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
@@ -309,13 +309,13 @@ abstract class IntegrationTestBase {
     )
   }
 
-  protected fun deliusCaseDetailsResponse(vararg caseDetailsInitialAppointments: CaseDetailsInitialAppointment) {
+  protected fun deliusCaseDetailsResponse(vararg caseDetailsIntegrations: CaseDetailsIntegration) {
     val initialAppointmentRequest =
       request().withPath("/allocation-demand")
 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON)
-        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsInitialAppointments))
+        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations))
     )
   }
 
