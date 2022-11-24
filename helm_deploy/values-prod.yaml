@@ -24,3 +24,4 @@ generic-prometheus-alerts:
     - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue_dl"
   sqsAlertsOldestThreshold: 2
   sqsAlertsTotalMessagesThreshold: 1
+  ingress5xxErrorWindowMinutes: 4
