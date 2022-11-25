@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -40,18 +41,10 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
       "probationStatus": {
          "status": "STATUS",
          "description": "${caseDetailsIntegration.probationStatusDescription}"
-      },
-      "communityPersonManager": {
-          "code": "N54B340",
-          "name": {
-              "forename": "Beverly",
-              "surname": "Elliott"
-          },
-          "teamCode": "N54NGH",
-          "grade": "PSO"
       }
   """ +
   initialAppointment(caseDetailsIntegration.initialAppointment) +
+  communityPersonManager(caseDetailsIntegration.communityPersonManager) +
   "}".trimIndent()
 
 private fun initialAppointment(initialAppointment: LocalDate?): String {
@@ -59,6 +52,22 @@ private fun initialAppointment(initialAppointment: LocalDate?): String {
     """
       ,"initialAppointment": {
         "date": ${initialAppointment.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))}
+      }
+    """.trimIndent()
+  } ?: ""
+}
+
+private fun communityPersonManager(communityPersonManager: CommunityPersonManager?): String {
+  return communityPersonManager?.let {
+    """
+      ,"communityPersonManager": {
+        "code": "N54B999",
+        "name": {
+          "forename": "${communityPersonManager.name.forename}",
+          "surname": "${communityPersonManager.name.surname}"
+        },
+        "teamCode": "N54NGH",
+        "grade": "${communityPersonManager.grade}"
       }
     """.trimIndent()
   } ?: ""

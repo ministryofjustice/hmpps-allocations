@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -117,9 +118,13 @@ data class OffenderManagerDetails @JsonCreator constructor(
       )
     }
 
-    fun from(case: UnallocatedCaseEntity): OffenderManagerDetails? {
-      return case.offenderManagerForename?.let {
-        OffenderManagerDetails(case.offenderManagerForename, case.offenderManagerSurname, case.offenderManagerGrade)
+    fun from(communityPersonManager: CommunityPersonManager?): OffenderManagerDetails? {
+      return communityPersonManager?.name?.forename?.let {
+        OffenderManagerDetails(
+          communityPersonManager.name.forename,
+          communityPersonManager.name.surname,
+          communityPersonManager.grade
+        )
       }
     }
   }

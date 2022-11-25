@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
@@ -34,18 +36,30 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionId == 123456789)].tier")
       .isEqualTo("C1")
       .jsonPath("$.[?(@.convictionId == 123456789)].status")
-      .isEqualTo("New to Probation")
+      .isEqualTo("Currently managed")
       .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.forenames")
-      .isEqualTo("Antonio")
+      .isEqualTo("Beverley")
       .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.surname")
-      .isEqualTo("LoSardo")
+      .isEqualTo("Smith")
       .jsonPath("$.[?(@.convictionId == 123456789)].offenderManager.grade")
-      .isEqualTo("PO")
+      .isEqualTo("SPO")
       .jsonPath("$.[?(@.convictionId == 123456789)].caseType")
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
       .isEqualTo(null)
+      .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.forenames")
+      .isEqualTo("Janie")
+      .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.surname")
+      .isEqualTo("Jones")
+      .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.grade")
+      .isEqualTo("PO")
       .jsonPath("$.[?(@.convictionId == 987654321)].offenderManager")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionId == 987654321)].status")
+      .isEqualTo("Previously managed")
+      .jsonPath("$.[?(@.convictionId == 68793954)].status")
+      .isEqualTo("New to probation")
+      .jsonPath("$.[?(@.convictionId == 68793954)].offenderManager")
       .doesNotExist()
   }
 
@@ -69,6 +83,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .expectStatus()
       .isUnauthorized
   }
+
   @Test
   fun `not found`() {
     webTestClient.post()
@@ -78,6 +93,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .expectStatus()
       .isEqualTo(HttpStatus.NOT_FOUND)
   }
+
   @Test
   fun `method not allowed`() {
     webTestClient.post()
@@ -114,9 +130,21 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
   }
 
   fun setupTeam1CaseDetails() = deliusCaseDetailsResponse(
-    CaseDetailsIntegration("J678910", "1", LocalDate.of(2022, 10, 11), "New to Probation"),
-    CaseDetailsIntegration("J680648", "2", null, "Currently managed"),
-    CaseDetailsIntegration("X4565764", "3", LocalDate.now(), "Currently managed"),
-    CaseDetailsIntegration("J680660", "4", LocalDate.now(), "Currently managed")
+    CaseDetailsIntegration(
+      "J678910",
+      "1",
+      LocalDate.of(2022, 10, 11),
+      "Currently managed",
+      CommunityPersonManager(Name("Beverley", "Smith"), "SPO")
+    ),
+    CaseDetailsIntegration(
+      "J680648", "2", null, "Currently managed", CommunityPersonManager(Name("Janie", "Jones"), "PO")
+    ),
+    CaseDetailsIntegration(
+      "X4565764", "3", LocalDate.now(), "New to probation", null
+    ),
+    CaseDetailsIntegration(
+      "J680660", "4", LocalDate.now(), "Previously managed", null
+    )
   )
 }
