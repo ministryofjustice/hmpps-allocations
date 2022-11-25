@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
+package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
@@ -40,6 +40,15 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
       "probationStatus": {
          "status": "STATUS",
          "description": "${caseDetailsIntegration.probationStatusDescription}"
+      },
+      "communityPersonManager": {
+          "code": "N54B340",
+          "name": {
+              "forename": "Beverly",
+              "surname": "Elliott"
+          },
+          "teamCode": "N54NGH",
+          "grade": "PSO"
       }
   """ +
   initialAppointment(caseDetailsIntegration.initialAppointment) +

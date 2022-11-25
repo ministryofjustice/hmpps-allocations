@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
+package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
 fun documentsResponse() = """
   [
