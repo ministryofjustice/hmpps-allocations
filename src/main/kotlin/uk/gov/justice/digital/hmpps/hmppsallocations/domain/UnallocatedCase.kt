@@ -41,7 +41,10 @@ data class UnallocatedCase @JsonCreator constructor(
         deliusCaseDetail.sentence.date,
         deliusCaseDetail.initialAppointment?.date,
         deliusCaseDetail.probationStatus.description,
-        OffenderManagerDetails.from(deliusCaseDetail.communityPersonManager),
+        OffenderManagerDetails.from(
+          deliusCaseDetail.communityPersonManager,
+          deliusCaseDetail.probationStatus.description
+        ),
         case.convictionId,
         case.caseType,
         deliusCaseDetail.sentence.length

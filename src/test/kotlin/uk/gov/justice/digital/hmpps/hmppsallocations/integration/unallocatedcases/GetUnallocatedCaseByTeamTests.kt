@@ -45,6 +45,8 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .isEqualTo("SPO")
       .jsonPath("$.[?(@.convictionId == 123456789)].caseType")
       .isEqualTo("CUSTODY")
+      .jsonPath("$.[?(@.convictionId == 23456789)].status")
+      .isEqualTo("Previously managed")
       .jsonPath("$.[?(@.convictionId == 23456789)].initialAppointment")
       .isEqualTo(null)
       .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.forenames")
@@ -52,7 +54,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.surname")
       .isEqualTo("Jones")
       .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.grade")
-      .isEqualTo("PO")
+      .doesNotExist()
       .jsonPath("$.[?(@.convictionId == 987654321)].offenderManager")
       .doesNotExist()
       .jsonPath("$.[?(@.convictionId == 987654321)].status")
@@ -138,7 +140,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       CommunityPersonManager(Name("Beverley", "Smith"), "SPO")
     ),
     CaseDetailsIntegration(
-      "J680648", "2", null, "Currently managed", CommunityPersonManager(Name("Janie", "Jones"), "PO")
+      "J680648", "2", null, "Previously managed", CommunityPersonManager(Name("Janie", "Jones"), "PO")
     ),
     CaseDetailsIntegration(
       "X4565764", "3", LocalDate.now(), "New to probation", null

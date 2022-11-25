@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
@@ -104,6 +105,7 @@ data class OffenderManagerDetails @JsonCreator constructor(
   val forenames: String?,
   @Schema(description = "Surname", example = "Smith")
   val surname: String?,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "Grade", example = "PSO")
   val grade: String?
 ) {
@@ -118,14 +120,22 @@ data class OffenderManagerDetails @JsonCreator constructor(
       )
     }
 
-    fun from(communityPersonManager: CommunityPersonManager?): OffenderManagerDetails? {
+    fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
+
       return communityPersonManager?.name?.forename?.let {
         OffenderManagerDetails(
           communityPersonManager.name.forename,
           communityPersonManager.name.surname,
-          communityPersonManager.grade
+          gradeFrom(probationStatus, communityPersonManager.grade)
         )
       }
+    }
+
+    private fun gradeFrom(probationStatus: String, grade: String): String? {
+      if (probationStatus == "Currently managed") {
+        return grade
+      }
+      return null
     }
   }
 }
