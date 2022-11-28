@@ -66,9 +66,16 @@ private fun communityPersonManager(communityPersonManager: CommunityPersonManage
           "forename": "${communityPersonManager.name.forename}",
           "surname": "${communityPersonManager.name.surname}"
         },
-        "teamCode": "N54NGH",
-        "grade": "${communityPersonManager.grade}"
+        "teamCode": "N54NGH"
+        ${showGrade(communityPersonManager)}
       }
     """.trimIndent()
   } ?: ""
+}
+
+private fun showGrade(communityPersonManager: CommunityPersonManager): String {
+  if (communityPersonManager.grade != null) {
+    return ""","grade": "${communityPersonManager.grade}""""
+  }
+  return ""
 }

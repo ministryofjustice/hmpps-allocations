@@ -59,7 +59,7 @@ data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 data class Name(val forename: String, val surname: String)
-data class CommunityPersonManager(val name: Name, val grade: String)
+data class CommunityPersonManager(val name: Name, val grade: String?)
 
 data class Sentence(val date: LocalDate, val length: String)
 

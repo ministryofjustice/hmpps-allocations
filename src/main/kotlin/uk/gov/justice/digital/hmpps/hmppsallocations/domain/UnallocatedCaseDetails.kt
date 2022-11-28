@@ -131,7 +131,7 @@ data class OffenderManagerDetails @JsonCreator constructor(
       }
     }
 
-    private fun gradeFrom(probationStatus: String, grade: String): String? {
+    private fun gradeFrom(probationStatus: String, grade: String?): String? {
       if (probationStatus == "Currently managed") {
         return grade
       }

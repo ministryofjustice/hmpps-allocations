@@ -24,7 +24,7 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(4)
+      .isEqualTo(5)
       .jsonPath("$.[?(@.convictionId == 123456789)].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[?(@.convictionId == 123456789)].initialAppointment")
@@ -54,6 +54,14 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.surname")
       .isEqualTo("Jones")
       .jsonPath("$.[?(@.convictionId == 23456789)].offenderManager.grade")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionId == 86472147892)].status")
+      .isEqualTo("Currently managed")
+      .jsonPath("$.[?(@.convictionId == 86472147892)].offenderManager.forenames")
+      .isEqualTo("John")
+      .jsonPath("$.[?(@.convictionId == 86472147892)].offenderManager.surname")
+      .isEqualTo("Brown")
+      .jsonPath("$.[?(@.convictionId == 86472147892)].offenderManager.grade")
       .doesNotExist()
       .jsonPath("$.[?(@.convictionId == 987654321)].offenderManager")
       .doesNotExist()
@@ -147,6 +155,13 @@ class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
     ),
     CaseDetailsIntegration(
       "J680660", "4", LocalDate.now(), "Previously managed", null
-    )
+    ),
+    CaseDetailsIntegration(
+      "C3333333",
+      "6",
+      LocalDate.of(2022, 10, 11),
+      "Currently managed",
+      CommunityPersonManager(Name("John", "Brown"), null)
+    ),
   )
 }
