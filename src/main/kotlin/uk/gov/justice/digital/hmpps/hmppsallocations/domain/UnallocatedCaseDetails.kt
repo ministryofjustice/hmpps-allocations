@@ -3,8 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -103,6 +105,7 @@ data class OffenderManagerDetails @JsonCreator constructor(
   val forenames: String?,
   @Schema(description = "Surname", example = "Smith")
   val surname: String?,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "Grade", example = "PSO")
   val grade: String?
 ) {
@@ -117,10 +120,22 @@ data class OffenderManagerDetails @JsonCreator constructor(
       )
     }
 
-    fun from(case: UnallocatedCaseEntity): OffenderManagerDetails? {
-      return case.offenderManagerForename?.let {
-        OffenderManagerDetails(case.offenderManagerForename, case.offenderManagerSurname, case.offenderManagerGrade)
+    fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
+
+      return communityPersonManager?.name?.forename?.let {
+        OffenderManagerDetails(
+          communityPersonManager.name.forename,
+          communityPersonManager.name.surname,
+          gradeFrom(probationStatus, communityPersonManager.grade)
+        )
       }
+    }
+
+    private fun gradeFrom(probationStatus: String, grade: String?): String? {
+      if (probationStatus == "Currently managed") {
+        return grade
+      }
+      return null
     }
   }
 }

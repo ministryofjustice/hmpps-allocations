@@ -1,5 +1,6 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
+package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -43,6 +44,7 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
       }
   """ +
   initialAppointment(caseDetailsIntegration.initialAppointment) +
+  communityPersonManager(caseDetailsIntegration.communityPersonManager) +
   "}".trimIndent()
 
 private fun initialAppointment(initialAppointment: LocalDate?): String {
@@ -53,4 +55,27 @@ private fun initialAppointment(initialAppointment: LocalDate?): String {
       }
     """.trimIndent()
   } ?: ""
+}
+
+private fun communityPersonManager(communityPersonManager: CommunityPersonManager?): String {
+  return communityPersonManager?.let {
+    """
+      ,"communityPersonManager": {
+        "code": "N54B999",
+        "name": {
+          "forename": "${communityPersonManager.name.forename}",
+          "surname": "${communityPersonManager.name.surname}"
+        },
+        "teamCode": "N54NGH"
+        ${showGrade(communityPersonManager)}
+      }
+    """.trimIndent()
+  } ?: ""
+}
+
+private fun showGrade(communityPersonManager: CommunityPersonManager): String {
+  if (communityPersonManager.grade != null) {
+    return ""","grade": "${communityPersonManager.grade}""""
+  }
+  return ""
 }

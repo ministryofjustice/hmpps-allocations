@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.documentsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse
 
 class GetCaseDocumentsTest : IntegrationTestBase() {
 
