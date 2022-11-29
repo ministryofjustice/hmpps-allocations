@@ -122,7 +122,7 @@ data class OffenderManagerDetails @JsonCreator constructor(
 
     fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
 
-      return communityPersonManager?.name?.forename?.let {
+      return communityPersonManager?.name?.forename?.takeUnless { probationStatus == "New to probation" }?.let {
         OffenderManagerDetails(
           communityPersonManager.name.forename,
           communityPersonManager.name.surname,
