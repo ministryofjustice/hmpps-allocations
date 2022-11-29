@@ -29,6 +29,8 @@ class ChooseOffenderManagerCaseControllerTest : IntegrationTestBase() {
       .isEqualTo(convictionId)
       .jsonPath("$.offenderManager")
       .doesNotExist()
+      .jsonPath("$.convictionNumber")
+      .isEqualTo(4)
   }
 
   @Test
