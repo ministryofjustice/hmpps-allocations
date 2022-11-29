@@ -54,25 +54,27 @@ data class ChooseOffenderManagerCase @JsonCreator constructor(
   @JsonInclude(JsonInclude.Include.NON_NULL)
   val offenderManager: OffenderManagerDetails?,
   @Schema(description = "convictionId", example = "123456789")
-  val convictionId: Long
+  val convictionId: Long,
+  val convictionNumber: Int
 ) {
   companion object {
-    fun from(e: UnallocatedCaseEntity): ChooseOffenderManagerCase {
+    fun from(unallocatedCase: UnallocatedCaseEntity): ChooseOffenderManagerCase {
       var offenderManager: OffenderManagerDetails? = null
-      e.offenderManagerSurname?.let {
+      unallocatedCase.offenderManagerForename?.let {
         offenderManager = OffenderManagerDetails(
-          e.offenderManagerForename,
-          e.offenderManagerSurname,
-          e.offenderManagerGrade
+          unallocatedCase.offenderManagerForename,
+          unallocatedCase.offenderManagerSurname,
+          unallocatedCase.offenderManagerGrade
         )
       }
       return ChooseOffenderManagerCase(
-        e.name,
-        e.crn,
-        e.tier,
-        e.status,
+        unallocatedCase.name,
+        unallocatedCase.crn,
+        unallocatedCase.tier,
+        unallocatedCase.status,
         offenderManager,
-        e.convictionId
+        unallocatedCase.convictionId,
+        unallocatedCase.convictionNumber
       )
     }
   }
