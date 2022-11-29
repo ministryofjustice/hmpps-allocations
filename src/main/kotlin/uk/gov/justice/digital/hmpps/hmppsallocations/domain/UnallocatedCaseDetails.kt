@@ -56,7 +56,8 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val preConvictionDocument: UnallocatedCaseDocument?,
   val address: Address?,
   @Schema(description = "Sentence Length")
-  val sentenceLength: String?
+  val sentenceLength: String?,
+  val convictionNumber: Int
 ) {
 
   companion object {
@@ -94,7 +95,8 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         documents?.cpsPack,
         documents?.preConvictionDocument,
         offenderDetails.contactDetails.addresses?.firstOrNull { it.status.code == "M" },
-        case.sentenceLength
+        case.sentenceLength,
+        case.convictionNumber
       )
     }
   }
