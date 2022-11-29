@@ -22,7 +22,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val ogrs: UnallocatedCaseOgrs?,
   val convictionId: Long,
   @Schema(description = "Case Type")
-  val caseType: CaseTypes
+  val caseType: CaseTypes,
+  val convictionNumber: Int
 ) {
   companion object {
     fun from(
@@ -54,7 +55,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
           }
         },
         case.convictionId,
-        case.caseType
+        case.caseType,
+        case.convictionNumber
       )
     }
   }
