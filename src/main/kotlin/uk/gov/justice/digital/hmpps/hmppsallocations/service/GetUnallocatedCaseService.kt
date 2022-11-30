@@ -35,12 +35,12 @@ class GetUnallocatedCaseService(
 ) {
 
   fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
       val offenderSummary = communityApiClient.getOffenderDetails(crn)
 
-      val conviction = communityApiClient.getConviction(crn, convictionId)
+      val conviction = communityApiClient.getConviction(crn, it.convictionId)
 
-      val requirements = communityApiClient.getActiveRequirements(crn, convictionId)
+      val requirements = communityApiClient.getActiveRequirements(crn, it.convictionId)
       val associatedDocuments = getDocuments(crn, it.convictionNumber.toString())
 
       val assessment = assessmentApiClient.getAssessment(crn)
@@ -96,7 +96,10 @@ class GetUnallocatedCaseService(
     return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCasesRepository.findByTeamCode(teamCode))
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(deliusCaseDetail.crn, deliusCaseDetail.event.number.toInt())!!
+        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(
+          deliusCaseDetail.crn,
+          deliusCaseDetail.event.number.toInt()
+        )!!
         unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
         unallocatedCasesRepository.save(unallocatedCase)
         UnallocatedCase.from(
@@ -171,11 +174,15 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? = findUnallocatedCaseByConvictionIdOrConvictionNumber(convictionId, crn)?.let { from(it) }
+  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(
+      crn,
+      convictionId
+    )?.let { from(it) }
 
   private fun findUnallocatedCaseByConvictionIdOrConvictionNumber(
-    convictionId: Long,
-    crn: String
+    crn: String,
+    convictionId: Long
   ) = if (convictionId < 100) {
     unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionId.toInt())
   } else {

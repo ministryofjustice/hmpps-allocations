@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
-  fun `can get case by crn`() {
+  fun `can get case by crn and convictionId`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()
@@ -242,5 +242,27 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.sentenceLength")
       .isEqualTo("5 Weeks")
+  }
+
+  @Test
+  fun `can get case by convictionNumber`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    insertCases()
+
+    offenderDetailsNoFixedAbodeResponse(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    singleActiveRequirementResponse(crn, convictionId)
+    documentsResponse(crn)
+    getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/1")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.convictionNumber")
+      .isEqualTo(1)
   }
 }
