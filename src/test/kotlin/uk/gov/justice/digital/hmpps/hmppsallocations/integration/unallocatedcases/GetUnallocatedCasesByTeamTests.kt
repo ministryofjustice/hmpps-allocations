@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDeta
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class GetUnallocatedCaseByTeamTests : IntegrationTestBase() {
+class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team`() {
     insertCases()
