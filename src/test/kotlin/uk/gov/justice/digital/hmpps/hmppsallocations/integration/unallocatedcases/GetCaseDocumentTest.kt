@@ -24,4 +24,21 @@ class GetCaseDocumentTest : IntegrationTestBase() {
       .expectHeader()
       .contentType("application/msword;charset=UTF-8")
   }
+
+  @Test
+  fun `can get a document without conviction id`() {
+    val crn = "J678910"
+    val documentId = UUID.randomUUID().toString()
+    getDocument(crn, documentId)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/documents/$documentId")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectHeader()
+      .contentDisposition(ContentDisposition.parse("attachment; filename=\"sample_word_doc.doc\""))
+      .expectHeader()
+      .contentType("application/msword;charset=UTF-8")
+  }
 }

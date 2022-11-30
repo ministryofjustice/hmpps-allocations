@@ -28,10 +28,10 @@ class UnallocatedCasesDocumentController(@Qualifier("workforceAllocationsToDeliu
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping(path = ["/cases/unallocated/{crn}/convictions/{convictionId}/documents/{documentId}"], produces = [APPLICATION_OCTET_STREAM_VALUE])
+  @GetMapping(path = ["/cases/unallocated/{crn}/convictions/{convictionId}/documents/{documentId}", "/cases/unallocated/{crn}/documents/{documentId}"], produces = [APPLICATION_OCTET_STREAM_VALUE])
   fun getUnallocatedCaseDocument(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionId: Long,
+    @PathVariable(required = false) convictionId: Long?,
     @PathVariable(required = true) documentId: String
   ): Mono<ResponseEntity<Resource>> {
     return workforceAllocationsToDeliusApiClient.getDocumentById(crn, documentId)
