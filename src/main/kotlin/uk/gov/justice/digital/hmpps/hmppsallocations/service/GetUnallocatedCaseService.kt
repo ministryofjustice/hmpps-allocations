@@ -96,7 +96,7 @@ class GetUnallocatedCaseService(
     return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCasesRepository.findByTeamCode(teamCode))
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(deliusCaseDetail.crn, deliusCaseDetail.event.number.toInt())
+        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(deliusCaseDetail.crn, deliusCaseDetail.event.number.toInt())!!
         unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
         unallocatedCasesRepository.save(unallocatedCase)
         UnallocatedCase.from(
@@ -171,8 +171,14 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
-      from(it)
-    }
+  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? = findUnallocatedCaseByConvictionIdOrConvictionNumber(convictionId, crn)?.let { from(it) }
+
+  private fun findUnallocatedCaseByConvictionIdOrConvictionNumber(
+    convictionId: Long,
+    crn: String
+  ) = if (convictionId < 100) {
+    unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionId.toInt())
+  } else {
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)
+  }
 }
