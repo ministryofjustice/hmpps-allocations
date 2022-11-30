@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
   @Test
-  fun `can get case risks`() {
+  fun `can get case risks by crn and convictionId`() {
     val crn = "J678910"
     val convictionId = 123456789L
     insertCases()
@@ -93,6 +93,25 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEmpty
       .jsonPath("$.inactiveRegistrations")
       .isEmpty
+  }
+
+  @Test
+  fun `get case risks by crn and convictionNumber`() {
+    val crn = "J678910"
+    insertCases()
+    noRegistrationsFromDelius(crn)
+    getRoshForCrn(crn)
+    getRiskPredictorsForCrn(crn)
+    getOgrsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/1/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.convictionNumber")
+      .isEqualTo(1)
   }
 
   @Test
