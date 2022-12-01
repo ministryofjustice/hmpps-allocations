@@ -126,7 +126,7 @@ fun twoActiveConvictionsResponse() = """
     },
     {
         "convictionId": 2500292515,
-        "index": "1",
+        "index": "2",
         "active": true,
         "inBreach": false,
         "failureToComplyCount": 3,

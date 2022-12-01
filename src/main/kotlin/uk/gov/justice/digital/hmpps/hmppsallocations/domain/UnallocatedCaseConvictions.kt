@@ -14,9 +14,7 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   @Schema(description = "Latest tier of case", example = "D2")
   val tier: String,
   val active: List<UnallocatedCaseConviction>,
-  val previous: List<UnallocatedCaseConviction>,
-  @Schema(description = "Case Type")
-  val caseType: CaseTypes
+  val previous: List<UnallocatedCaseConviction>
 ) {
   companion object {
     fun from(
@@ -27,8 +25,7 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
       return UnallocatedCaseConvictions(
         case.name, case.crn, case.tier,
         active,
-        previous,
-        case.caseType
+        previous
       )
     }
   }

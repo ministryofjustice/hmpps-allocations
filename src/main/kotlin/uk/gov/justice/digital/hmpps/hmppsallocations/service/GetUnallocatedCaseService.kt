@@ -108,15 +108,15 @@ class GetUnallocatedCaseService(
       }
   }
 
-  fun getCaseConvictions(crn: String, excludeConvictionId: Long?): UnallocatedCaseConvictions? =
-    unallocatedCasesRepository.findFirstCaseByCrn(crn)?.let {
+  fun getCaseConvictions(crn: String, excludeConvictionId: Long): UnallocatedCaseConvictions? =
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, excludeConvictionId)?.let {
       val convictions = communityApiClient.getAllConvictions(crn)
         .map { convictions ->
           convictions.groupBy { it.active }
         }.blockOptional().orElse(emptyMap())
       val activeConvictions = convictions.getOrDefault(true, emptyList())
         .filter { c -> c.sentence != null }
-        .filter { c -> c.convictionId != excludeConvictionId }
+        .filter { c -> c.convictionNumber != it.convictionNumber }
         .map { conviction ->
           val practitioner = getCurrentOrderManager(conviction)
 

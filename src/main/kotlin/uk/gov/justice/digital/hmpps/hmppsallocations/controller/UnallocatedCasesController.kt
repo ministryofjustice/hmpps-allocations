@@ -84,7 +84,7 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated/{crn}/convictions")
   fun getUnallocatedCaseConvictions(
     @PathVariable(required = true) crn: String,
-    @RequestParam(required = false) excludeConvictionId: Long?
+    @RequestParam(required = true) excludeConvictionId: Long
   ): ResponseEntity<UnallocatedCaseConvictions> =
     ResponseEntity.ok(
       getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionId)
