@@ -88,7 +88,7 @@ class GetUnallocatedCaseService(
     }
 
   fun getCaseOverview(crn: String, convictionId: Long): UnallocatedCase? =
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
       UnallocatedCase.from(it)
     }
 
@@ -140,7 +140,7 @@ class GetUnallocatedCaseService(
       ?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
 
   fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)?.let {
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()

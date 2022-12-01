@@ -21,7 +21,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     tierCalculationResponse(crn)
     writeUnallocatedCaseToDatabase(crn, "D0", convictionId, 1)
     publishTierCalculationCompleteMessage(crn)
-    checkTierHasBeenUpdated(crn, "B3", convictionId)
+    checkTierHasBeenUpdated(crn, "B3", 1)
   }
 
   @Test
@@ -43,8 +43,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     writeUnallocatedCaseToDatabase(crn, "D0", firstConvictionId, 1)
     writeUnallocatedCaseToDatabase(crn, "D0", secondConvictionId, 2)
     publishTierCalculationCompleteMessage(crn)
-    checkTierHasBeenUpdated(crn, "B3", firstConvictionId)
-    checkTierHasBeenUpdated(crn, "B3", secondConvictionId)
+    checkTierHasBeenUpdated(crn, "B3", 1)
+    checkTierHasBeenUpdated(crn, "B3", 2)
   }
 
   private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long, convictionNumber: Int) {
@@ -63,8 +63,12 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
     )
   }
 
-  private fun checkTierHasBeenUpdated(crn: String, tier: String, convictionId: Long) {
-    await untilCallTo { repository.findCaseByCrnAndConvictionId(crn, convictionId) } matches { it!!.tier.equals(tier) }
+  private fun checkTierHasBeenUpdated(crn: String, tier: String, convictionNumber: Int) {
+    await untilCallTo { repository.findCaseByCrnAndConvictionNumber(crn, convictionNumber) } matches {
+      it!!.tier.equals(
+        tier
+      )
+    }
   }
 
   private fun publishTierCalculationCompleteMessage(crn: String) {
