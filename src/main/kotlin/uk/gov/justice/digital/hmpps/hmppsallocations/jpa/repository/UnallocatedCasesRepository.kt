@@ -13,7 +13,6 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
 
   fun existsByCrnAndConvictionNumber(crn: String, convictionNumber: Int): Boolean
   fun findByCrn(crn: String): List<UnallocatedCaseEntity>
-  fun findFirstCaseByCrn(crn: String): UnallocatedCaseEntity?
   fun findCaseByCrnAndConvictionId(crn: String, convictionId: Long): UnallocatedCaseEntity?
 
   fun findCaseByCrnAndConvictionNumber(crn: String, convictionNumber: Int): UnallocatedCaseEntity?
