@@ -10,11 +10,10 @@ class GetCaseDocumentTest : IntegrationTestBase() {
   @Test
   fun `can get a document`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val documentId = UUID.randomUUID().toString()
     getDocument(crn, documentId)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId/documents/$documentId")
+      .uri("/cases/unallocated/$crn/documents/$documentId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
