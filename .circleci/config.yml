@@ -87,6 +87,10 @@ workflows:
           context:
             - hmpps-common-vars
             - hmpps-allocations-preprod
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - validate
             - build_docker
