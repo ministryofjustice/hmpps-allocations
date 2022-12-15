@@ -15,7 +15,6 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   val tier: String,
   val active: List<UnallocatedCaseConviction>,
   val previous: List<UnallocatedCaseConviction>,
-  val convictionId: Long,
   val convictionNumber: Int
 ) {
   companion object {
@@ -28,7 +27,6 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
         case.name, case.crn, case.tier,
         active,
         previous,
-        case.convictionId,
         case.convictionNumber
       )
     }
