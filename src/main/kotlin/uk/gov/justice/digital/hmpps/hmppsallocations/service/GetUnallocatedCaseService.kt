@@ -175,16 +175,16 @@ class GetUnallocatedCaseService(
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
-  fun getChooseOffenderManagerCase(crn: String, convictionId: Long): ChooseOffenderManagerCase? =
+  fun getChooseOffenderManagerCase(crn: String, convictionNumber: Long): ChooseOffenderManagerCase? =
     findUnallocatedCaseByConvictionIdOrConvictionNumber(
       crn,
-      convictionId
+      convictionNumber
     )?.let { from(it) }
 
   private fun findUnallocatedCaseByConvictionIdOrConvictionNumber(
     crn: String,
     convictionId: Long
-  ) = if (convictionId < 100) {
+  ) = if (convictionId < 10000) {
     unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionId.toInt())
   } else {
     unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)

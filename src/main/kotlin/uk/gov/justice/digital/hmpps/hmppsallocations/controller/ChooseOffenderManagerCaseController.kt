@@ -31,13 +31,13 @@ class ChooseOffenderManagerCaseController(
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/practitionerCase")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/practitionerCase")
   fun getOffenderManagerCase(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionId: Long
+    @PathVariable(required = true) convictionNumber: Long
   ): ResponseEntity<ChooseOffenderManagerCase> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getChooseOffenderManagerCase(crn, convictionId)
+      getUnallocatedCaseService.getChooseOffenderManagerCase(crn, convictionNumber)
         ?: throw EntityNotFoundException("OffenderManager Case Not Found for $crn")
     )
 }
@@ -53,8 +53,7 @@ data class ChooseOffenderManagerCase @JsonCreator constructor(
   val status: String,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   val offenderManager: OffenderManagerDetails?,
-  @Schema(description = "convictionId", example = "123456789")
-  val convictionId: Long,
+  @Schema(description = "convictionNumber", example = "1")
   val convictionNumber: Int
 ) {
   companion object {
@@ -73,7 +72,6 @@ data class ChooseOffenderManagerCase @JsonCreator constructor(
         unallocatedCase.tier,
         unallocatedCase.status,
         offenderManager,
-        unallocatedCase.convictionId,
         unallocatedCase.convictionNumber
       )
     }
