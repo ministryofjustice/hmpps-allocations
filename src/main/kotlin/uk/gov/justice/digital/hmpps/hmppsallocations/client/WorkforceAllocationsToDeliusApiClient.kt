@@ -64,7 +64,7 @@ data class CommunityPersonManager(val name: Name, val grade: String?)
 data class Sentence(val date: LocalDate, val length: String)
 
 data class Document @JsonCreator constructor(
-  val id: String,
+  val id: String?,
   val name: String,
   val dateCreated: ZonedDateTime?,
   val sensitive: Boolean,

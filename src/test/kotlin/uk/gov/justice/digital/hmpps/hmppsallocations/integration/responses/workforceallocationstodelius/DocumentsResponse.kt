@@ -44,6 +44,21 @@ fun documentsResponse() = """
             "description": "PNC previous convictions"
         },
         "sensitive": false
+    },
+    {
+        "name": "documentWithoutId.PDF",
+        "relatedTo": {
+            "type": "EVENT",
+            "name": "CJA - Community Order",
+            "event": {
+                "eventType": "CURRENT",
+                "eventNumber": "1",
+                "mainOffence": "Attempt/Common/Assault of an Emergency Worker   (Act 2018) 00873"
+            },
+            "description": "Event"
+        },
+        "dateSaved": "2014-11-21T14:14:44.315Z",
+        "sensitive": false
     }
   ]
 """.trimIndent()
