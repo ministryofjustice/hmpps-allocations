@@ -9,9 +9,10 @@ import java.time.format.DateTimeFormatter
 class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
-  fun `can get case by crn and convictionId`() {
+  fun `can get case by crn and convictionNumber`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
     val dateOfBirth = LocalDate.of(2001, 11, 17)
     val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
@@ -22,7 +23,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     documentsResponse(crn)
     getAssessmentsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -95,7 +96,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.caseType")
       .isEqualTo("CUSTODY")
       .jsonPath("$.convictionNumber")
-      .isEqualTo(1)
+      .isEqualTo(convictionNumber)
       .jsonPath("$.preConvictionDocument.completedDate")
       .doesNotExist()
       .jsonPath("$.preConvictionDocument.documentId")
@@ -108,6 +109,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
     offenderDetailsResponse(crn)
     unallocatedConvictionResponse(crn, convictionId)
@@ -116,7 +118,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     getAssessmentsForCrn(crn)
 
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -130,6 +132,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
     offenderDetailsResponse(crn)
     unallocatedConvictionResponse(crn, convictionId)
@@ -138,7 +141,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     notFoundAssessmentForCrn(crn)
 
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -151,7 +154,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `get 404 if crn not found`() {
     webTestClient.get()
-      .uri("/cases/unallocated/J678912/convictions/51245325")
+      .uri("/cases/unallocated/J678912/convictions/9")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -162,6 +165,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `retrieve main address`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
 
     offenderDetailsResponse(crn)
@@ -170,7 +174,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     documentsResponse(crn)
     getAssessmentsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -200,6 +204,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `return a no fixed abode address`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
 
     offenderDetailsNoFixedAbodeResponse(crn)
@@ -208,7 +213,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     documentsResponse(crn)
     getAssessmentsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -226,6 +231,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `must return sentence length`() {
     val crn = "J678910"
     val convictionId = 123456789L
+    val convictionNumber = 1
     insertCases()
 
     offenderDetailsNoFixedAbodeResponse(crn)
@@ -234,7 +240,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     documentsResponse(crn)
     getAssessmentsForCrn(crn)
     webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionId")
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
@@ -242,27 +248,5 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.sentenceLength")
       .isEqualTo("5 Weeks")
-  }
-
-  @Test
-  fun `can get case by convictionNumber`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    insertCases()
-
-    offenderDetailsNoFixedAbodeResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
-    getAssessmentsForCrn(crn)
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/1")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("$.convictionNumber")
-      .isEqualTo(1)
   }
 }

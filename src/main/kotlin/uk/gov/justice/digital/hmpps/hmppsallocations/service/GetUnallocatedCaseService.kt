@@ -35,8 +35,8 @@ class GetUnallocatedCaseService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
-  fun getCase(crn: String, convictionId: Long): UnallocatedCaseDetails? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
+  fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
       val offenderSummary = communityApiClient.getOffenderDetails(crn)
 
       val conviction = communityApiClient.getConviction(crn, it.convictionId)
@@ -183,10 +183,10 @@ class GetUnallocatedCaseService(
 
   private fun findUnallocatedCaseByConvictionIdOrConvictionNumber(
     crn: String,
-    convictionId: Long
-  ) = if (convictionId < 10000) {
-    unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionId.toInt())
+    convictionNumber: Long
+  ) = if (convictionNumber < 10000) {
+    unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
   } else {
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionId)
+    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionNumber)
   }
 }
