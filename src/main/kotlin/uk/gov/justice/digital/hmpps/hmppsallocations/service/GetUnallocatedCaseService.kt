@@ -36,7 +36,7 @@ class GetUnallocatedCaseService(
 ) {
 
   fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
+    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       val offenderSummary = communityApiClient.getOffenderDetails(crn)
 
       val conviction = communityApiClient.getConviction(crn, it.convictionId)
@@ -89,7 +89,7 @@ class GetUnallocatedCaseService(
     }
 
   fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
+    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
     }
 
@@ -109,8 +109,8 @@ class GetUnallocatedCaseService(
       }
   }
 
-  fun getCaseConvictions(crn: String, excludeConvictionId: Long): UnallocatedCaseConvictions? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, excludeConvictionId)?.let {
+  fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
+    findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val convictions = communityApiClient.getAllConvictions(crn)
         .map { convictions ->
           convictions.groupBy { it.active }
@@ -141,7 +141,7 @@ class GetUnallocatedCaseService(
       ?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
 
   fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
+    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
@@ -176,17 +176,13 @@ class GetUnallocatedCaseService(
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
   fun getChooseOffenderManagerCase(crn: String, convictionNumber: Long): ChooseOffenderManagerCase? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(
+    findUnallocatedCaseByConvictionNumber(
       crn,
       convictionNumber
     )?.let { from(it) }
 
-  private fun findUnallocatedCaseByConvictionIdOrConvictionNumber(
+  private fun findUnallocatedCaseByConvictionNumber(
     crn: String,
     convictionNumber: Long
-  ) = if (convictionNumber < 10000) {
-    unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
-  } else {
-    unallocatedCasesRepository.findCaseByCrnAndConvictionId(crn, convictionNumber)
-  }
+  ) = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
 }
