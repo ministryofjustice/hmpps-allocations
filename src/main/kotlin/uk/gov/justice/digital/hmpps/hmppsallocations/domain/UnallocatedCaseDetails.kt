@@ -48,8 +48,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val pncNumber: String?,
   val courtReport: UnallocatedCaseDocument?,
   val assessment: UnallocatedAssessment?,
-  @Schema(description = "Conviction Id")
-  val convictionId: Long,
   @Schema(description = "Case Type")
   val caseType: CaseTypes,
   val cpsPack: UnallocatedCaseDocument?,
@@ -90,7 +88,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         offenderDetails.otherIds?.pncNumber,
         documents?.preSentenceReport,
         UnallocatedAssessment.from(assessment),
-        case.convictionId,
         case.caseType,
         documents?.cpsPack,
         documents?.preConvictionDocument,
