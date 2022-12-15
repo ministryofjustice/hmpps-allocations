@@ -99,13 +99,13 @@ class UnallocatedCasesController(
     ]
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionId}/risks")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/risks")
   fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionId: Long
+    @PathVariable(required = true) convictionNumber: Long
   ): ResponseEntity<UnallocatedCaseRisks> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseRisks(crn, convictionId)
+      getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
         ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 }

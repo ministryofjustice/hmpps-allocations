@@ -140,8 +140,8 @@ class GetUnallocatedCaseService(
     }?.takeUnless { orderManager -> orderManager.isUnallocated }
       ?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
 
-  fun getCaseRisks(crn: String, convictionId: Long): UnallocatedCaseRisks? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
+  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
       val registrations = communityApiClient.getAllRegistrations(crn)
         .map { registrations ->
           registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
