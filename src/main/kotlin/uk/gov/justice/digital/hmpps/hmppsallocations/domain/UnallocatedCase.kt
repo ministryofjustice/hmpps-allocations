@@ -25,8 +25,6 @@ data class UnallocatedCase @JsonCreator constructor(
   val status: String,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   val offenderManager: OffenderManagerDetails?,
-  @Schema(description = "Conviction Id")
-  val convictionId: Long,
   @Schema(description = "Case Type")
   val caseType: CaseTypes,
   @Schema(description = "Sentence Length")
@@ -46,7 +44,6 @@ data class UnallocatedCase @JsonCreator constructor(
           deliusCaseDetail.communityPersonManager,
           deliusCaseDetail.probationStatus.description
         ),
-        case.convictionId,
         case.caseType,
         deliusCaseDetail.sentence.length,
         case.convictionNumber
@@ -62,7 +59,6 @@ data class UnallocatedCase @JsonCreator constructor(
           case.offenderManagerSurname,
           case.offenderManagerGrade
         ),
-        case.convictionId,
         case.caseType,
         case.sentenceLength,
         case.convictionNumber
