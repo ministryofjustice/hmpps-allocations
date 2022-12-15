@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
@@ -67,7 +67,7 @@ class UnallocatedCasesController(
   fun getUnallocatedCaseOverview(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionId: Long
-  ): ResponseEntity<UnallocatedCase> =
+  ): ResponseEntity<CaseOverview> =
     ResponseEntity.ok(
       getUnallocatedCaseService.getCaseOverview(crn, convictionId)
         ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")

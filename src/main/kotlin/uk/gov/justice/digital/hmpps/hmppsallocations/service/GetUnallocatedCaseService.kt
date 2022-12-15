@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
@@ -87,9 +88,9 @@ class GetUnallocatedCaseService(
       Documents(courtReport, cpsPack, preConviction)
     }
 
-  fun getCaseOverview(crn: String, convictionId: Long): UnallocatedCase? =
+  fun getCaseOverview(crn: String, convictionId: Long): CaseOverview? =
     findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
-      UnallocatedCase.from(it)
+      CaseOverview.from(it)
     }
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
