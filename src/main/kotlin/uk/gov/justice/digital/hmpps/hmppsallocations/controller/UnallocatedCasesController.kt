@@ -91,6 +91,24 @@ class UnallocatedCasesController(
         ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
 
+  @Operation(summary = "Retrieve probation record")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/record/exclude-conviction/{excludeConvictionNumber}")
+  fun getUnallocatedCaseProbationRecord(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) excludeConvictionNumber: Long
+  ): ResponseEntity<UnallocatedCaseConvictions> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
+
   @Operation(summary = "Retrieve unallocated case risks by crn")
   @ApiResponses(
     value = [
