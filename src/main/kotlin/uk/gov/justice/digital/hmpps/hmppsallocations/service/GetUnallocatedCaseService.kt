@@ -88,8 +88,8 @@ class GetUnallocatedCaseService(
       Documents(courtReport, cpsPack, preConviction)
     }
 
-  fun getCaseOverview(crn: String, convictionId: Long): CaseOverview? =
-    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionId)?.let {
+  fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
+    findUnallocatedCaseByConvictionIdOrConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
     }
 
