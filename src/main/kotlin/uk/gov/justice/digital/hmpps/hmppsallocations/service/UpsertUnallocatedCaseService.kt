@@ -52,7 +52,7 @@ class UpsertUnallocatedCaseService(
               unallocatedCaseEntity.crn,
               activeConvictions
             )
-            val caseType = caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionId)
+            unallocatedCaseEntity.convictionNumber = conviction.convictionNumber
             unallocatedCaseEntity.sentenceDate = sentence.startDate
             unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
@@ -61,11 +61,12 @@ class UpsertUnallocatedCaseService(
             unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
             unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
             unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
-            unallocatedCaseEntity.caseType = caseType
+            unallocatedCaseEntity.caseType =
+              caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionNumber)
             unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
             unallocatedCaseEntity.providerCode = currentOrderManager.probationAreaCode
             unallocatedCaseEntity.sentenceLength = getSentenceLength(sentence)
-            unallocatedCaseEntity.convictionNumber = conviction.convictionNumber
+
             return unallocatedCaseEntity
           }
         } else {
