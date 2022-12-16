@@ -20,8 +20,6 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val roshRisk: RoshSummary?,
   val rsr: UnallocatedCaseRsr?,
   val ogrs: UnallocatedCaseOgrs?,
-  @Schema(description = "Case Type")
-  val caseType: CaseTypes,
   val convictionNumber: Int
 ) {
   companion object {
@@ -53,7 +51,6 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
             )
           }
         },
-        case.caseType,
         case.convictionNumber
       )
     }

@@ -27,8 +27,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   @Schema(description = "Initial Appointment Date", example = "2020-03-21")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val initialAppointment: LocalDate?,
-  @Schema(description = "Probation Status", example = "Currently managed")
-  val status: String,
   val offenderManager: OffenderManagerDetails,
   @Schema(description = "Gender", example = "Male")
   val gender: String?,
@@ -48,8 +46,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val pncNumber: String?,
   val courtReport: UnallocatedCaseDocument?,
   val assessment: UnallocatedAssessment?,
-  @Schema(description = "Case Type")
-  val caseType: CaseTypes,
   val cpsPack: UnallocatedCaseDocument?,
   val preConvictionDocument: UnallocatedCaseDocument?,
   val address: Address?,
@@ -72,7 +68,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         case.name,
-        case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
+        case.crn, case.tier, case.sentenceDate, case.initialAppointment,
         OffenderManagerDetails(
           case.offenderManagerForename,
           case.offenderManagerSurname,
@@ -88,7 +84,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         offenderDetails.otherIds?.pncNumber,
         documents?.preSentenceReport,
         UnallocatedAssessment.from(assessment),
-        case.caseType,
         documents?.cpsPack,
         documents?.preConvictionDocument,
         offenderDetails.contactDetails.addresses?.firstOrNull { it.status.code == "M" },
