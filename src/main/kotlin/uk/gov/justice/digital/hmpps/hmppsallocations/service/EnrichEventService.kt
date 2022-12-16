@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderManagerDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionIdentifiers
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
 
@@ -66,11 +67,11 @@ class EnrichEventService(
     }
   }
 
-  fun getAllConvictionIdsAssociatedToCrn(crn: String): Flux<Long> =
+  fun getAllConvictionIdentifiersAssociatedToCrn(crn: String): Flux<ConvictionIdentifiers> =
     Flux.merge(
-      Flux.fromIterable(unallocatedCasesRepository.findConvictionIdsByCrn(crn)).map { it.getConvictionId() },
+      Flux.fromIterable(unallocatedCasesRepository.findConvictionIdentifiersByCrn(crn)),
       communityApiClient.getActiveConvictions(crn)
-        .map { conviction -> conviction.convictionId }
+        .map { conviction -> ConvictionIdentifiers(conviction.convictionId, conviction.convictionNumber) }
     ).distinct()
 }
 
