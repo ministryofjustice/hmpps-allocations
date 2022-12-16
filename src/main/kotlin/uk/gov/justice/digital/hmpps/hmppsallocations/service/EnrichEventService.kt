@@ -67,7 +67,7 @@ class EnrichEventService(
     }
   }
 
-  fun getAllConvictionIdsAssociatedToCrn(crn: String): Flux<ConvictionIdentifiers> =
+  fun getAllConvictionIdentifiersAssociatedToCrn(crn: String): Flux<ConvictionIdentifiers> =
     Flux.merge(
       Flux.fromIterable(unallocatedCasesRepository.findConvictionIdentifiersByCrn(crn)),
       communityApiClient.getActiveConvictions(crn)

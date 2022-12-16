@@ -20,7 +20,7 @@ class OffenderEventListener(
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
     try {
-      enrichEventService.getAllConvictionIdsAssociatedToCrn(crn)
+      enrichEventService.getAllConvictionIdentifiersAssociatedToCrn(crn)
         .collectList()
         .block()!!
         .forEach { convictionId ->
