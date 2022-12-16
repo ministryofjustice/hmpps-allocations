@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OrderManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Sentence
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionIdentifiers
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,8 +25,8 @@ class UpsertUnallocatedCaseService(
 
 ) {
   @Transactional
-  fun upsertUnallocatedCase(crn: String, convictionId: Long) {
-    updateExistingCase(getUnallocatedCase(crn, convictionId))?.let {
+  fun upsertUnallocatedCase(crn: String, convictionIdentifiers: ConvictionIdentifiers) {
+    updateExistingCase(getUnallocatedCase(crn, convictionIdentifiers))?.let {
       if (isNewAllocationDemand(it))
         repository.save(it).also { savedEntity ->
           telemetryService.trackAllocationDemandRaised(savedEntity)
@@ -84,17 +85,17 @@ class UpsertUnallocatedCaseService(
       return null
     }
 
-  private fun getUnallocatedCase(crn: String, convictionId: Long): UnallocatedCaseEntity =
-    repository.findCaseByCrnAndConvictionId(crn, convictionId) ?: UnallocatedCaseEntity(
+  private fun getUnallocatedCase(crn: String, convictionIdentifiers: ConvictionIdentifiers): UnallocatedCaseEntity =
+    repository.findCaseByCrnAndConvictionNumber(crn, convictionIdentifiers.convictionNumber) ?: UnallocatedCaseEntity(
       name = "",
       crn = crn,
       tier = "",
       sentenceDate = LocalDate.now(),
       status = "",
-      convictionId = convictionId,
+      convictionId = convictionIdentifiers.convictionId,
       caseType = CaseTypes.UNKNOWN,
       providerCode = "PC1",
-      convictionNumber = -1
+      convictionNumber = convictionIdentifiers.convictionNumber
     )
 
   private fun getSentenceLength(sentence: Sentence): String? =
