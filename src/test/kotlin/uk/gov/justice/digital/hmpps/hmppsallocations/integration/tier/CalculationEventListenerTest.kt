@@ -62,9 +62,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   private fun checkTierHasBeenUpdated(crn: String, tier: String, convictionNumber: Int) {
     await untilCallTo { repository.findCaseByCrnAndConvictionNumber(crn, convictionNumber) } matches {
-      it!!.tier.equals(
-        tier
-      )
+      it!!.tier == tier
     }
   }
 

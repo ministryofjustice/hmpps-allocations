@@ -11,13 +11,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn, "STAFF1")
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
+    makeTestRequest(crn, convictionNumber)
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.crn")
@@ -52,13 +46,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn, "STAFF1")
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/record/exclude-conviction/$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
+    makeTestRequest(crn, convictionNumber)
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.crn")
@@ -94,13 +82,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     insertCases()
     twoActiveConvictionsResponse(crn)
 
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
+    makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active[0].description")
       .isEqualTo("Adult Custody < 12m")
       .jsonPath("$.active[0].length")
@@ -125,13 +107,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     noConvictionsResponse(crn)
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
+    makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active")
       .isEmpty
       .jsonPath("$.previous")
@@ -144,14 +120,19 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     singleActiveAndInactiveConvictionsResponse(crn, "STAFFU")
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions?excludeConvictionId=$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
+    makeTestRequest(crn, convictionNumber)
       .jsonPath("$.previous[0].offenderManager")
       .doesNotExist()
   }
+
+  private fun makeTestRequest(
+    crn: String,
+    convictionNumber: Int
+  ) = webTestClient.get()
+    .uri("/cases/unallocated/$crn/record/exclude-conviction/$convictionNumber")
+    .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+    .exchange()
+    .expectStatus()
+    .isOk
+    .expectBody()
 }
