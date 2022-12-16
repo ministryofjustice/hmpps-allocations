@@ -53,7 +53,6 @@ class UpsertUnallocatedCaseService(
               unallocatedCaseEntity.crn,
               activeConvictions
             )
-            unallocatedCaseEntity.convictionNumber = conviction.convictionNumber
             unallocatedCaseEntity.sentenceDate = sentence.startDate
             unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
