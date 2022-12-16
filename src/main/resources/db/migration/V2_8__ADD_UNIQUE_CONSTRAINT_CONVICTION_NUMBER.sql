@@ -1,0 +1,1 @@
+ALTER TABLE unallocated_cases ADD CONSTRAINT conviction_number_crn_unique UNIQUE (conviction_number, crn);

@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
   @Test
-  fun `can get case risks by crn and convictionId`() {
+  fun `can get case risks by crn and convictionNUmber`() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
