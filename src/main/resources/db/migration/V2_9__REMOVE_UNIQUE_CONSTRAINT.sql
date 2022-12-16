@@ -1,0 +1,1 @@
+ALTER TABLE unallocated_cases DROP CONSTRAINT conviction_id_crn_unique;

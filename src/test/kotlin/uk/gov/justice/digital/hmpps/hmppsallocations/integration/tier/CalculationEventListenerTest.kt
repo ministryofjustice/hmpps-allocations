@@ -17,9 +17,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `change tier after event calculation is consumed`() {
     val crn = "X123456"
-    val convictionId = 1234L
     tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", convictionId, 1)
+    writeUnallocatedCaseToDatabase(crn, "D0", 1)
     publishTierCalculationCompleteMessage(crn)
     checkTierHasBeenUpdated(crn, "B3", 1)
   }
@@ -37,17 +36,15 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `updates all occurrences of crn after event calculation is consumed`() {
     val crn = "X123456"
-    val firstConvictionId = 1234L
-    val secondConvictionId = 5678L
     tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", firstConvictionId, 1)
-    writeUnallocatedCaseToDatabase(crn, "D0", secondConvictionId, 2)
+    writeUnallocatedCaseToDatabase(crn, "D0", 1)
+    writeUnallocatedCaseToDatabase(crn, "D0", 2)
     publishTierCalculationCompleteMessage(crn)
     checkTierHasBeenUpdated(crn, "B3", 1)
     checkTierHasBeenUpdated(crn, "B3", 2)
   }
 
-  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionId: Long, convictionNumber: Int) {
+  private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionNumber: Int) {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
@@ -55,7 +52,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         name = "foo",
         status = "active",
         sentenceDate = LocalDate.now(),
-        convictionId = convictionId,
+        convictionId = 12345678L + convictionNumber,
         caseType = CaseTypes.CUSTODY,
         providerCode = "",
         convictionNumber = convictionNumber
@@ -65,9 +62,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
 
   private fun checkTierHasBeenUpdated(crn: String, tier: String, convictionNumber: Int) {
     await untilCallTo { repository.findCaseByCrnAndConvictionNumber(crn, convictionNumber) } matches {
-      it!!.tier.equals(
-        tier
-      )
+      it!!.tier == tier
     }
   }
 
