@@ -26,7 +26,8 @@ class CalculationEventListener(
     val eventData = objectMapper.readValue(message, CalculationEventData::class.java)
     eventData.occurredAt.let {
       val timeToDeliverMs = Duration.between(it, LocalDateTime.now())
-      if (timeToDeliverMs.seconds > 1000) {
+      log.info("Delivered TierCalculationEvent in (${timeToDeliverMs.seconds}): Crn ${crnFrom(eventData)}")
+      if (timeToDeliverMs.seconds > 1) {
         log.warn("Delayed TierCalculationEvent delivery (${timeToDeliverMs.seconds}): Crn ${crnFrom(eventData)}")
       }
     }

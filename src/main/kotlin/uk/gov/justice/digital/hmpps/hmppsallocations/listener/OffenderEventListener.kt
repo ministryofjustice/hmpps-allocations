@@ -36,7 +36,8 @@ class OffenderEventListener(
     val eventData = objectMapper.readValue(message, HmppsOffenderEvent::class.java)
     eventData.eventDatetime.let {
       val timeToDeliverMs = Duration.between(it, ZonedDateTime.now())
-      if (timeToDeliverMs.seconds > 1000) {
+      log.info("Delivered OffenderEvent in (${timeToDeliverMs.seconds}): Crn ${eventData.crn}")
+      if (timeToDeliverMs.seconds > 1) {
         log.warn("Delayed OffenderEvent delivery (${timeToDeliverMs.seconds}): Crn ${eventData.crn}")
       }
     }
