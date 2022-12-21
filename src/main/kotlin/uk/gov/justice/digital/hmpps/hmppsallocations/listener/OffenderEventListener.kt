@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
-import java.time.Duration
-import java.time.ZonedDateTime
 
 @Component
 class OffenderEventListener(
@@ -33,14 +31,7 @@ class OffenderEventListener(
 
   private fun getCrn(rawMessage: String): String {
     val (message) = objectMapper.readValue(rawMessage, SQSMessage::class.java)
-    val eventData = objectMapper.readValue(message, HmppsOffenderEvent::class.java)
-    eventData.eventDatetime.let {
-      val timeToDeliverMs = Duration.between(it, ZonedDateTime.now())
-      if (timeToDeliverMs.seconds > 1000) {
-        log.warn("Delayed OffenderEvent delivery (${timeToDeliverMs.seconds}): Crn ${eventData.crn}")
-      }
-    }
-    return eventData.crn
+    return objectMapper.readValue(message, HmppsOffenderEvent::class.java).crn
   }
 
   companion object {
@@ -49,8 +40,7 @@ class OffenderEventListener(
 }
 
 data class HmppsOffenderEvent(
-  val crn: String,
-  val eventDatetime: ZonedDateTime
+  val crn: String
 )
 
 data class SQSMessage(

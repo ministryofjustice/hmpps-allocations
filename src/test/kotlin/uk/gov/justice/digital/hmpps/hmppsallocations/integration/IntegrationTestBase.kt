@@ -63,8 +63,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -261,10 +259,10 @@ abstract class IntegrationTestBase {
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
-  protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn, ZonedDateTime.now())
+  protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn)
 
   protected fun tierCalculationEvent(crn: String) = CalculationEventData(
-    PersonReference(listOf(PersonReferenceType("CRN", crn))), LocalDateTime.now()
+    PersonReference(listOf(PersonReferenceType("CRN", crn)))
   )
 
   @AfterAll
