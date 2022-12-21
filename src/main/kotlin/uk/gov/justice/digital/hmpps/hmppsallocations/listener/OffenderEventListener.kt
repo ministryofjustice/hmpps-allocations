@@ -37,6 +37,9 @@ class OffenderEventListener(
     eventData.eventDatetime.let {
       val timeToDeliverMs = Duration.between(it, ZonedDateTime.now())
       log.info("Delivered OffenderEvent in (${timeToDeliverMs.seconds}): Crn ${eventData.crn}")
+      if (timeToDeliverMs.seconds > 1) {
+        log.warn("Delayed OffenderEvent delivery (${timeToDeliverMs.seconds}): Crn ${eventData.crn}")
+      }
     }
     return eventData.crn
   }
