@@ -95,14 +95,15 @@ class CommunityApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getInactiveConvictions(crn: String): Mono<List<InactiveConviction>> {
-    val responseType = object : ParameterizedTypeReference<List<InactiveConviction>>() {}
+  fun getInactiveConvictions(crn: String): Flux<InactiveConviction> {
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions")
       .retrieve()
-      .bodyToMono(responseType)
-      .map { convictions -> convictions.filter { c -> !c.active } }
+      .bodyToFlux(InactiveConviction::class.java)
+      .filter { !it.active }
+
+    // .map { convictions -> convictions.filter { c -> !c.active } }
   }
 
   fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Mono<List<Contact>> {
