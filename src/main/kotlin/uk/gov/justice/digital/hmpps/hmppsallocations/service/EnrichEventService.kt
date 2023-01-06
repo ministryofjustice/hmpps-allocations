@@ -50,7 +50,7 @@ class EnrichEventService(
         ProbationStatus(ProbationStatusType.CURRENTLY_MANAGED, offenderManagerDetails = OffenderManagerDetails.from(offenderManager))
       }
       else -> {
-        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).block() ?: emptyList()
+        val inactiveConvictions = communityApiClient.getInactiveConvictions(crn).collectList().block() ?: emptyList()
         return when {
           inactiveConvictions.isNotEmpty() -> {
             ProbationStatus(

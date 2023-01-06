@@ -5,6 +5,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
@@ -20,7 +21,7 @@ class EnrichEventServiceTests {
   @BeforeEach
   fun setupMocks() {
 
-    every { communityApiClient.getInactiveConvictions(any()) } returns Mono.just(emptyList())
+    every { communityApiClient.getInactiveConvictions(any()) } returns Flux.empty()
   }
 
   @Test
