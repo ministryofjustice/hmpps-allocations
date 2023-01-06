@@ -49,20 +49,5 @@ data class UnallocatedCase @JsonCreator constructor(
         case.convictionNumber
       )
     }
-
-    fun from(case: UnallocatedCaseEntity): UnallocatedCase {
-      return UnallocatedCase(
-        case.name,
-        case.crn, case.tier, case.sentenceDate, case.initialAppointment, case.status,
-        OffenderManagerDetails(
-          case.offenderManagerForename,
-          case.offenderManagerSurname,
-          case.offenderManagerGrade
-        ),
-        case.caseType,
-        case.sentenceLength,
-        case.convictionNumber
-      )
-    }
   }
 }

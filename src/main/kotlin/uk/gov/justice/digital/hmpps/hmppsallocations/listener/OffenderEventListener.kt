@@ -23,9 +23,7 @@ class OffenderEventListener(
       enrichEventService.getAllConvictionIdentifiersAssociatedToCrn(crn)
         .collectList()
         .block()!!
-        .forEach { convictionId ->
-          upsertUnallocatedCaseService.upsertUnallocatedCase(crn, convictionId)
-        }
+        .forEach { upsertUnallocatedCaseService.upsertUnallocatedCase(crn, it) }
     } catch (e: ForbiddenOffenderError) {
       log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
     }
