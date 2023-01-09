@@ -410,6 +410,15 @@ abstract class IntegrationTestBase {
     )
   }
 
+  protected fun noActiveInductionResponse(crn: String) {
+    val inductionRequest =
+      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
+
+    communityApi.`when`(inductionRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody("[]")
+    )
+  }
+
   protected fun offenderDetailsResponse(crn: String) {
     val summaryRequest =
       request().withPath("/offenders/crn/$crn/all")
