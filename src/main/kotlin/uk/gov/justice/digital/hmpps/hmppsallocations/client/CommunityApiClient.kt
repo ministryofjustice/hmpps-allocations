@@ -102,8 +102,6 @@ class CommunityApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToFlux(InactiveConviction::class.java)
       .filter { !it.active }
-
-    // .map { convictions -> convictions.filter { c -> !c.active } }
   }
 
   fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Flux<Contact> {
