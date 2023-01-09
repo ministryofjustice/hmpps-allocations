@@ -299,4 +299,46 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       )
     }
   }
+
+  @Test
+  fun `initial appointment should be empty when there is no active conviction`() {
+    val crn = "J678910"
+    val convictionId = 123456789L
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        sentenceDate = LocalDate.parse("2019-11-17"),
+        initialAppointment = LocalDate.parse("2021-11-30"),
+        name = "Tester TestSurname",
+        tier = "B3",
+        status = "New to probation",
+        convictionId = convictionId,
+        caseType = CaseTypes.CUSTODY,
+        providerCode = "",
+        convictionNumber = 1
+      )
+    )
+    singleActiveConvictionResponseForAllConvictions(crn)
+    unallocatedConvictionResponse(crn, convictionId)
+    noActiveInductionResponse(crn)
+    tierCalculationResponse(crn)
+    offenderDetailsResponse(crn)
+    getStaffWithGradeFromDelius(crn)
+    singleActiveConvictionResponse(crn)
+    singleActiveConvictionResponseForAllConvictions(crn)
+
+    hmppsOffenderSnsClient.publish(
+      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      )
+    )
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(repository.count()).isEqualTo(1)
+    val case = repository.findAll().first()
+
+    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
+    assertThat(case.initialAppointment).isNull()
+  }
 }
