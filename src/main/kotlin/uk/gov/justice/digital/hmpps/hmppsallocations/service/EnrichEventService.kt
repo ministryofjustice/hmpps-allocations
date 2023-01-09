@@ -20,9 +20,10 @@ class EnrichEventService(
 
   fun getInitialAppointmentDate(crn: String, contactsFromDate: LocalDate): LocalDate? {
     return communityApiClient.getInductionContacts(crn, contactsFromDate)
-      .mapNotNull { it.contactStart }
-      .collectList()
-      .block()?.max()?.toLocalDate()
+      .mapNotNull { contacts ->
+        contacts.maxByOrNull { c -> c.contactStart }?.contactStart?.toLocalDate()
+      }
+      .block()
   }
 
   fun getOffenderName(crn: String): String {

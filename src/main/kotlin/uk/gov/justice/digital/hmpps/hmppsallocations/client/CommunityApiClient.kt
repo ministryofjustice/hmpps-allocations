@@ -104,16 +104,17 @@ class CommunityApiClient(private val webClient: WebClient) {
       .filter { !it.active }
   }
 
-  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Flux<Contact> {
+  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Mono<List<Contact>> {
+    val responseType = object : ParameterizedTypeReference<List<Contact>>() {}
     val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     return webClient
       .get()
       .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
       .retrieve()
-      .bodyToFlux(Contact::class.java)
+      .bodyToMono(responseType)
       .onErrorResume {
         log.warn("Error retrieving induction contacts", it)
-        Flux.empty()
+        Mono.just(emptyList())
       }
   }
 
