@@ -32,7 +32,7 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("org.mock-server:mockserver-netty:5.14.0")
+  testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.3")
   testImplementation("com.ninja-squad:springmockk:4.0.0")
