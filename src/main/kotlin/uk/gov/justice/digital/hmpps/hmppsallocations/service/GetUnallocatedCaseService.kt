@@ -8,8 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiC
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase
-import uk.gov.justice.digital.hmpps.hmppsallocations.controller.ChooseOffenderManagerCase.Companion.from
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
@@ -174,12 +172,6 @@ class GetUnallocatedCaseService(
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
       .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
-
-  fun getChooseOffenderManagerCase(crn: String, convictionNumber: Long): ChooseOffenderManagerCase? =
-    findUnallocatedCaseByConvictionNumber(
-      crn,
-      convictionNumber
-    )?.let { from(it) }
 
   private fun findUnallocatedCaseByConvictionNumber(
     crn: String,

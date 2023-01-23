@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.InactiveConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
@@ -95,17 +94,7 @@ class CommunityApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getInactiveConvictions(crn: String): Flux<InactiveConviction> {
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/convictions")
-      .retrieve()
-      .bodyToFlux(InactiveConviction::class.java)
-      .filter { !it.active }
-  }
-
   fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Flux<Contact> {
-    val responseType = object : ParameterizedTypeReference<List<Contact>>() {}
     val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     return webClient
       .get()
@@ -128,17 +117,6 @@ class CommunityApiClient(private val webClient: WebClient) {
         { Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn")) }
       )
       .bodyToMono(OffenderDetails::class.java)
-  }
-
-  fun getOffenderManagerName(crn: String): Mono<OffenderManager> {
-    val responseType = object : ParameterizedTypeReference<List<OffenderManager>>() {}
-
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/allOffenderManagers")
-      .retrieve()
-      .bodyToMono(responseType)
-      .map { it.first() }
   }
 
   fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {

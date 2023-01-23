@@ -30,7 +30,6 @@ internal class GetUnallocatedCaseServiceTest {
       crn = crn,
       providerCode = "PC1",
       sentenceDate = sentenceDate,
-      status = "status",
       tier = "C2",
       id = id,
       convictionNumber = 1

@@ -49,18 +49,10 @@ class UpsertUnallocatedCaseService(
               enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
             val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
             val activeConvictions = enrichEventService.getActiveSentencedConvictions(unallocatedCaseEntity.crn)
-            val (status, offenderManagerDetails) = enrichEventService.getProbationStatus(
-              unallocatedCaseEntity.crn,
-              activeConvictions
-            )
             unallocatedCaseEntity.sentenceDate = sentence.startDate
             unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
             unallocatedCaseEntity.name = name
-            unallocatedCaseEntity.status = status.status
-            unallocatedCaseEntity.offenderManagerSurname = offenderManagerDetails?.surname
-            unallocatedCaseEntity.offenderManagerForename = offenderManagerDetails?.forenames
-            unallocatedCaseEntity.offenderManagerGrade = offenderManagerDetails?.grade
             unallocatedCaseEntity.caseType =
               caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionNumber)
             unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
@@ -90,7 +82,6 @@ class UpsertUnallocatedCaseService(
       crn = crn,
       tier = "",
       sentenceDate = LocalDate.now(),
-      status = "",
       convictionId = convictionIdentifiers.convictionId,
       caseType = CaseTypes.UNKNOWN,
       providerCode = "PC1",
