@@ -38,18 +38,6 @@ data class UnallocatedCaseEntity(
   @Column(name = "initial_appointment")
   var initialAppointment: LocalDate? = null,
 
-  @Column
-  var status: String,
-
-  @Column(name = "offender_manager_forename")
-  var offenderManagerForename: String? = null,
-
-  @Column(name = "offender_manager_surname")
-  var offenderManagerSurname: String? = null,
-
-  @Column(name = "offender_manager_grade")
-  var offenderManagerGrade: String? = null,
-
   @Column(name = "conviction_id")
   @NotNull
   val convictionId: Long,

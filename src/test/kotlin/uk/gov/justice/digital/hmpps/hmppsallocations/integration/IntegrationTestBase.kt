@@ -41,7 +41,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inact
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsNoFixedAbodeResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
@@ -51,7 +50,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.unallocatedOffenderManagerResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -87,7 +85,6 @@ abstract class IntegrationTestBase {
     "C2",
     LocalDate.now().minusDays(1),
     null,
-    "Previously managed",
     convictionId = 987654321,
     caseType = CaseTypes.CUSTODY,
     providerCode = "",
@@ -100,8 +97,7 @@ abstract class IntegrationTestBase {
       listOf(
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          firstSentenceDate, firstInitialAppointment, "Currently managed",
-          "Antonio", "LoSardo", "PO",
+          firstSentenceDate, firstInitialAppointment,
           123456789,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
@@ -116,7 +112,6 @@ abstract class IntegrationTestBase {
           "A1",
           LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
-          "New to probation",
           convictionId = 23456789,
           caseType = CaseTypes.LICENSE,
           providerCode = "",
@@ -131,7 +126,6 @@ abstract class IntegrationTestBase {
           "C1",
           LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
-          "New to probation",
           convictionId = 68793954,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
@@ -142,8 +136,7 @@ abstract class IntegrationTestBase {
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          firstSentenceDate, firstInitialAppointment, "Currently managed",
-          "Antonio", "LoSardo", "PO",
+          firstSentenceDate, firstInitialAppointment,
           56785493, CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM2",
@@ -156,7 +149,6 @@ abstract class IntegrationTestBase {
           "B1",
           LocalDate.now().minusDays(3),
           null,
-          "New to probation",
           convictionId = 86472147892,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
@@ -501,24 +493,6 @@ abstract class IntegrationTestBase {
       request().withPath("/offenders/$crn/documents")
     workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody("[]")
-    )
-  }
-
-  protected fun getStaffWithGradeFromDelius(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/allOffenderManagers")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderManagerResponse())
-    )
-  }
-
-  protected fun getUnallocatedManagerFromDelius(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/allOffenderManagers")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(unallocatedOffenderManagerResponse())
     )
   }
 

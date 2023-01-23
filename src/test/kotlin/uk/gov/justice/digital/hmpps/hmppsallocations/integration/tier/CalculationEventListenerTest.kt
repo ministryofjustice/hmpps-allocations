@@ -50,7 +50,6 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         crn = crn,
         tier = tier,
         name = "foo",
-        status = "active",
         sentenceDate = LocalDate.now(),
         convictionId = 12345678L + convictionNumber,
         caseType = CaseTypes.CUSTODY,

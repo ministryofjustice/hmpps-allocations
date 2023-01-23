@@ -32,7 +32,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY,
         providerCode = "",
@@ -44,9 +43,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     singleActiveInductionResponse(crn)
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -63,7 +60,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
-    assertThat(case.status).isEqualTo("New to probation")
   }
 
   @Test
@@ -77,7 +73,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY,
         providerCode = "PC1",
@@ -91,7 +86,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -133,7 +127,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY, providerCode = "",
         convictionNumber = 1
@@ -145,7 +138,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -170,7 +162,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY, providerCode = "",
         convictionNumber = 1
@@ -182,7 +173,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -207,7 +197,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY, providerCode = "",
         convictionNumber = 1
@@ -219,7 +208,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -244,7 +232,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY, providerCode = "",
         convictionNumber = 1
@@ -275,7 +262,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY, providerCode = "",
         convictionNumber = 1
@@ -290,7 +276,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           initialAppointment = LocalDate.parse("2021-11-30"),
           name = "Tester TestSurname",
           tier = "B3",
-          status = "New to probation",
           convictionId = convictionId,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
@@ -311,7 +296,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        status = "New to probation",
         convictionId = convictionId,
         caseType = CaseTypes.CUSTODY,
         providerCode = "",
@@ -323,9 +307,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     noActiveInductionResponse(crn)
     tierCalculationResponse(crn)
     offenderDetailsResponse(crn)
-    getStaffWithGradeFromDelius(crn)
     singleActiveConvictionResponse(crn)
-    singleActiveConvictionResponseForAllConvictions(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
