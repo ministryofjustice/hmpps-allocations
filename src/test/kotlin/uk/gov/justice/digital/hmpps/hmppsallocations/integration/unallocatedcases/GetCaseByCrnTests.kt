@@ -2,25 +2,15 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import java.time.LocalDate
-import java.time.Period
-import java.time.format.DateTimeFormatter
 
 class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can get case by crn and convictionNumber`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
-    val dateOfBirth = LocalDate.of(2001, 11, 17)
-    val expectedAge = Period.between(dateOfBirth, LocalDate.now()).years
-
-    offenderDetailsResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
+    caseViewResponse(crn, convictionNumber)
     getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -30,9 +20,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.sentenceDate")
-      .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-      .jsonPath("$.initialAppointment")
-      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .isEqualTo("2023-01-04")
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.crn")
@@ -44,9 +32,9 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.dateOfBirth")
       .isEqualTo("2001-11-17")
       .jsonPath("$.age")
-      .isEqualTo(expectedAge)
+      .isEqualTo(21)
       .jsonPath("$.expectedSentenceEndDate")
-      .isEqualTo("2020-05-16")
+      .isEqualTo("2024-01-03")
       .jsonPath("$.sentenceDescription")
       .isEqualTo("Adult Custody < 12m")
       .jsonPath("$.offences[0].mainOffence")
@@ -60,9 +48,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.requirements[0].subCategory")
       .isEqualTo("Regular")
       .jsonPath("$.requirements[0].length")
-      .isEqualTo(100)
-      .jsonPath("$.requirements[0].lengthUnit")
-      .isEqualTo("Hours")
+      .isEqualTo("100 Hours")
       .jsonPath("$.pncNumber")
       .isEqualTo("9999/1234567A")
       .jsonPath("$.courtReport.description")
@@ -96,13 +82,9 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
-    offenderDetailsResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    noDocumentsResponse(crn)
+    caseViewNoCourtReportResponse(crn, convictionNumber)
     getAssessmentsForCrn(crn)
 
     webTestClient.get()
@@ -119,13 +101,9 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
-    offenderDetailsResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
+    caseViewResponse(crn, convictionNumber)
     notFoundAssessmentForCrn(crn)
 
     webTestClient.get()
@@ -152,14 +130,10 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `retrieve main address`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
 
-    offenderDetailsResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
+    caseViewWithMainAddressResponse(crn, convictionNumber)
     getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -182,7 +156,11 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("S2 4SU")
       .jsonPath("$.address.type.description")
       .isEqualTo("Supported Housing")
+      .jsonPath("$.address.typeDescription")
+      .isEqualTo("Supported Housing")
       .jsonPath("$.address.from")
+      .isEqualTo("2022-08-25")
+      .jsonPath("$.address.startDate")
       .isEqualTo("2022-08-25")
       .jsonPath("$.address.noFixedAbode")
       .isEqualTo(false)
@@ -191,14 +169,10 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `return a no fixed abode address`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
 
-    offenderDetailsNoFixedAbodeResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
+    caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
     getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -209,8 +183,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.address.type.description")
       .isEqualTo("Homeless - rough sleeping")
+      .jsonPath("$.address.typeDescription")
+      .isEqualTo("Homeless - rough sleeping")
       .jsonPath("$.address.from")
-      .isEqualTo("2022-08-22")
+      .isEqualTo("2022-08-25")
+      .jsonPath("$.address.startDate")
+      .isEqualTo("2022-08-25")
       .jsonPath("$.address.noFixedAbode")
       .isEqualTo(true)
   }
@@ -218,14 +196,10 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `must return sentence length`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
 
-    offenderDetailsNoFixedAbodeResponse(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveRequirementResponse(crn, convictionId)
-    documentsResponse(crn)
+    caseViewResponse(crn, convictionNumber)
     getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")

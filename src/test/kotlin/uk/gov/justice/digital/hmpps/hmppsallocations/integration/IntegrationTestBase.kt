@@ -33,6 +33,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentencedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
@@ -50,6 +51,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singl
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveRequirementResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewNoCourtReportResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -600,6 +604,34 @@ abstract class IntegrationTestBase {
         .withHeader(HttpHeaders.LAST_MODIFIED, "Wed, 03 Jan 2018 13:20:35 GMT")
         .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
         .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes())
+    )
+  }
+
+  protected fun caseViewResponse(crn: String, convictionNumber: Int) {
+    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
+    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewResponse())
+    )
+  }
+
+  protected fun caseViewNoCourtReportResponse(crn: String, convictionNumber: Int) {
+    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
+    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewNoCourtReportResponse())
+    )
+  }
+
+  protected fun caseViewWithMainAddressResponse(crn: String, convictionNumber: Int) {
+    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
+    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration("Sheffield Towers", "22", "Sheffield Street", "Sheffield", "Yorkshire", "S2 4SU", false, false, "Supported Housing", "2022-08-25")))
+    )
+  }
+
+  protected fun caseViewWithNoFixedAbodeResponse(crn: String, convictionNumber: Int) {
+    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
+    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration(noFixedAbode = true, typeVerified = false, typeDescription = "Homeless - rough sleeping", startDate = "2022-08-25")))
     )
   }
 

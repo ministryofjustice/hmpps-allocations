@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -37,6 +38,14 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/offenders/$crn/documents/$documentId")
       .retrieve()
       .toEntity(Resource::class.java)
+  }
+
+  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
+    return webClient
+      .get()
+      .uri("/allocation-demand/$crn/$convictionNumber/case-view")
+      .retrieve()
+      .bodyToMono(DeliusCaseView::class.java)
   }
 }
 
