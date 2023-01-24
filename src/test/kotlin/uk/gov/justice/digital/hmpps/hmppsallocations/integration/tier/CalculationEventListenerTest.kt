@@ -10,7 +10,6 @@ import org.mockserver.verify.VerificationTimes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
-import java.time.LocalDate
 
 internal class CalculationEventListenerTest : IntegrationTestBase() {
 
@@ -50,7 +49,6 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         crn = crn,
         tier = tier,
         name = "foo",
-        sentenceDate = LocalDate.now(),
         convictionId = 12345678L + convictionNumber,
         caseType = CaseTypes.CUSTODY,
         providerCode = "",

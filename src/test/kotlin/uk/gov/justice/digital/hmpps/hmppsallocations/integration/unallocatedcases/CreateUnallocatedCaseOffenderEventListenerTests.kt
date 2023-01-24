@@ -36,14 +36,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
     assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
-    assertThat(case.sentenceLength).isEqualTo("6 Months")
     assertThat(case.convictionNumber).isEqualTo(1)
 
     verify(exactly = 1) {
@@ -212,7 +210,6 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
     assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")

@@ -28,7 +28,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -56,7 +55,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(repository.count()).isEqualTo(1)
     val case = repository.findAll().first()
 
-    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
     assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
@@ -69,7 +67,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -123,7 +120,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -158,7 +154,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -193,7 +188,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -228,7 +222,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -258,7 +251,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -272,7 +264,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       repository.save(
         UnallocatedCaseEntity(
           crn = crn,
-          sentenceDate = LocalDate.parse("2019-11-17"),
           initialAppointment = LocalDate.parse("2021-11-30"),
           name = "Tester TestSurname",
           tier = "B3",
@@ -292,7 +283,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        sentenceDate = LocalDate.parse("2019-11-17"),
         initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
@@ -320,7 +310,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(repository.count()).isEqualTo(1)
     val case = repository.findAll().first()
 
-    assertThat(case.sentenceDate).isEqualTo(LocalDate.parse("2019-11-17"))
     assertThat(case.initialAppointment).isNull()
   }
 }

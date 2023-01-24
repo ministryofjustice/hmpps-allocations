@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import java.time.LocalDate
 
 internal class GetUnallocatedCaseServiceTest {
 
@@ -21,7 +20,6 @@ internal class GetUnallocatedCaseServiceTest {
   @Test
   fun `must not return unallocated cases which get deleted during enrichment`() {
     val crn = "X123456"
-    val sentenceDate = LocalDate.now()
     val id = 2L
     val unallocatedCaseEntity = UnallocatedCaseEntity(
       caseType = CaseTypes.COMMUNITY,
@@ -29,7 +27,6 @@ internal class GetUnallocatedCaseServiceTest {
       convictionId = 1L,
       crn = crn,
       providerCode = "PC1",
-      sentenceDate = sentenceDate,
       tier = "C2",
       id = id,
       convictionNumber = 1

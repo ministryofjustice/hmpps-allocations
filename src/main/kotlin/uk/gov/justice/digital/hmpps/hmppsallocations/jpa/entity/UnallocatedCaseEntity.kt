@@ -32,9 +32,6 @@ data class UnallocatedCaseEntity(
   @Column
   var tier: String,
 
-  @Column(name = "sentence_date")
-  var sentenceDate: LocalDate,
-
   @Column(name = "initial_appointment")
   var initialAppointment: LocalDate? = null,
 
@@ -54,9 +51,6 @@ data class UnallocatedCaseEntity(
 
   @Column
   val createdDate: ZonedDateTime = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-
-  @Column
-  var sentenceLength: String? = null,
 
   @Column
   var convictionNumber: Int
