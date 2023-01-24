@@ -11,17 +11,14 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Documents
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Optional
 
 @Service
@@ -35,55 +32,11 @@ class GetUnallocatedCaseService(
 
   fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-      val offenderSummary = communityApiClient.getOffenderDetails(crn)
-
-      val conviction = communityApiClient.getConviction(crn, it.convictionId)
-
-      val requirements = communityApiClient.getActiveRequirements(crn, it.convictionId)
-      val associatedDocuments = getDocuments(crn, it.convictionNumber.toString())
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
-      val results = Mono.zip(offenderSummary, requirements, associatedDocuments, assessment, conviction).block()!!
-      return UnallocatedCaseDetails.from(
-        it, results.t1, results.t5?.offences,
-        results.t5?.sentence?.expectedSentenceEndDate, results.t5?.sentence?.description, results.t2.requirements,
-        results.t3,
-        results.t4.orElse(null)
-      )
-    }
-
-  private fun getDocuments(
-    crn: String,
-    convictionNumber: String
-  ) = workforceAllocationsToDeliusApiClient.getDocuments(crn)
-    .filter { document ->
-      document.relatedTo.event == null || document.relatedTo.event.eventNumber == convictionNumber
-    }
-    .collectList()
-    .map { documents ->
-      val cpsPack = UnallocatedCaseDocument.from(
-        documents.filter { it.relatedTo.type == "CPSPACK" }.maxByOrNull {
-          it.dateCreated ?: LocalDateTime.MIN.atZone(
-            ZoneId.systemDefault()
-          )
-        }
-      )
-      val preConviction = UnallocatedCaseDocument.from(
-        documents.filter { it.relatedTo.type == "PRECONS" }.maxByOrNull {
-          it.dateCreated ?: LocalDateTime.MIN.atZone(
-            ZoneId.systemDefault()
-          )
-        }
-      )
-      val courtReport = UnallocatedCaseDocument.from(
-        documents.filter { it.relatedTo.type == "COURT_REPORT" }.maxByOrNull {
-          it.dateCreated ?: LocalDateTime.MIN.atZone(
-            ZoneId.systemDefault()
-          )
-        }
-      )
-      Documents(courtReport, cpsPack, preConviction)
+      val results = Mono.zip(workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber), assessment).block()!!
+      return UnallocatedCaseDetails.from(it, results.t1, results.t2.orElse(null))
     }
 
   fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =

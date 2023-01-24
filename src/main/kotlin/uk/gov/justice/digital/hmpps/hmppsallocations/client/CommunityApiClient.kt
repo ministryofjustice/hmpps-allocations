@@ -9,7 +9,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.ConvictionRequirements
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
@@ -59,19 +58,6 @@ class CommunityApiClient(private val webClient: WebClient) {
           else -> Mono.error(ex)
         }
       }
-  }
-
-  fun getActiveRequirements(crn: String, convictionId: Long): Mono<ConvictionRequirements> {
-    return webClient
-      .get()
-      .uri { uriBuilder ->
-        uriBuilder.path("/offenders/crn/{crn}/convictions/{convictionId}/requirements")
-          .queryParam("activeOnly", true)
-          .queryParam("excludeSoftDeleted", true)
-          .build(crn, convictionId)
-      }
-      .retrieve()
-      .bodyToMono(ConvictionRequirements::class.java)
   }
 
   fun getAllConvictions(crn: String): Mono<List<Conviction>> {
