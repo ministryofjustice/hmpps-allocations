@@ -79,7 +79,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         UnallocatedCaseDocument.from(deliusCaseView.cpsPack),
         UnallocatedCaseDocument.from(deliusCaseView.preConvictionDocument),
         deliusCaseView.mainAddress,
-        case.sentenceLength,
+        deliusCaseView.sentence.length,
         case.convictionNumber
       )
     }

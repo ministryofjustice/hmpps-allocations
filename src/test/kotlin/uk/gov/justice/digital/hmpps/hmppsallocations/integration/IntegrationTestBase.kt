@@ -77,7 +77,6 @@ abstract class IntegrationTestBase {
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
   private val gson: Gson = Gson()
 
-  val firstSentenceDate: LocalDate = LocalDate.now().minusDays(4)
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
 
   val previouslyManagedCase = UnallocatedCaseEntity(
@@ -86,7 +85,6 @@ abstract class IntegrationTestBase {
     "J680660",
     "C2",
     LocalDate.now().minusDays(1),
-    null,
     convictionId = 987654321,
     caseType = CaseTypes.CUSTODY,
     providerCode = "",
@@ -98,13 +96,11 @@ abstract class IntegrationTestBase {
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
-          null, "Dylan Adam Armstrong", "J678910", "C1",
-          firstSentenceDate, firstInitialAppointment,
+          null, "Dylan Adam Armstrong", "J678910", "C1", firstInitialAppointment,
           123456789,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "5 Weeks",
           convictionNumber = 1
         ),
         UnallocatedCaseEntity(
@@ -112,13 +108,11 @@ abstract class IntegrationTestBase {
           "Andrei Edwards",
           "J680648",
           "A1",
-          LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
           convictionId = 23456789,
           caseType = CaseTypes.LICENSE,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "36 Days",
           convictionNumber = 2
         ),
         UnallocatedCaseEntity(
@@ -126,19 +120,17 @@ abstract class IntegrationTestBase {
           "William Jones",
           "X4565764",
           "C1",
-          LocalDate.now().minusDays(3),
           LocalDate.now().plusDays(2),
           convictionId = 68793954,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
           teamCode = "TEAM1",
-          sentenceLength = "16 Months",
           convictionNumber = 3
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          firstSentenceDate, firstInitialAppointment,
+          firstInitialAppointment,
           56785493, CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM2",
@@ -149,7 +141,6 @@ abstract class IntegrationTestBase {
           "Jim Doe",
           "C3333333",
           "B1",
-          LocalDate.now().minusDays(3),
           null,
           convictionId = 86472147892,
           caseType = CaseTypes.COMMUNITY,

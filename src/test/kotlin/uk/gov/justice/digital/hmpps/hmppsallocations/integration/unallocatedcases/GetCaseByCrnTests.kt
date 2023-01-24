@@ -209,6 +209,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.sentenceLength")
-      .isEqualTo("5 Weeks")
+      .isEqualTo("12 Months")
   }
 }
