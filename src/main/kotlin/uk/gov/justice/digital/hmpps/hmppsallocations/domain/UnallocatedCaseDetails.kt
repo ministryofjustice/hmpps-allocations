@@ -27,9 +27,6 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   @Schema(description = "Sentence Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
   val sentenceDate: LocalDate,
-  @Schema(description = "Initial Appointment Date", example = "2020-03-21")
-  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val initialAppointment: LocalDate?,
   @Schema(description = "Gender", example = "Male")
   val gender: String?,
   @Schema(description = "Date Of Birth", example = "2021-06-19")
@@ -65,7 +62,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         case.name,
-        case.crn, case.tier, deliusCaseView.sentence.startDate, case.initialAppointment,
+        case.crn, case.tier, deliusCaseView.sentence.startDate,
         deliusCaseView.gender,
         deliusCaseView.dateOfBirth,
         deliusCaseView.age,
