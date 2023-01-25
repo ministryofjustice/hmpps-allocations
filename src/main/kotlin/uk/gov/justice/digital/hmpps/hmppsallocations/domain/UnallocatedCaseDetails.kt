@@ -61,7 +61,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       assessment: Assessment?,
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
-        case.name,
+        deliusCaseView.name.getCombinedName(),
         case.crn, case.tier, deliusCaseView.sentence.startDate,
         deliusCaseView.gender,
         deliusCaseView.dateOfBirth,
