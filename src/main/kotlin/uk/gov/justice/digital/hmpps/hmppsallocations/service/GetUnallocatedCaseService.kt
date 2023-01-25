@@ -10,10 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictionPractitioner
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
@@ -62,34 +59,9 @@ class GetUnallocatedCaseService(
 
   fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
     findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
-      val convictions = communityApiClient.getAllConvictions(crn)
-        .map { convictions ->
-          convictions.groupBy { it.active }
-        }.blockOptional().orElse(emptyMap())
-      val activeConvictions = convictions.getOrDefault(true, emptyList())
-        .filter { c -> c.sentence != null }
-        .filter { c -> c.convictionNumber != it.convictionNumber }
-        .map { conviction ->
-          val practitioner = getCurrentOrderManager(conviction)
-
-          UnallocatedCaseConviction.from(conviction, conviction.sentence!!.startDate, null, practitioner)
-        }
-
-      val inactiveConvictions = convictions.getOrDefault(false, emptyList())
-        .filter { c -> c.sentence != null }
-        .map { conviction ->
-          val practitioner = getCurrentOrderManager(conviction)
-          UnallocatedCaseConviction.from(conviction, null, conviction.sentence!!.terminationDate, practitioner)
-        }
-
-      return UnallocatedCaseConvictions.from(it, activeConvictions, inactiveConvictions)
+      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber).block()
+      return UnallocatedCaseConvictions.from(it, probationRecord)
     }
-
-  private fun getCurrentOrderManager(conviction: Conviction): UnallocatedCaseConvictionPractitioner? =
-    conviction.orderManagers.maxByOrNull { orderManager ->
-      orderManager.dateStartOfAllocation ?: LocalDateTime.MIN
-    }?.takeUnless { orderManager -> orderManager.isUnallocated }
-      ?.let { orderManager -> UnallocatedCaseConvictionPractitioner(orderManager.name, orderManager.staffGrade) }
 
   fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {

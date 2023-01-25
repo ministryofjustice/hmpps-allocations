@@ -3,6 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CommunityEventManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 
@@ -20,13 +24,12 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
-      active: List<UnallocatedCaseConviction>,
-      previous: List<UnallocatedCaseConviction>
+      probationRecord: DeliusProbationRecord
     ): UnallocatedCaseConvictions {
       return UnallocatedCaseConvictions(
-        case.name, case.crn, case.tier,
-        active,
-        previous,
+        probationRecord.name.getCombinedName(), case.crn, case.tier,
+        probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
+        probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
         case.convictionNumber
       )
     }
@@ -36,10 +39,8 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
 data class UnallocatedCaseConviction @JsonCreator constructor(
   @Schema(description = "Description", example = "ORA Community Order")
   val description: String,
-  @Schema(description = "Length", example = "5")
-  val length: Int,
-  @Schema(description = "Length Unit", example = "Months")
-  val lengthUnit: String?,
+  @Schema(description = "Length", example = "5 Months")
+  val length: String,
   val offenderManager: UnallocatedCaseConvictionPractitioner?,
   @Schema(description = "Start of sentence", example = "2021-11-15")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
@@ -50,16 +51,15 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
   val offences: List<UnallocatedCaseConvictionOffence>,
 ) {
   companion object {
-    fun from(conviction: Conviction, startDate: LocalDate?, endDate: LocalDate?, practitioner: UnallocatedCaseConvictionPractitioner?): UnallocatedCaseConviction {
 
+    fun from(sentencedEvent: SentencedEvent): UnallocatedCaseConviction {
       return UnallocatedCaseConviction(
-        conviction.sentence!!.description,
-        conviction.sentence.originalLength,
-        conviction.sentence.originalLengthUnits,
-        practitioner,
-        startDate,
-        endDate,
-        conviction.offences.map { UnallocatedCaseConvictionOffence.from(it) }
+        sentencedEvent.sentence.description,
+        sentencedEvent.sentence.length,
+        UnallocatedCaseConvictionPractitioner.from(sentencedEvent.manager),
+        sentencedEvent.sentence.startDate,
+        sentencedEvent.sentence.terminationDate,
+        sentencedEvent.offences.map { UnallocatedCaseConvictionOffence.from(it) }
       )
     }
   }
@@ -70,7 +70,13 @@ data class UnallocatedCaseConvictionPractitioner @JsonCreator constructor(
   val name: String?,
   @Schema(description = "Grade", example = "PSO")
   val grade: String?
-)
+) {
+  companion object {
+    fun from(communityEventManager: CommunityEventManager?): UnallocatedCaseConvictionPractitioner? {
+      return communityEventManager?.let { UnallocatedCaseConvictionPractitioner(it.name.getCombinedName(), it.grade) }
+    }
+  }
+}
 
 data class UnallocatedCaseConvictionOffence @JsonCreator constructor(
   @Schema(description = "Description", example = "ORA Community Order")
@@ -79,8 +85,8 @@ data class UnallocatedCaseConvictionOffence @JsonCreator constructor(
   val mainOffence: Boolean,
 ) {
   companion object {
-    fun from(offence: Offence): UnallocatedCaseConvictionOffence {
-      return UnallocatedCaseConvictionOffence(offence.detail.description, offence.mainOffence)
+    fun from(sentenceOffence: SentenceOffence): UnallocatedCaseConvictionOffence {
+      return UnallocatedCaseConvictionOffence(sentenceOffence.description, sentenceOffence.main)
     }
   }
 }

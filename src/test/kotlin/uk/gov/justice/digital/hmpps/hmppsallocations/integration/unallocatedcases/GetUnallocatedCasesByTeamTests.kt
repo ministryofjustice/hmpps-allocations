@@ -145,13 +145,13 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       "1",
       LocalDate.of(2022, 10, 11),
       "Currently managed",
-      CommunityPersonManager(Name("Beverley", "Smith"), "SPO")
+      CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
     ),
     CaseDetailsIntegration(
-      "J680648", "2", null, "Previously managed", CommunityPersonManager(Name("Janie", "Jones"), "PO")
+      "J680648", "2", null, "Previously managed", CommunityPersonManager(Name("Janie", null, "Jones"), "PO")
     ),
     CaseDetailsIntegration(
-      "X4565764", "3", LocalDate.now(), "New to probation", CommunityPersonManager(Name("Beverley", "Smith"), "SPO")
+      "X4565764", "3", LocalDate.now(), "New to probation", CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
     ),
     CaseDetailsIntegration(
       "J680660", "4", LocalDate.now(), "Previously managed", null
@@ -161,7 +161,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       "6",
       LocalDate.of(2022, 10, 11),
       "Currently managed",
-      CommunityPersonManager(Name("John", "Brown"), null)
+      CommunityPersonManager(Name("John", null, "Brown"), null)
     ),
   )
 }

@@ -48,10 +48,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshR
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.twoActiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewNoCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordNoEventsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleActiveEventResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleInactiveEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -418,15 +420,6 @@ abstract class IntegrationTestBase {
     return request
   }
 
-  protected fun twoActiveConvictionsResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(twoActiveConvictionsResponse())
-    )
-  }
-
   protected fun noConvictionsResponse(crn: String) {
     val convictionsRequest =
       request().withPath("/offenders/crn/$crn/convictions")
@@ -592,6 +585,26 @@ abstract class IntegrationTestBase {
     val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
     workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
       response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration(noFixedAbode = true, typeVerified = false, typeDescription = "Homeless - rough sleeping", startDate = "2022-08-25")))
+    )
+  }
+
+  protected fun probationRecordSingleInactiveEventReponse(crn: String, convictionNumber: Int) {
+    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
+    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber))
+    )
+  }
+  protected fun probationRecordSingleActiveEventReponse(crn: String, convictionNumber: Int) {
+    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
+    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordSingleActiveEventResponse(crn, convictionNumber))
+    )
+  }
+
+  protected fun probationRecordNoEventsResponse(crn: String, convictionNumber: Int) {
+    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
+    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
+      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordNoEventsResponse(crn, convictionNumber))
     )
   }
 

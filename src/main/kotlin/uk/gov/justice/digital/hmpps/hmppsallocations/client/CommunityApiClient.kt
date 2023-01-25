@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import org.slf4j.LoggerFactory
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
@@ -55,26 +54,6 @@ class CommunityApiClient(private val webClient: WebClient) {
       .onErrorResume { ex ->
         when (ex) {
           is MissingConvictionError -> Mono.empty()
-          else -> Mono.error(ex)
-        }
-      }
-  }
-
-  fun getAllConvictions(crn: String): Mono<List<Conviction>> {
-    val responseType = object : ParameterizedTypeReference<List<Conviction>>() {}
-
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/convictions")
-      .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingConvictionError("No Conviction found for $crn")) }
-      )
-      .bodyToMono(responseType)
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingConvictionError -> Mono.just(emptyList())
           else -> Mono.error(ex)
         }
       }
