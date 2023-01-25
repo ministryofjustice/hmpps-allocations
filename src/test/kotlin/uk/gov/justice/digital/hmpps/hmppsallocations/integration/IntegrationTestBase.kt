@@ -45,7 +45,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsR
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponseNoOverallRisk
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveAndInactiveConvictionsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
@@ -418,23 +417,6 @@ abstract class IntegrationTestBase {
       response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
     )
     return request
-  }
-
-  protected fun noConvictionsResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("[]")
-    )
-  }
-
-  protected fun singleActiveAndInactiveConvictionsResponse(crn: String, staffCode: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleActiveAndInactiveConvictionsResponse(staffCode))
-    )
   }
 
   protected fun documentsResponse(crn: String) {
