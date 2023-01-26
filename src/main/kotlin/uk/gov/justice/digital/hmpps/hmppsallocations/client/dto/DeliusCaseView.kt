@@ -27,17 +27,8 @@ data class MainAddress constructor(
   val postcode: String?,
   val noFixedAbode: Boolean,
   val typeVerified: Boolean,
-  val typeDescription: String,
+  val typeDescription: String?,
   val startDate: LocalDate
-) {
-  val from: LocalDate
-    get() = startDate
-  val type: MainAddressType
-    get() = MainAddressType(typeDescription)
-}
-
-data class MainAddressType(
-  val description: String
 )
 
 data class Sentence constructor(
