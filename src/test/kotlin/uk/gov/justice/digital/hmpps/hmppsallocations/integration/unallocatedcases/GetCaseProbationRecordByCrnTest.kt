@@ -10,7 +10,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    singleActiveAndInactiveConvictionsResponse(crn, "STAFF1")
+    probationRecordSingleInactiveEventReponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
@@ -23,44 +23,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .jsonPath("$.previous[0].description")
       .isEqualTo("Absolute/Conditional Discharge")
       .jsonPath("$.previous[0].length")
-      .isEqualTo(0)
-      .jsonPath("$.previous[0].lengthUnit")
-      .doesNotExist()
-      .jsonPath("$.previous[0].offenderManager.name")
-      .isEqualTo("A Staff Name")
-      .jsonPath("$.previous[0].offenderManager.grade")
-      .isEqualTo("PQiP")
-      .jsonPath("$.previous[0].endDate")
-      .isEqualTo("2009-10-12")
-      .jsonPath("$.previous[0].offences[0].description")
-      .isEqualTo("Abstracting electricity - 04300")
-      .jsonPath("$.previous[0].offences[0].mainOffence")
-      .isEqualTo(true)
-      .jsonPath("$.convictionNumber")
-      .isEqualTo(convictionNumber)
-  }
-
-  @Test
-  fun `can get case probation record`() {
-    val crn = "J678910"
-    val convictionNumber = 1
-    insertCases()
-    singleActiveAndInactiveConvictionsResponse(crn, "STAFF1")
-    makeTestRequest(crn, convictionNumber)
-      .jsonPath("$.name")
-      .isEqualTo("Dylan Adam Armstrong")
-      .jsonPath("$.crn")
-      .isEqualTo("J678910")
-      .jsonPath("$.tier")
-      .isEqualTo("C1")
-      .jsonPath("$.active")
-      .isEmpty
-      .jsonPath("$.previous[0].description")
-      .isEqualTo("Absolute/Conditional Discharge")
-      .jsonPath("$.previous[0].length")
-      .isEqualTo(0)
-      .jsonPath("$.previous[0].lengthUnit")
-      .doesNotExist()
+      .isEqualTo("0")
       .jsonPath("$.previous[0].offenderManager.name")
       .isEqualTo("A Staff Name")
       .jsonPath("$.previous[0].offenderManager.grade")
@@ -80,15 +43,13 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    twoActiveConvictionsResponse(crn)
+    probationRecordSingleActiveEventReponse(crn, convictionNumber)
 
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active[0].description")
       .isEqualTo("Adult Custody < 12m")
       .jsonPath("$.active[0].length")
-      .isEqualTo(6)
-      .jsonPath("$.active[0].lengthUnit")
-      .isEqualTo("Months")
+      .isEqualTo("6 Months")
       .jsonPath("$.active[0].startDate")
       .isEqualTo("2021-11-22")
       .jsonPath("$.active[0].offenderManager.name")
@@ -106,23 +67,12 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    noConvictionsResponse(crn)
+    probationRecordNoEventsResponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active")
       .isEmpty
       .jsonPath("$.previous")
       .isEmpty
-  }
-
-  @Test
-  fun `do not return unallocated order managers`() {
-    val crn = "J678910"
-    val convictionNumber = 1
-    insertCases()
-    singleActiveAndInactiveConvictionsResponse(crn, "STAFFU")
-    makeTestRequest(crn, convictionNumber)
-      .jsonPath("$.previous[0].offenderManager")
-      .doesNotExist()
   }
 
   private fun makeTestRequest(

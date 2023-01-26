@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -47,6 +48,14 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusCaseView::class.java)
   }
+
+  fun getProbationRecord(crn: String, excludeConvictionNumber: Long): Mono<DeliusProbationRecord> {
+    return webClient
+      .get()
+      .uri("/allocation-demand/$crn/$excludeConvictionNumber/probation-record")
+      .retrieve()
+      .bodyToMono(DeliusProbationRecord::class.java)
+  }
 }
 
 data class CaseIdentifier(val crn: String, val eventNumber: String)
@@ -67,7 +76,9 @@ data class Event(val number: String)
 data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
-data class Name(val forename: String, val surname: String)
+data class Name(val forename: String, val middleName: String?, val surname: String) {
+  fun getCombinedName() = "$forename ${middleName?.let { "$middleName " } ?: ""}$surname"
+}
 data class CommunityPersonManager(val name: Name, val grade: String?)
 
 data class Sentence(val date: LocalDate, val length: String)
