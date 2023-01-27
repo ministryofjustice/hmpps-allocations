@@ -2,8 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType.STRING
 import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType.IDENTITY
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
@@ -17,7 +19,7 @@ import java.time.temporal.ChronoUnit
 data class UnallocatedCaseEntity(
   @Id
   @Column
-  @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+  @GeneratedValue(strategy = IDENTITY)
   val id: Long? = null,
 
   @Column
@@ -38,7 +40,7 @@ data class UnallocatedCaseEntity(
   val convictionId: Long,
 
   @Column(name = "case_type")
-  @Enumerated(jakarta.persistence.EnumType.STRING)
+  @Enumerated(STRING)
   var caseType: CaseTypes,
 
   @Column

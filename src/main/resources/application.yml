@@ -72,7 +72,7 @@ server:
 hmpps:
   sqs:
     queueAdminRole: ROLE_ALLOCATION_API_QUEUE_ADMIN
-    reactiveApi: false
+#    reactiveApi: false
 management:
   endpoints:
     web:

@@ -13,7 +13,7 @@ class CalculationEventListener(
 ) {
 
   @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
-  fun onMessage(rawMessage: String?) {
+  fun processMessage(rawMessage: String?) {
     val calculationEventData = readMessage(rawMessage)
     calculationTierService.updateTier(crnFrom(calculationEventData))
   }
