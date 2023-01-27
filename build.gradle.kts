@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.0.0-beta-5"
   kotlin("plugin.spring") version "1.8.0"
   kotlin("plugin.jpa") version "1.8.0"
   id("io.gitlab.arturbosch.detekt") version "1.22.0"
@@ -11,13 +11,13 @@ configurations {
 }
 
 allOpen {
-  annotations("javax.persistence.Entity")
+  annotations("jakarta.persistence.Entity")
 }
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.2.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-8")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.6.14")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.14")
@@ -36,6 +36,7 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.3")
   testImplementation("com.ninja-squad:springmockk:4.0.0")
+  testImplementation("javax.xml.bind:jaxb-api:2.3.1")
 }
 
 java {
@@ -57,6 +58,7 @@ tasks.named<JavaExec>("bootRun") {
   systemProperty("spring.profiles.active", "dev,docker")
 }
 repositories {
+  maven { url = uri("https://repo.spring.io/milestone") }
   mavenCentral()
 }
 

@@ -1,10 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration
 
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
-import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.justRun
 import org.awaitility.kotlin.await
@@ -31,6 +28,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
@@ -63,6 +62,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventLi
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -76,7 +76,6 @@ abstract class IntegrationTestBase {
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
   var workforceAllocationsToDelius: ClientAndServer = startClientAndServer(8084)
   private var oauthMock: ClientAndServer = startClientAndServer(9090)
-  private val gson: Gson = Gson()
 
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
 
@@ -157,9 +156,9 @@ abstract class IntegrationTestBase {
   @BeforeEach
   fun `clear queues and database`() {
     repository.deleteAll()
-    tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
-    hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.queueUrl))
-    hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
+    tierCalculationSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(tierCalculationQueue.queueUrl).build())
+    hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsOffenderQueue.queueUrl).build())
+    hmppsOffenderSqsDlqClient?.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsOffenderQueue.dlqUrl).build())
     communityApi.reset()
     hmppsTier.reset()
     workforceAllocationsToDelius.reset()
@@ -187,7 +186,7 @@ abstract class IntegrationTestBase {
       ?: throw MissingQueueException("HmppsTopic hmppsoffendertopic not found")
   }
 
-  private val hmppsOffenderSqsDlqClient by lazy { hmppsOffenderQueue.sqsDlqClient as AmazonSQS }
+  private val hmppsOffenderSqsDlqClient by lazy { hmppsOffenderQueue.sqsDlqClient }
 
   protected val tierCalculationSqsClient by lazy { tierCalculationQueue.sqsClient }
   protected val hmppsOffenderSqsClient by lazy { hmppsOffenderQueue.sqsClient }
@@ -228,20 +227,9 @@ abstract class IntegrationTestBase {
   }
 
   protected fun countMessagesOnOffenderEventQueue(): Int =
-    hmppsOffenderSqsClient.getQueueAttributes(
-      hmppsOffenderQueue.queueUrl,
-      listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible")
-    )
-      .let {
-        (
-          it.attributes["ApproximateNumberOfMessages"]?.toInt()
-            ?: 0
-          ) + (it.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0)
-      }
+    hmppsOffenderSqsClient.countAllMessagesOnQueue(hmppsOffenderQueue.queueUrl).get()
 
-  protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int =
-    hmppsOffenderSqsDlqClient.getQueueAttributes(hmppsOffenderQueue.dlqUrl, listOf("ApproximateNumberOfMessages"))
-      .let { it.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0 }
+  protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int? = hmppsOffenderSqsDlqClient?.countAllMessagesOnQueue(hmppsOffenderQueue.dlqUrl!!)?.get()
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
@@ -264,7 +252,7 @@ abstract class IntegrationTestBase {
 
   fun setupOauth() {
     val response = response().withContentType(APPLICATION_JSON)
-      .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
+      .withBody(objectMapper.writeValueAsString(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
     oauthMock.`when`(request().withPath("/auth/oauth/token")).respond(response)
   }
 
@@ -590,10 +578,7 @@ abstract class IntegrationTestBase {
     )
   }
 
-  private fun getNumberOfMessagesCurrentlyOnQueue(client: AmazonSQS, queueUrl: String): Int? {
-    val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
-  }
+  private fun getNumberOfMessagesCurrentlyOnQueue(client: SqsAsyncClient, queueUrl: String): Int? = client.countAllMessagesOnQueue(queueUrl).get()
 
   protected fun whenCalculationQueueIsEmpty() {
     await untilCallTo {
@@ -606,15 +591,10 @@ abstract class IntegrationTestBase {
 
   protected fun whenCalculationMessageHasBeenProcessed() {
     await untilCallTo {
-      getNumberOfMessagesCurrentlyNotVisibleOnQueue(
+      getNumberOfMessagesCurrentlyOnQueue(
         tierCalculationSqsClient,
         tierCalculationQueue.queueUrl
       )
     } matches { it == 0 }
-  }
-
-  private fun getNumberOfMessagesCurrentlyNotVisibleOnQueue(client: AmazonSQS, queueUrl: String): Int? {
-    val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessagesNotVisible"))
-    return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()
   }
 }

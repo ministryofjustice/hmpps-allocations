@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -11,7 +12,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionIdentifiers
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
-import javax.transaction.Transactional
 
 @Service
 class UpsertUnallocatedCaseService(
