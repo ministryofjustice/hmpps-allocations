@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
 import java.time.LocalDate
@@ -37,12 +39,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.unallocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -77,12 +79,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    allocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.allocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -128,12 +130,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    convictionWithNoSentenceResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.convictionWithNoSentenceResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -162,12 +164,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    inactiveConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.inactiveConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -196,12 +198,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    notFoundConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.notFoundConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -230,7 +232,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    notFoundAllConvictionResponse(crn)
+    communityApi.notFoundAllConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -292,12 +294,12 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1
       )
     )
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    noActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.unallocatedConvictionResponse(crn, convictionId)
+    communityApi.noActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(

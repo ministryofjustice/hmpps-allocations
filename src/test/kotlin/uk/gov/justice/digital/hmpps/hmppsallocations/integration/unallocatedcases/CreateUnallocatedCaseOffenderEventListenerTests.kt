@@ -11,6 +11,8 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import java.time.LocalDate
 
 class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
@@ -19,12 +21,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `retrieve event with minimum required data will save`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.unallocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -61,12 +63,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction allocated to actual officer`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    allocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.allocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -85,7 +87,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when crn is not found`() {
     val crn = "J678910"
-    notFoundActiveConvictionsResponse(crn)
+    communityApi.notFoundActiveConvictionsResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -103,12 +105,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when restricted case`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsForbiddenResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.unallocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsForbiddenResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -124,12 +126,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not sentenced yet`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    convictionWithNoSentenceResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.convictionWithNoSentenceResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -147,12 +149,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not active`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    inactiveConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.inactiveConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -170,12 +172,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `do not save when conviction is not found`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    notFoundConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    singleActiveConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.notFoundConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -193,12 +195,12 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   fun `create case when one conviction is sentenced and other is still being sentenced`() {
     val crn = "J678910"
     val convictionId = 123456789L
-    singleActiveConvictionResponseForAllConvictions(crn)
-    unallocatedConvictionResponse(crn, convictionId)
-    singleActiveInductionResponse(crn)
-    tierCalculationResponse(crn)
-    offenderDetailsResponse(crn)
-    activeSentenacedAndPreConvictionResponse(crn)
+    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
+    communityApi.unallocatedConvictionResponse(crn, convictionId)
+    communityApi.singleActiveInductionResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+    communityApi.offenderDetailsResponse(crn)
+    communityApi.activeSentenacedAndPreConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(

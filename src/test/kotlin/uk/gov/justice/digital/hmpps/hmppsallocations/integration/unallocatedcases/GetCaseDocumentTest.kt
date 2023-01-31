@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import org.springframework.http.ContentDisposition
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import java.util.UUID
 
 class GetCaseDocumentTest : IntegrationTestBase() {
@@ -11,7 +12,7 @@ class GetCaseDocumentTest : IntegrationTestBase() {
   fun `can get a document`() {
     val crn = "J678910"
     val documentId = UUID.randomUUID().toString()
-    getDocument(crn, documentId)
+    workforceAllocationsToDelius.getDocument(crn, documentId)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/documents/$documentId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -28,7 +29,7 @@ class GetCaseDocumentTest : IntegrationTestBase() {
   fun `can get a document without conviction id`() {
     val crn = "J678910"
     val documentId = UUID.randomUUID().toString()
-    getDocument(crn, documentId)
+    workforceAllocationsToDelius.getDocument(crn, documentId)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/documents/$documentId")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
