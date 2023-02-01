@@ -33,6 +33,7 @@ class AssessRisksNeedsApiExtension : BeforeAllCallback, AfterAllCallback, Before
     assessRisksNeedsApi.stop()
   }
 }
+
 class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   companion object {
