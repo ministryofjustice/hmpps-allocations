@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.matchers.Times.exactly
@@ -34,6 +35,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentencedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
@@ -42,9 +44,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inact
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponseNoOverallRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
@@ -65,12 +64,14 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
 
+@ExtendWith(
+  AssessRisksNeedsApiExtension::class
+)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
 
-  var assessRisksNeedsApi: ClientAndServer = startClientAndServer(8085)
   var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
   var communityApi: ClientAndServer = startClientAndServer(8092)
   var hmppsTier: ClientAndServer = startClientAndServer(8082)
@@ -164,7 +165,6 @@ abstract class IntegrationTestBase {
     hmppsTier.reset()
     workforceAllocationsToDelius.reset()
     offenderAssessmentApi.reset()
-    assessRisksNeedsApi.reset()
     justRun { telemetryClient.trackEvent(any(), any(), any()) }
     setupOauth()
   }
@@ -258,7 +258,6 @@ abstract class IntegrationTestBase {
     workforceAllocationsToDelius.stop()
     oauthMock.stop()
     offenderAssessmentApi.stop()
-    assessRisksNeedsApi.stop()
     repository.deleteAll()
   }
 
@@ -469,51 +468,6 @@ abstract class IntegrationTestBase {
         .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
       response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
-    )
-  }
-
-  protected fun getRoshForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/risks/crn/$crn/widget")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(roshResponse())
-    )
-  }
-
-  protected fun getRoshNoLevelForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/risks/crn/$crn/widget")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(roshResponseNoOverallRisk())
-    )
-  }
-
-  protected fun getRoshNotFoundForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/risks/crn/$crn/widget")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
-    )
-  }
-
-  protected fun notFoundOgrsForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/offenders/crn/$crn/assessments")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
-    )
-  }
-
-  protected fun getRiskPredictorsForCrn(crn: String) {
-    val riskRequest =
-      request().withPath("/risks/crn/$crn/predictors/rsr/history")
-
-    assessRisksNeedsApi.`when`(riskRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(riskPredictorResponse())
     )
   }
 

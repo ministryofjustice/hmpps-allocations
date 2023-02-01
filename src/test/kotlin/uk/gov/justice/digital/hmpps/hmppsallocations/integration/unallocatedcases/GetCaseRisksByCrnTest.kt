@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
 
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
@@ -11,8 +12,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     getRegistrationsFromDelius(crn)
-    getRoshForCrn(crn)
-    getRiskPredictorsForCrn(crn)
+    assessRisksNeedsApi.getRoshForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
@@ -75,8 +76,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     noRegistrationsFromDelius(crn)
-    getRoshForCrn(crn)
-    getRiskPredictorsForCrn(crn)
+    assessRisksNeedsApi.getRoshForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
@@ -97,8 +98,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     noRegistrationsFromDelius(crn)
-    getRoshNotFoundForCrn(crn)
-    getRiskPredictorsForCrn(crn)
+    assessRisksNeedsApi.getRoshNotFoundForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
@@ -116,10 +117,10 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    getRoshForCrn(crn)
+    assessRisksNeedsApi.getRoshForCrn(crn)
     noRegistrationsFromDelius(crn)
-    notFoundOgrsForCrn(crn)
-    getRiskPredictorsForCrn(crn)
+    assessRisksNeedsApi.notFoundOgrsForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -137,8 +138,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     noRegistrationsFromDelius(crn)
-    getRoshNoLevelForCrn(crn)
-    getRiskPredictorsForCrn(crn)
+    assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
@@ -157,7 +158,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
     noRegistrationsFromDelius(crn)
-    getRoshForCrn(crn)
+    assessRisksNeedsApi.getRoshForCrn(crn)
     getOgrsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
