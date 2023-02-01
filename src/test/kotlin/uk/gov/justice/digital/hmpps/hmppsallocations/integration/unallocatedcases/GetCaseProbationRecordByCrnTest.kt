@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
 
@@ -10,7 +11,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    probationRecordSingleInactiveEventReponse(crn, convictionNumber)
+    workforceAllocationsToDelius.probationRecordSingleInactiveEventReponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
@@ -43,7 +44,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    probationRecordSingleActiveEventReponse(crn, convictionNumber)
+    workforceAllocationsToDelius.probationRecordSingleActiveEventReponse(crn, convictionNumber)
 
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active[0].description")
@@ -67,7 +68,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    probationRecordNoEventsResponse(crn, convictionNumber)
+    workforceAllocationsToDelius.probationRecordNoEventsResponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)
       .jsonPath("$.active")
       .isEmpty

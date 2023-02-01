@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockserver.verify.VerificationTimes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 
 internal class CalculationEventListenerTest : IntegrationTestBase() {
@@ -16,7 +17,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `change tier after event calculation is consumed`() {
     val crn = "X123456"
-    tierCalculationResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
     writeUnallocatedCaseToDatabase(crn, "D0", 1)
     publishTierCalculationCompleteMessage(crn)
     checkTierHasBeenUpdated(crn, "B3", 1)
@@ -25,7 +26,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `does not get tier calculation when the crn is not for an unallocated case`() {
     val crn = "J678910"
-    val tierCalculationRequest = tierCalculationResponse(crn)
+    val tierCalculationRequest = hmppsTier.tierCalculationResponse(crn)
     publishTierCalculationCompleteMessage(crn)
     whenCalculationQueueIsEmpty()
     whenCalculationMessageHasBeenProcessed()
@@ -35,7 +36,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   @Test
   fun `updates all occurrences of crn after event calculation is consumed`() {
     val crn = "X123456"
-    tierCalculationResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
     writeUnallocatedCaseToDatabase(crn, "D0", 1)
     writeUnallocatedCaseToDatabase(crn, "D0", 2)
     publishTierCalculationCompleteMessage(crn)

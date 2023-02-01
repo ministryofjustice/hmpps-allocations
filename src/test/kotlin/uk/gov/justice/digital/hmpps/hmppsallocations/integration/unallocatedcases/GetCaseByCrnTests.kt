@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension.Companion.offenderAssessmentApi
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseByCrnTests : IntegrationTestBase() {
 
@@ -10,8 +12,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    caseViewResponse(crn, convictionNumber)
-    getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -84,8 +86,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    caseViewNoCourtReportResponse(crn, convictionNumber)
-    getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -103,8 +105,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    caseViewResponse(crn, convictionNumber)
-    notFoundAssessmentForCrn(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.notFoundAssessmentForCrn(crn)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -133,8 +135,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
 
-    caseViewWithMainAddressResponse(crn, convictionNumber)
-    getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -168,8 +170,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
 
-    caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
-    getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -191,8 +193,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val convictionNumber = 1
     insertCases()
 
-    caseViewResponse(crn, convictionNumber)
-    getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

@@ -4,56 +4,26 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
-import com.microsoft.applicationinsights.core.dependencies.google.gson.Gson
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.justRun
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockserver.integration.ClientAndServer
-import org.mockserver.integration.ClientAndServer.startClientAndServer
-import org.mockserver.matchers.Times.exactly
-import org.mockserver.model.HttpRequest
-import org.mockserver.model.HttpRequest.request
-import org.mockserver.model.HttpResponse.notFoundResponse
-import org.mockserver.model.HttpResponse.response
-import org.mockserver.model.MediaType.APPLICATION_JSON
-import org.mockserver.model.Parameter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentencedAndPreConvictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.inactiveConvictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.offenderDetailsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveConvictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewNoCourtReportResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordNoEventsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleActiveEventResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleInactiveEventResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.HmppsAuthApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.CalculationEventData
@@ -65,19 +35,16 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
 
 @ExtendWith(
-  AssessRisksNeedsApiExtension::class
+  AssessRisksNeedsApiExtension::class,
+  OffenderAssessmentApiExtension::class,
+  CommunityApiExtension::class,
+  TierApiExtension::class,
+  WorkforceAllocationsToDeliusApiExtension::class,
+  HmppsAuthApiExtension::class
 )
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-@TestInstance(PER_CLASS)
 abstract class IntegrationTestBase {
-
-  var offenderAssessmentApi: ClientAndServer = startClientAndServer(8072)
-  var communityApi: ClientAndServer = startClientAndServer(8092)
-  var hmppsTier: ClientAndServer = startClientAndServer(8082)
-  var workforceAllocationsToDelius: ClientAndServer = startClientAndServer(8084)
-  private var oauthMock: ClientAndServer = startClientAndServer(9090)
-  private val gson: Gson = Gson()
 
   val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
 
@@ -161,12 +128,7 @@ abstract class IntegrationTestBase {
     tierCalculationSqsClient.purgeQueue(PurgeQueueRequest(tierCalculationQueue.queueUrl))
     hmppsOffenderSqsClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.queueUrl))
     hmppsOffenderSqsDlqClient.purgeQueue(PurgeQueueRequest(hmppsOffenderQueue.dlqUrl))
-    communityApi.reset()
-    hmppsTier.reset()
-    workforceAllocationsToDelius.reset()
-    offenderAssessmentApi.reset()
     justRun { telemetryClient.trackEvent(any(), any(), any()) }
-    setupOauth()
   }
 
   private val tierCalculationQueue by lazy {
@@ -250,299 +212,6 @@ abstract class IntegrationTestBase {
   protected fun tierCalculationEvent(crn: String) = CalculationEventData(
     PersonReference(listOf(PersonReferenceType("CRN", crn)))
   )
-
-  @AfterAll
-  fun tearDownServer() {
-    communityApi.stop()
-    hmppsTier.stop()
-    workforceAllocationsToDelius.stop()
-    oauthMock.stop()
-    offenderAssessmentApi.stop()
-    repository.deleteAll()
-  }
-
-  fun setupOauth() {
-    val response = response().withContentType(APPLICATION_JSON)
-      .withBody(gson.toJson(mapOf("access_token" to "ABCDE", "token_type" to "bearer")))
-    oauthMock.`when`(request().withPath("/auth/oauth/token")).respond(response)
-  }
-
-  protected fun singleActiveConvictionResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
-    )
-  }
-
-  protected fun activeSentenacedAndPreConvictionResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(activeSentencedAndPreConvictionResponse())
-    )
-  }
-
-  protected fun unallocatedConvictionResponse(crn: String, convictionId: Long, staffCode: String = "STFFCDEU") {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(convictionResponse(staffCode))
-    )
-  }
-
-  protected fun deliusCaseDetailsResponse(vararg caseDetailsIntegrations: CaseDetailsIntegration) {
-    val initialAppointmentRequest =
-      request().withPath("/allocation-demand")
-
-    workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON)
-        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations))
-    )
-  }
-
-  protected fun errorDeliusCaseDetailsResponse() {
-    val initialAppointmentRequest =
-      request().withPath("/allocation-demand")
-
-    workforceAllocationsToDelius.`when`(initialAppointmentRequest, exactly(1)).respond(notFoundResponse())
-  }
-
-  protected fun allocatedConvictionResponse(crn: String, convictionId: Long) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(convictionResponse("STFFCDE"))
-    )
-  }
-
-  protected fun convictionWithNoSentenceResponse(crn: String, convictionId: Long) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(convictionNoSentenceResponse("STFFCDEU"))
-    )
-  }
-
-  protected fun inactiveConvictionResponse(crn: String, convictionId: Long) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(inactiveConvictionResponse("STFFCDEU"))
-    )
-  }
-
-  protected fun notFoundConvictionResponse(crn: String, convictionId: Long) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions/$convictionId")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
-    )
-  }
-
-  protected fun notFoundAllConvictionResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
-    )
-  }
-
-  protected fun notFoundActiveConvictionsResponse(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions").withQueryStringParameter(Parameter("activeOnly", "true"))
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(NOT_FOUND.value())
-    )
-  }
-
-  protected fun singleActiveConvictionResponseForAllConvictions(crn: String) {
-    val convictionsRequest =
-      request().withPath("/offenders/crn/$crn/convictions")
-
-    communityApi.`when`(convictionsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleActiveConvictionResponse())
-    )
-  }
-
-  protected fun singleActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    communityApi.`when`(inductionRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(singleActiveInductionResponse())
-    )
-  }
-
-  protected fun noActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    communityApi.`when`(inductionRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("[]")
-    )
-  }
-
-  protected fun offenderDetailsResponse(crn: String) {
-    val summaryRequest =
-      request().withPath("/offenders/crn/$crn/all")
-
-    communityApi.`when`(summaryRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(offenderDetailsResponse())
-    )
-  }
-
-  protected fun offenderDetailsForbiddenResponse(crn: String) {
-    val summaryRequest =
-      request().withPath("/offenders/crn/$crn/all")
-
-    communityApi.`when`(summaryRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withStatusCode(403)
-    )
-  }
-
-  protected fun tierCalculationResponse(crn: String): HttpRequest {
-    val request = request().withPath("/crn/$crn/tier")
-    hmppsTier.`when`(request).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
-    )
-    return request
-  }
-
-  protected fun documentsResponse(crn: String) {
-    val preSentenceReportRequest =
-      request().withPath("/offenders/$crn/documents")
-    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(documentsResponse())
-    )
-  }
-
-  protected fun documentsErrorResponse(crn: String) {
-    val preSentenceReportRequest =
-      request().withPath("/offenders/$crn/documents")
-    workforceAllocationsToDelius.`when`(preSentenceReportRequest, exactly(1)).respond(
-      response().withStatusCode(NOT_FOUND.value())
-    )
-  }
-
-  protected fun getRegistrationsFromDelius(crn: String) {
-    val registrationsRequest =
-      request().withPath("/offenders/crn/$crn/registrations")
-
-    communityApi.`when`(registrationsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(multipleRegistrationResponse())
-    )
-  }
-
-  protected fun noRegistrationsFromDelius(crn: String) {
-    val registrationsRequest =
-      request().withPath("/offenders/crn/$crn/registrations")
-
-    communityApi.`when`(registrationsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody("{}")
-    )
-  }
-
-  protected fun getAssessmentsForCrn(crn: String) {
-    val needsRequest =
-      request().withPath("/offenders/crn/$crn/assessments/summary")
-        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
-
-    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(assessmentResponse())
-    )
-  }
-
-  protected fun notFoundAssessmentForCrn(crn: String) {
-    val needsRequest =
-      request().withPath("/offenders/crn/$crn/assessments/summary")
-        .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
-    offenderAssessmentApi.`when`(needsRequest, exactly(1)).respond(
-      response().withStatusCode(NOT_FOUND.value()).withContentType(APPLICATION_JSON)
-    )
-  }
-
-  protected fun getOgrsForCrn(crn: String) {
-    val ogrsRequest =
-      request().withPath("/offenders/crn/$crn/assessments")
-
-    communityApi.`when`(ogrsRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(ogrsResponse())
-    )
-  }
-
-  protected fun getDocument(crn: String, documentId: String) {
-    val documentRequest = request().withPath("/offenders/$crn/documents/$documentId")
-    workforceAllocationsToDelius.`when`(documentRequest, exactly(1)).respond(
-      response()
-        .withHeader(HttpHeaders.CONTENT_TYPE, "application/msword;charset=UTF-8")
-        .withHeader(HttpHeaders.ACCEPT_RANGES, "bytes")
-        .withHeader(HttpHeaders.CACHE_CONTROL, "max-age=0, must-revalidate")
-        .withHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"sample_word_doc.doc\"")
-        .withHeader(HttpHeaders.DATE, "Fri, 05 Jan 2018 09:50:45 GMT")
-        .withHeader(HttpHeaders.ETAG, "9514985635950")
-        .withHeader(HttpHeaders.LAST_MODIFIED, "Wed, 03 Jan 2018 13:20:35 GMT")
-        .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
-        .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes())
-    )
-  }
-
-  protected fun caseViewResponse(crn: String, convictionNumber: Int) {
-    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
-    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewResponse())
-    )
-  }
-
-  protected fun caseViewNoCourtReportResponse(crn: String, convictionNumber: Int) {
-    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
-    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewNoCourtReportResponse())
-    )
-  }
-
-  protected fun caseViewWithMainAddressResponse(crn: String, convictionNumber: Int) {
-    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
-    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration("Sheffield Towers", "22", "Sheffield Street", "Sheffield", "Yorkshire", "S2 4SU", false, false, "Supported Housing", "2022-08-25")))
-    )
-  }
-
-  protected fun caseViewWithNoFixedAbodeResponse(crn: String, convictionNumber: Int) {
-    val caseViewRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
-    workforceAllocationsToDelius.`when`(caseViewRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration(noFixedAbode = true, typeVerified = false, typeDescription = "Homeless - rough sleeping", startDate = "2022-08-25")))
-    )
-  }
-
-  protected fun probationRecordSingleInactiveEventReponse(crn: String, convictionNumber: Int) {
-    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
-    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber))
-    )
-  }
-  protected fun probationRecordSingleActiveEventReponse(crn: String, convictionNumber: Int) {
-    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
-    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordSingleActiveEventResponse(crn, convictionNumber))
-    )
-  }
-
-  protected fun probationRecordNoEventsResponse(crn: String, convictionNumber: Int) {
-    val probationRecordRequest = request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
-    workforceAllocationsToDelius.`when`(probationRecordRequest, exactly(1)).respond(
-      response().withContentType(APPLICATION_JSON).withBody(deliusProbationRecordNoEventsResponse(crn, convictionNumber))
-    )
-  }
 
   private fun getNumberOfMessagesCurrentlyOnQueue(client: AmazonSQS, queueUrl: String): Int? {
     val queueAttributes = client.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))

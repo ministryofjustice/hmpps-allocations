@@ -2,10 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -15,7 +13,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
-    setupTeam1CaseDetails()
+    workforceAllocationsToDelius.setupTeam1CaseDetails()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -76,7 +74,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   @Test
   fun `return error when error on API call`() {
     insertCases()
-    errorDeliusCaseDetailsResponse()
+    workforceAllocationsToDelius.errorDeliusCaseDetailsResponse()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -125,7 +123,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
-    setupTeam1CaseDetails()
+    workforceAllocationsToDelius.setupTeam1CaseDetails()
 
     insertCases()
     webTestClient.get()
@@ -138,30 +136,4 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceLength")
       .isEqualTo("5 Weeks")
   }
-
-  fun setupTeam1CaseDetails() = deliusCaseDetailsResponse(
-    CaseDetailsIntegration(
-      "J678910",
-      "1",
-      LocalDate.of(2022, 10, 11),
-      "Currently managed",
-      CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
-    ),
-    CaseDetailsIntegration(
-      "J680648", "2", null, "Previously managed", CommunityPersonManager(Name("Janie", null, "Jones"), "PO")
-    ),
-    CaseDetailsIntegration(
-      "X4565764", "3", LocalDate.now(), "New to probation", CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
-    ),
-    CaseDetailsIntegration(
-      "J680660", "4", LocalDate.now(), "Previously managed", null
-    ),
-    CaseDetailsIntegration(
-      "C3333333",
-      "6",
-      LocalDate.of(2022, 10, 11),
-      "Currently managed",
-      CommunityPersonManager(Name("John", null, "Brown"), null)
-    ),
-  )
 }
