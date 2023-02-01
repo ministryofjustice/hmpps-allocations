@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.jms.annotation.JmsListener
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
 
@@ -12,7 +12,7 @@ class CalculationEventListener(
   private val objectMapper: ObjectMapper
 ) {
 
-  @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val calculationEventData = readMessage(rawMessage)
     calculationTierService.updateTier(crnFrom(calculationEventData))

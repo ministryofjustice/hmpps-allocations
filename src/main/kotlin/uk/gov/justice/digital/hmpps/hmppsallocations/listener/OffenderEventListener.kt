@@ -2,8 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.LoggerFactory
-import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
@@ -16,7 +16,7 @@ class OffenderEventListener(
   private val enrichEventService: EnrichEventService
 ) {
 
-  @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
     try {
