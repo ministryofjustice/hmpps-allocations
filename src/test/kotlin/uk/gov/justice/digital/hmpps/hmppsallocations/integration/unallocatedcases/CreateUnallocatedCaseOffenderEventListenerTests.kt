@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import io.mockk.Called
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
@@ -9,6 +7,8 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
@@ -28,11 +28,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { repository.count() } matches { it!! > 0 }
 
@@ -70,11 +66,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -89,11 +81,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val crn = "J678910"
     communityApi.notFoundActiveConvictionsResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -112,11 +100,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsForbiddenResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
     await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
@@ -133,11 +117,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -156,11 +136,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -179,11 +155,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -202,11 +174,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.offenderDetailsResponse(crn)
     communityApi.activeSentenacedAndPreConvictionResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { repository.count() } matches { it!! > 0 }
 
@@ -216,5 +184,22 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
+  }
+
+  private fun publishConvictionChangedMessage(crn: String) {
+    hmppsOffenderSnsClient
+      .publish(
+        PublishRequest.builder()
+          .topicArn(hmppsOffenderTopicArn)
+          .message(jsonString(offenderEvent(crn)))
+          .messageAttributes(
+            mapOf(
+              "eventType" to MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue("CONVICTION_CHANGED")
+                .build()
+            )
+          ).build()
+      )
   }
 }

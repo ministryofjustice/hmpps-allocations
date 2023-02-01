@@ -11,7 +11,7 @@ configurations {
 }
 
 allOpen {
-  annotations("javax.persistence.Entity")
+  annotations("jakarta.persistence.Entity")
 }
 
 repositories {
