@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
@@ -16,6 +17,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -34,7 +37,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .jsonPath("$.activeRegistrations[0].registered")
       .isEqualTo("2021-08-30")
       .jsonPath("$.activeRegistrations[0].notes")
-      .doesNotExist()
+      .isEqualTo("Some Notes")
       .jsonPath("$.activeRegistrations[0].endDate")
       .doesNotExist()
       .jsonPath("$.inactiveRegistrations[0].type")
@@ -46,7 +49,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .jsonPath("$.inactiveRegistrations[0].endDate")
       .isEqualTo("2021-08-30")
       .jsonPath("$.roshRisk.overallRisk")
-      .isEqualTo("VERY_HIGH")
+      .isEqualTo("MEDIUM")
       .jsonPath("$.roshRisk.assessedOn")
       .isEqualTo("2022-10-07")
       .jsonPath("$.roshRisk.riskInCommunity.Children")
@@ -80,6 +83,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -102,6 +106,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     assessRisksNeedsApi.getRoshNotFoundForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -122,6 +127,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     communityApi.noRegistrationsFromDelius(crn)
     assessRisksNeedsApi.notFoundOgrsForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -142,6 +148,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -161,6 +168,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     communityApi.noRegistrationsFromDelius(crn)
     assessRisksNeedsApi.getRoshForCrn(crn)
     communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

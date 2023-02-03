@@ -10,12 +10,15 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseOgrs
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRegistration
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRsr
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import java.time.LocalDateTime
 import java.util.Optional
 
 @Service
@@ -62,37 +65,21 @@ class GetUnallocatedCaseService(
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber).block()
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
-
-  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
-    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-      val registrations = communityApiClient.getAllRegistrations(crn)
-        .map { registrations ->
-          registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
-        }
-
-      val rosh = assessRisksNeedsApiClient.getRosh(crn)
-
-      val rsr = assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .map { riskPredictors ->
-          Optional.ofNullable(
-            riskPredictors
-              .filter { riskPredictor -> riskPredictor.rsrScoreLevel != null && riskPredictor.rsrPercentageScore != null }
-              .maxByOrNull { riskPredictor -> riskPredictor.completedDate ?: LocalDateTime.MIN }
-          )
-        }
-
-      val ogrs = communityApiClient.getAssessment(crn)
-
-      val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
-      return UnallocatedCaseRisks.from(
-        it,
-        results.t1.getOrDefault(true, emptyList()),
-        results.t1.getOrDefault(false, emptyList()),
-        results.t2.orElse(null),
-        results.t3.orElse(null),
-        results.t4.orElse(null)
-      )
-    }
+  fun getCaseRisk(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
+    val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block()
+    val unallocatedCaseEntity = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!
+    return UnallocatedCaseRisks(
+      deliusRisk.name.forename + " " + deliusRisk.name.middleName + " " + deliusRisk.name.surname,
+      crn,
+      unallocatedCaseEntity.tier,
+      deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, null) },
+      deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, it.endDate) },
+      RoshSummary(deliusRisk.rosh.overallRisk, deliusRisk.rosh.assessmentDate, deliusRisk.rosh.riskInCommunity),
+      UnallocatedCaseRsr(deliusRisk.rsr.levelScore, deliusRisk.rsr.completedDate, deliusRisk.rsr.percentageScore),
+      UnallocatedCaseOgrs(deliusRisk.ogrs?.lastUpdatedDate, deliusRisk.ogrs?.score).takeUnless { deliusRisk.ogrs == null },
+      unallocatedCaseEntity.convictionNumber
+    )
+  }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
