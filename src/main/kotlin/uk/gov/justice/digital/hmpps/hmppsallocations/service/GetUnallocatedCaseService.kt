@@ -4,29 +4,21 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseOgrs
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRegistration
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRsr
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.util.Optional
 
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
-  @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
-  @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
@@ -66,18 +58,10 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
   fun getCaseRisk(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
-    val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block()
-    val unallocatedCaseEntity = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!
-    return UnallocatedCaseRisks(
-      deliusRisk.name.forename + " " + deliusRisk.name.middleName + " " + deliusRisk.name.surname,
-      crn,
-      unallocatedCaseEntity.tier,
-      deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, null) },
-      deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, it.endDate) },
-      RoshSummary(deliusRisk.rosh.overallRisk, deliusRisk.rosh.assessmentDate, deliusRisk.rosh.riskInCommunity),
-      UnallocatedCaseRsr(deliusRisk.rsr.levelScore, deliusRisk.rsr.completedDate, deliusRisk.rsr.percentageScore),
-      UnallocatedCaseOgrs(deliusRisk.ogrs?.lastUpdatedDate, deliusRisk.ogrs?.score).takeUnless { deliusRisk.ogrs == null },
-      unallocatedCaseEntity.convictionNumber
+    return UnallocatedCaseRisks.from(
+      workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
+      findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!,
+      crn
     )
   }
 
