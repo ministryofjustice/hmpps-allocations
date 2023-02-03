@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -25,19 +24,33 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
 ) {
   companion object {
     fun from(
-      deliusRisk: DeliusRisk,
       case: UnallocatedCaseEntity,
-      crn: String
+      activeRegistrations: List<OffenderRegistration>,
+      inactiveRegistrations: List<OffenderRegistration>,
+      rosh: RoshSummary?,
+      riskPredictor: RiskPredictor?,
+      offenderAssessment: OffenderAssessment?
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
-        deliusRisk.name.forename + " " + deliusRisk.name.middleName + " " + deliusRisk.name.surname,
-        crn,
-        case.tier,
-        deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, null) },
-        deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, it.endDate) },
-        RoshSummary(deliusRisk.rosh.overallRisk, deliusRisk.rosh.assessmentDate, deliusRisk.rosh.riskInCommunity),
-        UnallocatedCaseRsr(deliusRisk.rsr.levelScore, deliusRisk.rsr.completedDate, deliusRisk.rsr.percentageScore),
-        UnallocatedCaseOgrs(deliusRisk.ogrs?.lastUpdatedDate, deliusRisk.ogrs?.score).takeUnless { deliusRisk.ogrs == null },
+        case.name, case.crn, case.tier,
+        activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        rosh,
+        riskPredictor?.let {
+          UnallocatedCaseRsr(
+            it.rsrScoreLevel!!,
+            it.completedDate!!.toLocalDate(),
+            it.rsrPercentageScore!!
+          )
+        },
+        offenderAssessment?.let { assessment ->
+          assessment.ogrsScore?.let { score ->
+            UnallocatedCaseOgrs(
+              assessment.ogrsLastUpdate,
+              score
+            )
+          }
+        },
         case.convictionNumber
       )
     }
