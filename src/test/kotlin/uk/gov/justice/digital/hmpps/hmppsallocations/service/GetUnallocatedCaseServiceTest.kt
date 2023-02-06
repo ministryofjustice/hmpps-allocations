@@ -5,7 +5,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -13,7 +12,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedC
 
 internal class GetUnallocatedCaseServiceTest {
 
-  private val mockCommunityClient: CommunityApiClient = mockk()
   private val mockWorkforceAllocationsToDeliusApiClientClient: WorkforceAllocationsToDeliusApiClient = mockk()
   private val mockRepo: UnallocatedCasesRepository = mockk()
 
@@ -34,7 +32,7 @@ internal class GetUnallocatedCaseServiceTest {
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
     every { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns Flux.empty()
-    val cases = GetUnallocatedCaseService(mockRepo, mockCommunityClient, mockk(), mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").collectList().block()
+    val cases = GetUnallocatedCaseService(mockRepo, mockk(), mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").collectList().block()
     assertEquals(0, cases!!.size)
   }
 }

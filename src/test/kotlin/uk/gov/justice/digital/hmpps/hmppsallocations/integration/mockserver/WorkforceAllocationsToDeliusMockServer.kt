@@ -23,6 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workf
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordNoEventsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleActiveEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleInactiveEventResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponseNoRegistrationsNoOgrs
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import java.time.LocalDate
 
@@ -177,6 +179,20 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordNoEventsResponse(crn, convictionNumber))
+    )
+  }
+
+  fun riskResponse(crn: String) {
+    val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
+    workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponse())
+    )
+  }
+
+  fun riskResponseNoRegistrationsNoOgrs(crn: String) {
+    val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
+    workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRegistrationsNoOgrs())
     )
   }
 }
