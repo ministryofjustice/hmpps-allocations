@@ -105,7 +105,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long
   ): ResponseEntity<UnallocatedCaseRisks> =
     ResponseEntity.ok(
-      getUnallocatedCaseService.getCaseRisk(crn, convictionNumber)
+      getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
         ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
     )
 }
