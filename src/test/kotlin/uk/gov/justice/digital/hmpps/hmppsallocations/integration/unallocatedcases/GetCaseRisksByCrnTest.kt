@@ -181,4 +181,26 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .jsonPath("$.inactiveRegistrations")
       .isEmpty
   }
+
+  @Test
+  fun `can get case risks when no Rosh nor Rsr are returned`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    communityApi.noRegistrationsFromDelius(crn)
+    assessRisksNeedsApi.getRoshForCrn(crn)
+    communityApi.getOgrsForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRoshNoRsr(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.activeRegistrations")
+      .isEmpty
+      .jsonPath("$.inactiveRegistrations")
+      .isEmpty
+  }
 }

@@ -34,8 +34,8 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
         case.tier,
         deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, null) },
         deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration(it.description, it.startDate, it.notes, it.endDate) },
-        RoshSummary(deliusRisk.rosh.overallRisk, deliusRisk.rosh.assessmentDate, deliusRisk.rosh.riskInCommunity),
-        UnallocatedCaseRsr(deliusRisk.rsr.levelScore, deliusRisk.rsr.completedDate, deliusRisk.rsr.percentageScore),
+        RoshSummary(deliusRisk.rosh?.overallRisk, deliusRisk.rosh?.assessmentDate, deliusRisk.rosh?.riskInCommunity).takeUnless { deliusRisk.rosh == null },
+        UnallocatedCaseRsr(deliusRisk.rsr?.levelScore, deliusRisk.rsr?.completedDate, deliusRisk.rsr?.percentageScore).takeUnless { deliusRisk.rsr == null },
         UnallocatedCaseOgrs(deliusRisk.ogrs?.lastUpdatedDate, deliusRisk.ogrs?.score).takeUnless { deliusRisk.ogrs == null },
         case.convictionNumber
       )
@@ -69,11 +69,11 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
 
 data class UnallocatedCaseRsr @JsonCreator constructor(
   @Schema(description = "Level", example = "HIGH")
-  val level: String,
+  val level: String?,
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val lastUpdatedOn: LocalDate,
-  val percentage: BigDecimal
+  val lastUpdatedOn: LocalDate?,
+  val percentage: BigDecimal?
 )
 
 data class UnallocatedCaseOgrs @JsonCreator constructor(

@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workf
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleInactiveEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponseNoRegistrationsNoOgrs
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponseNoRoshNoRsr
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import java.time.LocalDate
 
@@ -193,6 +194,13 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
     workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRegistrationsNoOgrs())
+    )
+  }
+
+  fun riskResponseNoRoshNoRsr(crn: String) {
+    val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
+    workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRoshNoRsr())
     )
   }
 }

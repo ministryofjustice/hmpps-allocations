@@ -11,8 +11,8 @@ data class DeliusRisk constructor(
   val activeRegistrations: List<ActiveRegistration>,
   val inactiveRegistrations: List<InactiveRegistration>,
   val ogrs: Ogrs?,
-  val rosh: Rosh,
-  val rsr: Rsr
+  val rosh: Rosh?,
+  val rsr: Rsr?
 )
 
 data class ActiveRegistration constructor(
