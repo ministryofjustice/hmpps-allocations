@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
@@ -155,9 +154,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-    communityApi.noRegistrationsFromDelius(crn)
     assessRisksNeedsApi.getRoshForCrn(crn)
-    communityApi.getOgrsForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
