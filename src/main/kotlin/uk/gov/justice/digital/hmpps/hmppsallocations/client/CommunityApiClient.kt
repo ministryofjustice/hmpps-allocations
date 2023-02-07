@@ -8,13 +8,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Optional
 
 class CommunityApiClient(private val webClient: WebClient) {
 
@@ -84,33 +81,6 @@ class CommunityApiClient(private val webClient: WebClient) {
       .bodyToMono(OffenderDetails::class.java)
   }
 
-  fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/registrations")
-      .retrieve()
-      .bodyToMono(OffenderRegistrations::class.java)
-  }
-
-  fun getAssessment(crn: String): Mono<Optional<OffenderAssessment>> {
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/assessments")
-      .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingOffenderAssessmentError("No offender assessment found for $crn")) }
-      )
-      .bodyToMono(OffenderAssessment::class.java)
-      .map { Optional.of(it) }
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingOffenderAssessmentError -> Mono.just(Optional.empty())
-          else -> Mono.error(ex)
-        }
-      }
-  }
-
   data class Staff @JsonCreator constructor(
     val forenames: String,
     val surname: String
@@ -126,5 +96,4 @@ class CommunityApiClient(private val webClient: WebClient) {
 }
 
 private class MissingConvictionError(msg: String) : RuntimeException(msg)
-private class MissingOffenderAssessmentError(msg: String) : RuntimeException(msg)
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)

@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import org.springframework.core.io.Resource
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
@@ -64,20 +63,8 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .get()
       .uri("/allocation-demand/$crn/risk")
       .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingDeliusRiskError("No delius risk found for $crn")) }
-      )
       .bodyToMono(DeliusRisk::class.java)
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingDeliusRiskError -> Mono.empty()
-          else -> Mono.error(ex)
-        }
-      }
   }
-
-  private class MissingDeliusRiskError(msg: String) : RuntimeException(msg)
 }
 
 data class CaseIdentifier(val crn: String, val eventNumber: String)
