@@ -49,10 +49,10 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
 
 data class UnallocatedCaseRegistration @JsonCreator constructor(
   @Schema(description = "Type", example = "Suicide/self-harm")
-  val type: String?,
+  val type: String,
   @Schema(description = "Registered date", example = "2020-03-21")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val registered: LocalDate?,
+  val registered: LocalDate,
   @Schema(description = "Notes", example = "Previous suicide /self-harm attempt. Needs further investigating.")
   val notes: String?,
   @Schema(description = "End Date", example = "2020-01-16")
