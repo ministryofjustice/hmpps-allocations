@@ -13,7 +13,7 @@ data class DeliusRisk constructor(
 )
 
 data class Registrations constructor(
-  val description: String?,
+  val description: String,
   val startDate: LocalDate?,
   val endDate: LocalDate?,
   val notes: String?

@@ -6,11 +6,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
-import java.util.Optional
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
-  fun getRosh(crn: String): Mono<Optional<RoshSummary>> {
+  fun getRosh(crn: String): Mono<RoshSummary> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/widget")
@@ -20,10 +19,9 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
         { Mono.error(MissingRiskError("No risk summary found for $crn")) }
       )
       .bodyToMono(RoshSummary::class.java)
-      .map { Optional.of(it) }
       .onErrorResume { ex ->
         when (ex) {
-          is MissingRiskError -> Mono.just(Optional.empty())
+          is MissingRiskError -> Mono.empty()
           else -> Mono.error(ex)
         }
       }

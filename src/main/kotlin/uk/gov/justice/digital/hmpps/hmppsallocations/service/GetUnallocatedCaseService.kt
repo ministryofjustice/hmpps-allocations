@@ -65,7 +65,7 @@ class GetUnallocatedCaseService(
     return UnallocatedCaseRisks.from(
       workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
       findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!,
-      assessRisksNeedsApiClient.getRosh(crn).block()!!.orElse(null),
+      assessRisksNeedsApiClient.getRosh(crn).block(),
       assessRisksNeedsApiClient.getRiskPredictors(crn)
         .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
         .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }

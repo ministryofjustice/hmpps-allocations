@@ -81,11 +81,7 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
 ) {
   companion object {
     fun from(rp: RiskPredictor?): UnallocatedCaseRsr? {
-      return UnallocatedCaseRsr(
-        rp?.rsrScoreLevel,
-        rp?.completedDate?.toLocalDate(),
-        rp?.rsrPercentageScore
-      ).takeUnless { rp == null }
+      return rp?.let { UnallocatedCaseRsr(it.rsrScoreLevel, it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
     }
   }
 }
@@ -93,15 +89,13 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
 data class UnallocatedCaseOgrs @JsonCreator constructor(
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val lastUpdatedOn: LocalDate?,
+  val lastUpdatedOn: LocalDate,
   @Schema(description = "Score", example = "62")
-  val score: BigInteger?
+  val score: BigInteger
 ) {
   companion object {
     fun from(ogrs: Ogrs?): UnallocatedCaseOgrs? {
-      return UnallocatedCaseOgrs(
-        ogrs?.lastUpdatedDate, ogrs?.score
-      ).takeUnless { ogrs == null }
+      return ogrs?.let { UnallocatedCaseOgrs(it.lastUpdatedDate, it.score) }
     }
   }
 }
