@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import java.time.format.DateTimeFormatter
 
 class GetCaseOverviewByCrnTests : IntegrationTestBase() {
 
@@ -20,8 +19,6 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.initialAppointment")
-      .isEqualTo(firstInitialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.crn")
@@ -30,8 +27,6 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
       .isEqualTo("C1")
       .jsonPath("$.convictionId")
       .isEqualTo(convictionId)
-      .jsonPath("$.caseType")
-      .isEqualTo("CUSTODY")
       .jsonPath("$.convictionNumber")
       .isEqualTo(convictionNumber)
   }

@@ -47,8 +47,6 @@ class GetUnallocatedCaseService(
           deliusCaseDetail.crn,
           deliusCaseDetail.event.number.toInt()
         )!!
-        unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
-        unallocatedCasesRepository.save(unallocatedCase)
         UnallocatedCase.from(
           unallocatedCase, deliusCaseDetail
         )

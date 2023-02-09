@@ -32,7 +32,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventLi
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
-import java.time.LocalDate
 
 @ExtendWith(
   AssessRisksNeedsApiExtension::class,
@@ -46,14 +45,11 @@ import java.time.LocalDate
 @ActiveProfiles("test")
 abstract class IntegrationTestBase {
 
-  val firstInitialAppointment: LocalDate = LocalDate.now().plusDays(1)
-
   val previouslyManagedCase = UnallocatedCaseEntity(
     null,
     "Hannah Francis",
     "J680660",
     "C2",
-    LocalDate.now().minusDays(1),
     convictionId = 987654321,
     caseType = CaseTypes.CUSTODY,
     providerCode = "",
@@ -65,7 +61,7 @@ abstract class IntegrationTestBase {
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
-          null, "Dylan Adam Armstrong", "J678910", "C1", firstInitialAppointment,
+          null, "Dylan Adam Armstrong", "J678910", "C1",
           123456789,
           caseType = CaseTypes.CUSTODY,
           providerCode = "",
@@ -77,7 +73,6 @@ abstract class IntegrationTestBase {
           "Andrei Edwards",
           "J680648",
           "A1",
-          LocalDate.now().plusDays(2),
           convictionId = 23456789,
           caseType = CaseTypes.LICENSE,
           providerCode = "",
@@ -89,7 +84,6 @@ abstract class IntegrationTestBase {
           "William Jones",
           "X4565764",
           "C1",
-          LocalDate.now().plusDays(2),
           convictionId = 68793954,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",
@@ -99,7 +93,6 @@ abstract class IntegrationTestBase {
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          firstInitialAppointment,
           56785493, CaseTypes.CUSTODY,
           providerCode = "",
           teamCode = "TEAM2",
@@ -110,7 +103,6 @@ abstract class IntegrationTestBase {
           "Jim Doe",
           "C3333333",
           "B1",
-          null,
           convictionId = 86472147892,
           caseType = CaseTypes.COMMUNITY,
           providerCode = "",

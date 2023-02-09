@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
-import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.persistence.Column
@@ -31,9 +30,6 @@ data class UnallocatedCaseEntity(
 
   @Column
   var tier: String,
-
-  @Column(name = "initial_appointment")
-  var initialAppointment: LocalDate? = null,
 
   @Column(name = "conviction_id")
   @NotNull

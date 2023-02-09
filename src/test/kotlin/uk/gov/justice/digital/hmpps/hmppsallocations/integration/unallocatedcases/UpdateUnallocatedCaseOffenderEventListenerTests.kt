@@ -17,7 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.Comm
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -30,7 +29,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -41,7 +39,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
@@ -57,7 +55,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(repository.count()).isEqualTo(1)
     val case = repository.findAll().first()
 
-    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
   }
@@ -69,7 +66,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -81,7 +77,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.allocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
@@ -122,7 +118,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -132,7 +127,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.convictionWithNoSentenceResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
@@ -156,7 +151,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -166,7 +160,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.inactiveConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
@@ -190,7 +184,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -200,7 +193,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.notFoundConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
     communityApi.singleActiveConvictionResponse(crn)
@@ -224,7 +217,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -253,7 +245,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
@@ -266,7 +257,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       repository.save(
         UnallocatedCaseEntity(
           crn = crn,
-          initialAppointment = LocalDate.parse("2021-11-30"),
           name = "Tester TestSurname",
           tier = "B3",
           convictionId = convictionId,
@@ -276,42 +266,5 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         )
       )
     }
-  }
-
-  @Test
-  fun `initial appointment should be empty when there is no active conviction`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
-        name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
-        providerCode = "",
-        convictionNumber = 1
-      )
-    )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.noActiveInductionResponse(crn)
-    hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
-
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-
-    assertThat(repository.count()).isEqualTo(1)
-    val case = repository.findAll().first()
-
-    assertThat(case.initialAppointment).isNull()
   }
 }
