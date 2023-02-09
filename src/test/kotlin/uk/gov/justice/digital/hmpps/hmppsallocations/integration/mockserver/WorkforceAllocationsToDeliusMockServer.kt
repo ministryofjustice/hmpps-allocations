@@ -76,14 +76,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     ),
     CaseDetailsIntegration(
       "J680660", "4", LocalDate.now(), "Previously managed", null
-    ),
-    CaseDetailsIntegration(
-      "C3333333",
-      "6",
-      LocalDate.of(2022, 10, 11),
-      "Currently managed",
-      CommunityPersonManager(Name("John", null, "Brown"), null)
-    ),
+    )
   )
 
   fun errorDeliusCaseDetailsResponse() {
