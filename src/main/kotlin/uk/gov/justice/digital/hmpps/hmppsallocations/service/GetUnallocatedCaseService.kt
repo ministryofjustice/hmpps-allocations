@@ -40,13 +40,11 @@ class GetUnallocatedCaseService(
     }
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
-    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCasesRepository.findByTeamCode(teamCode))
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(
-          deliusCaseDetail.crn,
-          deliusCaseDetail.event.number.toInt()
-        )!!
+        val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
         UnallocatedCase.from(
           unallocatedCase, deliusCaseDetail
         )
