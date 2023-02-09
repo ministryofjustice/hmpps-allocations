@@ -43,11 +43,8 @@ class UpsertUnallocatedCaseService(
           val sentence = conviction.sentence!!
           log.info("${unallocatedCaseEntity.crn} is in unallocated")
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
-            val initialAppointment =
-              enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
             val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
             val activeConvictions = enrichEventService.getActiveSentencedConvictions(unallocatedCaseEntity.crn)
-            unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
             unallocatedCaseEntity.name = name
             unallocatedCaseEntity.caseType =

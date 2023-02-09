@@ -137,25 +137,6 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
     )
   }
 
-  fun singleActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    CommunityApiExtension.communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
-      HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse())
-    )
-  }
-
-  fun noActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    CommunityApiExtension.communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]")
-    )
-  }
-
   fun offenderDetailsResponse(crn: String) {
     val summaryRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/all")

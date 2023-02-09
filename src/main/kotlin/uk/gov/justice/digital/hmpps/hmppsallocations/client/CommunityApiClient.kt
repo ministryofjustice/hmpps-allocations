@@ -1,26 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 class CommunityApiClient(private val webClient: WebClient) {
 
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
-
   fun getActiveConvictions(crn: String): Flux<Conviction> {
-
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions?activeOnly=true")
@@ -53,19 +44,6 @@ class CommunityApiClient(private val webClient: WebClient) {
           is MissingConvictionError -> Mono.empty()
           else -> Mono.error(ex)
         }
-      }
-  }
-
-  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Flux<Contact> {
-    val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
-      .retrieve()
-      .bodyToFlux(Contact::class.java)
-      .onErrorResume {
-        log.warn("Error retrieving induction contacts", it)
-        Flux.empty()
       }
   }
 
