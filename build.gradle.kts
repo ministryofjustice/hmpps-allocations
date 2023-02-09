@@ -10,6 +10,10 @@ configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
+dependencyCheck {
+  suppressionFiles.add("suppressions.xml")
+}
+
 allOpen {
   annotations("javax.persistence.Entity")
 }
