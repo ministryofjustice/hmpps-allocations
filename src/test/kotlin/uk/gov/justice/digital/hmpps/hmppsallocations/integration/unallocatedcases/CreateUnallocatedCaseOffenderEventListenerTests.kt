@@ -7,8 +7,6 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.services.sns.model.MessageAttributeValue
-import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
@@ -184,22 +182,5 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
     assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
-  }
-
-  private fun publishConvictionChangedMessage(crn: String) {
-    hmppsOffenderSnsClient
-      .publish(
-        PublishRequest.builder()
-          .topicArn(hmppsOffenderTopicArn)
-          .message(jsonString(offenderEvent(crn)))
-          .messageAttributes(
-            mapOf(
-              "eventType" to MessageAttributeValue.builder()
-                .dataType("String")
-                .stringValue("CONVICTION_CHANGED")
-                .build()
-            )
-          ).build()
-      )
   }
 }

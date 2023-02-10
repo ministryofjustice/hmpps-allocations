@@ -9,8 +9,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
-import software.amazon.awssdk.services.sns.model.MessageAttributeValue
-import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
@@ -285,22 +283,5 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.initialAppointment).isNull()
-  }
-
-  private fun publishConvictionChangedMessage(crn: String) {
-    hmppsOffenderSnsClient
-      .publish(
-        PublishRequest.builder()
-          .topicArn(hmppsOffenderTopicArn)
-          .message(jsonString(offenderEvent(crn)))
-          .messageAttributes(
-            mapOf(
-              "eventType" to MessageAttributeValue.builder()
-                .dataType("String")
-                .stringValue("CONVICTION_CHANGED")
-                .build()
-            )
-          ).build()
-      )
   }
 }

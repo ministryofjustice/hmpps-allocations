@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
@@ -188,6 +190,23 @@ abstract class IntegrationTestBase {
         clientId = "some-client"
       )
     )
+  }
+
+  protected fun publishConvictionChangedMessage(crn: String) {
+    hmppsOffenderSnsClient
+      .publish(
+        PublishRequest.builder()
+          .topicArn(hmppsOffenderTopicArn)
+          .message(jsonString(offenderEvent(crn)))
+          .messageAttributes(
+            mapOf(
+              "eventType" to MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue("CONVICTION_CHANGED")
+                .build()
+            )
+          ).build()
+      )
   }
 
   protected fun countMessagesOnOffenderEventQueue(): Int =
