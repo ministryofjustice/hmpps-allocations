@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionIdentifiers
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
@@ -24,12 +23,6 @@ class EnrichEventService(
 
   fun getTier(crn: String): String? {
     return hmppsTierApiClient.getTierByCrn(crn)
-  }
-
-  fun getActiveSentencedConvictions(crn: String): List<Conviction> {
-    return communityApiClient.getActiveConvictions(crn).filter { conviction -> conviction.sentence != null }
-      .collectList()
-      .block() ?: emptyList()
   }
 
   fun getAllConvictionIdentifiersAssociatedToCrn(crn: String): Flux<ConvictionIdentifiers> =

@@ -38,6 +38,7 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
         "date": "2022-11-05",
         "length": "5 Weeks"
       },
+      "type": "CUSTODY",
       "probationStatus": {
          "status": "STATUS",
          "description": "${caseDetailsIntegration.probationStatusDescription}"

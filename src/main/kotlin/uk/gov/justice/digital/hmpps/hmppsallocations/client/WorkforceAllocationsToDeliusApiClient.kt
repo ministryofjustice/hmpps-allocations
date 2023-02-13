@@ -77,7 +77,8 @@ data class DeliusCaseDetail(
   val event: Event,
   val initialAppointment: InitialAppointment?,
   val probationStatus: ProbationStatus,
-  val communityPersonManager: CommunityPersonManager?
+  val communityPersonManager: CommunityPersonManager?,
+  val type: String
 )
 
 data class Event(val number: String)

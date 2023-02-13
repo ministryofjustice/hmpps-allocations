@@ -1,12 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.IDENTITY
 import javax.persistence.Id
@@ -34,10 +31,6 @@ data class UnallocatedCaseEntity(
   @Column(name = "conviction_id")
   @NotNull
   val convictionId: Long,
-
-  @Column(name = "case_type")
-  @Enumerated(EnumType.STRING)
-  var caseType: CaseTypes,
 
   @Column
   var teamCode: String? = null,

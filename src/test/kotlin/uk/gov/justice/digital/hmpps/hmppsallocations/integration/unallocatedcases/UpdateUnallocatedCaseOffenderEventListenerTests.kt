@@ -11,7 +11,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
@@ -32,7 +31,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
         providerCode = "",
         convictionNumber = 1
       )
@@ -42,7 +40,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -69,7 +66,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
         providerCode = "PC1",
         teamCode = "TC1",
         convictionNumber = 1
@@ -80,7 +76,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -120,8 +115,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -130,7 +124,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -153,8 +146,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -163,7 +155,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -186,8 +177,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -196,7 +186,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -219,8 +208,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -247,8 +235,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -260,7 +247,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           name = "Tester TestSurname",
           tier = "B3",
           convictionId = convictionId,
-          caseType = CaseTypes.CUSTODY,
           providerCode = "",
           convictionNumber = 1
         )
