@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
@@ -20,7 +19,6 @@ internal class GetUnallocatedCaseServiceTest {
     val crn = "X123456"
     val id = 2L
     val unallocatedCaseEntity = UnallocatedCaseEntity(
-      caseType = CaseTypes.COMMUNITY,
       name = "case1",
       convictionId = 1L,
       crn = crn,

@@ -7,7 +7,6 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.mockserver.verify.VerificationTimes
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -51,7 +50,6 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         tier = tier,
         name = "foo",
         convictionId = 12345678L + convictionNumber,
-        caseType = CaseTypes.CUSTODY,
         providerCode = "",
         convictionNumber = convictionNumber
       )

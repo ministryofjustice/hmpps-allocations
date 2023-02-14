@@ -1,0 +1,1 @@
+alter table unallocated_cases drop column case_type;
