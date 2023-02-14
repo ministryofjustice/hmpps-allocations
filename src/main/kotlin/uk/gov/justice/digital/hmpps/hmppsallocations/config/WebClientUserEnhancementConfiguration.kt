@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -23,7 +24,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiC
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import javax.servlet.http.HttpServletRequest
 
 @Configuration
 class WebClientUserEnhancementConfiguration(
