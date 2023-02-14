@@ -6,7 +6,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
@@ -21,7 +20,6 @@ import java.util.Optional
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
-  @Qualifier("communityApiClientUserEnhanced") private val communityApiClient: CommunityApiClient,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
@@ -42,15 +40,11 @@ class GetUnallocatedCaseService(
     }
 
   fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
-    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCasesRepository.findByTeamCode(teamCode))
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(
-          deliusCaseDetail.crn,
-          deliusCaseDetail.event.number.toInt()
-        )!!
-        unallocatedCase.initialAppointment = deliusCaseDetail.initialAppointment?.date
-        unallocatedCasesRepository.save(unallocatedCase)
+        val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
         UnallocatedCase.from(
           unallocatedCase, deliusCaseDetail
         )
@@ -63,36 +57,16 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
 
-  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
-    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-      val registrations = communityApiClient.getAllRegistrations(crn)
-        .map { registrations ->
-          registrations.registrations?.groupBy { registration -> registration.active } ?: emptyMap()
-        }
-
-      val rosh = assessRisksNeedsApiClient.getRosh(crn)
-
-      val rsr = assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .map { riskPredictors ->
-          Optional.ofNullable(
-            riskPredictors
-              .filter { riskPredictor -> riskPredictor.rsrScoreLevel != null && riskPredictor.rsrPercentageScore != null }
-              .maxByOrNull { riskPredictor -> riskPredictor.completedDate ?: LocalDateTime.MIN }
-          )
-        }
-
-      val ogrs = communityApiClient.getAssessment(crn)
-
-      val results = Mono.zip(registrations, rosh, rsr, ogrs).block()!!
-      return UnallocatedCaseRisks.from(
-        it,
-        results.t1.getOrDefault(true, emptyList()),
-        results.t1.getOrDefault(false, emptyList()),
-        results.t2.orElse(null),
-        results.t3.orElse(null),
-        results.t4.orElse(null)
-      )
-    }
+  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
+    return UnallocatedCaseRisks.from(
+      workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
+      findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!,
+      assessRisksNeedsApiClient.getRosh(crn).block(),
+      assessRisksNeedsApiClient.getRiskPredictors(crn)
+        .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
+        .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+    )
+  }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))

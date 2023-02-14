@@ -7,11 +7,9 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
-import java.time.LocalDate
 
 class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
@@ -21,10 +19,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -32,10 +29,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
-    assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
     assertThat(case.convictionNumber).isEqualTo(1)
@@ -59,10 +54,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.allocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -93,10 +87,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsForbiddenResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -110,10 +103,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.convictionWithNoSentenceResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -129,10 +121,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.inactiveConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -148,10 +139,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.notFoundConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -167,10 +157,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val convictionId = 123456789L
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.activeSentenacedAndPreConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -178,9 +167,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
-    assertThat(case.caseType).isEqualTo(CaseTypes.CUSTODY)
   }
 }

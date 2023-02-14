@@ -14,8 +14,6 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.activeSentencedAndPreConvictionResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionNoSentenceResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.convictionResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.multipleRegistrationResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.ogrsResponse
 
 class CommunityApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
@@ -139,25 +137,6 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
     )
   }
 
-  fun singleActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    CommunityApiExtension.communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
-      HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.singleActiveInductionResponse())
-    )
-  }
-
-  fun noActiveInductionResponse(crn: String) {
-    val inductionRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/contact-summary/inductions")
-
-    CommunityApiExtension.communityApi.`when`(inductionRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]")
-    )
-  }
-
   fun offenderDetailsResponse(crn: String) {
     val summaryRequest =
       HttpRequest.request().withPath("/offenders/crn/$crn/all")
@@ -174,33 +153,6 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
     CommunityApiExtension.communityApi.`when`(summaryRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withStatusCode(403)
-    )
-  }
-
-  fun getRegistrationsFromDelius(crn: String) {
-    val registrationsRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/registrations")
-
-    CommunityApiExtension.communityApi.`when`(registrationsRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(multipleRegistrationResponse())
-    )
-  }
-
-  fun noRegistrationsFromDelius(crn: String) {
-    val registrationsRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/registrations")
-
-    CommunityApiExtension.communityApi.`when`(registrationsRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("{}")
-    )
-  }
-
-  fun getOgrsForCrn(crn: String) {
-    val ogrsRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/assessments")
-
-    CommunityApiExtension.communityApi.`when`(ogrsRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(ogrsResponse())
     )
   }
 }

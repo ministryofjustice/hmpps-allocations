@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -56,6 +57,14 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusProbationRecord::class.java)
   }
+
+  fun getDeliusRisk(crn: String): Mono<DeliusRisk> {
+    return webClient
+      .get()
+      .uri("/allocation-demand/$crn/risk")
+      .retrieve()
+      .bodyToMono(DeliusRisk::class.java)
+  }
 }
 
 data class CaseIdentifier(val crn: String, val eventNumber: String)
@@ -68,7 +77,8 @@ data class DeliusCaseDetail(
   val event: Event,
   val initialAppointment: InitialAppointment?,
   val probationStatus: ProbationStatus,
-  val communityPersonManager: CommunityPersonManager?
+  val communityPersonManager: CommunityPersonManager?,
+  val type: String
 )
 
 data class Event(val number: String)

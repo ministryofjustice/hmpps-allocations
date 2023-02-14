@@ -2,15 +2,11 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType.IDENTITY
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
-import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -32,16 +28,9 @@ data class UnallocatedCaseEntity(
   @Column
   var tier: String,
 
-  @Column(name = "initial_appointment")
-  var initialAppointment: LocalDate? = null,
-
   @Column(name = "conviction_id")
   @NotNull
   val convictionId: Long,
-
-  @Column(name = "case_type")
-  @Enumerated(EnumType.STRING)
-  var caseType: CaseTypes,
 
   @Column
   var teamCode: String? = null,

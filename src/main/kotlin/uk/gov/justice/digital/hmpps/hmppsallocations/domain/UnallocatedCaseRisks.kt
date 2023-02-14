@@ -3,6 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Ogrs
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -24,33 +27,20 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
 ) {
   companion object {
     fun from(
+      deliusRisk: DeliusRisk,
       case: UnallocatedCaseEntity,
-      activeRegistrations: List<OffenderRegistration>,
-      inactiveRegistrations: List<OffenderRegistration>,
       rosh: RoshSummary?,
-      riskPredictor: RiskPredictor?,
-      offenderAssessment: OffenderAssessment?
+      riskPredictor: RiskPredictor?
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
-        case.name, case.crn, case.tier,
-        activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        case.name,
+        case.crn,
+        case.tier,
+        deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
+        deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
         rosh,
-        riskPredictor?.let {
-          UnallocatedCaseRsr(
-            it.rsrScoreLevel!!,
-            it.completedDate!!.toLocalDate(),
-            it.rsrPercentageScore!!
-          )
-        },
-        offenderAssessment?.let { assessment ->
-          assessment.ogrsScore?.let { score ->
-            UnallocatedCaseOgrs(
-              assessment.ogrsLastUpdate,
-              score
-            )
-          }
-        },
+        UnallocatedCaseRsr.from(riskPredictor),
+        UnallocatedCaseOgrs.from(deliusRisk.ogrs),
         case.convictionNumber
       )
     }
@@ -70,12 +60,12 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
   val endDate: LocalDate?,
 ) {
   companion object {
-    fun from(offenderRegistration: OffenderRegistration): UnallocatedCaseRegistration {
+    fun from(registrations: Registrations): UnallocatedCaseRegistration {
       return UnallocatedCaseRegistration(
-        offenderRegistration.type.description,
-        offenderRegistration.startDate,
-        offenderRegistration.notes,
-        offenderRegistration.endDate
+        registrations.description,
+        registrations.startDate,
+        registrations.notes,
+        registrations.endDate
       )
     }
   }
@@ -83,17 +73,29 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
 
 data class UnallocatedCaseRsr @JsonCreator constructor(
   @Schema(description = "Level", example = "HIGH")
-  val level: String,
+  val level: String?,
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val lastUpdatedOn: LocalDate,
-  val percentage: BigDecimal
-)
+  val lastUpdatedOn: LocalDate?,
+  val percentage: BigDecimal?
+) {
+  companion object {
+    fun from(rp: RiskPredictor?): UnallocatedCaseRsr? {
+      return rp?.let { UnallocatedCaseRsr(it.rsrScoreLevel, it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
+    }
+  }
+}
 
 data class UnallocatedCaseOgrs @JsonCreator constructor(
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-  val lastUpdatedOn: LocalDate?,
+  val lastUpdatedOn: LocalDate,
   @Schema(description = "Score", example = "62")
-  val score: BigInteger?
-)
+  val score: BigInteger
+) {
+  companion object {
+    fun from(ogrs: Ogrs?): UnallocatedCaseOgrs? {
+      return ogrs?.let { UnallocatedCaseOgrs(it.lastUpdatedDate, it.score) }
+    }
+  }
+}

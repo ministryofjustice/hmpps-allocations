@@ -9,13 +9,11 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -28,21 +26,18 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
         providerCode = "",
         convictionNumber = 1
       )
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -51,7 +46,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     assertThat(repository.count()).isEqualTo(1)
     val case = repository.findAll().first()
 
-    assertThat(case.initialAppointment).isEqualTo(LocalDate.parse("2021-11-30"))
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
   }
@@ -63,11 +57,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
         convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
         providerCode = "PC1",
         teamCode = "TC1",
         convictionNumber = 1
@@ -75,10 +67,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.allocatedConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -112,20 +103,17 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.convictionWithNoSentenceResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -142,20 +130,17 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.inactiveConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -172,20 +157,17 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
     communityApi.singleActiveConvictionResponseForAllConvictions(crn)
     communityApi.notFoundConvictionResponse(crn, convictionId)
-    communityApi.singleActiveInductionResponse(crn)
+
     hmppsTier.tierCalculationResponse(crn)
     communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
@@ -202,11 +184,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -227,11 +207,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY, providerCode = "",
+        convictionId = convictionId, providerCode = "",
         convictionNumber = 1
       )
     )
@@ -240,48 +218,13 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       repository.save(
         UnallocatedCaseEntity(
           crn = crn,
-          initialAppointment = LocalDate.parse("2021-11-30"),
           name = "Tester TestSurname",
           tier = "B3",
           convictionId = convictionId,
-          caseType = CaseTypes.CUSTODY,
           providerCode = "",
           convictionNumber = 1
         )
       )
     }
-  }
-
-  @Test
-  fun `initial appointment should be empty when there is no active conviction`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        initialAppointment = LocalDate.parse("2021-11-30"),
-        name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId,
-        caseType = CaseTypes.CUSTODY,
-        providerCode = "",
-        convictionNumber = 1
-      )
-    )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.unallocatedConvictionResponse(crn, convictionId)
-    communityApi.noActiveInductionResponse(crn)
-    hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
-    communityApi.singleActiveConvictionResponse(crn)
-
-    publishConvictionChangedMessage(crn)
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-
-    assertThat(repository.count()).isEqualTo(1)
-    val case = repository.findAll().first()
-
-    assertThat(case.initialAppointment).isNull()
   }
 }

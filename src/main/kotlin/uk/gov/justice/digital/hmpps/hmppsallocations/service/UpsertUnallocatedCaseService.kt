@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseTypes
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OrderManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -18,7 +17,6 @@ class UpsertUnallocatedCaseService(
   private val repository: UnallocatedCasesRepository,
   @Qualifier("communityApiClient") private val communityApiClient: CommunityApiClient,
   private val enrichEventService: EnrichEventService,
-  private val caseTypeEngine: CaseTypeEngine,
   private val telemetryService: TelemetryService,
 
 ) {
@@ -40,18 +38,11 @@ class UpsertUnallocatedCaseService(
       .block()?.let { conviction ->
         val currentOrderManager = conviction.orderManagers.maxByOrNull { it.dateStartOfAllocation ?: LocalDateTime.MIN }
         if (isUnallocated(conviction, currentOrderManager)) {
-          val sentence = conviction.sentence!!
           log.info("${unallocatedCaseEntity.crn} is in unallocated")
           enrichEventService.getTier(unallocatedCaseEntity.crn)?.let { tier ->
-            val initialAppointment =
-              enrichEventService.getInitialAppointmentDate(unallocatedCaseEntity.crn, sentence.startDate)
             val name = enrichEventService.getOffenderName(unallocatedCaseEntity.crn)
-            val activeConvictions = enrichEventService.getActiveSentencedConvictions(unallocatedCaseEntity.crn)
-            unallocatedCaseEntity.initialAppointment = initialAppointment
             unallocatedCaseEntity.tier = tier
             unallocatedCaseEntity.name = name
-            unallocatedCaseEntity.caseType =
-              caseTypeEngine.getCaseType(activeConvictions, unallocatedCaseEntity.convictionNumber)
             unallocatedCaseEntity.teamCode = currentOrderManager!!.teamCode
             unallocatedCaseEntity.providerCode = currentOrderManager.probationAreaCode
 
@@ -78,7 +69,6 @@ class UpsertUnallocatedCaseService(
       crn = crn,
       tier = "",
       convictionId = convictionIdentifiers.convictionId,
-      caseType = CaseTypes.UNKNOWN,
       providerCode = "PC1",
       convictionNumber = convictionIdentifiers.convictionNumber
     )

@@ -1,29 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Contact
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Conviction
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.OffenderRegistrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.mapper.deliusToStaffGrade
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Optional
 
 class CommunityApiClient(private val webClient: WebClient) {
 
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
-
   fun getActiveConvictions(crn: String): Flux<Conviction> {
-
     return webClient
       .get()
       .uri("/offenders/crn/$crn/convictions?activeOnly=true")
@@ -59,19 +47,6 @@ class CommunityApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getInductionContacts(crn: String, contactDateFrom: LocalDate): Flux<Contact> {
-    val contactDateFromQuery = contactDateFrom.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/contact-summary/inductions?contactDateFrom=$contactDateFromQuery")
-      .retrieve()
-      .bodyToFlux(Contact::class.java)
-      .onErrorResume {
-        log.warn("Error retrieving induction contacts", it)
-        Flux.empty()
-      }
-  }
-
   fun getOffenderDetails(crn: String): Mono<OffenderDetails> {
     return webClient
       .get()
@@ -82,33 +57,6 @@ class CommunityApiClient(private val webClient: WebClient) {
         { Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn")) }
       )
       .bodyToMono(OffenderDetails::class.java)
-  }
-
-  fun getAllRegistrations(crn: String): Mono<OffenderRegistrations> {
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/registrations")
-      .retrieve()
-      .bodyToMono(OffenderRegistrations::class.java)
-  }
-
-  fun getAssessment(crn: String): Mono<Optional<OffenderAssessment>> {
-    return webClient
-      .get()
-      .uri("/offenders/crn/$crn/assessments")
-      .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingOffenderAssessmentError("No offender assessment found for $crn")) }
-      )
-      .bodyToMono(OffenderAssessment::class.java)
-      .map { Optional.of(it) }
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingOffenderAssessmentError -> Mono.just(Optional.empty())
-          else -> Mono.error(ex)
-        }
-      }
   }
 
   data class Staff @JsonCreator constructor(
@@ -126,5 +74,4 @@ class CommunityApiClient(private val webClient: WebClient) {
 }
 
 private class MissingConvictionError(msg: String) : RuntimeException(msg)
-private class MissingOffenderAssessmentError(msg: String) : RuntimeException(msg)
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
