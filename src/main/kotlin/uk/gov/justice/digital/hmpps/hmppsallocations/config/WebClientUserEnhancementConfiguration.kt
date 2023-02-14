@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiC
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.utils.UserContext
+import javax.servlet.http.HttpServletRequest
 
 @Configuration
 class WebClientUserEnhancementConfiguration(
@@ -35,11 +35,11 @@ class WebClientUserEnhancementConfiguration(
 
   @Bean
   @RequestScope
-  fun assessRisksNeedsWebClientUserEnhancedAppScope(builder: WebClient.Builder): WebClient {
+  fun assessRisksNeedsWebClientUserEnhancedAppScope(builder: WebClient.Builder, httpServletRequest: HttpServletRequest): WebClient {
     return builder.baseUrl(assessRisksNeedsApiRootUri)
       .filter { request: ClientRequest, next: ExchangeFunction ->
         val filtered = ClientRequest.from(request)
-          .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
+          .header(HttpHeaders.AUTHORIZATION, httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION))
           .build()
         next.exchange(filtered)
       }
