@@ -168,4 +168,14 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .jsonPath("$.inactiveRegistrations")
       .isEmpty
   }
+
+  @Test
+  fun `getting case risks when not in allocation demand returns not found`() {
+    webTestClient.get()
+      .uri("/cases/unallocated/CRN12345/convictions/6/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
 }

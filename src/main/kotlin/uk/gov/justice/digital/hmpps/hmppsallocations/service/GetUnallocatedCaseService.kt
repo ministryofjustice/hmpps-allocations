@@ -57,16 +57,17 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
 
-  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
-    return UnallocatedCaseRisks.from(
-      workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
-      findUnallocatedCaseByConvictionNumber(crn, convictionNumber)!!,
-      assessRisksNeedsApiClient.getRosh(crn).block(),
-      assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-        .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
-    )
-  }
+  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
+    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+      return UnallocatedCaseRisks.from(
+        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
+        unallocatedCaseEntity,
+        assessRisksNeedsApiClient.getRosh(crn).block(),
+        assessRisksNeedsApiClient.getRiskPredictors(crn)
+          .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
+          .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+      )
+    }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
