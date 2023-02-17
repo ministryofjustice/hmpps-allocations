@@ -13,6 +13,11 @@ fun deliusRiskResponse() = """
       "description": "ALT Under MAPPA Arrangements",
       "startDate": "2021-08-30",
       "notes": "Some Notes"
+    },
+    {
+      "description": "Suicide/self-harm",
+      "startDate": "2021-08-30",
+      "notes": "Some Notes"
     }
   ],
   "inactiveRegistrations": [

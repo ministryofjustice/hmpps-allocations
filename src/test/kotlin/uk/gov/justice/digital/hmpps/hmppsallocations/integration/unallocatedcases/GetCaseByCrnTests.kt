@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension.Companion.offenderAssessmentApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
@@ -12,6 +13,9 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
@@ -79,6 +83,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("626aa1d1-71c6-4b76-92a1-bf2f9250c143")
       .jsonPath("$.preConvictionDocument.name")
       .isEqualTo("Pre Cons.pdf")
+      .jsonPath("$.roshOverallRisk")
+      .isEqualTo("VERY_HIGH")
+      .jsonPath("$.rsrLevel")
+      .isEqualTo("MEDIUM")
+      .jsonPath("$.ogrsLevel")
+      .isEqualTo(85)
+      .jsonPath("$.activeRiskRegistration")
+      .isEqualTo("ALT Under MAPPA Arrangements, Suicide/self-harm")
   }
 
   @Test
@@ -86,6 +98,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
 
@@ -105,6 +118,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.notFoundAssessmentForCrn(crn)
 
@@ -134,7 +148,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
@@ -169,7 +183,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
@@ -192,7 +206,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
-
+    workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
     webTestClient.get()
