@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddress
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Offence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Requirement
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
-import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -54,7 +53,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val convictionNumber: Int,
   val roshOverallRisk: String?,
   val rsrLevel: String?,
-  val ogrsLevel: BigInteger?,
+  val ogrsLevel: String?,
   val activeRiskRegistration: String?
 ) {
 
@@ -84,11 +83,24 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         deliusCaseView.mainAddress,
         deliusCaseView.sentence.length,
         case.convictionNumber,
-        unallocatedCaseRisks?.roshRisk?.overallRisk,
-        unallocatedCaseRisks?.rsr?.level,
-        unallocatedCaseRisks?.ogrs?.score,
+        unallocatedCaseRisks?.roshRisk?.overallRisk?.replace("_", " "),
+        unallocatedCaseRisks?.rsr?.level?.replace("_", " "),
+        ogrsLevel(unallocatedCaseRisks?.ogrs?.score?.toInt()),
         unallocatedCaseRisks?.activeRegistrations?.joinToString(", ") { it.type }
       )
+    }
+    fun ogrsLevel(score: Int?): String {
+      if (score != null) {
+        if (score < 50)
+          return "LOW"
+        else if (score in 50..74)
+          return "MEDIUM"
+        else if (score in 75..89)
+          return "HIGH"
+        else if (score > 89)
+          return "VERY HIGH"
+      }
+      return "SCORE UNAVAILABLE"
     }
   }
 }

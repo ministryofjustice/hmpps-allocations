@@ -84,11 +84,11 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.preConvictionDocument.name")
       .isEqualTo("Pre Cons.pdf")
       .jsonPath("$.roshOverallRisk")
-      .isEqualTo("VERY_HIGH")
+      .isEqualTo("VERY HIGH")
       .jsonPath("$.rsrLevel")
       .isEqualTo("MEDIUM")
       .jsonPath("$.ogrsLevel")
-      .isEqualTo(85)
+      .isEqualTo("HIGH")
       .jsonPath("$.activeRiskRegistration")
       .isEqualTo("ALT Under MAPPA Arrangements, Suicide/self-harm")
   }
