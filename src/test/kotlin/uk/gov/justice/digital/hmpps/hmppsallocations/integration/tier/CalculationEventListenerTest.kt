@@ -50,6 +50,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         tier = tier,
         name = "foo",
         providerCode = "",
+        teamCode = "",
         convictionNumber = convictionNumber
       )
     )

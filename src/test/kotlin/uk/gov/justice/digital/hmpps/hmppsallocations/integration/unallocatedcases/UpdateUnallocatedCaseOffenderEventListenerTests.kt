@@ -31,6 +31,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         name = "Tester TestSurname",
         tier = "B3",
         providerCode = "",
+        teamCode = "",
         convictionNumber = 1
       )
     )
@@ -107,7 +108,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "",
+        tier = "B3", providerCode = "", teamCode = "",
         convictionNumber = 1
       )
     )
@@ -132,7 +133,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "",
+        tier = "B3", providerCode = "", teamCode = "",
         convictionNumber = 1
       )
     )
@@ -144,6 +145,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           name = "Tester TestSurname",
           tier = "B3",
           providerCode = "",
+          teamCode = "",
           convictionNumber = 1
         )
       )

@@ -82,11 +82,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .onErrorResume(WebClientResponseException::class.java) { ex ->
         when (ex.rawStatusCode) {
           404 -> Mono.empty()
+          403 -> Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
           else -> Mono.error(ex)
         }
       }
 }
 
+class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
 

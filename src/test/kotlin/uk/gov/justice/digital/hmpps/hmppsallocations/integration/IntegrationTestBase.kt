@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
@@ -35,7 +34,6 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 @ExtendWith(
   AssessRisksNeedsApiExtension::class,
   OffenderAssessmentApiExtension::class,
-  CommunityApiExtension::class,
   TierApiExtension::class,
   WorkforceAllocationsToDeliusApiExtension::class,
   HmppsAuthApiExtension::class

@@ -21,13 +21,11 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import javax.servlet.http.HttpServletRequest
 
 @Configuration
 class WebClientUserEnhancementConfiguration(
-  @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
   @Value("\${assessment.endpoint.url}") private val assessmentApiRootUri: String,
   @Value("\${assess-risks-needs.endpoint.url}") private val assessRisksNeedsApiRootUri: String,
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
@@ -63,20 +61,6 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun assessmentApiClientUserEnhanced(@Qualifier("assessmentWebClientUserEnhancedAppScope") webClient: WebClient): AssessmentApiClient {
     return AssessmentApiClient(webClient)
-  }
-
-  @Bean
-  @RequestScope
-  fun communityWebClientUserEnhancedAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    builder: WebClient.Builder
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository), builder, communityApiRootUri, "community-api")
-  }
-
-  @Bean
-  fun communityApiClientUserEnhanced(@Qualifier("communityWebClientUserEnhancedAppScope") webClient: WebClient): CommunityApiClient {
-    return CommunityApiClient(webClient)
   }
 
   @Bean
