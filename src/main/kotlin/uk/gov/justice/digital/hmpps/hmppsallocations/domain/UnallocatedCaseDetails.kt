@@ -87,7 +87,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         unallocatedCaseRisks?.roshRisk?.overallRisk,
         unallocatedCaseRisks?.rsr?.level,
         unallocatedCaseRisks?.ogrs?.score,
-        unallocatedCaseRisks?.activeRegistrations?.joinToString(", ") { it.type }.takeUnless { it.isNullOrEmpty() }
+        unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type }
       )
     }
   }
