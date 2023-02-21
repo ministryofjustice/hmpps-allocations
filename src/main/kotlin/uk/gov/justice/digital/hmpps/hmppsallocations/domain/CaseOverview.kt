@@ -11,8 +11,6 @@ data class CaseOverview @JsonCreator constructor(
   val crn: String,
   @Schema(description = "Latest tier of case", example = "D2")
   val tier: String,
-  @Schema(description = "Conviction Id")
-  val convictionId: Long,
   @Schema(description = "Conviction Number")
   val convictionNumber: Int
 ) {
@@ -21,7 +19,6 @@ data class CaseOverview @JsonCreator constructor(
       return CaseOverview(
         case.name,
         case.crn, case.tier,
-        case.convictionId,
         case.convictionNumber
       )
     }
