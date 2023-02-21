@@ -31,7 +31,8 @@ class GetUnallocatedCaseService(
       val assessment = assessmentApiClient.getAssessment(crn)
         .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
       val results = Mono.zip(workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber), assessment).block()!!
-      return UnallocatedCaseDetails.from(it, results.t1, results.t2.orElse(null))
+      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
+      return UnallocatedCaseDetails.from(it, results.t1, results.t2.orElse(null), unallocatedCaseRisks)
     }
 
   fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =

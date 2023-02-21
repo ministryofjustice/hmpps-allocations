@@ -49,11 +49,12 @@ class UnallocatedCasesController(
   fun getUnallocatedCase(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long
-  ): ResponseEntity<UnallocatedCaseDetails> =
-    ResponseEntity.ok(
+  ): ResponseEntity<UnallocatedCaseDetails> {
+    return ResponseEntity.ok(
       getUnallocatedCaseService.getCase(crn, convictionNumber)
         ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
     )
+  }
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")
   @ApiResponses(
