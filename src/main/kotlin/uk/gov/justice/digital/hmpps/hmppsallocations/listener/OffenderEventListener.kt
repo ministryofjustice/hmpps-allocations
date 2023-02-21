@@ -6,24 +6,19 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.EnrichEventService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
-  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
-  private val enrichEventService: EnrichEventService
+  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService
 ) {
 
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
     try {
-      enrichEventService.getAllConvictionIdentifiersAssociatedToCrn(crn)
-        .collectList()
-        .block()!!
-        .forEach { upsertUnallocatedCaseService.upsertUnallocatedCase(crn, it) }
+      upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
     } catch (e: ForbiddenOffenderError) {
       log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
     }

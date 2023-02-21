@@ -49,7 +49,6 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         crn = crn,
         tier = tier,
         name = "foo",
-        convictionId = 12345678L + convictionNumber,
         providerCode = "",
         convictionNumber = convictionNumber
       )

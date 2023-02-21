@@ -49,7 +49,6 @@ abstract class IntegrationTestBase {
     "Hannah Francis",
     "J680660",
     "C2",
-    convictionId = 987654321,
     providerCode = "",
     teamCode = "TEAM1",
     convictionNumber = 4
@@ -60,7 +59,6 @@ abstract class IntegrationTestBase {
       listOf(
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          123456789,
           providerCode = "",
           teamCode = "TEAM1",
           convictionNumber = 1
@@ -70,7 +68,6 @@ abstract class IntegrationTestBase {
           "Andrei Edwards",
           "J680648",
           "A1",
-          convictionId = 23456789,
           providerCode = "",
           teamCode = "TEAM1",
           convictionNumber = 2
@@ -80,7 +77,6 @@ abstract class IntegrationTestBase {
           "William Jones",
           "X4565764",
           "C1",
-          convictionId = 68793954,
           providerCode = "",
           teamCode = "TEAM1",
           convictionNumber = 3
@@ -88,7 +84,6 @@ abstract class IntegrationTestBase {
         previouslyManagedCase,
         UnallocatedCaseEntity(
           null, "Dylan Adam Armstrong", "J678910", "C1",
-          56785493,
           providerCode = "",
           teamCode = "TEAM2",
           convictionNumber = 5
@@ -98,7 +93,6 @@ abstract class IntegrationTestBase {
           "Jim Doe",
           "C3333333",
           "B1",
-          convictionId = 86472147892,
           providerCode = "",
           teamCode = "TEAM3",
           convictionNumber = 6

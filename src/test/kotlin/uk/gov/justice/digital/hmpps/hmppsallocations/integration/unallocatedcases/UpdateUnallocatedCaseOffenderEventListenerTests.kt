@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.getWmtPeriod
 import java.time.LocalDateTime
@@ -24,22 +24,19 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `only contain one record in db if case remains the same after event emitted about it`() {
     val crn = "J678910"
-    val convictionId = 123456789L
+
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
         providerCode = "",
         convictionNumber = 1
       )
     )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.unallocatedConvictionResponse(crn, convictionId)
 
+    workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -59,23 +56,19 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `delete when conviction allocated to actual officer`() {
     val crn = "J678910"
-    val convictionId = 123456789L
+
     val savedEntity = repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        convictionId = convictionId,
         providerCode = "PC1",
         teamCode = "TC1",
         convictionNumber = 1
       )
     )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.allocatedConvictionResponse(crn, convictionId)
-
+    workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -107,112 +100,18 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `delete when conviction's sentence is removed`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId, providerCode = "",
-        convictionNumber = 1
-      )
-    )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.convictionWithNoSentenceResponse(crn, convictionId)
-
-    hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
-
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-
-    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
-    assertThat(repository.count()).isEqualTo(0)
-  }
-
-  @Test
-  fun `delete when conviction comes inactive`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId, providerCode = "",
-        convictionNumber = 1
-      )
-    )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.inactiveConvictionResponse(crn, convictionId)
-
-    hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
-
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-
-    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
-    assertThat(repository.count()).isEqualTo(0)
-  }
-
-  @Test
-  fun `delete when conviction is not found`() {
-    val crn = "J678910"
-    val convictionId = 123456789L
-    repository.save(
-      UnallocatedCaseEntity(
-        crn = crn,
-        name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId, providerCode = "",
-        convictionNumber = 1
-      )
-    )
-    communityApi.singleActiveConvictionResponseForAllConvictions(crn)
-    communityApi.notFoundConvictionResponse(crn, convictionId)
-
-    hmppsTier.tierCalculationResponse(crn)
-    communityApi.offenderDetailsResponse(crn)
-
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
-    )
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-
-    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
-    assertThat(repository.count()).isEqualTo(0)
-  }
-
-  @Test
   fun `delete when crn is not found`() {
     val crn = "J678910"
-    val convictionId = 123456789L
+
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId, providerCode = "",
+        tier = "B3", providerCode = "",
         convictionNumber = 1
       )
     )
-    communityApi.notFoundAllConvictionResponse(crn)
+    workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
@@ -229,13 +128,11 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `should not be able to insert more than one row of crn conviction id combination`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     repository.save(
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
-        convictionId = convictionId, providerCode = "",
+        tier = "B3", providerCode = "",
         convictionNumber = 1
       )
     )
@@ -246,7 +143,6 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           crn = crn,
           name = "Tester TestSurname",
           tier = "B3",
-          convictionId = convictionId,
           providerCode = "",
           convictionNumber = 1
         )

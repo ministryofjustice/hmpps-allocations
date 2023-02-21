@@ -2,13 +2,16 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -65,6 +68,23 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusRisk::class.java)
   }
+
+  fun getUnallocatedEvents(crn: String): Mono<UnallocatedEvents?> =
+    webClient
+      .get()
+      .uri("/allocation-demand/$crn/unallocated-events")
+      .retrieve()
+      .onStatus(
+        { httpStatus -> HttpStatus.FORBIDDEN == httpStatus },
+        { Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn")) }
+      )
+      .bodyToMono(UnallocatedEvents::class.java)
+      .onErrorResume(WebClientResponseException::class.java) { ex ->
+        when (ex.rawStatusCode) {
+          404 -> Mono.empty()
+          else -> Mono.error(ex)
+        }
+      }
 }
 
 data class CaseIdentifier(val crn: String, val eventNumber: String)
@@ -87,7 +107,7 @@ data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 data class Name(val forename: String, val middleName: String?, val surname: String) {
-  fun getCombinedName() = "$forename ${middleName?.let { "$middleName " } ?: ""}$surname"
+  fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let{ "$middleName " } ?: ""}$surname"
 }
 data class CommunityPersonManager(val name: Name, val grade: String?)
 
