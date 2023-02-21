@@ -74,15 +74,11 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .get()
       .uri("/allocation-demand/$crn/unallocated-events")
       .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.FORBIDDEN == httpStatus },
-        { Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn")) }
-      )
       .bodyToMono(UnallocatedEvents::class.java)
       .onErrorResume(WebClientResponseException::class.java) { ex ->
         when (ex.rawStatusCode) {
-          404 -> Mono.empty()
-          403 -> Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+          HttpStatus.NOT_FOUND.value() -> Mono.empty()
+          HttpStatus.FORBIDDEN.value() -> Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
           else -> Mono.error(ex)
         }
       }
