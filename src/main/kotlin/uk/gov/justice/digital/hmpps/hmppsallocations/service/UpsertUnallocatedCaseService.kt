@@ -1,12 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import javax.transaction.Transactional
@@ -26,12 +24,12 @@ class UpsertUnallocatedCaseService(
     workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn).block()?.let { unallocatedEvents ->
       val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
       hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-
-        saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedEvents, tier)
-        updateExistingEvents(activeEvents, storedUnallocatedEvents, unallocatedEvents, tier)
+        val name = unallocatedEvents.name.getCombinedName()
+        saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+        updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
         deleteOldEvents(storedUnallocatedEvents, activeEvents)
       }
-    } ?: repository.deleteAll(storedUnallocatedEvents)
+    } ?: deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
 
   private fun deleteOldEvents(
@@ -49,7 +47,7 @@ class UpsertUnallocatedCaseService(
   private fun updateExistingEvents(
     activeEvents: Map<Int, ActiveEvent>,
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    unallocatedEvents: UnallocatedEvents,
+    name: String,
     tier: String
   ) {
     storedUnallocatedEvents
@@ -57,7 +55,7 @@ class UpsertUnallocatedCaseService(
       .forEach { unallocatedCaseEntity ->
         val activeEvent = activeEvents[unallocatedCaseEntity.convictionNumber]!!
         unallocatedCaseEntity.tier = tier
-        unallocatedCaseEntity.name = unallocatedEvents.name.getCombinedName()
+        unallocatedCaseEntity.name = name
         unallocatedCaseEntity.teamCode = activeEvent.teamCode
         unallocatedCaseEntity.providerCode = activeEvent.providerCode
       }
@@ -66,7 +64,8 @@ class UpsertUnallocatedCaseService(
   private fun saveNewEvents(
     activeEvents: Map<Int, ActiveEvent>,
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    unallocatedEvents: UnallocatedEvents,
+    name: String,
+    crn: String,
     tier: String
   ) {
     activeEvents
@@ -75,8 +74,8 @@ class UpsertUnallocatedCaseService(
       .forEach { createEvent ->
         val savedEntity = repository.save(
           UnallocatedCaseEntity(
-            name = unallocatedEvents.name.getCombinedName(),
-            crn = unallocatedEvents.crn,
+            name = name,
+            crn = crn,
             tier = tier,
             providerCode = createEvent.providerCode,
             teamCode = createEvent.teamCode,
@@ -85,9 +84,5 @@ class UpsertUnallocatedCaseService(
         )
         telemetryService.trackAllocationDemandRaised(savedEntity)
       }
-  }
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
