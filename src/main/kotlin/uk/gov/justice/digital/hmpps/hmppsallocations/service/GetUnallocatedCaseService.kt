@@ -1,5 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -40,7 +43,7 @@ class GetUnallocatedCaseService(
       CaseOverview.from(it)
     }
 
-  fun getAllByTeam(teamCode: String): Flux<UnallocatedCase> {
+  suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
     return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
