@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
@@ -31,7 +32,7 @@ internal class GetUnallocatedCaseServiceTest {
     )
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false
-    every { runBlocking { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } } returns emptyFlow()
+    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns emptyFlow()
     val cases = GetUnallocatedCaseService(mockRepo, mockk(), mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").toList()
     assertEquals(0, cases!!.size)
   }
