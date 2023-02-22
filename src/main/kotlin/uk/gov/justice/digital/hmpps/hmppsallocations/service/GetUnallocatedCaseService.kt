@@ -3,10 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -18,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
-import java.util.Optional
 
 @Service
 class GetUnallocatedCaseService(
@@ -28,17 +27,18 @@ class GetUnallocatedCaseService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
-  fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
+  suspend fun getCase(crn: String, convictionNumber: Long, authToken: String): UnallocatedCaseDetails? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
 
       val assessment = assessmentApiClient.getAssessment(crn)
-        .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
-      val results = Mono.zip(workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber), assessment).block()!!
-      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
-      return UnallocatedCaseDetails.from(it, results.t1, results.t2.orElse(null), unallocatedCaseRisks)
+        .toList()
+        .maxByOrNull { a -> a.completed }
+      val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
+      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber, authToken)
+      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks)
     }
 
-  fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
+  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
     }
@@ -55,21 +55,21 @@ class GetUnallocatedCaseService(
       }
   }
 
-  fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
+  suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
     findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
-      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber).block()
+      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
 
-  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
+  suspend fun getCaseRisks(crn: String, convictionNumber: Long, authToken: String): UnallocatedCaseRisks? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       return UnallocatedCaseRisks.from(
-        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
+        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
         unallocatedCaseEntity,
-        assessRisksNeedsApiClient.getRosh(crn).block(),
-        assessRisksNeedsApiClient.getRiskPredictors(crn)
+        assessRisksNeedsApiClient.getRosh(crn, authToken),
+        assessRisksNeedsApiClient.getRiskPredictors(crn, authToken)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-          .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       )
     }
 
