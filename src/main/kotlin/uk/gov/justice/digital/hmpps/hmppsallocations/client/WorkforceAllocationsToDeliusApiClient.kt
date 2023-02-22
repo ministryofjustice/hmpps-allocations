@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,7 +20,7 @@ import java.time.ZonedDateTime
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
-  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flux<DeliusCaseDetail> {
+  suspend fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
     val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()
@@ -27,6 +29,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
       .flatMapIterable { it.cases }
+      .asFlow()
   }
 
   fun getDocuments(crn: String): Flux<Document> {
