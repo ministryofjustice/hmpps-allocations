@@ -5,7 +5,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.CaseCountByTeam
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.ConvictionIdentifiers
 
 @Repository
 interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
@@ -15,7 +14,6 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
   fun findByCrn(crn: String): List<UnallocatedCaseEntity>
 
   fun findCaseByCrnAndConvictionNumber(crn: String, convictionNumber: Int): UnallocatedCaseEntity?
-  fun findConvictionIdentifiersByCrn(crn: String): List<ConvictionIdentifiers>
 
   fun findByTeamCode(teamCode: String): List<UnallocatedCaseEntity>
   @Query("select u.teamCode AS teamCode, count(*) AS caseCount from UnallocatedCaseEntity u where u.teamCode in :teamCodes GROUP BY u.teamCode")

@@ -20,9 +20,9 @@ internal class GetUnallocatedCaseServiceTest {
     val id = 2L
     val unallocatedCaseEntity = UnallocatedCaseEntity(
       name = "case1",
-      convictionId = 1L,
       crn = crn,
       providerCode = "PC1",
+      teamCode = "TM1",
       tier = "C2",
       id = id,
       convictionNumber = 1

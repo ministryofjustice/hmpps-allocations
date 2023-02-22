@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CaseViewDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
@@ -104,14 +103,6 @@ data class OffenderManagerDetails @JsonCreator constructor(
 ) {
 
   companion object {
-
-    fun from(offenderManager: CommunityApiClient.OffenderManager): OffenderManagerDetails {
-      return OffenderManagerDetails(
-        forenames = offenderManager.staff.forenames,
-        surname = offenderManager.staff.surname,
-        grade = offenderManager.staffGrade
-      )
-    }
 
     fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
 
