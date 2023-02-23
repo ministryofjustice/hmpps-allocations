@@ -32,8 +32,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
 
   implementation("io.opentelemetry:opentelemetry-api:1.11.0")
 
@@ -47,7 +47,7 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.4")
   testImplementation("com.ninja-squad:springmockk:4.0.0")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 }
 
 java {
