@@ -1,24 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.endpoint.WebClientReactiveClientCredentialsTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
@@ -73,21 +65,7 @@ class WebClientUserEnhancementConfiguration(
     val service: ReactiveOAuth2AuthorizedClientService = InMemoryReactiveOAuth2AuthorizedClientService(clients)
     val manager = AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clients, service)
 
-    val reactiveClientCredentialsTokenResponseClient = WebClientReactiveClientCredentialsTokenResponseClient()
-
-    reactiveClientCredentialsTokenResponseClient.addParametersConverter { grantRequest ->
-      val parameters: MultiValueMap<String, String> = LinkedMultiValueMap()
-
-      runBlocking {
-        val username = ReactiveSecurityContextHolder.getContext()
-          .map(SecurityContext::getAuthentication)
-          .map(Authentication::getName)
-          .awaitFirstOrNull()
-        parameters.add("username", username)
-      }
-
-      parameters
-    }
+    val reactiveClientCredentialsTokenResponseClient = UserEnhancedReactiveClientCredentialsTokenResponseClient()
 
     val reactiveAuthorizedClientProvider = ReactiveOAuth2AuthorizedClientProviderBuilder
       .builder()
