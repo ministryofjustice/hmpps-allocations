@@ -68,24 +68,14 @@ class UserEnhancedReactiveClientCredentialsTokenResponseClient :
       }
   }
 
-  /**
-   * Populates the given [OAuth2AccessTokenResponse] with additional details from
-   * the grant request.
-   * @param grantRequest the request for which the response was received.
-   * @param tokenResponse the original token response
-   * @return a token response optionally populated with additional details from the
-   * request.
-   */
   fun populateTokenResponse(grantRequest: OAuth2ClientCredentialsGrantRequest?, tokenResponse: OAuth2AccessTokenResponse): OAuth2AccessTokenResponse? {
     var tokenResponse = tokenResponse
     if (CollectionUtils.isEmpty(tokenResponse.accessToken.scopes)) {
       val defaultScopes: Set<String> = emptySet()
-      // @formatter:off
       tokenResponse = OAuth2AccessTokenResponse
         .withResponse(tokenResponse)
         .scopes(defaultScopes)
         .build()
-      // @formatter:on
     }
     return tokenResponse
   }
