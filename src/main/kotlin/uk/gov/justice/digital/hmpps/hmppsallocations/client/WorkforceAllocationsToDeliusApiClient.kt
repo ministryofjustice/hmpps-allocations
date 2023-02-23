@@ -8,8 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.bodyToFlow
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
@@ -33,12 +32,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .asFlow()
   }
 
-  suspend fun getDocuments(crn: String): Flow<Document> {
+  fun getDocuments(crn: String): Flux<Document> {
     return webClient
       .get()
       .uri("/offenders/$crn/documents")
       .retrieve()
-      .bodyToFlow()
+      .bodyToFlux(Document::class.java)
   }
 
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
@@ -49,28 +48,28 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .toEntity(Resource::class.java)
   }
 
-  suspend fun getDeliusCaseView(crn: String, convictionNumber: Long): DeliusCaseView {
+  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/$convictionNumber/case-view")
       .retrieve()
-      .awaitBody()
+      .bodyToMono(DeliusCaseView::class.java)
   }
 
-  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
+  fun getProbationRecord(crn: String, excludeConvictionNumber: Long): Mono<DeliusProbationRecord> {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/$excludeConvictionNumber/probation-record")
       .retrieve()
-      .awaitBody()
+      .bodyToMono(DeliusProbationRecord::class.java)
   }
 
-  suspend fun getDeliusRisk(crn: String): DeliusRisk {
+  fun getDeliusRisk(crn: String): Mono<DeliusRisk> {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/risk")
       .retrieve()
-      .awaitBody()
+      .bodyToMono(DeliusRisk::class.java)
   }
 
   fun getUnallocatedEvents(crn: String): Mono<UnallocatedEvents?> =

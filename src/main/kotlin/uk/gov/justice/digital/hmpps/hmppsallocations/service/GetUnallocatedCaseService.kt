@@ -3,10 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
+import java.util.Optional
 
 @Service
 class GetUnallocatedCaseService(
@@ -27,18 +28,17 @@ class GetUnallocatedCaseService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
+  fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
 
       val assessment = assessmentApiClient.getAssessment(crn)
-        .toList()
-        .maxByOrNull { a -> a.completed }
-      val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
+        .map { assessments -> Optional.ofNullable(assessments.maxByOrNull { a -> a.completed }) }
+      val results = Mono.zip(workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber), assessment).block()!!
       val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
-      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks)
+      return UnallocatedCaseDetails.from(it, results.t1, results.t2.orElse(null), unallocatedCaseRisks)
     }
 
-  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
+  fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
     }
@@ -55,21 +55,21 @@ class GetUnallocatedCaseService(
       }
   }
 
-  suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
+  fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
     findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
-      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
+      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber).block()
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
 
-  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
+  fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       return UnallocatedCaseRisks.from(
-        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn).block(),
         unallocatedCaseEntity,
-        assessRisksNeedsApiClient.getRosh(crn),
+        assessRisksNeedsApiClient.getRosh(crn).block(),
         assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+          .collectList().block()?.maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       )
     }
 
