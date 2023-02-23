@@ -9,6 +9,8 @@ plugins {
 configurations {
   implementation { exclude(module = "spring-boot-starter-web") }
   implementation { exclude(module = "spring-boot-starter-tomcat") }
+  implementation { exclude(module = "applicationinsights-spring-boot-starter") }
+  implementation { exclude(module = "applicationinsights-logging-logback") }
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
@@ -35,7 +37,10 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.11.0")
+  // go to open telemetry, when upgrading to spring boot 3 these can be removed
+  implementation("io.opentelemetry:opentelemetry-api:1.21.0")
+  implementation("com.microsoft.azure:applicationinsights-core:3.4.7")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.4.7")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
