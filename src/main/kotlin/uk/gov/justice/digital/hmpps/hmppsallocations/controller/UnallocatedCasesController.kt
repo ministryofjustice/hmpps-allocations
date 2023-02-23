@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -45,11 +46,14 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}")
-  suspend fun getUnallocatedCase(
+  fun getUnallocatedCase(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long
-  ): UnallocatedCaseDetails {
-    return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+  ): ResponseEntity<UnallocatedCaseDetails> {
+    return ResponseEntity.ok(
+      getUnallocatedCaseService.getCase(crn, convictionNumber)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
   }
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")
@@ -61,12 +65,14 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/overview")
-  suspend fun getUnallocatedCaseOverview(
+  fun getUnallocatedCaseOverview(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long
-  ): CaseOverview =
-    getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
-      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+  ): ResponseEntity<CaseOverview> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
 
   @Operation(summary = "Retrieve probation record")
   @ApiResponses(
@@ -77,12 +83,14 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/record/exclude-conviction/{excludeConvictionNumber}")
-  suspend fun getUnallocatedCaseProbationRecord(
+  fun getUnallocatedCaseProbationRecord(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) excludeConvictionNumber: Long
-  ): UnallocatedCaseConvictions =
-    getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
-      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+  ): ResponseEntity<UnallocatedCaseConvictions> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
+        ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    )
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
   @ApiResponses(
@@ -93,9 +101,12 @@ class UnallocatedCasesController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/risks")
-  suspend fun getUnallocatedCaseRisks(
+  fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long
-  ): UnallocatedCaseRisks =
-    getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+  ): ResponseEntity<UnallocatedCaseRisks> =
+    ResponseEntity.ok(
+      getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
+        ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+    )
 }

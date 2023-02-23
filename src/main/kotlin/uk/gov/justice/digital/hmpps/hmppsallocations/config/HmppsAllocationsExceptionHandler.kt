@@ -9,11 +9,11 @@ import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
-import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import javax.validation.ValidationException
 
@@ -33,7 +33,7 @@ class HmppsAllocationsExceptionHandler {
       )
   }
 
-  @ExceptionHandler(MethodNotAllowedException::class)
+  @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleMethodNotAllowed(e: Exception): ResponseEntity<ErrorResponse> {
     log.error("Method not allowed exception: {}", e.message)
     return ResponseEntity
