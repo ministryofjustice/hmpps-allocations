@@ -3,12 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -49,10 +47,9 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}")
   suspend fun getUnallocatedCase(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long,
-    @RequestHeader(HttpHeaders.AUTHORIZATION) authToken: String
+    @PathVariable(required = true) convictionNumber: Long
   ): UnallocatedCaseDetails {
-    return getUnallocatedCaseService.getCase(crn, convictionNumber, authToken) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")
@@ -98,8 +95,7 @@ class UnallocatedCasesController(
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/risks")
   suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long,
-    @RequestHeader(HttpHeaders.AUTHORIZATION) authToken: String
+    @PathVariable(required = true) convictionNumber: Long
   ): UnallocatedCaseRisks =
-    getUnallocatedCaseService.getCaseRisks(crn, convictionNumber, authToken) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+    getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
 }

@@ -34,6 +34,7 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun assessRisksNeedsWebClientUserEnhancedAppScope(builder: WebClient.Builder): WebClient {
     return builder.baseUrl(assessRisksNeedsApiRootUri)
+      .filter(AuthTokenFilterFunction())
       .build()
   }
 
@@ -76,6 +77,7 @@ class WebClientUserEnhancementConfiguration(
 
     reactiveClientCredentialsTokenResponseClient.addParametersConverter { grantRequest ->
       val parameters: MultiValueMap<String, String> = LinkedMultiValueMap()
+
       runBlocking {
         val username = ReactiveSecurityContextHolder.getContext()
           .map(SecurityContext::getAuthentication)

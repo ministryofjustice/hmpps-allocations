@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.flow.Flow
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
@@ -12,11 +11,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
-  suspend fun getRosh(crn: String, authToken: String): RoshSummary? {
+  suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
       .uri("/risks/crn/$crn/widget")
-      .header(HttpHeaders.AUTHORIZATION, authToken)
       .retrieve()
       .onStatus(
         { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
@@ -24,16 +22,14 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       ).awaitBodyOrNull()
   }
 
-  fun getRiskPredictors(crn: String, authToken: String): Flow<RiskPredictor> {
+  fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/predictors/rsr/history")
-      .header(HttpHeaders.AUTHORIZATION, authToken)
       .retrieve()
       .onStatus(
         { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
         { Mono.empty() }
-      )
-      .bodyToFlow()
+      ).bodyToFlow()
   }
 }

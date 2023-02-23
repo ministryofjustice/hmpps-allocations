@@ -27,14 +27,14 @@ class GetUnallocatedCaseService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long, authToken: String): UnallocatedCaseDetails? =
+  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
 
       val assessment = assessmentApiClient.getAssessment(crn)
         .toList()
         .maxByOrNull { a -> a.completed }
       val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
-      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber, authToken)
+      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
       return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks)
     }
 
@@ -61,13 +61,13 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConvictions.from(it, probationRecord)
     }
 
-  suspend fun getCaseRisks(crn: String, convictionNumber: Long, authToken: String): UnallocatedCaseRisks? =
+  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       return UnallocatedCaseRisks.from(
         workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
         unallocatedCaseEntity,
-        assessRisksNeedsApiClient.getRosh(crn, authToken),
-        assessRisksNeedsApiClient.getRiskPredictors(crn, authToken)
+        assessRisksNeedsApiClient.getRosh(crn),
+        assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       )
