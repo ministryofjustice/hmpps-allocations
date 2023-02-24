@@ -11,9 +11,9 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.riskPredictorResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.roshResponseNoOverallRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponseNoOverallRisk
 
 class AssessRisksNeedsApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
@@ -63,16 +63,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/widget")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
-    )
-  }
-
-  fun notFoundOgrsForCrn(crn: String) {
-    val riskRequest =
-      HttpRequest.request().withPath("/offenders/crn/$crn/assessments")
-
-    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
+      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody("{ \"foo\": \"bar\"}")
     )
   }
 
@@ -82,6 +73,14 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponse())
+    )
+  }
+  fun getRiskPredictorsNotFoundForCrn(crn: String) {
+    val riskRequest =
+      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody("{ \"foo\": \"bar\"}")
     )
   }
 }
