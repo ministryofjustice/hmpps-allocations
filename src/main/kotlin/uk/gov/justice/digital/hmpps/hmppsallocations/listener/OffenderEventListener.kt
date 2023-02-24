@@ -26,7 +26,7 @@ class OffenderEventListener(
       } catch (e: ForbiddenOffenderError) {
         log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
       }
-    }.thenAccept {}.get()
+    }.get()
   }
 
   private fun getCrn(rawMessage: String): String {

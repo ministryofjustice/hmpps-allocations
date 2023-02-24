@@ -20,7 +20,7 @@ class CalculationEventListener(
     val calculationEventData = readMessage(rawMessage)
     CoroutineScope(Dispatchers.Default).future {
       calculationTierService.updateTier(crnFrom(calculationEventData))
-    }.thenAccept {}.get()
+    }.get()
   }
 
   private fun readMessage(wrapper: String?): CalculationEventData {
