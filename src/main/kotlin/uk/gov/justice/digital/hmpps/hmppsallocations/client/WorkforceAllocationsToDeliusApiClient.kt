@@ -7,9 +7,10 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
@@ -73,17 +74,16 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .awaitBody()
   }
 
-  fun getUnallocatedEvents(crn: String): Mono<UnallocatedEvents?> =
+  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? =
     webClient
       .get()
       .uri("/allocation-demand/$crn/unallocated-events")
-      .retrieve()
-      .bodyToMono(UnallocatedEvents::class.java)
-      .onErrorResume(WebClientResponseException::class.java) { ex ->
-        when (ex.rawStatusCode) {
-          HttpStatus.NOT_FOUND.value() -> Mono.empty()
-          HttpStatus.FORBIDDEN.value() -> Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
-          else -> Mono.error(ex)
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody<UnallocatedEvents>()
+          HttpStatus.NOT_FOUND -> null
+          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
+          else -> throw response.createExceptionAndAwait()
         }
       }
 }
