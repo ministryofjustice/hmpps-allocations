@@ -39,7 +39,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
 
   // go to open telemetry, when upgrading to spring boot 3 these can be removed
-  implementation("io.opentelemetry:opentelemetry-api:1.21.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.23.1")
   implementation("com.microsoft.azure:applicationinsights-core:3.4.7")
   agentDeps("com.microsoft.azure:applicationinsights-agent:3.4.7")
 
