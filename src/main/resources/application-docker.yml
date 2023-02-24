@@ -2,9 +2,6 @@ hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4566
 
-community:
-  endpoint:
-    url: http://localhost:8099
 hmpps-tier:
   endpoint:
     url: http://localhost:8099

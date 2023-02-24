@@ -2,24 +2,21 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.web.server.SecurityWebFilterChain
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+@EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 class ResourceServerConfiguration {
   @Bean
-  fun filterChain(http: HttpSecurity): SecurityFilterChain {
-    http
-      .sessionManagement()
-      .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      .and().csrf().disable()
-      .authorizeHttpRequests { auth ->
-        auth.requestMatchers(
+  fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    return http
+      .csrf { it.disable() }
+      .authorizeExchange {
+        it.pathMatchers(
           "/webjars/**",
           "/favicon.ico",
           "/health/**",
@@ -28,9 +25,10 @@ class ResourceServerConfiguration {
           "/swagger-ui/**",
           "/swagger-ui.html",
           "/queue-admin/**"
-        )
-          .permitAll().anyRequest().authenticated()
-      }.oauth2ResourceServer().jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
-    return http.build()
+        ).permitAll().anyExchange().authenticated()
+      }
+      .oauth2ResourceServer {
+        it.jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
+      }.build()
   }
 }

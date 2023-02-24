@@ -12,10 +12,13 @@ class TierCalculationService(
 ) {
 
   @Transactional
-  fun updateTier(crn: String) {
+  suspend fun updateTier(crn: String) {
     if (repository.existsByCrn(crn)) {
       hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-        repository.findByCrn(crn).forEach { it.tier = tier }
+        repository.findByCrn(crn).forEach {
+          it.tier = tier
+          repository.save(it)
+        }
       }
     }
   }

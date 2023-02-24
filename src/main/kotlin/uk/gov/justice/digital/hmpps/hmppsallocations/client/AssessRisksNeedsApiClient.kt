@@ -1,49 +1,46 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import org.springframework.web.reactive.function.client.bodyToFlow
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
+import org.springframework.web.reactive.function.client.exchangeToFlow
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
-  fun getRosh(crn: String): Mono<RoshSummary> {
+  suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
       .uri("/risks/crn/$crn/widget")
-      .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingRiskError("No risk summary found for $crn")) }
-      )
-      .bodyToMono(RoshSummary::class.java)
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingRiskError -> Mono.empty()
-          else -> Mono.error(ex)
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody()
+          HttpStatus.NOT_FOUND -> null
+          else -> throw response.createExceptionAndAwait()
         }
       }
   }
 
-  fun getRiskPredictors(crn: String): Flux<RiskPredictor> {
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/predictors/rsr/history")
-      .retrieve()
-      .onStatus(
-        { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-        { Mono.error(MissingRiskError("No risk predictors found for $crn")) }
-      )
-      .bodyToFlux(RiskPredictor::class.java)
-      .onErrorResume { ex ->
-        when (ex) {
-          is MissingRiskError -> Flux.empty()
-          else -> Flux.error(ex)
+      .exchangeToFlow { response ->
+        flow {
+          when (response.statusCode()) {
+            HttpStatus.OK -> emitAll(response.bodyToFlow())
+            HttpStatus.NOT_FOUND -> emptyFlow<RiskPredictor>()
+            else -> throw response.createExceptionAndAwait()
+          }
         }
       }
   }
 }
-
-private class MissingRiskError(msg: String) : RuntimeException(msg)

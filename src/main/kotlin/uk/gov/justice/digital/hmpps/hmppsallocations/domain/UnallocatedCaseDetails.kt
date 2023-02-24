@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CaseViewDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
@@ -13,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddress
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Offence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Requirement
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -50,7 +50,11 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val address: MainAddress?,
   @Schema(description = "Sentence Length")
   val sentenceLength: String?,
-  val convictionNumber: Int
+  val convictionNumber: Int,
+  val roshLevel: String?,
+  val rsrLevel: String?,
+  val ogrsScore: BigInteger?,
+  val activeRiskRegistration: String?
 ) {
 
   companion object {
@@ -59,6 +63,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       case: UnallocatedCaseEntity,
       deliusCaseView: DeliusCaseView,
       assessment: Assessment?,
+      unallocatedCaseRisks: UnallocatedCaseRisks?
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         deliusCaseView.name.getCombinedName(),
@@ -77,7 +82,11 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         UnallocatedCaseDocument.from(deliusCaseView.preConvictionDocument),
         deliusCaseView.mainAddress,
         deliusCaseView.sentence.length,
-        case.convictionNumber
+        case.convictionNumber,
+        unallocatedCaseRisks?.roshRisk?.overallRisk,
+        unallocatedCaseRisks?.rsr?.level,
+        unallocatedCaseRisks?.ogrs?.score,
+        unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type }
       )
     }
   }
@@ -94,14 +103,6 @@ data class OffenderManagerDetails @JsonCreator constructor(
 ) {
 
   companion object {
-
-    fun from(offenderManager: CommunityApiClient.OffenderManager): OffenderManagerDetails {
-      return OffenderManagerDetails(
-        forenames = offenderManager.staff.forenames,
-        surname = offenderManager.staff.surname,
-        grade = offenderManager.staffGrade
-      )
-    }
 
     fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
 

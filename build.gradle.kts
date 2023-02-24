@@ -7,6 +7,10 @@ plugins {
 }
 
 configurations {
+  implementation { exclude(module = "spring-boot-starter-web") }
+  implementation { exclude(module = "spring-boot-starter-tomcat") }
+  implementation { exclude(module = "applicationinsights-spring-boot-starter") }
+  implementation { exclude(module = "applicationinsights-logging-logback") }
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
@@ -27,14 +31,24 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0-beta-10")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.0.2")
 
+  implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
+
+  // go to open telemetry, when upgrading to spring boot 3 these can be removed
+  implementation("io.opentelemetry:opentelemetry-api:1.21.0")
+  implementation("com.microsoft.azure:applicationinsights-core:3.4.7")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.4.7")
+
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.5.3")
+  runtimeOnly("org.postgresql:postgresql:42.5.4")
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
@@ -43,6 +57,7 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.4")
   testImplementation("com.ninja-squad:springmockk:4.0.0")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 }
 
 java {

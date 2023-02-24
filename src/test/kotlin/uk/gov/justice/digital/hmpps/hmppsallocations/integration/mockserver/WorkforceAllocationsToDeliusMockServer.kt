@@ -25,6 +25,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workf
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusProbationRecordSingleInactiveEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusRiskResponseNoRegistrationsNoOgrs
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusUnallocatedEventsNoActiveEventsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusUnallocatedEventsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
 import java.time.LocalDate
 
@@ -186,6 +188,34 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
     workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRegistrationsNoOgrs())
+    )
+  }
+
+  fun unallocatedEventsResponse(crn: String) {
+    val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsResponse())
+    )
+  }
+
+  fun unallocatedEventsNoActiveEventsResponse(crn: String) {
+    val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsNoActiveEventsResponse())
+    )
+  }
+
+  fun unallocatedEventsNotFoundResponse(crn: String) {
+    val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(404)
+    )
+  }
+
+  fun unallocatedEventsForbiddenResponse(crn: String) {
+    val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(403)
     )
   }
 }

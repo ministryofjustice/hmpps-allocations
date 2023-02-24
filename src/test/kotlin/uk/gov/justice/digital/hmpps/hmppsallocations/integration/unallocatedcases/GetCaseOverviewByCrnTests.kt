@@ -8,7 +8,6 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get case overview by crn and convictionNumber`() {
     val crn = "J678910"
-    val convictionId = 123456789L
     val convictionNumber = 1
     insertCases()
 
@@ -25,8 +24,6 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C1")
-      .jsonPath("$.convictionId")
-      .isEqualTo(convictionId)
       .jsonPath("$.convictionNumber")
       .isEqualTo(convictionNumber)
   }

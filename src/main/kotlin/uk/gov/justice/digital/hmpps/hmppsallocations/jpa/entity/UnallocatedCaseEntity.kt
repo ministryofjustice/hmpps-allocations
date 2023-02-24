@@ -28,12 +28,8 @@ data class UnallocatedCaseEntity(
   @Column
   var tier: String,
 
-  @Column(name = "conviction_id")
-  @NotNull
-  val convictionId: Long,
-
   @Column
-  var teamCode: String? = null,
+  var teamCode: String,
 
   @Column
   var providerCode: String,

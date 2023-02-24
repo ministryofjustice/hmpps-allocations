@@ -1,21 +1,28 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
+import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import org.springframework.web.reactive.function.client.bodyToFlow
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
-  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flux<DeliusCaseDetail> {
+  suspend fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
     val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()
@@ -24,14 +31,15 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
       .flatMapIterable { it.cases }
+      .asFlow()
   }
 
-  fun getDocuments(crn: String): Flux<Document> {
+  suspend fun getDocuments(crn: String): Flow<Document> {
     return webClient
       .get()
       .uri("/offenders/$crn/documents")
       .retrieve()
-      .bodyToFlux(Document::class.java)
+      .bodyToFlow()
   }
 
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
@@ -42,31 +50,45 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .toEntity(Resource::class.java)
   }
 
-  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
+  suspend fun getDeliusCaseView(crn: String, convictionNumber: Long): DeliusCaseView {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/$convictionNumber/case-view")
       .retrieve()
-      .bodyToMono(DeliusCaseView::class.java)
+      .awaitBody()
   }
 
-  fun getProbationRecord(crn: String, excludeConvictionNumber: Long): Mono<DeliusProbationRecord> {
+  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/$excludeConvictionNumber/probation-record")
       .retrieve()
-      .bodyToMono(DeliusProbationRecord::class.java)
+      .awaitBody()
   }
 
-  fun getDeliusRisk(crn: String): Mono<DeliusRisk> {
+  suspend fun getDeliusRisk(crn: String): DeliusRisk {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/risk")
       .retrieve()
-      .bodyToMono(DeliusRisk::class.java)
+      .awaitBody()
   }
+
+  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? =
+    webClient
+      .get()
+      .uri("/allocation-demand/$crn/unallocated-events")
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody<UnallocatedEvents>()
+          HttpStatus.NOT_FOUND -> null
+          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
+          else -> throw response.createExceptionAndAwait()
+        }
+      }
 }
 
+class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
 
@@ -87,7 +109,7 @@ data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 data class Name(val forename: String, val middleName: String?, val surname: String) {
-  fun getCombinedName() = "$forename ${middleName?.let { "$middleName " } ?: ""}$surname"
+  fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let{ "$middleName " } ?: ""}$surname"
 }
 data class CommunityPersonManager(val name: Name, val grade: String?)
 
