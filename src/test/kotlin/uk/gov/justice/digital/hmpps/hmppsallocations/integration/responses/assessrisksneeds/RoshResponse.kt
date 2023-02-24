@@ -1,7 +1,8 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses
+package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds
 
-fun roshResponseNoOverallRisk() = """
+fun roshResponse() = """
    {
+    "overallRisk": "VERY_HIGH",
     "assessedOn": "2022-10-07T13:11:50",
     "riskInCommunity": {
       "Public": "HIGH","Children": "LOW","Known Adult": "MEDIUM","Staff": "VERY_HIGH"

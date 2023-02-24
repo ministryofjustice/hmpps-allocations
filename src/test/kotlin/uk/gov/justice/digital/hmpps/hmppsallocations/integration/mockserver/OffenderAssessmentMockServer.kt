@@ -12,7 +12,8 @@ import org.mockserver.model.MediaType
 import org.mockserver.model.Parameter
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension.Companion.offenderAssessmentApi
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessmentResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentNotFoundResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentResponse
 
 class OffenderAssessmentApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
@@ -54,6 +55,7 @@ class OffenderAssessmentMockServer : ClientAndServer(MOCKSERVER_PORT) {
         .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(assessmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
+        .withBody(assessmentNotFoundResponse(crn))
     )
   }
 }
