@@ -29,7 +29,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       }
   }
 
-  fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/predictors/rsr/history")
