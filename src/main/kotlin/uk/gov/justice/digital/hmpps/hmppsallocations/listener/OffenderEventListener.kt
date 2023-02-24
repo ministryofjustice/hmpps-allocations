@@ -2,6 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
@@ -17,11 +20,13 @@ class OffenderEventListener(
   @JmsListener(destination = "hmppsoffenderqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
-    try {
-      upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
-    } catch (e: ForbiddenOffenderError) {
-      log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
-    }
+    CoroutineScope(Dispatchers.Default).future {
+      try {
+        upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+      } catch (e: ForbiddenOffenderError) {
+        log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+      }
+    }.get()
   }
 
   private fun getCrn(rawMessage: String): String {

@@ -2,41 +2,25 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
+import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
 
 class HmppsTierApiClient(private val webClient: WebClient) {
 
-  fun getTierByCrn(crn: String): String? = webClient
+  suspend fun getTierByCrn(crn: String): String? = webClient
     .get()
     .uri("/crn/$crn/tier")
-    .retrieve()
-    .onStatus(
-      { httpStatus -> HttpStatus.NOT_FOUND == httpStatus },
-      {
-        log.info("No tier found for $crn")
-        Mono.error(MissingTierError("No tier found for $crn"))
+    .awaitExchangeOrNull { response ->
+      when (response.statusCode()) {
+        HttpStatus.OK -> response.awaitBody<TierDto>()
+        HttpStatus.NOT_FOUND -> null
+        else -> throw response.createExceptionAndAwait()
       }
-    )
-    .bodyToMono(TierDto::class.java)
-    .map { it.tierScore }
-    .onErrorResume { ex ->
-      when (ex) {
-        is MissingTierError -> Mono.empty()
-        else -> Mono.error(ex)
-      }
-    }
-    .block()
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+    }?.tierScore
 }
-
-private class MissingTierError(msg: String) : RuntimeException(msg)
-
 private data class TierDto @JsonCreator constructor(
   @JsonProperty("tierScore")
   val tierScore: String
