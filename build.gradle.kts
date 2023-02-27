@@ -41,7 +41,7 @@ dependencies {
   // go to open telemetry, when upgrading to spring boot 3 these can be removed
   implementation("io.opentelemetry:opentelemetry-api:1.21.0")
   implementation("com.microsoft.azure:applicationinsights-core:3.4.7")
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.4.7")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.4.10")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
