@@ -24,16 +24,13 @@ class TriggerProcessingCrnTests : IntegrationTestBase() {
     WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     TierApiExtension.hmppsTier.tierCalculationResponse(crn)
 
-    val result = webTestClient.post()
-      .uri("/crn/upload")
+    webTestClient.post()
+      .uri("/crn/reprocess")
       .contentType(MediaType.MULTIPART_FORM_DATA)
       .body(generateMultipartBody(crn))
       .exchange()
       .expectStatus()
       .isOk
-      .expectBody(String::class.java)
-      .returnResult()
-      .responseBody
 
     await untilCallTo { repository.count() } matches { it!! > 0 }
 

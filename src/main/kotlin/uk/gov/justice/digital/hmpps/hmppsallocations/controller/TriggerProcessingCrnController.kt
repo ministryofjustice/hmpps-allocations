@@ -16,8 +16,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.TriggerReprocessSer
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class TriggerProcessingCrnController(private val triggerReprocessService: TriggerReprocessService) {
 
-  @PostMapping("/crn/upload")
-  suspend fun uploadCrns(@RequestPart("file") file: Mono<FilePart>): ResponseEntity<Void> {
+  @PostMapping("/crn/reprocess")
+  suspend fun reprocessCrns(@RequestPart("file") file: Mono<FilePart>): ResponseEntity<Void> {
     triggerReprocessService.sendEvents(fileToCases(file))
     return ResponseEntity.ok().build()
   }
