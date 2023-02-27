@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
@@ -15,19 +16,22 @@ class UpsertUnallocatedCaseService(
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val telemetryService: TelemetryService,
   @Qualifier("workforceAllocationsToDeliusApiClient") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+  private val communityApiClient: CommunityApiClient
 
 ) {
 
   @Transactional
   suspend fun upsertUnallocatedCase(crn: String) {
     val storedUnallocatedEvents = repository.findByCrn(crn)
-    workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
-      val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
-      hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-        val name = unallocatedEvents.name.getCombinedName()
-        saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-        updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
-        deleteOldEvents(storedUnallocatedEvents, activeEvents)
+    communityApiClient.getUserAccess(crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
+      workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
+        val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
+        hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
+          val name = unallocatedEvents.name.getCombinedName()
+          saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+          updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          deleteOldEvents(storedUnallocatedEvents, activeEvents)
+        }
       }
     } ?: deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
