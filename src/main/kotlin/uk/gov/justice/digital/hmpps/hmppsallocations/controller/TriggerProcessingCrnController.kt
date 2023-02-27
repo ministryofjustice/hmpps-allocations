@@ -22,7 +22,7 @@ class TriggerProcessingCrnController(private val triggerReprocessService: Trigge
     return ResponseEntity.ok().build()
   }
 
-  suspend fun fileToCases(filePart: Mono<FilePart>): List<String> {
+  private suspend fun fileToCases(filePart: Mono<FilePart>): List<String> {
     return filePart.flatMapMany { file ->
       file.content().flatMapIterable { dataBuffer ->
         dataBuffer.asInputStream().bufferedReader().use { reader ->
