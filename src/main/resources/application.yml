@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: hmpps-allocations
@@ -71,6 +72,7 @@ server:
 
 hmpps:
   sqs:
+    reactiveApi: true
     queueAdminRole: ROLE_ALLOCATION_API_QUEUE_ADMIN
 management:
   endpoints:
