@@ -83,7 +83,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         deliusCaseView.mainAddress,
         deliusCaseView.sentence.length,
         case.convictionNumber,
-        unallocatedCaseRisks?.roshRisk?.overallRisk,
+        unallocatedCaseRisks?.roshRisk?.getOverallRisk(),
         unallocatedCaseRisks?.rsr?.level,
         unallocatedCaseRisks?.ogrs?.score,
         unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type }
