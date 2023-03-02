@@ -31,8 +31,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        providerCode = "",
-        teamCode = "",
+        providerCode = "ORIGINALPROVIDER",
+        teamCode = "ORIGINALTEAM",
         convictionNumber = 1
       )
     )
@@ -54,6 +54,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.teamCode).isEqualTo("TM1")
+    assertThat(case.providerCode).isEqualTo("PAC1")
   }
 
   @Test

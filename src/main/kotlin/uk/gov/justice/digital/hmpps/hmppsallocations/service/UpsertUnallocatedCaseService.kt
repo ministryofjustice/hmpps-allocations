@@ -62,6 +62,7 @@ class UpsertUnallocatedCaseService(
         unallocatedCaseEntity.name = name
         unallocatedCaseEntity.teamCode = activeEvent.teamCode
         unallocatedCaseEntity.providerCode = activeEvent.providerCode
+        repository.save(unallocatedCaseEntity)
       }
   }
 
