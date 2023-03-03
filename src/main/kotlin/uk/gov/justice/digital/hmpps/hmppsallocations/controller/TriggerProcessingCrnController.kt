@@ -23,11 +23,14 @@ class TriggerProcessingCrnController(private val triggerReprocessService: Trigge
   }
 
   private suspend fun fileToCases(filePart: Mono<FilePart>): List<String> {
+    Int.MIN_VALUE
+    val alphaNumericRegex = Regex("[^A-Za-z0-9]")
     return filePart.flatMapMany { file ->
       file.content().flatMapIterable { dataBuffer ->
         dataBuffer.asInputStream().bufferedReader().use { reader ->
           reader.lineSequence()
             .filter { it.isNotBlank() }
+            .map { alphaNumericRegex.replace(it, "") }
             .toList()
         }
       }
