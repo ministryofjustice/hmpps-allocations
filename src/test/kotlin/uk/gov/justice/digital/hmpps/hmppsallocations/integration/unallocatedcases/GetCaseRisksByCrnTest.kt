@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
+import java.math.BigDecimal
 
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
@@ -106,8 +107,27 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rosh")
-      .doesNotExist()
+      .jsonPath("$.roshRisk.overallRisk")
+      .isEqualTo("NOT_FOUND")
+  }
+
+  @Test
+  fun `get case risks with ROSH summary unavailable`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.roshRisk.overallRisk")
+      .isEqualTo("UNAVAILABLE")
   }
 
   @Test
@@ -125,8 +145,31 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rsr")
-      .doesNotExist()
+      .jsonPath("$.rsr.level")
+      .isEqualTo("NOT_FOUND")
+      .jsonPath("$.rsr.percentage")
+      .isEqualTo(BigDecimal(Int.MIN_VALUE))
+  }
+
+  @Test
+  fun `get case risks with unavailable RSR`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    assessRisksNeedsApi.getRoshForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.rsr.level")
+      .isEqualTo("UNAVAILABLE")
+      .jsonPath("$.rsr.percentage")
+      .isEqualTo(BigDecimal(Int.MIN_VALUE))
   }
 
   @Test

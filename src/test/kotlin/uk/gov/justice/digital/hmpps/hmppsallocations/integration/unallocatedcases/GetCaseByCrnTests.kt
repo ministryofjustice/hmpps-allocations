@@ -221,11 +221,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `can get case by crn and no rosh and no regist`() {
+  fun `can get case by crn and not found rosh and not found rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
@@ -237,9 +238,36 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.roshLevel")
-      .isEmpty
+      .isEqualTo("NOT_FOUND")
       .jsonPath("$.rsrLevel")
+      .isEqualTo("NOT_FOUND")
+      .jsonPath("$.ogrsScore")
       .isEmpty
+      .jsonPath("$.activeRiskRegistration")
+      .isEmpty
+  }
+
+  @Test
+  fun `can get case by crn and unavailable rosh and unavailable rsr and no regist`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.roshLevel")
+      .isEqualTo("UNAVAILABLE")
+      .jsonPath("$.rsrLevel")
+      .isEqualTo("UNAVAILABLE")
       .jsonPath("$.ogrsScore")
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
