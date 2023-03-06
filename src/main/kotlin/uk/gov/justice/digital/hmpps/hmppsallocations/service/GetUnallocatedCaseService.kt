@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
@@ -81,4 +82,12 @@ class GetUnallocatedCaseService(
     crn: String,
     convictionNumber: Long
   ) = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
+
+  suspend fun getCaseConfirmInstructions(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseConfirmInstructions? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+    val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
+    return UnallocatedCaseConfirmInstructions.from(
+      unallocatedCaseEntity,
+      personOnProbationStaffDetailsResponse
+    )
+  }
 }
