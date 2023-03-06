@@ -8,4 +8,8 @@ data class RiskPredictor @JsonCreator constructor(
   val rsrPercentageScore: BigDecimal?,
   val rsrScoreLevel: String?,
   val completedDate: LocalDateTime?,
-)
+) {
+  fun getRiskPredictor(): String {
+    return rsrScoreLevel ?: "NOT_FOUND"
+  }
+}

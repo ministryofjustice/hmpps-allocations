@@ -81,7 +81,7 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
 ) {
   companion object {
     fun from(rp: RiskPredictor?): UnallocatedCaseRsr? {
-      return rp?.let { UnallocatedCaseRsr(it.rsrScoreLevel, it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
+      return rp?.let { UnallocatedCaseRsr(it.getRiskPredictor(), it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
     }
   }
 }
