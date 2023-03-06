@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
 
@@ -12,7 +12,7 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
     val staffCode = "STAFF1"
     val convictionNumber = 1
     insertCases()
-    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.getImpactResponse(crn, staffCode)
+    workforceAllocationsToDelius.getImpactResponse(crn, staffCode)
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber/confirm-instructions?staffCode=$staffCode")
