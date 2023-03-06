@@ -68,7 +68,7 @@ class GetUnallocatedCaseService(
         unallocatedCaseEntity,
         assessRisksNeedsApiClient.getRosh(crn),
         assessRisksNeedsApiClient.getRiskPredictors(crn)
-          .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
+          .filter { !it.rsrScoreLevel.isNullOrBlank() && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       )
     }
