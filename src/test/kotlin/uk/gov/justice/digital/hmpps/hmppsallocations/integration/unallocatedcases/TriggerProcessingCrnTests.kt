@@ -38,6 +38,28 @@ class TriggerProcessingCrnTests : IntegrationTestBase() {
     Assertions.assertEquals(crn, case.crn)
   }
 
+  @Test
+  fun `remove any special characters in lines from upload`() {
+    val crn = "J678910"
+    val crnWithSpeechMarks = "\"$crn\""
+    CommunityApiExtension.communityApi.getUserAccessForCrn(crn)
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.unallocatedEventsResponse(crn)
+    TierApiExtension.hmppsTier.tierCalculationResponse(crn)
+
+    webTestClient.post()
+      .uri("/crn/reprocess")
+      .contentType(MediaType.MULTIPART_FORM_DATA)
+      .body(generateMultipartBody(crnWithSpeechMarks))
+      .exchange()
+      .expectStatus()
+      .isOk
+
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val case = repository.findAll().first()
+    Assertions.assertEquals(crn, case.crn)
+  }
+
   private fun generateMultipartBody(crn1: String, crn2: String = ""): BodyInserters.MultipartInserter {
     val cases = listOf(crn1, crn2)
     val csvFile = generateCsv(cases)
