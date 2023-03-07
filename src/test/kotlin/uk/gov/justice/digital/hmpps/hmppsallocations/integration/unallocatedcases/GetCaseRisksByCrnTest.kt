@@ -189,8 +189,6 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.rsr.level")
       .isEqualTo("NOT_FOUND")
-    // .jsonPath("$.rsr.percentage")
-    // .isEqualTo(BigDecimal(Int.MIN_VALUE))
   }
 
   @Test
