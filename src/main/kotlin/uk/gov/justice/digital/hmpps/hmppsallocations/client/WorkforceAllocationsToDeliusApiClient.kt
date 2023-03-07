@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
@@ -80,12 +81,18 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/allocation-demand/$crn/unallocated-events")
       .awaitExchangeOrNull { response ->
         when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody<UnallocatedEvents>()
+          HttpStatus.OK -> response.awaitBody()
           HttpStatus.NOT_FOUND -> null
           HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
           else -> throw response.createExceptionAndAwait()
         }
       }
+
+  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
+    .get()
+    .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
+    .retrieve()
+    .awaitBody()
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)

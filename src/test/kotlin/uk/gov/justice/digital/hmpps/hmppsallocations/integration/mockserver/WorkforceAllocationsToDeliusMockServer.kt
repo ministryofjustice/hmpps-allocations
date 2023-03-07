@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workf
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusUnallocatedEventsNoActiveEventsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusUnallocatedEventsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.fullDeliusCaseDetailsResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.impactResponse
 import java.time.LocalDate
 
 class WorkforceAllocationsToDeliusApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
@@ -88,7 +89,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     workforceAllocationsToDelius.`when`(
       initialAppointmentRequest,
       Times.exactly(1)
-    ).respond(HttpResponse.notFoundResponse())
+    ).respond(HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()))
   }
 
   fun documentsResponse(crn: String) {
@@ -104,7 +105,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val preSentenceReportRequest =
       HttpRequest.request().withPath("/offenders/$crn/documents")
     workforceAllocationsToDelius.`when`(preSentenceReportRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value())
+      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
     )
   }
 
@@ -212,10 +213,25 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun unallocatedEventsForbiddenResponse(crn: String) {
-    val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
-    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(403)
+  fun getImpactResponse(crn: String, staffCode: String) {
+    val impactRequest =
+      HttpRequest.request()
+        .withPath("/allocation-demand/impact").withQueryStringParameter("crn", crn).withQueryStringParameter("staff", staffCode)
+
+    workforceAllocationsToDelius.`when`(impactRequest, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withContentType(MediaType.APPLICATION_JSON).withBody(impactResponse(crn, staffCode))
+    )
+  }
+
+  fun getImpactNotFoundResponse(crn: String, staffCode: String) {
+    val impactRequest =
+      HttpRequest.request()
+        .withPath("/allocation-demand/impact").withQueryStringParameter("crn", crn).withQueryStringParameter("staff", staffCode)
+
+    workforceAllocationsToDelius.`when`(impactRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(404)
+        .withContentType(MediaType.APPLICATION_JSON).withBody("{\"foo\":\"bar\"}")
     )
   }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
@@ -98,4 +99,19 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long
   ): UnallocatedCaseRisks =
     getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+
+  @Operation(summary = "Retrieve unallocated case confirm instructions by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found")
+    ]
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/confirm-instructions")
+  suspend fun getUnallocatedCaseConfirmInstructions(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionNumber: Long,
+    @RequestParam(required = true) staffCode: String
+  ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
 }
