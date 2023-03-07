@@ -36,6 +36,21 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `get 404 if no staff is found`() {
+    val crn = "J678910"
+    val staffCode = "STAFF1"
+    val convictionNumber = 1
+    insertCases()
+    workforceAllocationsToDelius.getImpactNotFoundResponse(crn, staffCode)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/confirm-instructions?staffCode=$staffCode")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
   fun `get 404 if crn not found`() {
     webTestClient.get()
       .uri("/cases/unallocated/J678912/convictions/1/confirm-instructions?staffCode=STAFF1")

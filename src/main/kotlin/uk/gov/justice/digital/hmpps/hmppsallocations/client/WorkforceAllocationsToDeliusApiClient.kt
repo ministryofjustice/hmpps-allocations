@@ -81,7 +81,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/allocation-demand/$crn/unallocated-events")
       .awaitExchangeOrNull { response ->
         when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody<UnallocatedEvents>()
+          HttpStatus.OK -> response.awaitBody()
           HttpStatus.NOT_FOUND -> null
           HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
           else -> throw response.createExceptionAndAwait()

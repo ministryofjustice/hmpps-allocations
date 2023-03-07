@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import javax.validation.ValidationException
@@ -109,6 +111,17 @@ class HmppsAllocationsExceptionHandler {
         developerMessage = e.message
       ),
       BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(WebClientResponseException.NotFound::class)
+  fun handle(e: WebClientResponseException.NotFound): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
+    return ResponseEntity(
+      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+        status = 404,
+        developerMessage = e.message
+      ),
+      NOT_FOUND
     )
   }
 
