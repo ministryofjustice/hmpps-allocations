@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorNotFoundResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponseBlankLevel
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorUnavailableResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponseNoOverallRisk
@@ -108,6 +109,15 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorNotFoundResponse())
+    )
+  }
+
+  fun getRiskPredictorsWithBlankLevel(crn: String) {
+    val riskRequest =
+      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponseBlankLevel())
     )
   }
 
