@@ -173,6 +173,27 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `get case risks with Empty List RSR`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    assessRisksNeedsApi.getRoshForCrn(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrnEmptyList(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.rsr.level")
+      .isEqualTo("NOT_FOUND")
+      .jsonPath("$.rsr.percentage")
+      .isEqualTo(BigDecimal(Int.MIN_VALUE))
+  }
+
+  @Test
   fun `get case risks with no ogrs`() {
     val crn = "J678910"
     val convictionNumber = 1

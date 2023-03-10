@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEmpty
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
@@ -36,10 +38,14 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
         flow {
           when (response.statusCode()) {
             HttpStatus.OK -> emitAll(response.bodyToFlow())
-            HttpStatus.NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "NOT_FOUND", null))
+            HttpStatus.NOT_FOUND -> notFound()
             else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "UNAVAILABLE", null))
           }
-        }
+        }.onEmpty { notFound() }
       }
+  }
+
+  private suspend fun FlowCollector<RiskPredictor>.notFound() {
+    emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "NOT_FOUND", null))
   }
 }
