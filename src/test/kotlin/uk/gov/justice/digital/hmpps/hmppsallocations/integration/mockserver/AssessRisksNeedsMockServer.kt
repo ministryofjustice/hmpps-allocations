@@ -119,4 +119,13 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorUnavailableResponse())
     )
   }
+
+  fun getRiskPredictorsForCrnEmptyList(crn: String) {
+    val riskRequest =
+      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]")
+    )
+  }
 }
