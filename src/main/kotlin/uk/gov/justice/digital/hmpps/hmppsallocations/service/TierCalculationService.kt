@@ -8,7 +8,7 @@ import javax.transaction.Transactional
 @Service
 class TierCalculationService(
   private val hmppsTierApiClient: HmppsTierApiClient,
-  private val repository: UnallocatedCasesRepository
+  private val repository: UnallocatedCasesRepository,
 ) {
 
   @Transactional

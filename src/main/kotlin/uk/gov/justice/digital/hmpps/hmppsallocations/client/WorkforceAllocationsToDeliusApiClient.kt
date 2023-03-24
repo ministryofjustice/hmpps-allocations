@@ -107,7 +107,7 @@ data class DeliusCaseDetail(
   val initialAppointment: InitialAppointment?,
   val probationStatus: ProbationStatus,
   val communityPersonManager: CommunityPersonManager?,
-  val type: String
+  val type: String,
 )
 
 data class Event(val number: String)
@@ -127,14 +127,14 @@ data class Document @JsonCreator constructor(
   val name: String,
   val dateCreated: ZonedDateTime?,
   val sensitive: Boolean,
-  val relatedTo: DocumentRelatedTo
+  val relatedTo: DocumentRelatedTo,
 )
 
 data class DocumentRelatedTo @JsonCreator constructor(
   val type: String,
   val name: String,
   val description: String,
-  val event: DocumentEvent?
+  val event: DocumentEvent?,
 )
 
 data class DocumentEvent @JsonCreator constructor(

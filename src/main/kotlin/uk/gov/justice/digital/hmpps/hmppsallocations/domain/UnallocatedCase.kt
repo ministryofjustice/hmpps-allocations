@@ -29,7 +29,7 @@ data class UnallocatedCase @JsonCreator constructor(
   val caseType: String,
   @Schema(description = "Sentence Length")
   val sentenceLength: String?,
-  val convictionNumber: Int
+  val convictionNumber: Int,
 ) {
   companion object {
     fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail): UnallocatedCase {
@@ -42,11 +42,11 @@ data class UnallocatedCase @JsonCreator constructor(
         deliusCaseDetail.probationStatus.description,
         OffenderManagerDetails.from(
           deliusCaseDetail.communityPersonManager,
-          deliusCaseDetail.probationStatus.description
+          deliusCaseDetail.probationStatus.description,
         ),
         deliusCaseDetail.type,
         deliusCaseDetail.sentence.length,
-        case.convictionNumber
+        case.convictionNumber,
       )
     }
   }

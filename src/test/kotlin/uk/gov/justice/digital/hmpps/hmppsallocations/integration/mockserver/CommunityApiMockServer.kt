@@ -42,7 +42,7 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
     val request = HttpRequest.request().withPath("/offenders/crn/$crn/userAccess")
 
     communityApi.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUserAccessResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUserAccessResponse()),
     )
   }
 
@@ -50,7 +50,7 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
     val request = HttpRequest.request().withPath("/offenders/crn/$crn/userAccess")
 
     communityApi.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withStatusCode(HttpStatus.NOT_FOUND.value())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withStatusCode(HttpStatus.NOT_FOUND.value()),
     )
   }
 
@@ -58,7 +58,7 @@ class CommunityApiMockServer : ClientAndServer(MOCKSERVER_PORT) {
     val request = HttpRequest.request().withPath("/offenders/crn/$crn/userAccess")
 
     communityApi.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withStatusCode(HttpStatus.FORBIDDEN.value()).withBody(deliusUserAccessForbiddenResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withStatusCode(HttpStatus.FORBIDDEN.value()).withBody(deliusUserAccessForbiddenResponse()),
     )
   }
 }

@@ -59,7 +59,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
-        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations))
+        .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations)),
     )
   }
 
@@ -69,17 +69,29 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       "1",
       LocalDate.of(2022, 10, 11),
       "Currently managed",
-      CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
+      CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO"),
     ),
     CaseDetailsIntegration(
-      "J680648", "2", null, "Previously managed", CommunityPersonManager(Name("Janie", null, "Jones"), "PO")
+      "J680648",
+      "2",
+      null,
+      "Previously managed",
+      CommunityPersonManager(Name("Janie", null, "Jones"), "PO"),
     ),
     CaseDetailsIntegration(
-      "X4565764", "3", LocalDate.now(), "New to probation", CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO")
+      "X4565764",
+      "3",
+      LocalDate.now(),
+      "New to probation",
+      CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO"),
     ),
     CaseDetailsIntegration(
-      "J680660", "4", LocalDate.now(), "Previously managed", null
-    )
+      "J680660",
+      "4",
+      LocalDate.now(),
+      "Previously managed",
+      null,
+    ),
   )
 
   fun errorDeliusCaseDetailsResponse() {
@@ -88,7 +100,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
     workforceAllocationsToDelius.`when`(
       initialAppointmentRequest,
-      Times.exactly(1)
+      Times.exactly(1),
     ).respond(HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()))
   }
 
@@ -97,7 +109,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       HttpRequest.request().withPath("/offenders/$crn/documents")
     workforceAllocationsToDelius.`when`(preSentenceReportRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse())
+        .withContentType(MediaType.APPLICATION_JSON).withBody(uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.documentsResponse()),
     )
   }
 
@@ -105,7 +117,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val preSentenceReportRequest =
       HttpRequest.request().withPath("/offenders/$crn/documents")
     workforceAllocationsToDelius.`when`(preSentenceReportRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()),
     )
   }
 
@@ -121,14 +133,14 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withHeader(HttpHeaders.ETAG, "9514985635950")
         .withHeader(HttpHeaders.LAST_MODIFIED, "Wed, 03 Jan 2018 13:20:35 GMT")
         .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
-        .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes())
+        .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes()),
     )
   }
 
   fun caseViewResponse(crn: String, convictionNumber: Int) {
     val caseViewRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
     workforceAllocationsToDelius.`when`(caseViewRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewResponse()),
     )
   }
 
@@ -136,7 +148,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val caseViewRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
     workforceAllocationsToDelius.`when`(caseViewRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewNoCourtReportResponse())
+        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewNoCourtReportResponse()),
     )
   }
 
@@ -144,7 +156,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val caseViewRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
     workforceAllocationsToDelius.`when`(caseViewRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration("Sheffield Towers", "22", "Sheffield Street", "Sheffield", "Yorkshire", "S2 4SU", false, false, "Supported Housing", "2022-08-25")))
+        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration("Sheffield Towers", "22", "Sheffield Street", "Sheffield", "Yorkshire", "S2 4SU", false, false, "Supported Housing", "2022-08-25"))),
     )
   }
 
@@ -152,7 +164,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val caseViewRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/case-view")
     workforceAllocationsToDelius.`when`(caseViewRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration(noFixedAbode = true, typeVerified = false, typeDescription = "Homeless - rough sleeping", startDate = "2022-08-25")))
+        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusCaseViewAddressResponse(CaseViewAddressIntegration(noFixedAbode = true, typeVerified = false, typeDescription = "Homeless - rough sleeping", startDate = "2022-08-25"))),
     )
   }
 
@@ -160,56 +172,56 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber))
+        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber)),
     )
   }
   fun probationRecordSingleActiveEventReponse(crn: String, convictionNumber: Int) {
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleActiveEventResponse(crn, convictionNumber))
+        .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleActiveEventResponse(crn, convictionNumber)),
     )
   }
 
   fun probationRecordNoEventsResponse(crn: String, convictionNumber: Int) {
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordNoEventsResponse(crn, convictionNumber))
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordNoEventsResponse(crn, convictionNumber)),
     )
   }
 
   fun riskResponse(crn: String) {
     val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
     workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponse()),
     )
   }
 
   fun riskResponseNoRegistrationsNoOgrs(crn: String) {
     val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
     workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRegistrationsNoOgrs())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponseNoRegistrationsNoOgrs()),
     )
   }
 
   fun unallocatedEventsResponse(crn: String) {
     val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
     workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsResponse()),
     )
   }
 
   fun unallocatedEventsNoActiveEventsResponse(crn: String) {
     val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
     workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsNoActiveEventsResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusUnallocatedEventsNoActiveEventsResponse()),
     )
   }
 
   fun unallocatedEventsNotFoundResponse(crn: String) {
     val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
     workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(404)
+      HttpResponse.response().withStatusCode(404),
     )
   }
 
@@ -220,7 +232,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
     workforceAllocationsToDelius.`when`(impactRequest, Times.exactly(1)).respond(
       HttpResponse.response()
-        .withContentType(MediaType.APPLICATION_JSON).withBody(impactResponse(crn, staffCode))
+        .withContentType(MediaType.APPLICATION_JSON).withBody(impactResponse(crn, staffCode)),
     )
   }
 
@@ -231,7 +243,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
     workforceAllocationsToDelius.`when`(impactRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(404)
-        .withContentType(MediaType.APPLICATION_JSON).withBody("{\"foo\":\"bar\"}")
+        .withContentType(MediaType.APPLICATION_JSON).withBody("{\"foo\":\"bar\"}"),
     )
   }
 }

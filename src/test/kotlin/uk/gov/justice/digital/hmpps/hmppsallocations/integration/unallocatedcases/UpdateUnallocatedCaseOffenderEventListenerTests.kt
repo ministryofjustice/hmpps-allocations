@@ -33,8 +33,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         providerCode = "ORIGINALPROVIDER",
         teamCode = "ORIGINALTEAM",
-        convictionNumber = 1
-      )
+        convictionNumber = 1,
+      ),
     )
 
     communityApi.getUserAccessForCrn(crn)
@@ -43,8 +43,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
@@ -69,8 +69,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         providerCode = "PC1",
         teamCode = "TC1",
-        convictionNumber = 1
-      )
+        convictionNumber = 1,
+      ),
     )
 
     communityApi.getUserAccessForCrn(crn)
@@ -79,8 +79,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
@@ -92,7 +92,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       telemetryClient.trackEvent(
         "EventAllocated",
         capture(parameters),
-        null
+        null,
       )
     }
     val startTime = ZonedDateTime.parse(parameters.captured["startTime"])
@@ -102,7 +102,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       { Assertions.assertEquals(savedEntity.providerCode, parameters.captured["providerCode"]) },
       { Assertions.assertEquals(getWmtPeriod(LocalDateTime.now()), parameters.captured["wmtPeriod"]) },
       { Assertions.assertTrue(startTime.isEqual(savedEntity.createdDate)) },
-      { Assertions.assertNotNull(parameters.captured["endTime"]) }
+      { Assertions.assertNotNull(parameters.captured["endTime"]) },
     )
   }
 
@@ -114,17 +114,19 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "", teamCode = "",
-        convictionNumber = 1
-      )
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
     )
     communityApi.getUserAccessForCrnNotFound(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
@@ -140,9 +142,11 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "", teamCode = "",
-        convictionNumber = 1
-      )
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
     )
 
     Assertions.assertThrows(DataIntegrityViolationException::class.java) {
@@ -153,8 +157,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           tier = "B3",
           providerCode = "",
           teamCode = "",
-          convictionNumber = 1
-        )
+          convictionNumber = 1,
+        ),
       )
     }
   }

@@ -12,14 +12,15 @@ data class CaseOverview @JsonCreator constructor(
   @Schema(description = "Latest tier of case", example = "D2")
   val tier: String,
   @Schema(description = "Conviction Number")
-  val convictionNumber: Int
+  val convictionNumber: Int,
 ) {
   companion object {
     fun from(case: UnallocatedCaseEntity): CaseOverview {
       return CaseOverview(
         case.name,
-        case.crn, case.tier,
-        case.convictionNumber
+        case.crn,
+        case.tier,
+        case.convictionNumber,
       )
     }
   }

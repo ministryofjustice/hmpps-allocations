@@ -23,5 +23,5 @@ class HmppsTierApiClient(private val webClient: WebClient) {
 }
 private data class TierDto @JsonCreator constructor(
   @JsonProperty("tierScore")
-  val tierScore: String
+  val tierScore: String,
 )

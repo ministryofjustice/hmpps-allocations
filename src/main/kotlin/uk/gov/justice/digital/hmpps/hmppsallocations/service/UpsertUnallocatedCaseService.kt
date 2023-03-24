@@ -16,7 +16,7 @@ class UpsertUnallocatedCaseService(
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val telemetryService: TelemetryService,
   @Qualifier("workforceAllocationsToDeliusApiClient") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
-  private val communityApiClient: CommunityApiClient
+  private val communityApiClient: CommunityApiClient,
 
 ) {
 
@@ -38,7 +38,7 @@ class UpsertUnallocatedCaseService(
 
   private fun deleteOldEvents(
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    activeEvents: Map<Int, ActiveEvent>
+    activeEvents: Map<Int, ActiveEvent>,
   ) {
     storedUnallocatedEvents
       .filter { !activeEvents.containsKey(it.convictionNumber) }
@@ -52,7 +52,7 @@ class UpsertUnallocatedCaseService(
     activeEvents: Map<Int, ActiveEvent>,
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
     name: String,
-    tier: String
+    tier: String,
   ) {
     storedUnallocatedEvents
       .filter { activeEvents.containsKey(it.convictionNumber) }
@@ -71,7 +71,7 @@ class UpsertUnallocatedCaseService(
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
     name: String,
     crn: String,
-    tier: String
+    tier: String,
   ) {
     activeEvents
       .filter { activeEvent -> storedUnallocatedEvents.none { entry -> entry.convictionNumber == activeEvent.key } }
@@ -84,8 +84,8 @@ class UpsertUnallocatedCaseService(
             tier = tier,
             providerCode = createEvent.providerCode,
             teamCode = createEvent.teamCode,
-            convictionNumber = createEvent.eventNumber.toInt()
-          )
+            convictionNumber = createEvent.eventNumber.toInt(),
+          ),
         )
         telemetryService.trackAllocationDemandRaised(savedEntity)
       }

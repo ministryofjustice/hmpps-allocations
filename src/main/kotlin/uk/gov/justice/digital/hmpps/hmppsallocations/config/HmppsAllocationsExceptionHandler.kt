@@ -30,8 +30,8 @@ class HmppsAllocationsExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -44,8 +44,8 @@ class HmppsAllocationsExceptionHandler {
         ErrorResponse(
           status = METHOD_NOT_ALLOWED,
           userMessage = "Method not allowed: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -57,8 +57,8 @@ class HmppsAllocationsExceptionHandler {
         ErrorResponse(
           status = FORBIDDEN,
           userMessage = "Access is denied",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -69,9 +69,9 @@ class HmppsAllocationsExceptionHandler {
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 404,
-        developerMessage = e.message
+        developerMessage = e.message,
       ),
-      HttpStatus.NOT_FOUND
+      HttpStatus.NOT_FOUND,
     )
   }
 
@@ -82,9 +82,9 @@ class HmppsAllocationsExceptionHandler {
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 400,
-        developerMessage = e.message
+        developerMessage = e.message,
       ),
-      BAD_REQUEST
+      BAD_REQUEST,
     )
   }
 
@@ -95,9 +95,9 @@ class HmppsAllocationsExceptionHandler {
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 400,
-        developerMessage = e.message
+        developerMessage = e.message,
       ),
-      BAD_REQUEST
+      BAD_REQUEST,
     )
   }
 
@@ -108,9 +108,9 @@ class HmppsAllocationsExceptionHandler {
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 400,
-        developerMessage = e.message
+        developerMessage = e.message,
       ),
-      BAD_REQUEST
+      BAD_REQUEST,
     )
   }
 
@@ -119,9 +119,9 @@ class HmppsAllocationsExceptionHandler {
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
         status = 404,
-        developerMessage = e.message
+        developerMessage = e.message,
       ),
-      NOT_FOUND
+      NOT_FOUND,
     )
   }
 
@@ -134,8 +134,8 @@ class HmppsAllocationsExceptionHandler {
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR,
           userMessage = "Unexpected error: ${e.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -149,14 +149,14 @@ data class ErrorResponse(
   val errorCode: Int? = null,
   val userMessage: String? = null,
   val developerMessage: String? = null,
-  val moreInfo: String? = null
+  val moreInfo: String? = null,
 ) {
   constructor(
     status: HttpStatus,
     errorCode: Int? = null,
     userMessage: String? = null,
     developerMessage: String? = null,
-    moreInfo: String? = null
+    moreInfo: String? = null,
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }

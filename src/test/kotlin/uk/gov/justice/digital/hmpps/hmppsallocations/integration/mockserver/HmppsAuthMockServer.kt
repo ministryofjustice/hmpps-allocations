@@ -43,7 +43,7 @@ class HmppsAuthMockServer : ClientAndServer(MOCKSERVER_PORT) {
             "token_type": "bearer",
             "access_token": "ABCDE"
         }
-        """.trimIndent()
+        """.trimIndent(),
       )
     hmppsAuth.`when`(HttpRequest.request().withPath("/auth/oauth/token")).respond(response)
   }

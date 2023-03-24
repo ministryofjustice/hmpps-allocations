@@ -21,14 +21,14 @@ class UnallocatedCasesByTeamController(private val getUnallocatedCaseService: Ge
   @Operation(summary = "Retrieve all unallocated cases by team")
   @ApiResponses(
     value = [
-      ApiResponse(responseCode = "200", description = "OK")
-    ]
+      ApiResponse(responseCode = "200", description = "OK"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/team/{teamCode}/cases/unallocated")
   suspend fun getUnallocatedCasesByTeam(@PathVariable teamCode: String): ResponseEntity<Flow<UnallocatedCase>> {
     return ResponseEntity.ok(
-      getUnallocatedCaseService.getAllByTeam(teamCode)
+      getUnallocatedCaseService.getAllByTeam(teamCode),
     )
   }
 }

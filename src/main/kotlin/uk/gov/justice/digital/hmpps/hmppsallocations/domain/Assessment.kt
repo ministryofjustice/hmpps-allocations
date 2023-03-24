@@ -5,5 +5,5 @@ import java.time.LocalDateTime
 
 data class Assessment @JsonCreator constructor(
   val completed: LocalDateTime,
-  val assessmentType: String
+  val assessmentType: String,
 )

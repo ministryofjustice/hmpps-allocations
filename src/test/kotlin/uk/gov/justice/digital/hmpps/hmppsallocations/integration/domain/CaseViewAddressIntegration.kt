@@ -10,5 +10,5 @@ data class CaseViewAddressIntegration constructor(
   val noFixedAbode: Boolean,
   val typeVerified: Boolean,
   val typeDescription: String,
-  val startDate: String
+  val startDate: String,
 )

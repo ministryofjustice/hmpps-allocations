@@ -16,6 +16,7 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
   fun findCaseByCrnAndConvictionNumber(crn: String, convictionNumber: Int): UnallocatedCaseEntity?
 
   fun findByTeamCode(teamCode: String): List<UnallocatedCaseEntity>
+
   @Query("select u.teamCode AS teamCode, count(*) AS caseCount from UnallocatedCaseEntity u where u.teamCode in :teamCodes GROUP BY u.teamCode")
   fun getCaseCountByTeam(teamCodes: List<String>): List<CaseCountByTeam>
 }

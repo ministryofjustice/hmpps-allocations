@@ -36,7 +36,7 @@ class TierMockServer : ClientAndServer(MOCKSERVER_PORT) {
   fun tierCalculationResponse(crn: String): HttpRequest {
     val request = HttpRequest.request().withPath("/crn/$crn/tier")
     hmppsTier.`when`(request).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}")
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("{\"tierScore\":\"B3\"}"),
     )
     return request
   }

@@ -14,20 +14,20 @@ data class UnallocatedCaseConfirmInstructions @JsonCreator constructor(
   @Schema(description = "Latest tier of case", example = "D2")
   val tier: String,
   val convictionNumber: Int,
-  val staff: StaffMember
+  val staff: StaffMember,
 ) {
 
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
-      personOnProbationStaffDetailsResponse: PersonOnProbationStaffDetailsResponse
+      personOnProbationStaffDetailsResponse: PersonOnProbationStaffDetailsResponse,
     ): UnallocatedCaseConfirmInstructions {
       return UnallocatedCaseConfirmInstructions(
         personOnProbationStaffDetailsResponse.name,
         case.crn,
         case.tier,
         case.convictionNumber,
-        personOnProbationStaffDetailsResponse.staff
+        personOnProbationStaffDetailsResponse.staff,
       )
     }
   }
