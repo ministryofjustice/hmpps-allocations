@@ -47,7 +47,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/widget")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(roshResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(roshResponse()),
     )
   }
 
@@ -56,7 +56,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/widget")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(roshResponseNoOverallRisk())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(roshResponseNoOverallRisk()),
     )
   }
 
@@ -72,8 +72,8 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
           "  \"errorCode\": 20012,\n" +
           "  \"userMessage\": \"Prisoner Not Found\",\n" +
           "  \"moreInfo\": \"Hard disk failure\"\n" +
-          "}"
-      )
+          "}",
+      ),
     )
   }
 
@@ -89,8 +89,8 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
           "  \"errorCode\": 20012,\n" +
           "  \"userMessage\": \"Prisoner Not Found\",\n" +
           "  \"moreInfo\": \"Hard disk failure\"\n" +
-          "}"
-      )
+          "}",
+      ),
     )
   }
 
@@ -99,7 +99,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponse()),
     )
   }
   fun getRiskPredictorsNotFoundForCrn(crn: String) {
@@ -107,7 +107,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorNotFoundResponse())
+      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorNotFoundResponse()),
     )
   }
 
@@ -116,7 +116,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorUnavailableResponse())
+      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorUnavailableResponse()),
     )
   }
 
@@ -125,7 +125,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]")
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]"),
     )
   }
 }

@@ -28,7 +28,7 @@ internal class GetUnallocatedCaseServiceTest {
       teamCode = "TM1",
       tier = "C2",
       id = id,
-      convictionNumber = 1
+      convictionNumber = 1,
     )
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
     every { mockRepo.existsById(id) } returns false

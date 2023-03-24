@@ -24,14 +24,14 @@ class UnallocatedCasesDocumentController(@Qualifier("workforceAllocationsToDeliu
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping(path = ["/cases/unallocated/{crn}/documents/{documentId}"], produces = [APPLICATION_OCTET_STREAM_VALUE])
   fun getUnallocatedCaseDocument(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) documentId: String
+    @PathVariable(required = true) documentId: String,
   ): Mono<ResponseEntity<Resource>> {
     return workforceAllocationsToDeliusApiClient.getDocumentById(crn, documentId)
   }
@@ -39,8 +39,8 @@ class UnallocatedCasesDocumentController(@Qualifier("workforceAllocationsToDeliu
   @Operation(summary = "Retrieve all documents by CRN")
   @ApiResponses(
     value = [
-      ApiResponse(responseCode = "200", description = "OK")
-    ]
+      ApiResponse(responseCode = "200", description = "OK"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping(path = ["/cases/unallocated/{crn}/documents"], produces = [APPLICATION_JSON_VALUE])

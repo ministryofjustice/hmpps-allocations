@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class RoshSummary @JsonCreator constructor(
   private val overallRisk: String?,
   val assessedOn: LocalDate?,
-  val riskInCommunity: Map<String, String?>
+  val riskInCommunity: Map<String, String?>,
 ) {
   fun getOverallRisk(): String {
     return overallRisk ?: "NOT_FOUND"

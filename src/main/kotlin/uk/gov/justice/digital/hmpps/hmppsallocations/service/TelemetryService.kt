@@ -27,8 +27,8 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
         PROVIDER_CODE to unallocatedCaseEntity.providerCode,
         "wmtPeriod" to getWmtPeriod(LocalDateTime.now()),
         "startTime" to unallocatedCaseEntity.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-        "endTime" to ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-      )
+        "endTime" to ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+      ),
     )
   }
 
@@ -38,8 +38,8 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
       mapOf(
         CRN to unallocatedCaseEntity.crn,
         TEAM_CODE to unallocatedCaseEntity.teamCode,
-        PROVIDER_CODE to unallocatedCaseEntity.providerCode
-      )
+        PROVIDER_CODE to unallocatedCaseEntity.providerCode,
+      ),
     )
   }
 

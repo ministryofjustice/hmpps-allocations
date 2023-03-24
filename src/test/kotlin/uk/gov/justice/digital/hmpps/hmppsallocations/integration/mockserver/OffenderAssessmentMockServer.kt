@@ -45,7 +45,7 @@ class OffenderAssessmentMockServer : ClientAndServer(MOCKSERVER_PORT) {
         .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
 
     offenderAssessmentApi.`when`(assessmentRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(assessmentResponse())
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(assessmentResponse()),
     )
   }
 
@@ -55,7 +55,7 @@ class OffenderAssessmentMockServer : ClientAndServer(MOCKSERVER_PORT) {
         .withQueryStringParameter(Parameter("assessmentStatus", "COMPLETE"))
     offenderAssessmentApi.`when`(assessmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
-        .withBody(assessmentNotFoundResponse(crn))
+        .withBody(assessmentNotFoundResponse(crn)),
     )
   }
 }

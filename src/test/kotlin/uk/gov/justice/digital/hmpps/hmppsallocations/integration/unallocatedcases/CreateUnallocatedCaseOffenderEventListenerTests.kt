@@ -25,8 +25,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { repository.count() } matches { it!! > 0 }
@@ -45,9 +45,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         mapOf(
           "crn" to crn,
           "teamCode" to "TM1",
-          "providerCode" to "PAC1"
+          "providerCode" to "PAC1",
         ),
-        null
+        null,
       )
     }
   }
@@ -60,8 +60,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
@@ -72,7 +72,6 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
   @Test
   fun `do not save when restricted case`() {
-
     val crn = "J678910"
     communityApi.getUserAccessForCrnForbidden(crn)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
@@ -81,8 +80,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsOffenderSnsClient.publish(
       PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
-      )
+        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
+      ),
     )
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }

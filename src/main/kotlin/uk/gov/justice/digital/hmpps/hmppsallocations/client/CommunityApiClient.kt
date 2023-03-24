@@ -25,5 +25,5 @@ class CommunityApiClient(private val webClient: WebClient) {
 
 data class DeliusUserAccess(
   val userRestricted: Boolean,
-  val userExcluded: Boolean
+  val userExcluded: Boolean,
 )

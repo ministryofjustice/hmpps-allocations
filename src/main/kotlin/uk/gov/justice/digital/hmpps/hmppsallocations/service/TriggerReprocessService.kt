@@ -37,10 +37,10 @@ class TriggerReprocessService(
     val sendMessage = SendMessageRequest(
       hmppsOffenderQueueUrl,
       objectMapper.writeValueAsString(
-        crnToOffenderSqsMessage(crn)
-      )
+        crnToOffenderSqsMessage(crn),
+      ),
     ).withMessageAttributes(
-      mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED"))
+      mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
     )
     log.info("publishing event type {} for crn {}", "CONVICTION_CHANGED", crn)
     return hmppsOffenderSqsClient.sendMessage(sendMessage)
@@ -48,8 +48,8 @@ class TriggerReprocessService(
 
   private fun crnToOffenderSqsMessage(crn: String): SQSMessage = SQSMessage(
     objectMapper.writeValueAsString(
-      HmppsOffenderEvent(crn)
-    )
+      HmppsOffenderEvent(crn),
+    ),
   )
 
   companion object {

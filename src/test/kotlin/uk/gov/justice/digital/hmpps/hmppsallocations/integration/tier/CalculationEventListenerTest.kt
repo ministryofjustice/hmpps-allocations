@@ -51,8 +51,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         name = "foo",
         providerCode = "",
         teamCode = "",
-        convictionNumber = convictionNumber
-      )
+        convictionNumber = convictionNumber,
+      ),
     )
   }
 
@@ -67,9 +67,9 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
       PublishRequest(hmppsDomainTopicArn, jsonString(tierCalculationEvent(crn)))
         .withMessageAttributes(
           mapOf(
-            "eventType" to MessageAttributeValue().withDataType("String").withStringValue("TIER_CALCULATION_COMPLETE")
-          )
-        )
+            "eventType" to MessageAttributeValue().withDataType("String").withStringValue("TIER_CALCULATION_COMPLETE"),
+          ),
+        ),
     )
   }
 }

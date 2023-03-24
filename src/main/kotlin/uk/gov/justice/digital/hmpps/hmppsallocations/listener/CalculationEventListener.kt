@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationServ
 @Component
 class CalculationEventListener(
   private val calculationTierService: TierCalculationService,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
 ) {
 
   @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
@@ -37,7 +37,7 @@ class CalculationEventListener(
 
   data class PersonReferenceType(
     val type: String,
-    val value: String
+    val value: String,
   )
 
   data class Message(@JsonProperty("Message") val message: String)
