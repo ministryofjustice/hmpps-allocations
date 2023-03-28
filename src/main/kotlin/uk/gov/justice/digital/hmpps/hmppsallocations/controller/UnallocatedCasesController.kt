@@ -124,7 +124,7 @@ class UnallocatedCasesController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/confirm-instructions")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/decision-evidencing")
   suspend fun getDecisionEvidencing(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
