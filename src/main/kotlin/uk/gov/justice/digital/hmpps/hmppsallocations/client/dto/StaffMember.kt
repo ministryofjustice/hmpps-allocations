@@ -6,4 +6,5 @@ data class StaffMember constructor(
   val code: String,
   val name: Name,
   val email: String?,
+  val grade: String?,
 )
