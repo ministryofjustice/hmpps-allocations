@@ -189,9 +189,9 @@ abstract class IntegrationTestBase {
               "eventType" to MessageAttributeValue.builder()
                 .dataType("String")
                 .stringValue("CONVICTION_CHANGED")
-                .build()
-            )
-          ).build()
+                .build(),
+            ),
+          ).build(),
       )
   }
 

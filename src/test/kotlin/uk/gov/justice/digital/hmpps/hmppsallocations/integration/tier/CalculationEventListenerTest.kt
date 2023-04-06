@@ -73,9 +73,9 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
               "eventType" to MessageAttributeValue.builder()
                 .dataType("String")
                 .stringValue("TIER_CALCULATION_COMPLETE")
-                .build()
-            )
-          ).build()
+                .build(),
+            ),
+          ).build(),
       )
   }
 }

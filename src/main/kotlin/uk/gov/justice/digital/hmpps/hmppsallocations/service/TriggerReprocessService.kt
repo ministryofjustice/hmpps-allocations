@@ -1,9 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.MessageAttributeValue
-import com.amazonaws.services.sqs.model.SendMessageRequest
-import com.amazonaws.services.sqs.model.SendMessageResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +7,9 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.HmppsOffenderEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.SQSMessage
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -18,9 +17,9 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 @Service
 class TriggerReprocessService(
-  private val hmppsQueueService: HmppsQueueService,
+  hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
-  @Qualifier("hmppsoffenderqueue-sqs-client") private val hmppsOffenderSqsClient: AmazonSQS,
+  @Qualifier("hmppsoffenderqueue-sqs-client") private val hmppsOffenderSqsClient: SqsAsyncClient,
 ) {
 
   private val hmppsOffenderQueueUrl = hmppsQueueService.findByQueueId("hmppsoffenderqueue")?.queueUrl ?: throw MissingQueueException("HmppsQueue hmppsoffenderqueue not found")
@@ -33,17 +32,19 @@ class TriggerReprocessService(
     }
   }
 
-  private fun publishToHMPPSOffenderQueue(crn: String): SendMessageResult {
-    val sendMessage = SendMessageRequest(
-      hmppsOffenderQueueUrl,
-      objectMapper.writeValueAsString(
-        crnToOffenderSqsMessage(crn),
-      ),
-    ).withMessageAttributes(
-      mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-    )
+  private fun publishToHMPPSOffenderQueue(crn: String) {
+    val sendMessage =
+      SendMessageRequest.builder()
+        .queueUrl(hmppsOffenderQueueUrl)
+        .messageBody(
+          objectMapper.writeValueAsString(
+            crnToOffenderSqsMessage(crn),
+          ),
+        ).messageAttributes(
+          mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue("CONVICTION_CHANGED").build()),
+        ).build()
     log.info("publishing event type {} for crn {}", "CONVICTION_CHANGED", crn)
-    return hmppsOffenderSqsClient.sendMessage(sendMessage)
+    hmppsOffenderSqsClient.sendMessage(sendMessage)
   }
 
   private fun crnToOffenderSqsMessage(crn: String): SQSMessage = SQSMessage(
