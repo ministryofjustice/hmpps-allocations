@@ -13,7 +13,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -24,12 +26,11 @@ class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
-  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
+  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-
       val assessment = assessmentApiClient.getAssessment(crn)
         .toList()
         .maxByOrNull { a -> a.completed }
@@ -50,7 +51,8 @@ class GetUnallocatedCaseService(
       .map { deliusCaseDetail ->
         val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
         UnallocatedCase.from(
-          unallocatedCase, deliusCaseDetail
+          unallocatedCase,
+          deliusCaseDetail,
         )
       }
   }
@@ -69,7 +71,7 @@ class GetUnallocatedCaseService(
         assessRisksNeedsApiClient.getRosh(crn),
         assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
       )
     }
 
@@ -79,6 +81,21 @@ class GetUnallocatedCaseService(
 
   private fun findUnallocatedCaseByConvictionNumber(
     crn: String,
-    convictionNumber: Long
+    convictionNumber: Long,
   ) = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
+
+  suspend fun getCaseConfirmInstructions(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseConfirmInstructions? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+    val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
+    return UnallocatedCaseConfirmInstructions.from(
+      unallocatedCaseEntity,
+      personOnProbationStaffDetailsResponse,
+    )
+  }
+  suspend fun getCaseDecisionEvidencing(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseDecisionEvidencing? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+    val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
+    return UnallocatedCaseDecisionEvidencing.from(
+      unallocatedCaseEntity,
+      personOnProbationStaffDetailsResponse,
+    )
+  }
 }

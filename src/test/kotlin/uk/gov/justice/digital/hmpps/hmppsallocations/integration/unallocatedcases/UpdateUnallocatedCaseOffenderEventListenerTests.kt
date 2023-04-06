@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -28,12 +29,13 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         crn = crn,
         name = "Tester TestSurname",
         tier = "B3",
-        providerCode = "",
-        teamCode = "",
-        convictionNumber = 1
-      )
+        providerCode = "ORIGINALPROVIDER",
+        teamCode = "ORIGINALTEAM",
+        convictionNumber = 1,
+      ),
     )
 
+    communityApi.getUserAccessForCrn(crn)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -46,6 +48,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.teamCode).isEqualTo("TM1")
+    assertThat(case.providerCode).isEqualTo("PAC1")
   }
 
   @Test
@@ -59,9 +63,11 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         tier = "B3",
         providerCode = "PC1",
         teamCode = "TC1",
-        convictionNumber = 1
-      )
+        convictionNumber = 1,
+      ),
     )
+
+    communityApi.getUserAccessForCrn(crn)
     workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -76,7 +82,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       telemetryClient.trackEvent(
         "EventAllocated",
         capture(parameters),
-        null
+        null,
       )
     }
     val startTime = ZonedDateTime.parse(parameters.captured["startTime"])
@@ -86,7 +92,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       { Assertions.assertEquals(savedEntity.providerCode, parameters.captured["providerCode"]) },
       { Assertions.assertEquals(getWmtPeriod(LocalDateTime.now()), parameters.captured["wmtPeriod"]) },
       { Assertions.assertTrue(startTime.isEqual(savedEntity.createdDate)) },
-      { Assertions.assertNotNull(parameters.captured["endTime"]) }
+      { Assertions.assertNotNull(parameters.captured["endTime"]) },
     )
   }
 
@@ -98,10 +104,13 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "", teamCode = "",
-        convictionNumber = 1
-      )
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
     )
+    communityApi.getUserAccessForCrnNotFound(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     publishConvictionChangedMessage(crn)
@@ -119,9 +128,11 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3", providerCode = "", teamCode = "",
-        convictionNumber = 1
-      )
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
     )
 
     Assertions.assertThrows(DataIntegrityViolationException::class.java) {
@@ -132,8 +143,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
           tier = "B3",
           providerCode = "",
           teamCode = "",
-          convictionNumber = 1
-        )
+          convictionNumber = 1,
+        ),
       )
     }
   }

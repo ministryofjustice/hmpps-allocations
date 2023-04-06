@@ -51,8 +51,8 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
         name = "foo",
         providerCode = "",
         teamCode = "",
-        convictionNumber = convictionNumber
-      )
+        convictionNumber = convictionNumber,
+      ),
     )
   }
 

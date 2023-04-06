@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
@@ -39,7 +40,8 @@ import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
   OffenderAssessmentApiExtension::class,
   TierApiExtension::class,
   WorkforceAllocationsToDeliusApiExtension::class,
-  HmppsAuthApiExtension::class
+  HmppsAuthApiExtension::class,
+  CommunityApiExtension::class,
 )
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -52,17 +54,20 @@ abstract class IntegrationTestBase {
     "C2",
     providerCode = "",
     teamCode = "TEAM1",
-    convictionNumber = 4
+    convictionNumber = 4,
   )
 
   fun insertCases() {
     repository.saveAll(
       listOf(
         UnallocatedCaseEntity(
-          null, "Dylan Adam Armstrong", "J678910", "C1",
+          null,
+          "Dylan Adam Armstrong",
+          "J678910",
+          "C1",
           providerCode = "",
           teamCode = "TEAM1",
-          convictionNumber = 1
+          convictionNumber = 1,
         ),
         UnallocatedCaseEntity(
           null,
@@ -71,7 +76,7 @@ abstract class IntegrationTestBase {
           "A1",
           providerCode = "",
           teamCode = "TEAM1",
-          convictionNumber = 2
+          convictionNumber = 2,
         ),
         UnallocatedCaseEntity(
           null,
@@ -80,14 +85,17 @@ abstract class IntegrationTestBase {
           "C1",
           providerCode = "",
           teamCode = "TEAM1",
-          convictionNumber = 3
+          convictionNumber = 3,
         ),
         previouslyManagedCase,
         UnallocatedCaseEntity(
-          null, "Dylan Adam Armstrong", "J678910", "C1",
+          null,
+          "Dylan Adam Armstrong",
+          "J678910",
+          "C1",
           providerCode = "",
           teamCode = "TEAM2",
-          convictionNumber = 5
+          convictionNumber = 5,
         ),
         UnallocatedCaseEntity(
           null,
@@ -96,10 +104,10 @@ abstract class IntegrationTestBase {
           "B1",
           providerCode = "",
           teamCode = "TEAM3",
-          convictionNumber = 6
-        )
+          convictionNumber = 6,
+        ),
 
-      )
+      ),
     )
   }
 
@@ -165,8 +173,8 @@ abstract class IntegrationTestBase {
       jwtAuthHelper.createJwt(
         subject = "SOME_USER",
         roles = roles,
-        clientId = "some-client"
-      )
+        clientId = "some-client",
+      ),
     )
   }
 
@@ -198,7 +206,7 @@ abstract class IntegrationTestBase {
   protected fun offenderEvent(crn: String) = HmppsOffenderEvent(crn)
 
   protected fun tierCalculationEvent(crn: String) = CalculationEventData(
-    PersonReference(listOf(PersonReferenceType("CRN", crn)))
+    PersonReference(listOf(PersonReferenceType("CRN", crn))),
   )
 
   private fun getNumberOfMessagesCurrentlyOnQueue(client: SqsAsyncClient, queueUrl: String): Int? =
@@ -208,7 +216,7 @@ abstract class IntegrationTestBase {
     await untilCallTo {
       getNumberOfMessagesCurrentlyOnQueue(
         tierCalculationSqsClient,
-        tierCalculationQueue.queueUrl
+        tierCalculationQueue.queueUrl,
       )
     } matches { it == 0 }
   }
@@ -217,7 +225,7 @@ abstract class IntegrationTestBase {
     await untilCallTo {
       getNumberOfMessagesCurrentlyOnQueue(
         tierCalculationSqsClient,
-        tierCalculationQueue.queueUrl
+        tierCalculationQueue.queueUrl,
       )
     } matches { it == 0 }
   }

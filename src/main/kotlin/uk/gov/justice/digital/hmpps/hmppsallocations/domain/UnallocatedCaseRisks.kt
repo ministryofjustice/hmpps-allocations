@@ -23,14 +23,14 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val roshRisk: RoshSummary?,
   val rsr: UnallocatedCaseRsr?,
   val ogrs: UnallocatedCaseOgrs?,
-  val convictionNumber: Int
+  val convictionNumber: Int,
 ) {
   companion object {
     fun from(
       deliusRisk: DeliusRisk,
       case: UnallocatedCaseEntity,
       rosh: RoshSummary?,
-      riskPredictor: RiskPredictor?
+      riskPredictor: RiskPredictor?,
     ): UnallocatedCaseRisks {
       return UnallocatedCaseRisks(
         case.name,
@@ -41,7 +41,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
         rosh,
         UnallocatedCaseRsr.from(riskPredictor),
         UnallocatedCaseOgrs.from(deliusRisk.ogrs),
-        case.convictionNumber
+        case.convictionNumber,
       )
     }
   }
@@ -65,7 +65,7 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
         registrations.description,
         registrations.startDate,
         registrations.notes,
-        registrations.endDate
+        registrations.endDate,
       )
     }
   }
@@ -77,7 +77,7 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
   @Schema(description = "last updated on Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val lastUpdatedOn: LocalDate?,
-  val percentage: BigDecimal?
+  val percentage: BigDecimal?,
 ) {
   companion object {
     fun from(rp: RiskPredictor?): UnallocatedCaseRsr? {
@@ -91,7 +91,7 @@ data class UnallocatedCaseOgrs @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val lastUpdatedOn: LocalDate,
   @Schema(description = "Score", example = "62")
-  val score: BigInteger
+  val score: BigInteger,
 ) {
   companion object {
     fun from(ogrs: Ogrs?): UnallocatedCaseOgrs? {

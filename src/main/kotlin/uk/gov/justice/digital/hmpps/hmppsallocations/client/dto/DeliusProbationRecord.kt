@@ -13,7 +13,7 @@ data class DeliusProbationRecord(
 data class SentencedEvent(
   val sentence: ProbationRecordSentence,
   val offences: List<SentenceOffence>,
-  val manager: CommunityEventManager?
+  val manager: CommunityEventManager?,
 )
 
 data class CommunityEventManager(

@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.time.LocalDate
 
 data class RoshSummary @JsonCreator constructor(
-  val overallRisk: String?,
+  private val overallRisk: String?,
   val assessedOn: LocalDate?,
-  val riskInCommunity: Map<String, String?>
-)
+  val riskInCommunity: Map<String, String?>,
+) {
+  fun getOverallRisk(): String {
+    return overallRisk ?: "NOT_FOUND"
+  }
+}

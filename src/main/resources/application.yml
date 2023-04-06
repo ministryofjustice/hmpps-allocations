@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: hmpps-allocations
@@ -47,6 +48,11 @@ spring:
             client-id: ${oauth.client.id}
             client-secret: ${oauth.client.secret}
             authorization-grant-type: client_credentials
+          community-api:
+            provider: hmpps-auth
+            client-id: ${oauth.client.id}
+            client-secret: ${oauth.client.secret}
+            authorization-grant-type: client_credentials
         provider:
           hmpps-auth:
             token-uri: ${oauth.endpoint.url}/oauth/token
@@ -66,6 +72,7 @@ server:
 
 hmpps:
   sqs:
+    reactiveApi: true
     queueAdminRole: ROLE_ALLOCATION_API_QUEUE_ADMIN
 management:
   endpoints:

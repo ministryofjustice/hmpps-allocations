@@ -5,8 +5,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
@@ -15,6 +17,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `retrieve event with minimum required data will save`() {
     val crn = "J678910"
+    communityApi.getUserAccessForCrn(crn)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -36,9 +39,9 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         mapOf(
           "crn" to crn,
           "teamCode" to "TM1",
-          "providerCode" to "PAC1"
+          "providerCode" to "PAC1",
         ),
-        null
+        null,
       )
     }
   }
@@ -46,6 +49,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when crn is not found`() {
     val crn = "J678910"
+    communityApi.getUserAccessForCrnNotFound(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     publishConvictionChangedMessage(crn)
@@ -59,7 +63,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when restricted case`() {
     val crn = "J678910"
-    workforceAllocationsToDelius.unallocatedEventsForbiddenResponse(crn)
+    communityApi.getUserAccessForCrnForbidden(crn)
+    workforceAllocationsToDelius.unallocatedEventsResponse(crn)
 
     hmppsTier.tierCalculationResponse(crn)
 
@@ -67,5 +72,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
     await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
+
+    Assertions.assertFalse(repository.existsByCrn(crn))
   }
 }

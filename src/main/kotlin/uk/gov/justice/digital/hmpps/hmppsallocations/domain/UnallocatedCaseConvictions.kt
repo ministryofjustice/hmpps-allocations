@@ -19,18 +19,20 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   val tier: String,
   val active: List<UnallocatedCaseConviction>,
   val previous: List<UnallocatedCaseConviction>,
-  val convictionNumber: Int
+  val convictionNumber: Int,
 ) {
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
-      probationRecord: DeliusProbationRecord
+      probationRecord: DeliusProbationRecord,
     ): UnallocatedCaseConvictions {
       return UnallocatedCaseConvictions(
-        probationRecord.name.getCombinedName(), case.crn, case.tier,
+        probationRecord.name.getCombinedName(),
+        case.crn,
+        case.tier,
         probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
         probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
-        case.convictionNumber
+        case.convictionNumber,
       )
     }
   }
@@ -59,7 +61,7 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
         UnallocatedCaseConvictionPractitioner.from(sentencedEvent.manager),
         sentencedEvent.sentence.startDate,
         sentencedEvent.sentence.terminationDate,
-        sentencedEvent.offences.map { UnallocatedCaseConvictionOffence.from(it) }
+        sentencedEvent.offences.map { UnallocatedCaseConvictionOffence.from(it) },
       )
     }
   }
@@ -69,7 +71,7 @@ data class UnallocatedCaseConvictionPractitioner @JsonCreator constructor(
   @Schema(description = "Full Name", example = "John William Smith")
   val name: String?,
   @Schema(description = "Grade", example = "PSO")
-  val grade: String?
+  val grade: String?,
 ) {
   companion object {
     fun from(communityEventManager: CommunityEventManager?): UnallocatedCaseConvictionPractitioner? {

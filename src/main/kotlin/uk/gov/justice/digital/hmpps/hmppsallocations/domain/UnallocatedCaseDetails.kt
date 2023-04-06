@@ -54,7 +54,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val roshLevel: String?,
   val rsrLevel: String?,
   val ogrsScore: BigInteger?,
-  val activeRiskRegistration: String?
+  val activeRiskRegistration: String?,
 ) {
 
   companion object {
@@ -63,7 +63,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       case: UnallocatedCaseEntity,
       deliusCaseView: DeliusCaseView,
       assessment: Assessment?,
-      unallocatedCaseRisks: UnallocatedCaseRisks?
+      unallocatedCaseRisks: UnallocatedCaseRisks?,
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         deliusCaseView.name.getCombinedName(),
@@ -83,10 +83,10 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         deliusCaseView.mainAddress,
         deliusCaseView.sentence.length,
         case.convictionNumber,
-        unallocatedCaseRisks?.roshRisk?.overallRisk,
+        unallocatedCaseRisks?.roshRisk?.getOverallRisk(),
         unallocatedCaseRisks?.rsr?.level,
         unallocatedCaseRisks?.ogrs?.score,
-        unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type }
+        unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
       )
     }
   }
@@ -99,18 +99,17 @@ data class OffenderManagerDetails @JsonCreator constructor(
   val surname: String?,
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Schema(description = "Grade", example = "PSO")
-  val grade: String?
+  val grade: String?,
 ) {
 
   companion object {
 
     fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
-
       return communityPersonManager?.name?.forename?.takeUnless { probationStatus == "New to probation" }?.let {
         OffenderManagerDetails(
           communityPersonManager.name.forename,
           communityPersonManager.name.surname,
-          gradeFrom(probationStatus, communityPersonManager.grade)
+          gradeFrom(probationStatus, communityPersonManager.grade),
         )
       }
     }
@@ -130,14 +129,14 @@ data class UnallocatedCaseOffence @JsonCreator constructor(
   @Schema(description = "Main Category", example = "Abstracting electricity")
   val mainCategory: String,
   @Schema(description = "Sub Category", example = "Abstracting electricity")
-  val subCategory: String
+  val subCategory: String,
 ) {
   companion object {
     fun from(offence: Offence): UnallocatedCaseOffence {
       return UnallocatedCaseOffence(
         offence.mainOffence,
         offence.mainCategory,
-        offence.subCategory
+        offence.subCategory,
       )
     }
   }
@@ -156,7 +155,7 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
       return UnallocatedCaseRequirement(
         requirement.mainCategory,
         requirement.subCategory,
-        requirement.length
+        requirement.length,
       )
     }
   }
@@ -171,7 +170,7 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
   @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
   val documentId: String?,
   @Schema(description = "Name of document")
-  val name: String
+  val name: String,
 ) {
   companion object {
     fun from(document: CaseViewDocument?): UnallocatedCaseDocument? {
@@ -180,7 +179,7 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
           it.description,
           it.dateCreated,
           it.documentId,
-          it.documentName
+          it.documentName,
         )
       }
     }

@@ -38,5 +38,5 @@ data class UnallocatedCaseEntity(
   val createdDate: ZonedDateTime = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS),
 
   @Column
-  var convictionNumber: Int
+  var convictionNumber: Int,
 )

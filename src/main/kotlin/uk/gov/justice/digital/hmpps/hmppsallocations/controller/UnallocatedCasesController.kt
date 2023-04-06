@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
@@ -22,13 +24,13 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNot
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
-  private val getUnallocatedCaseService: GetUnallocatedCaseService
+  private val getUnallocatedCaseService: GetUnallocatedCaseService,
 ) {
   @Operation(summary = "Retrieve count of all unallocated cases by team")
   @ApiResponses(
     value = [
-      ApiResponse(responseCode = "200", description = "OK")
-    ]
+      ApiResponse(responseCode = "200", description = "OK"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/teamCount")
@@ -40,14 +42,14 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}")
   suspend fun getUnallocatedCase(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long
+    @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseDetails {
     return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
@@ -56,14 +58,14 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/overview")
   suspend fun getUnallocatedCaseOverview(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long
+    @PathVariable(required = true) convictionNumber: Long,
   ): CaseOverview =
     getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
@@ -72,14 +74,14 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/record/exclude-conviction/{excludeConvictionNumber}")
   suspend fun getUnallocatedCaseProbationRecord(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) excludeConvictionNumber: Long
+    @PathVariable(required = true) excludeConvictionNumber: Long,
   ): UnallocatedCaseConvictions =
     getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
@@ -88,14 +90,44 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found")
-    ]
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/risks")
   suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long
+    @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseRisks =
     getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+
+  @Operation(summary = "Retrieve unallocated case confirm instructions by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/confirm-instructions")
+  suspend fun getUnallocatedCaseConfirmInstructions(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionNumber: Long,
+    @RequestParam(required = true) staffCode: String,
+  ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
+
+  @Operation(summary = "Retrieve unallocated case decision evidencing by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/decision-evidencing")
+  suspend fun getDecisionEvidencing(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) convictionNumber: Long,
+    @RequestParam(required = true) staffCode: String,
+  ): UnallocatedCaseDecisionEvidencing = getUnallocatedCaseService.getCaseDecisionEvidencing(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
 }

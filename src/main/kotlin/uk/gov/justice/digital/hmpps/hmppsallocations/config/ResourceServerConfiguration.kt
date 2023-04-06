@@ -24,7 +24,8 @@ class ResourceServerConfiguration {
           "/v3/api-docs/**",
           "/swagger-ui/**",
           "/swagger-ui.html",
-          "/queue-admin/**"
+          "/queue-admin/**",
+          "/crn/reprocess",
         ).permitAll().anyExchange().authenticated()
       }
       .oauth2ResourceServer {

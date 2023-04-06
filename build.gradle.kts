@@ -1,9 +1,9 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.0.1"
-  kotlin("plugin.spring") version "1.8.10"
-  kotlin("plugin.jpa") version "1.8.10"
+  kotlin("plugin.spring") version "1.8.20"
+  kotlin("plugin.jpa") version "1.8.20"
   id("io.gitlab.arturbosch.detekt") version "1.22.0"
-  id("org.jetbrains.kotlin.plugin.allopen") version "1.8.10"
+  id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
 }
 
 configurations {
@@ -43,7 +43,7 @@ dependencies {
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.5.4")
+  runtimeOnly("org.postgresql:postgresql:42.6.0")
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
@@ -51,7 +51,7 @@ dependencies {
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.4")
-  testImplementation("com.ninja-squad:springmockk:4.0.0")
+  testImplementation("com.ninja-squad:springmockk:4.0.2")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 }
 

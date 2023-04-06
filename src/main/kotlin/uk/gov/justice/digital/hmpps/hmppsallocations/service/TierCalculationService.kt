@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedC
 @Service
 class TierCalculationService(
   private val hmppsTierApiClient: HmppsTierApiClient,
-  private val repository: UnallocatedCasesRepository
+  private val repository: UnallocatedCasesRepository,
 ) {
 
   @Transactional

@@ -78,7 +78,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
 
   private fun makeTestRequest(
     crn: String,
-    convictionNumber: Int
+    convictionNumber: Int,
   ) = webTestClient.get()
     .uri("/cases/unallocated/$crn/record/exclude-conviction/$convictionNumber")
     .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

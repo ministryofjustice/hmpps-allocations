@@ -45,7 +45,7 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun assessmentWebClientUserEnhancedAppScope(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
-    builder: WebClient.Builder
+    builder: WebClient.Builder,
   ): WebClient {
     return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder), builder, assessmentApiRootUri, "assessment-api")
   }
@@ -58,7 +58,7 @@ class WebClientUserEnhancementConfiguration(
   @Bean
   fun workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
-    builder: WebClient.Builder
+    builder: WebClient.Builder,
   ): WebClient {
     return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder), builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
   }
@@ -102,7 +102,7 @@ class WebClientUserEnhancementConfiguration(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
     rootUri: String,
-    registrationId: String
+    registrationId: String,
   ): WebClient {
     val oauth2Client = ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId(registrationId)

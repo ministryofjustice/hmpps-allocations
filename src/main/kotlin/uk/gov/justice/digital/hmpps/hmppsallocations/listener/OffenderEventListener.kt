@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCa
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
-  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService
+  private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -40,9 +40,9 @@ class OffenderEventListener(
 }
 
 data class HmppsOffenderEvent(
-  val crn: String
+  val crn: String,
 )
 
 data class SQSMessage(
-  @JsonProperty("Message") val message: String
+  @JsonProperty("Message") val message: String,
 )

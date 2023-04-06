@@ -15,7 +15,7 @@ data class DeliusCaseView constructor(
   val cpsPack: CaseViewDocument?,
   val preConvictionDocument: CaseViewDocument?,
   val courtReport: CaseViewDocument?,
-  val age: Int
+  val age: Int,
 )
 
 data class MainAddress constructor(
@@ -28,31 +28,31 @@ data class MainAddress constructor(
   val noFixedAbode: Boolean,
   val typeVerified: Boolean,
   val typeDescription: String?,
-  val startDate: LocalDate
+  val startDate: LocalDate,
 )
 
 data class Sentence constructor(
   val description: String,
   val startDate: LocalDate,
   val length: String,
-  val endDate: LocalDate
+  val endDate: LocalDate,
 )
 
 data class Offence constructor(
   val mainCategory: String,
   val subCategory: String,
-  val mainOffence: Boolean
+  val mainOffence: Boolean,
 )
 
 data class Requirement constructor(
   val mainCategory: String,
   val subCategory: String,
-  val length: String
+  val length: String,
 )
 
 data class CaseViewDocument constructor(
   val documentId: String,
   val documentName: String,
   val dateCreated: LocalDate?,
-  val description: String?
+  val description: String?,
 )
