@@ -17,11 +17,11 @@ generic-service:
 
 generic-prometheus-alerts:
   sqsOldestAlertQueueNames:
-    - "Digital-Prison-Services-prod-hmpps_tier_calculation_allocation_queue"
     - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue"
+    - "manage-a-workforce-production-hmpps_allocation_domain_events_queue"
   sqsNumberAlertQueueNames:
-    - "Digital-Prison-Services-prod-hmpps_tier_calculation_allocation_dlq"
     - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue_dl"
+    - "manage-a-workforce-production-hmpps_allocation_domain_events_dlq"
   sqsAlertsOldestThreshold: 2
   sqsAlertsTotalMessagesThreshold: 1
   ingress5xxErrorWindowMinutes: 4
