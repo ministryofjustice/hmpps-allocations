@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -23,11 +21,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { repository.count() } matches { it!! > 0 }
 
@@ -58,11 +52,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.getUserAccessForCrnNotFound(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -78,11 +68,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     hmppsTier.tierCalculationResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
     await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }

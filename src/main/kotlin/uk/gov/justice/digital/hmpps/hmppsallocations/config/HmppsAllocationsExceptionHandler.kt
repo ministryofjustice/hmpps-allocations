@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
+import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -17,7 +18,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
-import javax.validation.ValidationException
 
 @RestControllerAdvice
 class HmppsAllocationsExceptionHandler {

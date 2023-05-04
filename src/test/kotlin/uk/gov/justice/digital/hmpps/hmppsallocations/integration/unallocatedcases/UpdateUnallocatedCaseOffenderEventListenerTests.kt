@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import io.mockk.slot
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
@@ -41,11 +39,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -77,11 +71,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
@@ -123,11 +113,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     communityApi.getUserAccessForCrnNotFound(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
-    hmppsOffenderSnsClient.publish(
-      PublishRequest(hmppsOffenderTopicArn, jsonString(offenderEvent(crn))).withMessageAttributes(
-        mapOf("eventType" to MessageAttributeValue().withDataType("String").withStringValue("CONVICTION_CHANGED")),
-      ),
-    )
+    publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 

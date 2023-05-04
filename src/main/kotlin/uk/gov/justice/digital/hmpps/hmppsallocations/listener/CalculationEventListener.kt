@@ -2,10 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.awspring.cloud.sqs.annotation.SqsListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
-import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
 
@@ -15,7 +15,7 @@ class CalculationEventListener(
   private val objectMapper: ObjectMapper,
 ) {
 
-  @JmsListener(destination = "tiercalculationqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val calculationEventData = readMessage(rawMessage)
     CoroutineScope(Dispatchers.Default).future {
