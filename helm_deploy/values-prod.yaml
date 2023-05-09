@@ -1,6 +1,8 @@
 ---
 # Per environment values which override defaults in hmpps-allocations/values.yaml
 
+queue_cronjob_schedule: "*/15 * * * *"
+
 generic-service:
 
   ingress:
