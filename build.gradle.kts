@@ -14,6 +14,15 @@ configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
+// fix to prevent the mismatch of kotlin versions for detekt
+configurations.matching { it.name == "detekt" }.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.jetbrains.kotlin") {
+      useVersion("1.8.21")
+    }
+  }
+}
+
 dependencyCheck {
   suppressionFiles.add("suppressions.xml")
 }
@@ -71,6 +80,6 @@ tasks.named<JavaExec>("bootRun") {
 }
 
 detekt {
-  config = files("src/test/resources/detekt-config.yml")
+  config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
