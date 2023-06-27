@@ -1,6 +1,6 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.0"
-  kotlin("plugin.spring") version "1.8.21"
+  kotlin("plugin.spring") version "1.8.22"
   kotlin("plugin.jpa") version "1.8.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.0"
   id("org.jetbrains.kotlin.plugin.allopen") version "1.8.21"
@@ -12,6 +12,15 @@ configurations {
   implementation { exclude(module = "applicationinsights-spring-boot-starter") }
   implementation { exclude(module = "applicationinsights-logging-logback") }
   testImplementation { exclude(group = "org.junit.vintage") }
+}
+
+// fix to prevent the mismatch of kotlin versions for detekt
+configurations.matching { it.name == "detekt" }.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.jetbrains.kotlin") {
+      useVersion("1.8.21")
+    }
+  }
 }
 
 dependencyCheck {
@@ -71,6 +80,6 @@ tasks.named<JavaExec>("bootRun") {
 }
 
 detekt {
-  config = files("src/test/resources/detekt-config.yml")
+  config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
