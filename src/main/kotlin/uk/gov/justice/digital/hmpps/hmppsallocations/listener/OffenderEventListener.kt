@@ -19,6 +19,7 @@ class OffenderEventListener(
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
+    log.debug("processing message")
     val crn = getCrn(rawMessage)
     CoroutineScope(Dispatchers.Default).future {
       try {
