@@ -23,6 +23,3 @@ hmpps-tier:
 
 oauth:
   endpoint.url: http://localhost:9090/auth
-spring:
-  flyway:
-    validate-on-migrate: false
