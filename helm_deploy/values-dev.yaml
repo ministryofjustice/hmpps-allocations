@@ -16,6 +16,17 @@ generic-service:
     ASSESSMENT_ENDPOINT_URL: https://offender-dev.aks-dev-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs-dev.hmpps.service.justice.gov.uk
     COMMUNITY_ENDPOINT_URL: https://community-api-secure.test.delius.probation.hmpps.dsd.io/secure
+    HMPPS_SQS_USE_WEB_TOKEN: "true"
+  serviceAccountName: workforce-management
 
+  namespace_secrets:
+    sqs-domain-events-secret:
+      HMPPS_SQS_QUEUES_TIERCALCULATIONQUEUE_QUEUE_NAME: "sqs_queue_name"
+    sqs-domain-events-dl-secret:
+      HMPPS_SQS_QUEUES_TIERCALCULATIONQUEUE_DLQ_NAME: "sqs_queue_name"
+    hmpps-allocations-offender-events-sqs-instance-output:
+      HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_QUEUE_NAME: "sqs_queue_name"
+    hmpps-allocations-offender-events-sqs-dl-instance-output:
+      HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME: "sqs_queue_name"
   scheduledDowntime:
     enabled: true
