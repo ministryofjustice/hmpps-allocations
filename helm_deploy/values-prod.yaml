@@ -16,6 +16,9 @@ generic-service:
     ASSESSMENT_ENDPOINT_URL: https://offender-prod.aks-live-1.studio-hosting.service.justice.gov.uk
     ASSESS_RISKS_NEEDS_ENDPOINT_URL: https://assess-risks-and-needs.hmpps.service.justice.gov.uk
     COMMUNITY_ENDPOINT_URL: https://community-api-secure.probation.service.justice.gov.uk/secure
+    HMPPS_SQS_USE_WEB_TOKEN: "true"
+
+  serviceAccountName: workforce-management
 
 generic-prometheus-alerts:
   sqsOldestAlertQueueNames:
