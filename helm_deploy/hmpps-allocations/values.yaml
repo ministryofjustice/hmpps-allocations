@@ -54,6 +54,8 @@ generic-service:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"
 
+  serviceAccountName: workforce-management
+
   allowlist:
     office: "217.33.148.210/32"
     health-kick: "35.177.252.195/32"
