@@ -71,7 +71,7 @@ class UpsertUnallocatedCaseService(
         unallocatedCaseEntity.name = name
         unallocatedCaseEntity.teamCode = activeEvent.teamCode
         unallocatedCaseEntity.providerCode = activeEvent.providerCode
-        log.debug("Updating existing event with name $name")
+        log.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber} name $name and teamCode ${activeEvent.teamCode}")
         repository.save(unallocatedCaseEntity)
       }
   }
@@ -87,7 +87,7 @@ class UpsertUnallocatedCaseService(
       .filter { activeEvent -> storedUnallocatedEvents.none { entry -> entry.convictionNumber == activeEvent.key } }
       .map { it.value }
       .forEach { createEvent ->
-        log.debug("Saving new event with CRN $crn")
+        log.debug("Saving new event with CRN $crn, teamCode ${createEvent.teamCode}, convictionNumber ${createEvent.eventNumber.toInt()}")
         val savedEntity = repository.save(
           UnallocatedCaseEntity(
             name = name,
