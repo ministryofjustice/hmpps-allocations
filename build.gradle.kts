@@ -18,7 +18,7 @@ configurations {
 configurations.matching { it.name == "detekt" }.all {
   resolutionStrategy.eachDependency {
     if (requested.group == "org.jetbrains.kotlin") {
-      useVersion("1.8.21")
+      useVersion("1.9.0")
     }
   }
 }
