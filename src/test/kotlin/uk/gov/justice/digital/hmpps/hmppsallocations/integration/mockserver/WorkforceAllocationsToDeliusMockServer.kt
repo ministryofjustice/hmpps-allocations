@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.communityapi.deliusUserAccessResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewNoCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewResponse
@@ -60,6 +61,20 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
         .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations)),
+    )
+  }
+
+  fun userHasAccess(crn: String, restricted: Boolean = false, excluded: Boolean = false) {
+    val request = HttpRequest.request()
+      .withPath("/users/limited-access")
+      .withMethod("POST")
+      .withBody("[\"$crn\"]")
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(deliusUserAccessResponse(crn, restricted, excluded)),
     )
   }
 

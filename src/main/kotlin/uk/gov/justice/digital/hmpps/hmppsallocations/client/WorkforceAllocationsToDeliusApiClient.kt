@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchange
 import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
@@ -23,7 +24,27 @@ import java.time.ZonedDateTime
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
-  suspend fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
+  suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess {
+    return webClient
+      .post()
+      .uri { ub ->
+        ub.path("/users/limited-access")
+        username?.also { ub.queryParam("username", it) }
+        ub.build()
+      }
+      .bodyValue(crns)
+      .awaitExchange { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody()
+          else -> throw response.createExceptionAndAwait()
+        }
+      }
+  }
+
+  suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? =
+    getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
+
+  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
     val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
     return webClient
       .post()
@@ -35,7 +56,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .asFlow()
   }
 
-  suspend fun getDocuments(crn: String): Flow<Document> {
+  fun getDocuments(crn: String): Flow<Document> {
     return webClient
       .get()
       .uri("/offenders/$crn/documents")
@@ -88,11 +109,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         }
       }
 
-  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
-    .get()
-    .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
-    .retrieve()
-    .awaitBody()
+  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse =
+    webClient
+      .get()
+      .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
+      .retrieve()
+      .awaitBody()
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
@@ -116,8 +138,9 @@ data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?)
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 data class Name(val forename: String, val middleName: String?, val surname: String) {
-  fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let{ "$middleName " } ?: ""}$surname"
+  fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let { "$middleName " } ?: ""}$surname"
 }
+
 data class CommunityPersonManager(val name: Name, val grade: String?)
 
 data class Sentence(val date: LocalDate, val length: String)
@@ -141,4 +164,14 @@ data class DocumentEvent @JsonCreator constructor(
   val eventType: String,
   val eventNumber: String,
   val mainOffence: String,
+)
+
+data class DeliusCaseAccess(
+  val crn: String,
+  val userRestricted: Boolean,
+  val userExcluded: Boolean,
+)
+
+data class DeliusUserAccess(
+  val access: List<DeliusCaseAccess>,
 )
