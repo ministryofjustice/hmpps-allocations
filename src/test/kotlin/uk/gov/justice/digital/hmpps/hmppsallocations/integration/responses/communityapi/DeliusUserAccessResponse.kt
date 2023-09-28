@@ -1,8 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.communityapi
 
-fun deliusUserAccessResponse() = """
+fun deliusUserAccessResponse(crn: String, restricted: Boolean, excluded: Boolean) = """
   {
-      "userRestricted": false,
-      "userExcluded": false
+    "access": [
+      {
+        "crn": "$crn",
+        "userRestricted": $restricted,
+        "userExcluded": $excluded
+      }
+    ]
   }
 """.trimIndent()

@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
@@ -19,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 class WebClientConfiguration(
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
-  @Value("\${community.endpoint.url}") private val communityApiRootUri: String,
 ) {
 
   @Bean
@@ -60,19 +58,6 @@ class WebClientConfiguration(
   @Bean
   fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
     return WorkforceAllocationsToDeliusApiClient(webClient)
-  }
-
-  @Bean
-  fun communityWebClientAppScope(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
-    builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManager, builder, communityApiRootUri, "community-api")
-  }
-
-  @Bean
-  fun communityApiClient(@Qualifier("communityWebClientAppScope") webClient: WebClient): CommunityApiClient {
-    return CommunityApiClient(webClient)
   }
 
   private fun getOAuthWebClient(

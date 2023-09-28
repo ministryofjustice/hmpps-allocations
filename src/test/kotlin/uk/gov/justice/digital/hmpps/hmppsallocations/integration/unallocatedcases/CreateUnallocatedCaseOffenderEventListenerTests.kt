@@ -8,7 +8,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
@@ -17,7 +16,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `retrieve event with minimum required data will save`() {
     val crn = "J678910"
-    communityApi.getUserAccessForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -49,7 +48,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when crn is not found`() {
     val crn = "J678910"
-    communityApi.getUserAccessForCrnNotFound(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     publishConvictionChangedMessage(crn)
@@ -63,7 +62,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   @Test
   fun `do not save when restricted case`() {
     val crn = "J678910"
-    communityApi.getUserAccessForCrnForbidden(crn)
+    workforceAllocationsToDelius.userHasAccess(crn, restricted = true)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
 
     hmppsTier.tierCalculationResponse(crn)

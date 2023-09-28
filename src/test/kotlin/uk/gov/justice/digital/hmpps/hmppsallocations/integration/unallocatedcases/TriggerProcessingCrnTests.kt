@@ -10,7 +10,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
 import java.io.File
@@ -20,7 +19,7 @@ class TriggerProcessingCrnTests : IntegrationTestBase() {
   @Test
   fun `trigger a processing from upload`() {
     val crn = "J678910"
-    CommunityApiExtension.communityApi.getUserAccessForCrn(crn)
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess(crn)
     WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     TierApiExtension.hmppsTier.tierCalculationResponse(crn)
 
@@ -42,7 +41,7 @@ class TriggerProcessingCrnTests : IntegrationTestBase() {
   fun `remove any special characters in lines from upload`() {
     val crn = "J678910"
     val crnWithSpeechMarks = "\"$crn\""
-    CommunityApiExtension.communityApi.getUserAccessForCrn(crn)
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess(crn)
     WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     TierApiExtension.hmppsTier.tierCalculationResponse(crn)
 

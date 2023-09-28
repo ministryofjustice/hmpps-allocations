@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DataIntegrityViolationException
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.CommunityApiExtension.Companion.communityApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -35,7 +34,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       ),
     )
 
-    communityApi.getUserAccessForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -67,7 +66,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       ),
     )
 
-    communityApi.getUserAccessForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
@@ -110,7 +109,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         convictionNumber = 1,
       ),
     )
-    communityApi.getUserAccessForCrnNotFound(crn)
+
+    workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     publishConvictionChangedMessage(crn)

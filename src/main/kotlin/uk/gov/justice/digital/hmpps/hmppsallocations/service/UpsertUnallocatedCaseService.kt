@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
@@ -17,8 +16,6 @@ class UpsertUnallocatedCaseService(
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
   private val telemetryService: TelemetryService,
   @Qualifier("workforceAllocationsToDeliusApiClient") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
-  private val communityApiClient: CommunityApiClient,
-
 ) {
 
   companion object {
@@ -29,7 +26,7 @@ class UpsertUnallocatedCaseService(
   suspend fun upsertUnallocatedCase(crn: String) {
     log.debug("upsert unallocated case")
     val storedUnallocatedEvents = repository.findByCrn(crn)
-    communityApiClient.getUserAccess(crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
+    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
