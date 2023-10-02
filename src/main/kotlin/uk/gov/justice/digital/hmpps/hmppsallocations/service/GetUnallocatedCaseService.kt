@@ -45,7 +45,8 @@ class GetUnallocatedCaseService(
     }
 
   suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
-    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false || this?.userRestricted == false } }
+
     return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .map { deliusCaseDetail ->

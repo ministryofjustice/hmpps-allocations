@@ -10,10 +10,17 @@ import java.time.format.DateTimeFormatter
 class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team`() {
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    workforceAllocationsToDelius.userHasAccess("J680648")
+    workforceAllocationsToDelius.userHasAccess("X4565764")
+    workforceAllocationsToDelius.userHasAccess("J680660")
+
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
+
     workforceAllocationsToDelius.setupTeam1CaseDetails()
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -65,6 +72,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `return error when error on API call`() {
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    workforceAllocationsToDelius.userHasAccess("J680648")
+    workforceAllocationsToDelius.userHasAccess("X4565764")
+    workforceAllocationsToDelius.userHasAccess("J680660")
     insertCases()
     workforceAllocationsToDelius.errorDeliusCaseDetailsResponse()
     webTestClient.get()
@@ -115,6 +126,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    workforceAllocationsToDelius.userHasAccess("J680648")
+    workforceAllocationsToDelius.userHasAccess("X4565764")
+    workforceAllocationsToDelius.userHasAccess("J680660")
+
     workforceAllocationsToDelius.setupTeam1CaseDetails()
 
     insertCases()
