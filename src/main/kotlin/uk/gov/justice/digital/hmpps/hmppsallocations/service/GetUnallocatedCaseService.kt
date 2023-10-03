@@ -29,15 +29,16 @@ class GetUnallocatedCaseService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? =
-    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
+  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       val assessment = assessmentApiClient.getAssessment(crn)
         .toList()
         .maxByOrNull { a -> a.completed }
       val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
       val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
-      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks)
+      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks).takeUnless { restrictedOrExcluded(crn) }
     }
+  }
 
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
     findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
@@ -98,5 +99,9 @@ class GetUnallocatedCaseService(
       unallocatedCaseEntity,
       personOnProbationStaffDetailsResponse,
     )
+  }
+
+  suspend fun restrictedOrExcluded(crn: String): Boolean {
+    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userExcluded || userRestricted } ?: true
   }
 }
