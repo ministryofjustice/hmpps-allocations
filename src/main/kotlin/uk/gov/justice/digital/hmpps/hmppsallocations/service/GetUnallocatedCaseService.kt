@@ -76,7 +76,7 @@ class GetUnallocatedCaseService(
         assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
-      )
+      ).takeUnless { restrictedOrExcluded(crn) }
     }
   }
 
@@ -89,19 +89,23 @@ class GetUnallocatedCaseService(
     convictionNumber: Long,
   ) = unallocatedCasesRepository.findCaseByCrnAndConvictionNumber(crn, convictionNumber.toInt())
 
-  suspend fun getCaseConfirmInstructions(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseConfirmInstructions? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
-    val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
-    return UnallocatedCaseConfirmInstructions.from(
-      unallocatedCaseEntity,
-      personOnProbationStaffDetailsResponse,
-    )
+  suspend fun getCaseConfirmInstructions(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseConfirmInstructions? {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+      val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
+      return UnallocatedCaseConfirmInstructions.from(
+        unallocatedCaseEntity,
+        personOnProbationStaffDetailsResponse,
+      ).takeUnless { restrictedOrExcluded(crn) }
+    }
   }
-  suspend fun getCaseDecisionEvidencing(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseDecisionEvidencing? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
-    val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
-    return UnallocatedCaseDecisionEvidencing.from(
-      unallocatedCaseEntity,
-      personOnProbationStaffDetailsResponse,
-    )
+  suspend fun getCaseDecisionEvidencing(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseDecisionEvidencing? {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+      val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
+      return UnallocatedCaseDecisionEvidencing.from(
+        unallocatedCaseEntity,
+        personOnProbationStaffDetailsResponse,
+      ).takeUnless { restrictedOrExcluded(crn) }
+    }
   }
 
   suspend fun restrictedOrExcluded(crn: String): Boolean {

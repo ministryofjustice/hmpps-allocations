@@ -19,6 +19,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -103,6 +104,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -124,6 +126,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.notFoundAssessmentForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -166,6 +169,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -202,6 +207,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -226,6 +233,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -241,13 +249,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and not found rosh and not found rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.userHasAccess("J678910")
+    workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -276,6 +285,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

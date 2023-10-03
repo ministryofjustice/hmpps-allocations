@@ -11,6 +11,7 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val staffCode = "STAFF1"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.getImpactResponse(crn, staffCode)
 
@@ -40,6 +41,7 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
     val crn = "J678910"
     val staffCode = "STAFF1"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.getImpactNotFoundResponse(crn, staffCode)
     webTestClient.get()
@@ -52,6 +54,17 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `get 404 if crn not found`() {
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    webTestClient.get()
+      .uri("/cases/unallocated/J678912/convictions/1/confirm-instructions?staffCode=STAFF1")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
+  fun `get 404 if crn is restricted or excluded`() {
     webTestClient.get()
       .uri("/cases/unallocated/J678912/convictions/1/confirm-instructions?staffCode=STAFF1")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

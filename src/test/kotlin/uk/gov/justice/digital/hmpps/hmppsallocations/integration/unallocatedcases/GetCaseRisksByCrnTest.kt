@@ -12,6 +12,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `can get case risks by crn and convictionNUmber`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -75,6 +76,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no registrations`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -96,6 +98,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no ROSH summary`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshNotFoundForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -115,6 +118,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with ROSH summary unavailable`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -134,6 +138,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no RSR`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
@@ -155,6 +160,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with unavailable RSR`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
@@ -176,6 +182,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with Empty List RSR`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrnEmptyList(crn)
@@ -197,6 +204,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no ogrs`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -216,6 +224,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `get case risks with no ROSH level`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
     assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
@@ -235,6 +244,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   fun `can get case risks when no registrations are returned`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     assessRisksNeedsApi.getRoshForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
@@ -253,6 +263,17 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
   @Test
   fun `getting case risks when not in allocation demand returns not found`() {
+    workforceAllocationsToDelius.userHasAccess("CRN12345")
+    webTestClient.get()
+      .uri("/cases/unallocated/CRN12345/convictions/6/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
+  fun `getting case risks when crn is restricted or excluded`() {
     webTestClient.get()
       .uri("/cases/unallocated/CRN12345/convictions/6/risks")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
