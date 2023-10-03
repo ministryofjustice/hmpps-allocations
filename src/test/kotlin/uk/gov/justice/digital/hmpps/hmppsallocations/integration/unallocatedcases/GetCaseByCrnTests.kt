@@ -302,4 +302,22 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.activeRiskRegistration")
       .isEmpty
   }
+
+  @Test
+  fun `return 404 when case is LAO`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
 }
