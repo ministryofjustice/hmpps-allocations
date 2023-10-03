@@ -12,12 +12,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and convictionNumber`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -97,10 +99,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -117,10 +121,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.notFoundAssessmentForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -135,6 +141,17 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `get 404 if crn not found`() {
+    workforceAllocationsToDelius.userHasAccess("J678912")
+    webTestClient.get()
+      .uri("/cases/unallocated/J678912/convictions/9")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
+  fun `get 404 if crn is restricted or limited`() {
     webTestClient.get()
       .uri("/cases/unallocated/J678912/convictions/9")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -147,10 +164,13 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `retrieve main address`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -182,10 +202,13 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `return a no fixed abode address`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -205,10 +228,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `must return sentence length`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -224,12 +249,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and not found rosh and not found rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -251,12 +278,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and unavailable rosh and unavailable rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     offenderAssessmentApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -272,5 +301,23 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
       .isEmpty
+  }
+
+  @Test
+  fun `return 404 when case is LAO`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    insertCases()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
+    workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
   }
 }
