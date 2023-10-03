@@ -40,10 +40,11 @@ class GetUnallocatedCaseService(
     }
   }
 
-  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? =
-    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
+  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
-    }
+    }.takeUnless { restrictedOrExcluded(crn) }
+  }
 
   suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false && !this.userRestricted } }
@@ -59,14 +60,15 @@ class GetUnallocatedCaseService(
       }
   }
 
-  suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? =
-    findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
+  suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
+    return findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(it, probationRecord)
+      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { restrictedOrExcluded(crn) }
     }
+  }
 
-  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? =
-    findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       return UnallocatedCaseRisks.from(
         workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
         unallocatedCaseEntity,
@@ -76,6 +78,7 @@ class GetUnallocatedCaseService(
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
       )
     }
+  }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
     Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))

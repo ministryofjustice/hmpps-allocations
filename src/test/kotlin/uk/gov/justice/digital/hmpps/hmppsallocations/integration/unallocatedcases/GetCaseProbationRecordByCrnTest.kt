@@ -6,10 +6,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.Work
 
 class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
 
+  private val crn = "J678910"
+  private val convictionNumber = 1
+
   @Test
   fun `can get case probation record excluding conviction number`() {
-    val crn = "J678910"
-    val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
     workforceAllocationsToDelius.probationRecordSingleInactiveEventReponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)
@@ -41,8 +43,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
 
   @Test
   fun `active probation record has probation practitioner`() {
-    val crn = "J678910"
-    val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
     workforceAllocationsToDelius.probationRecordSingleActiveEventReponse(crn, convictionNumber)
 
@@ -65,8 +66,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
 
   @Test
   fun `can get probation record for no convictions`() {
-    val crn = "J678910"
-    val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
     workforceAllocationsToDelius.probationRecordNoEventsResponse(crn, convictionNumber)
     makeTestRequest(crn, convictionNumber)

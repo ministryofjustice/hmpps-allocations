@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
 
 class GetCaseOverviewByCrnTests : IntegrationTestBase() {
 
@@ -9,6 +10,7 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
   fun `can get case overview by crn and convictionNumber`() {
     val crn = "J678910"
     val convictionNumber = 1
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
 
     webTestClient.get()
@@ -30,6 +32,17 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `get 404 if crn not found`() {
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678912")
+    webTestClient.get()
+      .uri("/cases/unallocated/J678912/convictions/1/overview")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
+  fun `get 404 if crn is restricted or excluded`() {
     webTestClient.get()
       .uri("/cases/unallocated/J678912/convictions/1/overview")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
