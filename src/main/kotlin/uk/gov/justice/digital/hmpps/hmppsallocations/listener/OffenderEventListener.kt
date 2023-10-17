@@ -50,6 +50,6 @@ data class HmppsOffenderEvent(
 data class SQSMessage(
   @JsonProperty("Message") val message: String,
   @JsonProperty("MessageAttributes") val messageAttributes: Map<String, String>,
-  ) {
+) {
   val eventType = messageAttributes["eventType"]
 }
