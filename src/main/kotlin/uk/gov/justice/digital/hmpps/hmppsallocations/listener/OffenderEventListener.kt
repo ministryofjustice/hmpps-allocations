@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.listener
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.awspring.cloud.sqs.annotation.SqsListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,8 +21,8 @@ class OffenderEventListener(
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     log.debug("processing message")
-    val crn = getCrn(rawMessage)
-    log.debug("Retrieved message CRN: $crn")
+    val (crn, eventType) = getCrn(rawMessage)
+    log.debug("Retrieved message CRN: $crn with event type $eventType")
     CoroutineScope(Dispatchers.Default).future {
       try {
         upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
@@ -31,9 +32,10 @@ class OffenderEventListener(
     }.get()
   }
 
-  private fun getCrn(rawMessage: String): String {
-    val (message) = objectMapper.readValue(rawMessage, SQSMessage::class.java)
-    return objectMapper.readValue(message, HmppsOffenderEvent::class.java).crn
+  private fun getCrn(rawMessage: String): Pair<String, String> {
+    val sqsMessage = objectMapper.readValue<SQSMessage>(rawMessage)
+    val crn = objectMapper.readValue<HmppsOffenderEvent>(sqsMessage.message).crn
+    return crn to sqsMessage.eventType!!
   }
 
   companion object {
@@ -47,4 +49,7 @@ data class HmppsOffenderEvent(
 
 data class SQSMessage(
   @JsonProperty("Message") val message: String,
-)
+  @JsonProperty("MessageAttributes") val messageAttributes: Map<String, String>,
+  ) {
+  val eventType = messageAttributes["eventType"]
+}
