@@ -21,7 +21,6 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.HmppsAuthApiExtension
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -36,7 +35,6 @@ import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 
 @ExtendWith(
   AssessRisksNeedsApiExtension::class,
-  OffenderAssessmentApiExtension::class,
   TierApiExtension::class,
   WorkforceAllocationsToDeliusApiExtension::class,
   HmppsAuthApiExtension::class,

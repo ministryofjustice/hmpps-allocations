@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.OffenderAssessmentApiExtension.Companion.offenderAssessmentApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseByCrnTests : IntegrationTestBase() {
@@ -18,7 +17,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -103,7 +102,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
@@ -125,7 +124,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.notFoundAssessmentForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.notFoundAssessmentForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
@@ -168,7 +167,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
@@ -206,7 +205,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
 
     webTestClient.get()
@@ -232,7 +231,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -255,7 +254,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -284,7 +283,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
@@ -312,7 +311,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    offenderAssessmentApi.getAssessmentsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     webTestClient.get()
       .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }

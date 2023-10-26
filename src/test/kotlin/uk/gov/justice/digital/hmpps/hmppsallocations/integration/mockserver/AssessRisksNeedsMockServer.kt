@@ -11,6 +11,8 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentNotFoundResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorNotFoundResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorUnavailableResponse
@@ -126,6 +128,21 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]"),
+    )
+  }
+
+  fun getAssessmentsForCrn(crn: String) {
+    val assessmentRequest = HttpRequest.request().withPath("/assessments/timeline/crn/$crn")
+    assessRisksNeedsApi.`when`(assessmentRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(assessmentResponse()),
+    )
+  }
+
+  fun notFoundAssessmentForCrn(crn: String) {
+    val assessmentRequest = HttpRequest.request().withPath("/assessments/timeline/crn/$crn")
+    assessRisksNeedsApi.`when`(assessmentRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
+        .withBody(assessmentNotFoundResponse(crn)),
     )
   }
 }

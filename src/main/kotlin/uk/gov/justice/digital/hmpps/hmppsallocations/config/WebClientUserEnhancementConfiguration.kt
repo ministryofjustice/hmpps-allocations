@@ -20,7 +20,6 @@ import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
 @Configuration
@@ -47,12 +46,12 @@ class WebClientUserEnhancementConfiguration(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
   ): WebClient {
-    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder), builder, assessmentApiRootUri, "assessment-api")
-  }
-
-  @Bean
-  fun assessmentApiClientUserEnhanced(@Qualifier("assessmentWebClientUserEnhancedAppScope") webClient: WebClient): AssessmentApiClient {
-    return AssessmentApiClient(webClient)
+    return getOAuthWebClient(
+      authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder),
+      builder,
+      assessmentApiRootUri,
+      "assessment-api",
+    )
   }
 
   @Bean
@@ -60,7 +59,12 @@ class WebClientUserEnhancementConfiguration(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
   ): WebClient {
-    return getOAuthWebClient(authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder), builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
+    return getOAuthWebClient(
+      authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder),
+      builder,
+      workforceAllocationsToDeliusApiRootUri,
+      "workforce-allocations-to-delius-api",
+    )
   }
 
   @Bean
