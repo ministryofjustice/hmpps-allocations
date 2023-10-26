@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessmentApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
@@ -24,16 +23,13 @@ import java.time.LocalDateTime
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
-  @Qualifier("assessmentApiClientUserEnhanced") private val assessmentApiClient: AssessmentApiClient,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-      val assessment = assessmentApiClient.getAssessment(crn)
-        .toList()
-        .maxByOrNull { a -> a.completed }
+      val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
       val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
       val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
       return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks).takeUnless { restrictedOrExcluded(crn) }
