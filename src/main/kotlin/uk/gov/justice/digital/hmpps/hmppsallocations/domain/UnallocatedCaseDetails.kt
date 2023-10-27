@@ -195,7 +195,7 @@ data class UnallocatedAssessment @JsonCreator constructor(
   companion object {
     fun from(assessment: Assessment?): UnallocatedAssessment? {
       return assessment?.let {
-        UnallocatedAssessment(assessment.completed, assessment.assessmentType)
+        UnallocatedAssessment(assessment.completed!!, assessment.assessmentType)
       }
     }
   }

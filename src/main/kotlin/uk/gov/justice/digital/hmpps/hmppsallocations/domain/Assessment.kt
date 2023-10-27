@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.time.LocalDateTime
 
 data class Assessment @JsonCreator constructor(
-  @JsonAlias("completedDate") val completed: LocalDateTime,
+  @JsonAlias("completedDate") val completed: LocalDateTime?,
   val assessmentType: String,
   val status: String,
 )
