@@ -30,7 +30,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
         when (res.statusCode()) {
           HttpStatus.NOT_FOUND -> res.releaseBody().then(Mono.defer { Mono.empty() })
           HttpStatus.OK -> res.bodyToMono<Timeline>()
-            .mapNotNull { a -> a.timeline.filter { it.status == "COMPLETE" }.maxByOrNull { it.completed } }
+            .mapNotNull { a -> a.timeline.filter { it.status == "COMPLETE" }.maxByOrNull { it.completed!! } }
           else -> res.createException().flatMap { Mono.error(it.rootCause!!) }
         }
       }.awaitSingleOrNull()
