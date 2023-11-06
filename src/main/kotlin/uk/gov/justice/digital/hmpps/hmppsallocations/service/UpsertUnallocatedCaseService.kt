@@ -24,14 +24,14 @@ class UpsertUnallocatedCaseService(
 
   @Transactional
   suspend fun upsertUnallocatedCase(crn: String) {
-    log.debug("upsert unallocated case")
+    log.debug("upsert unallocated case for crn: $crn")
     val storedUnallocatedEvents = repository.findByCrn(crn)
     workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
-        log.debug("workforce to delius api client: getting unallocated events")
+        log.debug("workforce to delius api client: getting unallocated events for crn: $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
         hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-          log.debug("hmpps tier api client: getting tier by crn")
+          log.debug("hmpps tier api client: getting tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()
           saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
           updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
