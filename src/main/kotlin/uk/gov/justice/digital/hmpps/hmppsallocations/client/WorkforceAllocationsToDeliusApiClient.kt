@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
@@ -127,7 +126,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("allocation-completed/manager?crn=$crn")
       .awaitExchangeOrNull { response ->
         when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody<AllocatedEvent>().also { log.debug("response: $response") }
+          HttpStatus.OK -> response.awaitBody()
+          HttpStatus.NOT_FOUND -> null
+          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access allocated offender manager team for $crn")
           else -> throw response.createExceptionAndAwait()
         }
       }
@@ -190,4 +191,8 @@ data class DeliusCaseAccess(
 
 data class DeliusUserAccess(
   val access: List<DeliusCaseAccess>,
+)
+
+data class AllocatedEvent @JsonCreator constructor(
+  val teamCode: String,
 )
