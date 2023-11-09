@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
@@ -23,6 +25,9 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess {
     return webClient
@@ -115,6 +120,17 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
       .retrieve()
       .awaitBody()
+
+  suspend fun getAllocatedTeam(crn: String): AllocatedEvent? =
+    webClient
+      .get()
+      .uri("allocation-completed/manager?crn=$crn")
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody<AllocatedEvent>().also { log.debug("response: $response") }
+          else -> throw response.createExceptionAndAwait()
+        }
+      }
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)

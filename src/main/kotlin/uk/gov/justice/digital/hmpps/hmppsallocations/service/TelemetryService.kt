@@ -18,13 +18,14 @@ private const val PROVIDER_CODE = "providerCode"
 @Component
 class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) {
 
-  fun trackUnallocatedCaseAllocated(unallocatedCaseEntity: UnallocatedCaseEntity) {
+  fun trackUnallocatedCaseAllocated(unallocatedCaseEntity: UnallocatedCaseEntity, teamCode: String?) {
     trackEvent(
       TelemetryEventType.EventAllocated,
       mapOf(
         CRN to unallocatedCaseEntity.crn,
         TEAM_CODE to unallocatedCaseEntity.teamCode,
         PROVIDER_CODE to unallocatedCaseEntity.providerCode,
+        "allocatedTeamCode" to teamCode,
         "wmtPeriod" to getWmtPeriod(LocalDateTime.now()),
         "startTime" to unallocatedCaseEntity.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         "endTime" to ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

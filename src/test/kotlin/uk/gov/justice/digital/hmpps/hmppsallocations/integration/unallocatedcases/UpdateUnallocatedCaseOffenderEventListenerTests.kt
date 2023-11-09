@@ -68,6 +68,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
+    workforceAllocationsToDelius.allocatedEventResponse(crn)
     hmppsTier.tierCalculationResponse(crn)
 
     publishConvictionChangedMessage(crn)
@@ -89,6 +90,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       { Assertions.assertEquals(savedEntity.crn, parameters.captured["crn"]) },
       { Assertions.assertEquals(savedEntity.teamCode, parameters.captured["teamCode"]) },
       { Assertions.assertEquals(savedEntity.providerCode, parameters.captured["providerCode"]) },
+      { Assertions.assertEquals("X123456", parameters.captured["allocatedTeamCode"]) },
       { Assertions.assertEquals(getWmtPeriod(LocalDateTime.now()), parameters.captured["wmtPeriod"]) },
       { Assertions.assertTrue(startTime.isEqual(savedEntity.createdDate)) },
       { Assertions.assertNotNull(parameters.captured["endTime"]) },

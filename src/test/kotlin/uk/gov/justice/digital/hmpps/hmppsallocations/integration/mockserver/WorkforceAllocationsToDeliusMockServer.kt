@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDeta
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.communityapi.deliusUserAccessResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusAllocatedEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewNoCourtReportResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewResponse
@@ -261,6 +262,15 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     workforceAllocationsToDelius.`when`(impactRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(404)
         .withContentType(MediaType.APPLICATION_JSON).withBody("{\"foo\":\"bar\"}"),
+    )
+  }
+
+  fun allocatedEventResponse(crn: String) {
+    val request = HttpRequest.request()
+      .withPath("/allocation-completed/manager")
+      .withQueryStringParameter("crn", crn)
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusAllocatedEventResponse()),
     )
   }
 }

@@ -41,7 +41,7 @@ class UpsertUnallocatedCaseService(
     } ?: deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
 
-  private fun deleteOldEvents(
+  private suspend fun deleteOldEvents(
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
     activeEvents: Map<Int, ActiveEvent>,
   ) {
@@ -50,7 +50,8 @@ class UpsertUnallocatedCaseService(
       .forEach { deleteEvent ->
         repository.delete(deleteEvent)
         log.debug("Event $deleteEvent deleted")
-        telemetryService.trackUnallocatedCaseAllocated(deleteEvent)
+        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn)
+        telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
       }
   }
 
