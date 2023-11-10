@@ -265,10 +265,11 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun allocatedEventResponse(crn: String) {
+  fun allocatedEventResponse(crn: String, convictionNumber: Int) {
     val request = HttpRequest.request()
-      .withPath("/allocation-completed/manager")
+      .withPath("/allocation-completed/order-manager")
       .withQueryStringParameter("crn", crn)
+      .withQueryStringParameter("eventNumber", convictionNumber.toString())
     workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusAllocatedEventResponse()),
     )
