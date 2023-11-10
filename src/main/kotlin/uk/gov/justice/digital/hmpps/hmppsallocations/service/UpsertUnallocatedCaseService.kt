@@ -50,7 +50,7 @@ class UpsertUnallocatedCaseService(
       .forEach { deleteEvent ->
         repository.delete(deleteEvent)
         log.debug("Event $deleteEvent deleted")
-        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn)
+        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
         telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
       }
   }

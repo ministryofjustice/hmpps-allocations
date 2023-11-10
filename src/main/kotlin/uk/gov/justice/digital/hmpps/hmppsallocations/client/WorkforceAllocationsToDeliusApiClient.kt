@@ -120,15 +120,15 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .awaitBody()
 
-  suspend fun getAllocatedTeam(crn: String): AllocatedEvent? =
+  suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? =
     webClient
       .get()
-      .uri("allocation-completed/manager?crn=$crn")
+      .uri("allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber")
       .awaitExchangeOrNull { response ->
         when (response.statusCode()) {
           HttpStatus.OK -> response.awaitBody()
           HttpStatus.NOT_FOUND -> null
-          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access allocated offender manager team for $crn")
+          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access allocated team for crn: $crn, event number: $convictionNumber")
           else -> throw response.createExceptionAndAwait()
         }
       }
