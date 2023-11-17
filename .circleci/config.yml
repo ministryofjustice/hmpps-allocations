@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@7.3.3
+  hmpps: ministryofjustice/hmpps@7
   slack: circleci/slack@4.12.5
 
 parameters:
@@ -148,5 +148,3 @@ workflows:
           context:
             - veracode-credentials
             - hmpps-common-vars
-
-
