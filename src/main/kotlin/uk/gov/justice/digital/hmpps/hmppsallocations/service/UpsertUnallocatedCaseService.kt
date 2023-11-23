@@ -28,8 +28,9 @@ class UpsertUnallocatedCaseService(
     val storedUnallocatedEvents = repository.findByCrn(crn)
     workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
-        log.debug("workforce to delius api client: getting unallocated events for crn: $crn")
+        log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
+        if (activeEvents.isEmpty()) { log.debug("No active events found for crn $crn") } else { log.debug("Active events found for crn $crn: $activeEvents") }
         hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
           log.debug("hmpps tier api client: getting tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()
@@ -48,8 +49,9 @@ class UpsertUnallocatedCaseService(
     storedUnallocatedEvents
       .filter { !activeEvents.containsKey(it.convictionNumber) }
       .forEach { deleteEvent ->
+        log.debug("Deleting event for CRN: ${deleteEvent.crn}, conviction number: ${deleteEvent.convictionNumber}, teamCode: ${deleteEvent.teamCode}")
         repository.delete(deleteEvent)
-        log.debug("Event $deleteEvent deleted")
+        log.debug("Event deleted for crn: ${deleteEvent.crn}")
         val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn)
         telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
       }
@@ -69,7 +71,7 @@ class UpsertUnallocatedCaseService(
         unallocatedCaseEntity.name = name
         unallocatedCaseEntity.teamCode = activeEvent.teamCode
         unallocatedCaseEntity.providerCode = activeEvent.providerCode
-        log.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber} name $name and teamCode ${activeEvent.teamCode}")
+        log.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber}, teamCode ${activeEvent.teamCode}")
         repository.save(unallocatedCaseEntity)
       }
   }
