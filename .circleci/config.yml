@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@7.3.3
+  hmpps: ministryofjustice/hmpps@7
   slack: circleci/slack@4.12.5
 
 parameters:
@@ -16,7 +16,7 @@ jobs:
   validate:
     executor:
       name: hmpps/java_localstack_postgres
-      jdk_tag: "18.0"
+      jdk_tag: "19.0"
       localstack_tag: "2.0.2"
       postgres_tag: "14"
     steps:
@@ -148,5 +148,3 @@ workflows:
           context:
             - veracode-credentials
             - hmpps-common-vars
-
-

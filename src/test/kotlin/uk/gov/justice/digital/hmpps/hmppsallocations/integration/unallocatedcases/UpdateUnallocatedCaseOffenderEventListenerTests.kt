@@ -68,7 +68,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     workforceAllocationsToDelius.userHasAccess(crn)
     workforceAllocationsToDelius.unallocatedEventsNoActiveEventsResponse(crn)
-    workforceAllocationsToDelius.allocatedEventResponse(crn)
+    workforceAllocationsToDelius.allocatedEventResponse(crn, savedEntity.convictionNumber)
     hmppsTier.tierCalculationResponse(crn)
 
     publishConvictionChangedMessage(crn)
