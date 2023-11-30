@@ -1,0 +1,44 @@
+hmpps.sqs:
+  provider: localstack
+  queues:
+    tiercalculationqueue:
+      queueName: hmpps_tier_event_queue
+      dlqName: hmpps_tier_event_dlq
+      subscribeTopicId: hmppsdomaintopic
+      subscribeFilter: '{"eventType":[ "TIER_CALCULATION_COMPLETE"] }'
+      dlqMaxReceiveCount: 1
+    hmppsoffenderqueue:
+      queueName: hmpps_offender_event_queue
+      dlqName: hmpps_offender_event_dlq
+      subscribeTopicId: hmppsoffendertopic
+      subscribeFilter: '{"eventType":[ "CONVICTION_CHANGED", "OFFENDER_MANAGER_CHANGED"] }'
+      dlqMaxReceiveCount: 1
+  topics:
+    hmppsdomaintopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+    hmppsoffendertopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+hmpps-tier:
+  endpoint:
+    url: https://hmpps-tier-dev.hmpps.service.justice.gov.uk
+
+assessment:
+  endpoint:
+    url: https://offender-dev.aks-dev-1.studio-hosting.service.justice.gov.uk
+
+assess-risks-needs:
+  endpoint:
+    url: https://assess-risks-and-needs-dev.hmpps.service.justice.gov.uk
+
+workforce-allocations-to-delius:
+  endpoint:
+    url: https://workforce-allocations-to-delius-dev.hmpps.service.justice.gov.uk
+
+community:
+  endpoint:
+    url: https://community-api-secure.test.delius.probation.hmpps.dsd.io/secure
+
+oauth:
+  endpoint:
+    url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
