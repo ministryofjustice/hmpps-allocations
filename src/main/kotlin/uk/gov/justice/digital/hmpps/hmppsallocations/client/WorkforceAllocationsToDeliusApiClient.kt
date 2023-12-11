@@ -155,7 +155,7 @@ data class ProbationStatus(val description: String)
 data class InitialAppointment(val date: LocalDate?, val staff: Staff?)
 
 data class Staff @JsonCreator constructor(
-  val name: Name?
+  val name: Name?,
 )
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 
