@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun fullDeliusCaseDetailsResponse(vararg caseDetailsIntegrations: CaseDetailsIntegration) = """
@@ -48,12 +48,22 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
   communityPersonManager(caseDetailsIntegration.communityPersonManager) +
   "}".trimIndent()
 
-private fun initialAppointment(initialAppointment: LocalDate?): String {
+private fun initialAppointment(initialAppointment: InitialAppointment?): String {
   return initialAppointment?.let {
     """
       ,"initialAppointment": {
-        "date": ${initialAppointment.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))}
-      }
+        "date": ${initialAppointment.date?.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))},
+        "staff": {
+          "code": "string",
+          "name": {
+            "forename": "${initialAppointment.staff?.name?.forename}",
+            "middleName": "${initialAppointment.staff?.name?.middleName}",
+            "surname": "${initialAppointment.staff?.name?.surname}"
+          },
+          "email": "string",
+          "grade": "string"
+        }
+        }
     """.trimIndent()
   } ?: ""
 }

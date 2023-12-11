@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CaseViewDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddress
@@ -119,6 +121,22 @@ data class OffenderManagerDetails @JsonCreator constructor(
         return grade
       }
       return null
+    }
+  }
+}
+
+data class InitialAppointmentDetails @JsonCreator constructor(
+  @Schema(description = "Initial appointment Date", example = "2020-01-16")
+  val date: LocalDate?,
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  val staff: Staff?,
+) {
+  companion object {
+    fun from(initialAppointment: InitialAppointment?): InitialAppointmentDetails {
+      return InitialAppointmentDetails(
+        initialAppointment?.date,
+        initialAppointment?.staff,
+      )
     }
   }
 }

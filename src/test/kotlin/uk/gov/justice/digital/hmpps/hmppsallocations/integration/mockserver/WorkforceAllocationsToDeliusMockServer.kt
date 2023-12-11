@@ -13,7 +13,9 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
@@ -84,7 +86,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       CaseDetailsIntegration(
         "J678910",
         "1",
-        LocalDate.of(2022, 10, 11),
+        InitialAppointment(LocalDate.of(2022, 10, 11), Staff(Name("Beverley", "Rose", "Smith"))),
         "Currently managed",
         CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO"),
       ),
@@ -98,14 +100,14 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       CaseDetailsIntegration(
         "X4565764",
         "3",
-        LocalDate.now(),
+        InitialAppointment(LocalDate.now(), Staff(Name("Beverley", null, "Smith"))),
         "New to probation",
         CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO"),
       ),
       CaseDetailsIntegration(
         "J680660",
         "4",
-        LocalDate.now(),
+        InitialAppointment(LocalDate.now(), null),
         "Previously managed",
         null,
       ),

@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
@@ -28,12 +29,21 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
+      .consumeWith(System.out::println)
       .jsonPath("$.length()")
       .isEqualTo(4)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.date")
       .isEqualTo(initialAppointment.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.staff.name.forename")
+      .isEqualTo("Beverley")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.staff.name.middleName")
+      .isEqualTo("Rose")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.staff.name.surname")
+      .isEqualTo("Smith")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.staff.name.combinedName")
+      .isEqualTo("Beverley Rose Smith")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].name")
       .isEqualTo("Dylan Adam Armstrong")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].crn")
@@ -52,8 +62,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
       .isEqualTo("Previously managed")
-      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].initialAppointment")
-      .isEqualTo(null)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
       .isEqualTo("Janie")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.surname")
@@ -143,5 +151,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceLength")
       .isEqualTo("5 Weeks")
+  }
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
