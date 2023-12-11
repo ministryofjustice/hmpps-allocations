@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
@@ -29,7 +28,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .consumeWith(System.out::println)
       .jsonPath("$.length()")
       .isEqualTo(4)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceDate")
@@ -151,9 +149,5 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceLength")
       .isEqualTo("5 Weeks")
-  }
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
