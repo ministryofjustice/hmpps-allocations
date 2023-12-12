@@ -151,7 +151,10 @@ data class DeliusCaseDetail(
 
 data class Event(val number: String)
 
-data class ProbationStatus(val description: String)
+data class ProbationStatus(
+  val status: String,
+  val description: String,
+)
 data class InitialAppointment(val date: LocalDate, val staff: Staff)
 
 data class Staff @JsonCreator constructor(
@@ -163,7 +166,7 @@ data class Name(val forename: String, val middleName: String?, val surname: Stri
   fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let { "$middleName " } ?: ""}$surname"
 }
 
-data class CommunityPersonManager(val name: Name, val grade: String?)
+data class CommunityPersonManager(val name: Name, val grade: String?, val teamCode: String?)
 
 data class Sentence(val date: LocalDate, val length: String)
 

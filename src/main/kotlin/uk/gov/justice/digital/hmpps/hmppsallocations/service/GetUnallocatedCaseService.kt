@@ -23,6 +23,7 @@ import java.time.LocalDateTime
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
+  private val outOfAreaTransferService: OutOfAreaTransferService,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
@@ -45,13 +46,24 @@ class GetUnallocatedCaseService(
   suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false && !this.userRestricted } }
 
-    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
+    val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
+
+    val casesThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+      .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+        teamCode,
+        unallocatedCasesFromDelius,
+      )
+
+    return unallocatedCasesFromDelius
       .map { deliusCaseDetail ->
         val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
         UnallocatedCase.from(
           unallocatedCase,
           deliusCaseDetail,
+          outOfAreaTransfer = casesThatAreCurrentlyManagedOutsideOfThisTeamsRegion
+            .map { it.first }.toList()
+            .contains(unallocatedCase.crn),
         )
       }
   }
