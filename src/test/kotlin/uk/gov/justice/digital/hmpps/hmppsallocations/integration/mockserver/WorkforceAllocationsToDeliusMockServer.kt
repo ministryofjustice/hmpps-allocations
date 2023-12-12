@@ -107,7 +107,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       CaseDetailsIntegration(
         "J680660",
         "4",
-        InitialAppointment(LocalDate.now(), null),
+        InitialAppointment(LocalDate.now(), Staff(Name("Beverley", "Rose", "Smith"))),
         "Previously managed",
         null,
       ),
