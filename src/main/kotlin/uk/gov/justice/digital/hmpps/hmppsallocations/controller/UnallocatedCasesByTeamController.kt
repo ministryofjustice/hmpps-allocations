@@ -26,7 +26,7 @@ class UnallocatedCasesByTeamController(private val getUnallocatedCaseService: Ge
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/team/{teamCode}/cases/unallocated")
-  suspend fun getUnallocatedCasesByTeam(@PathVariable teamCode: String): ResponseEntity<Flow<UnallocatedCase>> {
+  suspend fun getUnallocatedCasesByTeam(@PathVariable teamCode: String): ResponseEntity<List<UnallocatedCase>> {
     return ResponseEntity.ok(
       getUnallocatedCaseService.getAllByTeam(teamCode),
     )

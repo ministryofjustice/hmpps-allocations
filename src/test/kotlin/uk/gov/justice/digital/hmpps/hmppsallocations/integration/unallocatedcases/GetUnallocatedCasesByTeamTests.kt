@@ -21,6 +21,8 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
 
+    workforceAllocationsToDelius.setupTeam1CaseDetails()
+
     hmppsProbateEstate.regionsAndTeamsResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
@@ -31,8 +33,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
-
-    workforceAllocationsToDelius.setupTeam1CaseDetails()
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
@@ -125,8 +125,12 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
     workforceAllocationsToDelius.userHasAccess("J680660")
+    workforceAllocationsToDelius.userHasAccess("X6666222")
+
     insertCases()
+
     workforceAllocationsToDelius.errorDeliusCaseDetailsResponse()
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -179,8 +183,20 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
     workforceAllocationsToDelius.userHasAccess("J680660")
+    workforceAllocationsToDelius.userHasAccess("X6666222")
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
+
+    hmppsProbateEstate.regionsAndTeamsResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
 
     insertCases()
     webTestClient.get()

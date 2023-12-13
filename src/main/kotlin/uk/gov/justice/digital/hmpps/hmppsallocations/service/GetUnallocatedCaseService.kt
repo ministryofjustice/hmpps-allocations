@@ -43,7 +43,7 @@ class GetUnallocatedCaseService(
     }.takeUnless { restrictedOrExcluded(crn) }
   }
 
-  suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
+  suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false && !this.userRestricted } }
 
     val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
@@ -64,7 +64,7 @@ class GetUnallocatedCaseService(
           deliusCaseDetail,
           outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
         )
-      }.asFlow()
+      }
   }
 
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
