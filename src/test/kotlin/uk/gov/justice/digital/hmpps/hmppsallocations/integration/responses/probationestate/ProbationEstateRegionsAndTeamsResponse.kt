@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.prob
 
 fun regionsAndTeamsResponseBody(
   regions: List<Pair<String, String>>,
-  teams: List<Pair<String, String>>
+  teams: List<Pair<String, String>>,
 ): String {
   val regionAndTeamEntries = regions.mapIndexed { index, region ->
     """

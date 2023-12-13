@@ -27,9 +27,9 @@ class OutOfAreaTransferService(
 
     if (currentlyManagedCasesTeamCodes.isNotEmpty()) {
       val teamCodesToInvestigate = currentlyManagedCasesTeamCodes.plus(setOf(currentTeamCode))
-      val teamsInDifferentRegion  = getTeamCodesInDifferentRegion(
+      val teamsInDifferentRegion = getTeamCodesInDifferentRegion(
         currentTeamCode,
-        teamCodesToInvestigate
+        teamCodesToInvestigate,
       )
       return currentlyManagedCasesCrnAndTeamCodePairs
         .filter { teamsInDifferentRegion?.contains(it.second) ?: false }
@@ -39,7 +39,7 @@ class OutOfAreaTransferService(
 
   private suspend fun getTeamCodesInDifferentRegion(
     currentTeamCode: String,
-    teamCodesToInvestigate: Set<String>
+    teamCodesToInvestigate: Set<String>,
   ) = if (teamCodesToInvestigate.size > 1) {
     hmppsProbationEstateApiClient.getRegionsAndTeams(
       teamCodes = teamCodesToInvestigate,
@@ -55,5 +55,7 @@ class OutOfAreaTransferService(
 
       teamsInDifferentRegion
     }
-  } else null
+  } else {
+    null
+  }
 }

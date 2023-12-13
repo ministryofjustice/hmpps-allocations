@@ -24,7 +24,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     hmppsProbateEstate.regionsAndTeamsResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
-        "TEAM2" to "Team 2"
+        "TEAM2" to "Team 2",
       ),
       regions = listOf(
         "REGION1" to "Region 1",

@@ -48,8 +48,8 @@ class ProbateEstateMockServer : ClientAndServer(MOCKSERVER_PORT) {
         .withBody(
           regionsAndTeamsResponseBody(
             regions,
-            teams
-          )
+            teams,
+          ),
         ),
     )
     return request

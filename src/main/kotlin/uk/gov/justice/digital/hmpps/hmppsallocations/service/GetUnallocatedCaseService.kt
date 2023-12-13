@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
