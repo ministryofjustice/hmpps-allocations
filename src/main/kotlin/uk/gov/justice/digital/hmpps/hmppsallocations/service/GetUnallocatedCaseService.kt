@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -48,12 +48,13 @@ class GetUnallocatedCaseService(
 
     val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
+      .toList()
 
     val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
       .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
         teamCode,
         unallocatedCasesFromDelius,
-      ).map { it.first }.toList()
+      ).map { it.first }
 
     return unallocatedCasesFromDelius
       .map { deliusCaseDetail ->
@@ -63,7 +64,7 @@ class GetUnallocatedCaseService(
           deliusCaseDetail,
           outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
         )
-      }
+      }.asFlow()
   }
 
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {

@@ -37,6 +37,10 @@ hmpps-tier:
   endpoint:
     url: http://localhost:8082
 
+hmpps-probation-estate:
+  endpoint:
+    url: http://localhost:8083
+
 assessment:
   endpoint:
     url: http://localhost:8072
