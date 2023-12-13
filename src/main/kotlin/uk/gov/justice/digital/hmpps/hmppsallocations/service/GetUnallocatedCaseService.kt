@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
@@ -50,21 +48,26 @@ class GetUnallocatedCaseService(
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .toList()
 
-    val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
-      .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
-        teamCode,
-        unallocatedCasesFromDelius,
-      ).map { it.first }
+    if (unallocatedCasesFromDelius.isEmpty()) {
+      return emptyList()
+    } else {
+      val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+        .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+          teamCode,
+          unallocatedCasesFromDelius,
+        ).map { it.first }
 
-    return unallocatedCasesFromDelius
-      .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-        UnallocatedCase.from(
-          unallocatedCase,
-          deliusCaseDetail,
-          outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
-        )
-      }
+      return unallocatedCasesFromDelius
+        .map { deliusCaseDetail ->
+          val unallocatedCase =
+            unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+          UnallocatedCase.from(
+            unallocatedCase,
+            deliusCaseDetail,
+            outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+          )
+        }
+    }
   }
 
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {

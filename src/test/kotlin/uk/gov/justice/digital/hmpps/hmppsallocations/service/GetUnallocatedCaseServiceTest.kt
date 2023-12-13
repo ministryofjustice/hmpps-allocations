@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -19,7 +18,7 @@ internal class GetUnallocatedCaseServiceTest {
 
   private val mockWorkforceAllocationsToDeliusApiClientClient: WorkforceAllocationsToDeliusApiClient = mockk()
   private val mockRepo: UnallocatedCasesRepository = mockk()
-  private val outOfAreaTransferService: OutOfAreaTransferService = mockk()
+  private val mockOutOfAreaTransferService: OutOfAreaTransferService = mockk()
 
   @Test
   fun `must not return unallocated cases which get deleted during enrichment`() {
@@ -41,7 +40,7 @@ internal class GetUnallocatedCaseServiceTest {
         DeliusCaseAccess(crn, userRestricted = false, false)
 
       coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns emptyFlow()
-      val cases = GetUnallocatedCaseService(mockRepo, outOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").toList()
+      val cases = GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").toList()
       assertEquals(0, cases.size)
     }
   }
@@ -67,7 +66,7 @@ internal class GetUnallocatedCaseServiceTest {
     coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(emptyList()) } returns emptyFlow()
 
     val cases =
-      GetUnallocatedCaseService(mockRepo, outOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1")
+      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1")
         .toList()
 
     verify { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) wasNot Called }
