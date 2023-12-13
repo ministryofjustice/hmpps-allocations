@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toSet
+import kotlinx.coroutines.flow.asFlow
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
@@ -25,27 +26,30 @@ class OutOfAreaTransferService(
       }
       .map { it.crn to it.communityPersonManager?.teamCode }
 
-    val currentTeamCodePlusCurrentlyManagedCasesPoTeamCodes = currentlyManagedCasesCrnAndTeamCodePairs
+    val currentlyManagedCasesTeamCodes = currentlyManagedCasesCrnAndTeamCodePairs
       .mapNotNull {
         it.second
-      }.toSet().plus(setOf(currentTeamCode))
+      }.toSet()
 
-    val teamsInDifferentRegions = hmppsProbationEstateApiClient.getRegionsAndTeams(
-      teamCodes = currentTeamCodePlusCurrentlyManagedCasesPoTeamCodes,
-    )?.let { regionAndTeams ->
-      val currentTeamRegionCode = regionAndTeams
-        .filter { it.team.code == currentTeamCode }
-        .map { it.region.code }
-        .firstOrNull()
+    if (currentlyManagedCasesTeamCodes.isNotEmpty()) {
+      val teamsInDifferentRegions = hmppsProbationEstateApiClient.getRegionsAndTeams(
+        teamCodes = currentlyManagedCasesTeamCodes.plus(setOf(currentTeamCode)),
+      )?.let { regionAndTeams ->
+        val currentTeamRegionCode = regionAndTeams
+          .filter { it.team.code == currentTeamCode }
+          .map { it.region.code }
+          .firstOrNull()
 
-      val teamsInDifferentRegion = regionAndTeams
-        .filter { it.region.code != currentTeamRegionCode }
-        .map { it.team.code }
+        val teamsInDifferentRegion = regionAndTeams
+          .filter { it.region.code != currentTeamRegionCode }
+          .map { it.team.code }
 
-      teamsInDifferentRegion
+        teamsInDifferentRegion
+      }
+      return currentlyManagedCasesCrnAndTeamCodePairs
+        .filter { teamsInDifferentRegions?.contains(it.second) ?: false }
     }
-
-    return currentlyManagedCasesCrnAndTeamCodePairs
-      .filter { teamsInDifferentRegions?.contains(it.second) ?: false }
+    return emptyList<Pair<String, String>>()
+      .asFlow()
   }
 }

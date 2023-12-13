@@ -49,11 +49,11 @@ class GetUnallocatedCaseService(
     val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
 
-    val casesThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+    val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
       .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
         teamCode,
         unallocatedCasesFromDelius,
-      )
+      ).map { it.first }.toList()
 
     return unallocatedCasesFromDelius
       .map { deliusCaseDetail ->
@@ -61,9 +61,7 @@ class GetUnallocatedCaseService(
         UnallocatedCase.from(
           unallocatedCase,
           deliusCaseDetail,
-          outOfAreaTransfer = casesThatAreCurrentlyManagedOutsideOfThisTeamsRegion
-            .map { it.first }.toList()
-            .contains(unallocatedCase.crn),
+          outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
         )
       }
   }

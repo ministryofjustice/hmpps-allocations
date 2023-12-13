@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 @Configuration
 class WebClientConfiguration(
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
-  @Value("\${probation-estate.endpoint.url}") private val hmppsProbationEstateApiRootUri: String,
+  @Value("\${hmpps-probation-estate.endpoint.url}") private val hmppsProbationEstateApiRootUri: String,
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 

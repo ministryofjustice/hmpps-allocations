@@ -23,7 +23,7 @@ hmpps-tier:
   endpoint:
     url: https://hmpps-tier-dev.hmpps.service.justice.gov.uk
 
-probation-estate:
+hmpps-probation-estate:
   endpoint:
     url: https://hmpps-probation-estate-api-dev.hmpps.service.justice.gov.uk
 
