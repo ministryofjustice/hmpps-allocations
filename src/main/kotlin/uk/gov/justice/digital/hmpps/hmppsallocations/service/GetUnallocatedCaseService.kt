@@ -42,7 +42,11 @@ class GetUnallocatedCaseService(
   }
 
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
-    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false && !this.userRestricted } }
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+      .filter {
+        workforceAllocationsToDeliusApiClient.getUserAccess(it.crn)
+          .run { this?.userExcluded == false && !this.userRestricted }
+      }
 
     val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }

@@ -9,9 +9,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManag
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ProbationStatus
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.RegionAndTeamOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.RegionOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.TeamOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamOverview
 
 internal class OutOfAreaTransferServiceTest {
 
@@ -121,25 +121,27 @@ internal class OutOfAreaTransferServiceTest {
   fun `must not return unallocated cases which get deleted during enrichment`() {
     runBlocking {
       coEvery {
-        mockHmppsProbationEstateApiClient.getRegionsAndTeams(teamCodes = setOf(team2.code, team3.code, team4.code, team5.code, team6.code, team1.code))
+        mockHmppsProbationEstateApiClient.getRegionsAndTeams(
+          teamCodes = setOf(team2.code, team3.code, team4.code, team5.code, team6.code, team1.code)
+        )
       } returns listOf(
-        RegionAndTeamOverview(
+        ProbationEstateRegionAndTeamOverview(
           region = region1,
           team = team1,
         ),
-        RegionAndTeamOverview(
+        ProbationEstateRegionAndTeamOverview(
           region = region1,
           team = team2,
         ),
-        RegionAndTeamOverview(
+        ProbationEstateRegionAndTeamOverview(
           region = region1,
           team = team3,
         ),
-        RegionAndTeamOverview(
+        ProbationEstateRegionAndTeamOverview(
           region = region2,
           team = team4,
         ),
-        RegionAndTeamOverview(
+        ProbationEstateRegionAndTeamOverview(
           region = region3,
           team = team5,
         ),

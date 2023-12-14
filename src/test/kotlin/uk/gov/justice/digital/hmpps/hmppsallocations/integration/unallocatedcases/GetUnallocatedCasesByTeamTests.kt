@@ -9,8 +9,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
-  @Test
-  fun `Get unallocated cases by team`() {
+
+  private fun testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean
+  ) {
     workforceAllocationsToDelius.userHasAccess("J678910")
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
@@ -22,17 +24,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
-
-    hmppsProbateEstate.regionsAndTeamsResponse(
-      teams = listOf(
-        "TEAM1" to "Team 1",
-        "TEAM2" to "Team 2",
-      ),
-      regions = listOf(
-        "REGION1" to "Region 1",
-        "REGION2" to "Region 2",
-      ),
-    )
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
@@ -94,7 +85,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].offenderManager.grade")
       .isEqualTo("SPO")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].outOfAreaTransfer")
-      .isEqualTo(true)
+      .isEqualTo(probationEstateTeamsAndRegionsApiIsWorking)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
       .isEqualTo("Previously managed")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
@@ -117,6 +108,39 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .doesNotExist()
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].outOfAreaTransfer")
       .isEqualTo(false)
+  }
+
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is successful`() {
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = true
+    )
+  }
+
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is failing with InternalServerError response`() {
+    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
+    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false
+    )
+  }
+
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is failing with BadRequest response`() {
+    hmppsProbateEstate.regionsAndTeamsFailsWithBadRequestResponse()
+    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false
+    )
   }
 
   @Test
@@ -187,7 +211,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
 
-    hmppsProbateEstate.regionsAndTeamsResponse(
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
         "TEAM2" to "Team 2",
