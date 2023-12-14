@@ -10,8 +10,8 @@ import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
-  private fun testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
-    probationEstateTeamsAndRegionsApiIsWorking: Boolean
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean,
   ) {
     workforceAllocationsToDelius.userHasAccess("J678910")
     workforceAllocationsToDelius.userHasAccess("J680648")
@@ -122,29 +122,29 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
-    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
-      probationEstateTeamsAndRegionsApiIsWorking = true
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = true,
     )
   }
 
   @Test
   fun `Get unallocated cases by team where probation-estate API is failing with InternalServerError response`() {
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
-      probationEstateTeamsAndRegionsApiIsWorking = false
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false,
     )
   }
 
   @Test
   fun `Get unallocated cases by team where probation-estate API is failing with BadRequest response`() {
     hmppsProbateEstate.regionsAndTeamsFailsWithBadRequestResponse()
-    testUnallocatedCasesByTeamWithAllDataSetupAndAssertions(
-      probationEstateTeamsAndRegionsApiIsWorking = false
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false,
     )
   }
 
   @Test
-  fun `return error when error on API call`() {
+  fun `return error when error on Delius API call`() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")

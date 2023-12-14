@@ -122,7 +122,7 @@ internal class OutOfAreaTransferServiceTest {
     runBlocking {
       coEvery {
         mockHmppsProbationEstateApiClient.getRegionsAndTeams(
-          teamCodes = setOf(team2.code, team3.code, team4.code, team5.code, team6.code, team1.code)
+          teamCodes = setOf(team2.code, team3.code, team4.code, team5.code, team6.code, team1.code),
         )
       } returns listOf(
         ProbationEstateRegionAndTeamOverview(

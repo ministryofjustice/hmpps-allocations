@@ -30,4 +30,3 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
-
