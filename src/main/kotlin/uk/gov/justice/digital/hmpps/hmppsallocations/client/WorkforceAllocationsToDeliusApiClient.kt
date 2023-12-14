@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
@@ -49,11 +50,28 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
   fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
-    val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
+    val caseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
+    return getDeliusCaseDetails(caseDetails)
+  }
+
+  suspend fun getDeliusCaseDetails(
+    crn: String,
+    convictionNumber: String
+  ): DeliusCaseDetail? {
+    return getDeliusCaseDetails(
+      caseDetails = GetCaseDetails(
+        listOf(CaseIdentifier(crn, convictionNumber))
+      )
+    )
+      .toList()
+      .firstOrNull()
+  }
+
+  private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Flow<DeliusCaseDetail> {
     return webClient
       .post()
       .uri("/allocation-demand")
-      .body(Mono.just(getCaseDetails), GetCaseDetails::class.java)
+      .body(Mono.just(caseDetails), GetCaseDetails::class.java)
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
       .flatMapIterable { it.cases }

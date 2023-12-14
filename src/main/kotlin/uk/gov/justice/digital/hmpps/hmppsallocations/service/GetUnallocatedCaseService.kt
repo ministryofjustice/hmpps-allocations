@@ -27,11 +27,28 @@ class GetUnallocatedCaseService(
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
-    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
+      // TODO: can I run these 2 calls in parallel using webflux?
       val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
+      val caseIsOutOfAreaTransfer = workforceAllocationsToDeliusApiClient
+        .getDeliusCaseDetails(
+          crn,
+          convictionNumber.toString()
+        )?.let { deliusCaseDetail ->
+          outOfAreaTransferService.isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
+            currentTeamCode = unallocatedCaseEntity.teamCode,
+            unallocatedCasesFromDelius = deliusCaseDetail
+          )
+        } ?: false
       val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
-      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks).takeUnless { restrictedOrExcluded(crn) }
+      return UnallocatedCaseDetails.from(
+        unallocatedCaseEntity,
+        deliusCaseView,
+        assessment,
+        unallocatedCaseRisks,
+        caseIsOutOfAreaTransfer
+      ).takeUnless { restrictedOrExcluded(crn) }
     }
   }
 
@@ -56,10 +73,10 @@ class GetUnallocatedCaseService(
       return emptyList()
     } else {
       val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
-        .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+        .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
           teamCode,
           unallocatedCasesFromDelius,
-        ).map { it.first }
+        ).map { it.crn }
 
       return unallocatedCasesFromDelius
         .map { deliusCaseDetail ->

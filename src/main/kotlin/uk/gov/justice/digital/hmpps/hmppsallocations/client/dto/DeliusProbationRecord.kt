@@ -21,6 +21,7 @@ data class CommunityEventManager(
   val name: Name,
   val email: String?,
   val grade: String?,
+  val teamCode: String?
 )
 
 data class ProbationRecordSentence(
