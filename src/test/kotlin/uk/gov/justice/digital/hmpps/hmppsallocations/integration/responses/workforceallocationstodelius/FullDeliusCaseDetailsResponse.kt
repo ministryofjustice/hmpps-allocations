@@ -40,7 +40,7 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
       },
       "type": "CUSTODY",
       "probationStatus": {
-         "status": "STATUS",
+         "status": "${caseDetailsIntegration.probationStatus}",
          "description": "${caseDetailsIntegration.probationStatusDescription}"
       }
   """ +
@@ -77,7 +77,7 @@ private fun communityPersonManager(communityPersonManager: CommunityPersonManage
           "forename": "${communityPersonManager.name.forename}",
           "surname": "${communityPersonManager.name.surname}"
         },
-        "teamCode": "N54NGH"
+        "teamCode": "${communityPersonManager.teamCode}"
         ${showGrade(communityPersonManager)}
       }
     """.trimIndent()

@@ -23,6 +23,10 @@ hmpps-tier:
   endpoint:
     url: https://hmpps-tier-dev.hmpps.service.justice.gov.uk
 
+hmpps-probation-estate:
+  endpoint:
+    url: https://hmpps-probation-estate-api-dev.hmpps.service.justice.gov.uk
+
 assessment:
   endpoint:
     url: https://offender-dev.aks-dev-1.studio-hosting.service.justice.gov.uk

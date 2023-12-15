@@ -1,8 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -23,6 +21,7 @@ import java.time.LocalDateTime
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
+  private val outOfAreaTransferService: OutOfAreaTransferService,
   @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
@@ -42,18 +41,37 @@ class GetUnallocatedCaseService(
     }.takeUnless { restrictedOrExcluded(crn) }
   }
 
-  suspend fun getAllByTeam(teamCode: String): Flow<UnallocatedCase> {
-    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode).filter { workforceAllocationsToDeliusApiClient.getUserAccess(it.crn).run { this?.userExcluded == false && !this.userRestricted } }
-
-    return workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
-      .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
-      .map { deliusCaseDetail ->
-        val unallocatedCase = unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-        UnallocatedCase.from(
-          unallocatedCase,
-          deliusCaseDetail,
-        )
+  suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+      .filter {
+        workforceAllocationsToDeliusApiClient.getUserAccess(it.crn)
+          .run { this?.userExcluded == false && !this.userRestricted }
       }
+
+    val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
+      .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
+      .toList()
+
+    if (unallocatedCasesFromDelius.isEmpty()) {
+      return emptyList()
+    } else {
+      val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+        .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+          teamCode,
+          unallocatedCasesFromDelius,
+        ).map { it.first }
+
+      return unallocatedCasesFromDelius
+        .map { deliusCaseDetail ->
+          val unallocatedCase =
+            unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+          UnallocatedCase.from(
+            unallocatedCase,
+            deliusCaseDetail,
+            outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+          )
+        }
+    }
   }
 
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {

@@ -7,6 +7,7 @@ data class CaseDetailsIntegration(
   val crn: String,
   val eventNumber: String,
   val initialAppointment: InitialAppointment?,
+  val probationStatus: String,
   val probationStatusDescription: String,
   val communityPersonManager: CommunityPersonManager?,
 )

@@ -11,12 +11,14 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
 @Configuration
 class WebClientConfiguration(
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
+  @Value("\${hmpps-probation-estate.endpoint.url}") private val hmppsProbationEstateApiRootUri: String,
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 
@@ -45,6 +47,19 @@ class WebClientConfiguration(
   @Bean
   fun hmppsTierApiClient(@Qualifier("hmppsTierWebClientAppScope") webClient: WebClient): HmppsTierApiClient {
     return HmppsTierApiClient(webClient)
+  }
+
+  @Bean
+  fun hmppsProbationEstateAppScope(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient {
+    return getOAuthWebClient(authorizedClientManager, builder, hmppsProbationEstateApiRootUri, "hmpps-probation-estate-api")
+  }
+
+  @Bean
+  fun hmppsProbationEstateApiClient(@Qualifier("hmppsProbationEstateAppScope") webClient: WebClient): HmppsProbationEstateApiClient {
+    return HmppsProbationEstateApiClient(webClient)
   }
 
   @Bean

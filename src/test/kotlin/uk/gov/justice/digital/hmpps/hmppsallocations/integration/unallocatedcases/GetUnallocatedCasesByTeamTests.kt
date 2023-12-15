@@ -3,17 +3,21 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
-  @Test
-  fun `Get unallocated cases by team`() {
+
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+  ) {
     workforceAllocationsToDelius.userHasAccess("J678910")
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
     workforceAllocationsToDelius.userHasAccess("J680660")
+    workforceAllocationsToDelius.userHasAccess("X6666222")
 
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
@@ -29,7 +33,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(4)
+      .isEqualTo(5)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].initialAppointment.date")
@@ -58,6 +62,30 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo("SPO")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].caseType")
       .isEqualTo("CUSTODY")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].sentenceDate")
+      .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].initialAppointment.staff.name.forename")
+      .isEqualTo("Beverley")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].initialAppointment.staff.name.middleName")
+      .isEqualTo("Rose")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].initialAppointment.staff.name.surname")
+      .isEqualTo("Smith")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].initialAppointment.staff.name.combinedName")
+      .isEqualTo("Beverley Rose Smith")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].crn")
+      .isEqualTo("X6666222")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].status")
+      .isEqualTo("Currently managed")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].offenderManager.forenames")
+      .isEqualTo("Joe")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].offenderManager.surname")
+      .isEqualTo("Bloggs")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].offenderManager.grade")
+      .isEqualTo("SPO")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].outOfAreaTransfer")
+      .isEqualTo(probationEstateTeamsAndRegionsApiIsWorking)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
       .isEqualTo("Previously managed")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
@@ -66,24 +94,67 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo("Jones")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.grade")
       .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].outOfAreaTransfer")
+      .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 4 && @.crn == 'J680660')].offenderManager")
       .doesNotExist()
       .jsonPath("$.[?(@.convictionNumber == 4 && @.crn == 'J680660')].status")
       .isEqualTo("Previously managed")
+      .jsonPath("$.[?(@.convictionNumber == 4 && @.crn == 'J680660')].outOfAreaTransfer")
+      .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].status")
       .isEqualTo("New to probation")
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].offenderManager")
       .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].outOfAreaTransfer")
+      .isEqualTo(false)
   }
 
   @Test
-  fun `return error when error on API call`() {
+  fun `Get unallocated cases by team where probation-estate API is successful`() {
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = true,
+    )
+  }
+
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is failing with InternalServerError response`() {
+    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false,
+    )
+  }
+
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is failing with BadRequest response`() {
+    hmppsProbateEstate.regionsAndTeamsFailsWithBadRequestResponse()
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = false,
+    )
+  }
+
+  @Test
+  fun `return error when error on Delius API call`() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
     workforceAllocationsToDelius.userHasAccess("J680660")
+    workforceAllocationsToDelius.userHasAccess("X6666222")
+
     insertCases()
+
     workforceAllocationsToDelius.errorDeliusCaseDetailsResponse()
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -136,8 +207,20 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J680648")
     workforceAllocationsToDelius.userHasAccess("X4565764")
     workforceAllocationsToDelius.userHasAccess("J680660")
+    workforceAllocationsToDelius.userHasAccess("X6666222")
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
+
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
 
     insertCases()
     webTestClient.get()

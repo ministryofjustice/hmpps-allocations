@@ -29,25 +29,31 @@ data class UnallocatedCase @JsonCreator constructor(
   @Schema(description = "Sentence Length")
   val sentenceLength: String?,
   val convictionNumber: Int,
+  val outOfAreaTransfer: Boolean,
 ) {
   companion object {
-    fun from(case: UnallocatedCaseEntity, deliusCaseDetail: DeliusCaseDetail): UnallocatedCase {
+    fun from(
+      case: UnallocatedCaseEntity,
+      deliusCaseDetail: DeliusCaseDetail,
+      outOfAreaTransfer: Boolean,
+    ): UnallocatedCase {
       return UnallocatedCase(
-        "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
-        deliusCaseDetail.crn,
-        case.tier,
-        deliusCaseDetail.sentence.date,
-        InitialAppointmentDetails.from(
+        name = "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
+        crn = deliusCaseDetail.crn,
+        tier = case.tier,
+        sentenceDate = deliusCaseDetail.sentence.date,
+        initialAppointment = InitialAppointmentDetails.from(
           deliusCaseDetail.initialAppointment,
         ),
-        deliusCaseDetail.probationStatus.description,
-        OffenderManagerDetails.from(
+        status = deliusCaseDetail.probationStatus.description,
+        offenderManager = OffenderManagerDetails.from(
           deliusCaseDetail.communityPersonManager,
           deliusCaseDetail.probationStatus.description,
         ),
-        deliusCaseDetail.type,
-        deliusCaseDetail.sentence.length,
-        case.convictionNumber,
+        caseType = deliusCaseDetail.type,
+        sentenceLength = deliusCaseDetail.sentence.length,
+        convictionNumber = case.convictionNumber,
+        outOfAreaTransfer = outOfAreaTransfer,
       )
     }
   }
