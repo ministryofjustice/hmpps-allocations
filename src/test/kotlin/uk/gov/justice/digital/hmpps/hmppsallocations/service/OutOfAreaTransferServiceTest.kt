@@ -147,16 +147,16 @@ internal class OutOfAreaTransferServiceTest {
         ),
       )
       val results = OutOfAreaTransferService(mockHmppsProbationEstateApiClient)
-        .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+        .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
           currentTeamCode = team1.code,
           unallocatedCasesFromDelius = stubbedUnallocatedCasesFromDelius,
         )
 
       assertEquals(2, results.size)
-      assertEquals("33333", results.first().first)
-      assertEquals(team4.code, results.first().second)
-      assertEquals("44444", results[1].first)
-      assertEquals(team5.code, results[1].second)
+      assertEquals("33333", results.first().crn)
+      assertEquals(team4.code, results.first().teamCode)
+      assertEquals("44444", results[1].crn)
+      assertEquals(team5.code, results[1].teamCode)
     }
   }
 }

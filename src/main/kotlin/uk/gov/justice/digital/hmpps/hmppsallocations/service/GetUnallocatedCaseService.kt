@@ -2,19 +2,19 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.util.function.Tuple2
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.*
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
 
@@ -22,17 +22,77 @@ import java.time.LocalDateTime
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
   private val outOfAreaTransferService: OutOfAreaTransferService,
-  @Qualifier("assessRisksNeedsApiClientUserEnhanced") private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
-  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+  @Qualifier("assessRisksNeedsApiClientUserEnhanced")
+  private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
+  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
+  private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
-    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
+    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
-      val deliusCaseView = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
-      val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
-      return UnallocatedCaseDetails.from(it, deliusCaseView, assessment, unallocatedCaseRisks).takeUnless { restrictedOrExcluded(crn) }
+      val getDeliusCaseViewApiCall = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
+      val getDeliusCaseDetailsApiCall = workforceAllocationsToDeliusApiClient
+        .getDeliusCaseDetails(
+          crn,
+          convictionNumber
+        )
+      callDeliusCaseViewAndCaseDetailApisInParallel(
+        crn,
+        convictionNumber,
+        unallocatedCaseEntity,
+        assessment,
+        getDeliusCaseViewApiCall,
+        getDeliusCaseDetailsApiCall
+      )
     }
+  }
+
+  private suspend fun callDeliusCaseViewAndCaseDetailApisInParallel(
+    crn: String,
+    convictionNumber: Long,
+    unallocatedCaseEntity: UnallocatedCaseEntity,
+    assessment: Assessment?,
+    getDeliusCaseViewCall: Mono<DeliusCaseView>,
+    getDeliusCaseDetailsCall: Mono<DeliusCaseDetails>
+  ): UnallocatedCaseDetails? =
+    Mono.zip(getDeliusCaseViewCall, getDeliusCaseDetailsCall)
+      .awaitSingle()
+      .let {
+        val caseView = it.t1
+        val caseDetails = it.t2
+        val caseIsOutOfAreaTransfer = if (caseDetails.cases.firstOrNull() != null) {
+          outOfAreaTransferService.isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
+            currentTeamCode = unallocatedCaseEntity.teamCode,
+            unallocatedCasesFromDelius = caseDetails.cases.first()
+          )
+        } else false
+        getRisksAndGenerateUnallocatedCaseDetails(
+          crn,
+          convictionNumber,
+          unallocatedCaseEntity,
+          caseView,
+          assessment,
+          caseIsOutOfAreaTransfer
+        )
+      }
+
+  private suspend fun getRisksAndGenerateUnallocatedCaseDetails(
+    crn: String,
+    convictionNumber: Long,
+    unallocatedCaseEntity: UnallocatedCaseEntity,
+    caseView: DeliusCaseView,
+    assessment: Assessment?,
+    outOfAreaTransfer: Boolean
+  ): UnallocatedCaseDetails? {
+    val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
+    return UnallocatedCaseDetails.from(
+      unallocatedCaseEntity,
+      caseView,
+      assessment,
+      unallocatedCaseRisks,
+      outOfAreaTransfer
+    ).takeUnless { restrictedOrExcluded(crn) }
   }
 
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
@@ -48,7 +108,8 @@ class GetUnallocatedCaseService(
           .run { this?.userExcluded == false && !this.userRestricted }
       }
 
-    val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient.getDeliusCaseDetails(unallocatedCases)
+    val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient
+      .getDeliusCaseDetailsCases(cases = unallocatedCases)
       .filter { unallocatedCasesRepository.existsByCrnAndConvictionNumber(it.crn, it.event.number.toInt()) }
       .toList()
 
@@ -56,10 +117,10 @@ class GetUnallocatedCaseService(
       return emptyList()
     } else {
       val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
-        .getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+        .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
           teamCode,
           unallocatedCasesFromDelius,
-        ).map { it.first }
+        ).map { it.crn }
 
       return unallocatedCasesFromDelius
         .map { deliusCaseDetail ->

@@ -39,8 +39,9 @@ internal class GetUnallocatedCaseServiceTest {
       coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(crn) } returns
         DeliusCaseAccess(crn, userRestricted = false, false)
 
-      coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) } returns emptyFlow()
-      val cases = GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1").toList()
+      coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) } returns emptyFlow()
+      val cases = GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient)
+        .getAllByTeam("TM1").toList()
       assertEquals(0, cases.size)
     }
   }
@@ -63,13 +64,13 @@ internal class GetUnallocatedCaseServiceTest {
     coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(crn) } returns
       DeliusCaseAccess(crn, userRestricted = true, true)
 
-    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(emptyList()) } returns emptyFlow()
+    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(emptyList()) } returns emptyFlow()
 
     val cases =
       GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1")
         .toList()
 
-    verify { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetails(listOf(unallocatedCaseEntity)) wasNot Called }
+    verify { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) wasNot Called }
     assertEquals(0, cases.size)
   }
 }

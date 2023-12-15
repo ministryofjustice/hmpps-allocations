@@ -7,12 +7,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.*
 import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
-import org.springframework.web.reactive.function.client.awaitExchangeOrNull
-import org.springframework.web.reactive.function.client.bodyToFlow
-import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
@@ -48,16 +44,31 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? =
     getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
-  fun getDeliusCaseDetails(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> {
-    val getCaseDetails = GetCaseDetails(cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) })
+  fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> =
+    getDeliusCaseDetails(
+      caseDetails = GetCaseDetails(
+        cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) }
+      )
+    )
+      .flatMapIterable { it.cases }
+      .asFlow()
+
+  fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> =
+    getDeliusCaseDetails(
+      caseDetails = GetCaseDetails(
+        listOf(CaseIdentifier(crn, convictionNumber.toString()))
+      )
+    ).onErrorReturn(DeliusCaseDetails(
+      cases = emptyList()
+    ))
+
+  private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> {
     return webClient
       .post()
       .uri("/allocation-demand")
-      .body(Mono.just(getCaseDetails), GetCaseDetails::class.java)
+      .body(Mono.just(caseDetails), GetCaseDetails::class.java)
       .retrieve()
       .bodyToMono(DeliusCaseDetails::class.java)
-      .flatMapIterable { it.cases }
-      .asFlow()
   }
 
   fun getDocuments(crn: String): Flow<Document> {
@@ -76,12 +87,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .toEntity(Resource::class.java)
   }
 
-  suspend fun getDeliusCaseView(crn: String, convictionNumber: Long): DeliusCaseView {
+  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
     return webClient
       .get()
       .uri("/allocation-demand/$crn/$convictionNumber/case-view")
       .retrieve()
-      .awaitBody()
+      .bodyToMono()
   }
 
   suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
@@ -147,6 +158,11 @@ data class DeliusCaseDetail(
   val probationStatus: ProbationStatus,
   val communityPersonManager: CommunityPersonManager?,
   val type: String,
+)
+
+data class DeliusCaseViewAndDetails(
+  val caseView: DeliusCaseView,
+  val caseDetail: DeliusCaseDetail
 )
 
 data class Event(val number: String)
