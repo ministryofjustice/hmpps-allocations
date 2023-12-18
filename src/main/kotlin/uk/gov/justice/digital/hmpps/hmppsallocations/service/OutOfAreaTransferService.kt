@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnAndTeamCode
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationStatus
 
-
 @Service
 class OutOfAreaTransferService(
   private val hmppsProbationEstateApiClient: HmppsProbationEstateApiClient,
@@ -17,7 +16,7 @@ class OutOfAreaTransferService(
   ): Boolean {
     return getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
       currentTeamCode,
-      listOf(unallocatedCasesFromDelius)
+      listOf(unallocatedCasesFromDelius),
     ).firstOrNull() != null
   }
   suspend fun getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
@@ -32,7 +31,7 @@ class OutOfAreaTransferService(
       .map {
         CrnAndTeamCode(
           crn = it.crn,
-          teamCode = it.communityPersonManager?.teamCode
+          teamCode = it.communityPersonManager?.teamCode,
         )
       }
     val currentlyManagedCasesTeamCodes = currentlyManagedCasesCrnAndTeamCodes

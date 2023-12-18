@@ -3,17 +3,23 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuple2
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.*
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
@@ -35,7 +41,7 @@ class GetUnallocatedCaseService(
       val getDeliusCaseDetailsApiCall = workforceAllocationsToDeliusApiClient
         .getDeliusCaseDetails(
           crn,
-          convictionNumber
+          convictionNumber,
         )
       callDeliusCaseViewAndCaseDetailApisInParallel(
         crn,
@@ -43,7 +49,7 @@ class GetUnallocatedCaseService(
         unallocatedCaseEntity,
         assessment,
         getDeliusCaseViewApiCall,
-        getDeliusCaseDetailsApiCall
+        getDeliusCaseDetailsApiCall,
       )
     }
   }
@@ -54,7 +60,7 @@ class GetUnallocatedCaseService(
     unallocatedCaseEntity: UnallocatedCaseEntity,
     assessment: Assessment?,
     getDeliusCaseViewCall: Mono<DeliusCaseView>,
-    getDeliusCaseDetailsCall: Mono<DeliusCaseDetails>
+    getDeliusCaseDetailsCall: Mono<DeliusCaseDetails>,
   ): UnallocatedCaseDetails? =
     Mono.zip(getDeliusCaseViewCall, getDeliusCaseDetailsCall)
       .awaitSingle()
@@ -64,16 +70,18 @@ class GetUnallocatedCaseService(
         val caseIsOutOfAreaTransfer = if (caseDetails.cases.firstOrNull() != null) {
           outOfAreaTransferService.isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
             currentTeamCode = unallocatedCaseEntity.teamCode,
-            unallocatedCasesFromDelius = caseDetails.cases.first()
+            unallocatedCasesFromDelius = caseDetails.cases.first(),
           )
-        } else false
+        } else {
+          false
+        }
         getRisksAndGenerateUnallocatedCaseDetails(
           crn,
           convictionNumber,
           unallocatedCaseEntity,
           caseView,
           assessment,
-          caseIsOutOfAreaTransfer
+          caseIsOutOfAreaTransfer,
         )
       }
 
@@ -83,7 +91,7 @@ class GetUnallocatedCaseService(
     unallocatedCaseEntity: UnallocatedCaseEntity,
     caseView: DeliusCaseView,
     assessment: Assessment?,
-    outOfAreaTransfer: Boolean
+    outOfAreaTransfer: Boolean,
   ): UnallocatedCaseDetails? {
     val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
     return UnallocatedCaseDetails.from(
@@ -91,7 +99,7 @@ class GetUnallocatedCaseService(
       caseView,
       assessment,
       unallocatedCaseRisks,
-      outOfAreaTransfer
+      outOfAreaTransfer,
     ).takeUnless { restrictedOrExcluded(crn) }
   }
 

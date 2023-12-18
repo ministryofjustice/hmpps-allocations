@@ -57,7 +57,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val rsrLevel: String?,
   val ogrsScore: BigInteger?,
   val activeRiskRegistration: String?,
-  val outOfAreaTransfer: Boolean
+  val outOfAreaTransfer: Boolean,
 ) {
 
   companion object {
@@ -67,7 +67,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       deliusCaseView: DeliusCaseView,
       assessment: Assessment?,
       unallocatedCaseRisks: UnallocatedCaseRisks?,
-      outOfAreaTransfer: Boolean
+      outOfAreaTransfer: Boolean,
     ): UnallocatedCaseDetails {
       return UnallocatedCaseDetails(
         deliusCaseView.name.getCombinedName(),
@@ -91,7 +91,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
         unallocatedCaseRisks?.rsr?.level,
         unallocatedCaseRisks?.ogrs?.score,
         unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
-        outOfAreaTransfer
+        outOfAreaTransfer,
       )
     }
   }

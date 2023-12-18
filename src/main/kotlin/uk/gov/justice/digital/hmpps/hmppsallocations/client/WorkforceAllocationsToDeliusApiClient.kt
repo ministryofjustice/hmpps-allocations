@@ -7,8 +7,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.reactive.function.client.*
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitExchange
+import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import org.springframework.web.reactive.function.client.bodyToFlow
+import org.springframework.web.reactive.function.client.bodyToMono
+import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
@@ -47,8 +52,8 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> =
     getDeliusCaseDetails(
       caseDetails = GetCaseDetails(
-        cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) }
-      )
+        cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) },
+      ),
     )
       .flatMapIterable { it.cases }
       .asFlow()
@@ -56,11 +61,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> =
     getDeliusCaseDetails(
       caseDetails = GetCaseDetails(
-        listOf(CaseIdentifier(crn, convictionNumber.toString()))
-      )
-    ).onErrorReturn(DeliusCaseDetails(
-      cases = emptyList()
-    ))
+        listOf(CaseIdentifier(crn, convictionNumber.toString())),
+      ),
+    ).onErrorReturn(
+      DeliusCaseDetails(
+        cases = emptyList(),
+      ),
+    )
 
   private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> {
     return webClient
@@ -162,7 +169,7 @@ data class DeliusCaseDetail(
 
 data class DeliusCaseViewAndDetails(
   val caseView: DeliusCaseView,
-  val caseDetail: DeliusCaseDetail
+  val caseDetail: DeliusCaseDetail,
 )
 
 data class Event(val number: String)

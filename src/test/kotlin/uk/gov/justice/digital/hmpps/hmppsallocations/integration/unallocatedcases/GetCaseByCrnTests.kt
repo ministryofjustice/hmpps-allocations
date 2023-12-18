@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
@@ -14,6 +13,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     canGetCaseByCrnAndConvictionNumber()
   }
+
   @Test
   fun `can get case and outOfAreaTransfer is true`() {
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
@@ -28,7 +28,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       ),
     )
     canGetCaseByCrnAndConvictionNumber(
-      outOfAreaTransfer = true
+      outOfAreaTransfer = true,
     )
   }
 
@@ -37,12 +37,12 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
     canGetCaseByCrnAndConvictionNumber(
-      outOfAreaTransfer = false
+      outOfAreaTransfer = false,
     )
   }
 
   private fun canGetCaseByCrnAndConvictionNumber(
-    outOfAreaTransfer: Boolean = false
+    outOfAreaTransfer: Boolean = false,
   ) {
     val crn = "J678910"
     val convictionNumber = 1
@@ -357,7 +357,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
     canGetCaseByCrnAndConvictionNumber(
-      outOfAreaTransfer = false
+      outOfAreaTransfer = false,
     )
   }
 
