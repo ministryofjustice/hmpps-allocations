@@ -41,6 +41,15 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     )
   }
 
+  @Test
+  fun `can still get case when case-details Delius API responds with Internal Server Error`() {
+    workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
+    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
+    canGetCaseByCrnAndConvictionNumber(
+      outOfAreaTransfer = false,
+    )
+  }
+
   private fun canGetCaseByCrnAndConvictionNumber(
     outOfAreaTransfer: Boolean = false,
   ) {
@@ -350,15 +359,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
       .isEmpty
-  }
-
-  @Test
-  fun `can still get case when case-details Delius API responds with Internal Server Error`() {
-    workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
-    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    canGetCaseByCrnAndConvictionNumber(
-      outOfAreaTransfer = false,
-    )
   }
 
   @Test

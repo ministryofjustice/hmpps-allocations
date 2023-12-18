@@ -167,11 +167,6 @@ data class DeliusCaseDetail(
   val type: String,
 )
 
-data class DeliusCaseViewAndDetails(
-  val caseView: DeliusCaseView,
-  val caseDetail: DeliusCaseDetail,
-)
-
 data class Event(val number: String)
 
 data class ProbationStatus(
