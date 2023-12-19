@@ -3,12 +3,56 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 
 class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can get case by crn and convictionNumber`() {
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
+    canGetCaseByCrnAndConvictionNumber()
+  }
+
+  @Test
+  fun `can get case and outOfAreaTransfer is true`() {
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    canGetCaseByCrnAndConvictionNumber(
+      outOfAreaTransfer = true,
+    )
+  }
+
+  @Test
+  fun `can get case and outOfAreaTransfer is true but probate-estate-api is down`() {
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
+    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
+    canGetCaseByCrnAndConvictionNumber(
+      outOfAreaTransfer = false,
+    )
+  }
+
+  @Test
+  fun `can still get case when case-details Delius API responds with Internal Server Error`() {
+    workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
+    hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
+    canGetCaseByCrnAndConvictionNumber(
+      outOfAreaTransfer = false,
+    )
+  }
+
+  private fun canGetCaseByCrnAndConvictionNumber(
+    outOfAreaTransfer: Boolean = false,
+  ) {
     val crn = "J678910"
     val convictionNumber = 1
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -92,6 +136,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo(85)
       .jsonPath("$.activeRiskRegistration")
       .isEqualTo("ALT Under MAPPA Arrangements, Suicide/self-harm")
+      .jsonPath("$.outOfAreaTransfer")
+      .isEqualTo(outOfAreaTransfer)
   }
 
   @Test
@@ -101,6 +147,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewNoCourtReportResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -124,6 +171,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.notFoundAssessmentForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
 
@@ -166,6 +214,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewWithMainAddressResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -195,6 +244,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("2022-08-25")
       .jsonPath("$.address.noFixedAbode")
       .isEqualTo(false)
+      .jsonPath("$.outOfAreaTransfer")
+      .isEqualTo(false)
   }
 
   @Test
@@ -204,6 +255,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewWithNoFixedAbodeResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -221,6 +273,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("2022-08-25")
       .jsonPath("$.address.noFixedAbode")
       .isEqualTo(true)
+      .jsonPath("$.outOfAreaTransfer")
+      .isEqualTo(false)
   }
 
   @Test
@@ -230,6 +284,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -253,6 +308,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshNoLevelForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsNotFoundForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess(crn)
@@ -271,6 +327,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
       .isEmpty
+      .jsonPath("$.outOfAreaTransfer")
+      .isEqualTo(false)
   }
 
   @Test
@@ -282,6 +340,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshUnavailableForCrn(crn)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsUnavailableForCrn(crn)
     workforceAllocationsToDelius.riskResponseNoRegistrationsNoOgrs(crn)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")

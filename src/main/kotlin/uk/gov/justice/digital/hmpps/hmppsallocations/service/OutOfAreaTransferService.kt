@@ -3,26 +3,40 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnAndTeamCode
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationStatus
 
 @Service
 class OutOfAreaTransferService(
   private val hmppsProbationEstateApiClient: HmppsProbationEstateApiClient,
 ) {
-  suspend fun getCasesThatAreCurrentlyManagedOutsideOfThisTeamsRegion(
+  suspend fun isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
+    currentTeamCode: String,
+    unallocatedCasesFromDelius: DeliusCaseDetail,
+  ): Boolean {
+    return getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
+      currentTeamCode,
+      listOf(unallocatedCasesFromDelius),
+    ).firstOrNull() != null
+  }
+  suspend fun getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
     currentTeamCode: String,
     unallocatedCasesFromDelius: List<DeliusCaseDetail>,
-  ): List<Pair<String, String?>> {
-    val currentlyManagedCasesCrnAndTeamCodePairs = unallocatedCasesFromDelius
+  ): List<CrnAndTeamCode> {
+    val currentlyManagedCasesCrnAndTeamCodes = unallocatedCasesFromDelius
       .filter {
         DeliusProbationStatus.CURRENTLY_MANAGED.name == it.probationStatus.status &&
           it.communityPersonManager?.teamCode != null
       }
-      .map { it.crn to it.communityPersonManager?.teamCode }
-
-    val currentlyManagedCasesTeamCodes = currentlyManagedCasesCrnAndTeamCodePairs
+      .map {
+        CrnAndTeamCode(
+          crn = it.crn,
+          teamCode = it.communityPersonManager?.teamCode,
+        )
+      }
+    val currentlyManagedCasesTeamCodes = currentlyManagedCasesCrnAndTeamCodes
       .mapNotNull {
-        it.second
+        it.teamCode
       }.toSet()
 
     if (currentlyManagedCasesTeamCodes.isNotEmpty()) {
@@ -31,16 +45,16 @@ class OutOfAreaTransferService(
         currentTeamCode,
         teamCodesToInvestigate,
       )
-      return currentlyManagedCasesCrnAndTeamCodePairs
-        .filter { teamsInDifferentRegion?.contains(it.second) ?: false }
+      return currentlyManagedCasesCrnAndTeamCodes
+        .filter { teamsInDifferentRegion?.contains(it.teamCode) ?: false }
     }
-    return emptyList<Pair<String, String>>()
+    return emptyList()
   }
 
   private suspend fun getTeamCodesInDifferentRegion(
     currentTeamCode: String,
     teamCodesToInvestigate: Set<String>,
-  ) = if (teamCodesToInvestigate.size > 1) {
+  ): List<String>? = if (teamCodesToInvestigate.size > 1) {
     hmppsProbationEstateApiClient.getRegionsAndTeams(
       teamCodes = teamCodesToInvestigate,
     )?.let { regionAndTeams ->

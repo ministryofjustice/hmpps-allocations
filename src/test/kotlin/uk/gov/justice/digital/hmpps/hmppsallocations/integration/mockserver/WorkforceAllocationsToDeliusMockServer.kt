@@ -11,6 +11,7 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
@@ -53,6 +54,24 @@ class WorkforceAllocationsToDeliusApiExtension : BeforeAllCallback, AfterAllCall
 }
 class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
+  private val currentMangedByTeam1CaseDetails = CaseDetailsIntegration(
+    crn = "J678910",
+    eventNumber = "1",
+    initialAppointment = InitialAppointment(LocalDate.of(2022, 10, 11), Staff(Name("Beverley", "Rose", "Smith"))),
+    probationStatus = "CURRENTLY_MANAGED",
+    probationStatusDescription = "Currently managed",
+    communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
+  )
+
+  private val currentMangedByTeam2CaseDetails = CaseDetailsIntegration(
+    crn = "X6666222",
+    eventNumber = "1",
+    initialAppointment = InitialAppointment(LocalDate.of(2023, 12, 18), Staff(Name("Beverley", "Rose", "Smith"))),
+    probationStatus = "CURRENTLY_MANAGED",
+    probationStatusDescription = "Currently managed",
+    communityPersonManager = CommunityPersonManager(Name("Joe", null, "Bloggs"), "SPO", "TEAM2"),
+  )
+
   companion object {
     private const val MOCKSERVER_PORT = 8084
   }
@@ -83,22 +102,8 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
   fun setupTeam1CaseDetails() {
     deliusCaseDetailsResponse(
-      CaseDetailsIntegration(
-        crn = "J678910",
-        eventNumber = "1",
-        initialAppointment = InitialAppointment(LocalDate.of(2022, 10, 11), Staff(Name("Beverley", "Rose", "Smith"))),
-        probationStatus = "CURRENTLY_MANAGED",
-        probationStatusDescription = "Currently managed",
-        communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
-      ),
-      CaseDetailsIntegration(
-        crn = "X6666222",
-        eventNumber = "1",
-        initialAppointment = InitialAppointment(LocalDate.of(2023, 12, 18), Staff(Name("Beverley", "Rose", "Smith"))),
-        probationStatus = "CURRENTLY_MANAGED",
-        probationStatusDescription = "Currently managed",
-        communityPersonManager = CommunityPersonManager(Name("Joe", null, "Bloggs"), "SPO", "TEAM2"),
-      ),
+      currentMangedByTeam1CaseDetails,
+      currentMangedByTeam2CaseDetails,
       CaseDetailsIntegration(
         crn = "J680648",
         eventNumber = "2",
@@ -167,6 +172,26 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withHeader(HttpHeaders.CONTENT_LENGTH, "20992")
         .withBody(ClassPathResource("sample_word_doc.doc").file.readBytes()),
     )
+  }
+
+  fun caseDetailsResponseWhereCurrentlyManagedBySameTeam() {
+    deliusCaseDetailsResponse(currentMangedByTeam1CaseDetails)
+  }
+
+  fun caseDetailsResponseWhereCurrentlyManagedByDifferentTeam() {
+    deliusCaseDetailsResponse(currentMangedByTeam2CaseDetails)
+  }
+
+  fun caseDetailsResponseIsInternalServerError(): HttpRequest {
+    val request = HttpRequest.request()
+      .withPath("/allocation-demand")
+      .withMethod(HttpMethod.POST.name())
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
+        .withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    )
+    return request
   }
 
   fun caseViewResponse(crn: String, convictionNumber: Int) {
