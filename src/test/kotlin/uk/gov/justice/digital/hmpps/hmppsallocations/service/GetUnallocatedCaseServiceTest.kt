@@ -60,7 +60,6 @@ internal class GetUnallocatedCaseServiceTest {
     )
 
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
-    every { mockRepo.existsByCrnAndConvictionNumber(crn, 1) } returns true
     coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(crn) } returns
       DeliusCaseAccess(crn, userRestricted = true, true)
 
