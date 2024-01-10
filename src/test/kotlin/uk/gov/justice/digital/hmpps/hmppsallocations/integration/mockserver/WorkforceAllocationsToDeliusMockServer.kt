@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
@@ -83,6 +84,23 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     workforceAllocationsToDelius.`when`(initialAppointmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON)
         .withBody(fullDeliusCaseDetailsResponse(*caseDetailsIntegrations)),
+    )
+  }
+
+  fun userHasAccessToAllCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
+    val request = HttpRequest.request()
+      .withPath("/users/limited-access")
+      .withMethod("POST")
+      .withBody(
+        jacksonObjectMapper()
+          .writeValueAsString(caseAccessList.map { it.first })
+      )
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(deliusUserAccessResponse(caseAccessList)),
     )
   }
 
