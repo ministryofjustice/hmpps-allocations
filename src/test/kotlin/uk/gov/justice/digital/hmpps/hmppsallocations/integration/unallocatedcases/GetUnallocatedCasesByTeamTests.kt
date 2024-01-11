@@ -2,7 +2,11 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import java.time.LocalDate
@@ -12,6 +16,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration
   ) {
     workforceAllocationsToDelius.userHasAccessToAllCases(listOf(
       Triple("J678910", false, false),
@@ -26,7 +31,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
 
-    workforceAllocationsToDelius.setupTeam1CaseDetails()
+    workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
@@ -114,7 +119,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get unallocated cases by team where probation-estate API is successful`() {
+  fun `Get unallocated cases by team where probation-estate API is successful and does not return LAO cases`() {
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
@@ -127,6 +132,32 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = true,
+    )
+  }
+
+  @Test
+  fun `Get unallocated cases by team where Delius gives back more than we expect and we filter out the extras`() {
+    val extraUnexpectedCaseFromDelius = CaseDetailsIntegration(
+      crn = "AAAAAAA",
+      eventNumber = "1",
+      initialAppointment = InitialAppointment(LocalDate.now(), Staff(Name("Beverley", "Rose", "Smith"))),
+      probationStatus = "NEW_TO_PROBATION",
+      probationStatusDescription = "New to probation",
+      communityPersonManager = null,
+    )
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+      probationEstateTeamsAndRegionsApiIsWorking = true,
+      extraUnexpectedCaseFromDelius,
     )
   }
 

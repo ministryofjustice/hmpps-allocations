@@ -118,7 +118,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun setupTeam1CaseDetails() {
+  fun setupTeam1CaseDetails(vararg extraCaseDetailsIntegrations: CaseDetailsIntegration) {
     deliusCaseDetailsResponse(
       currentMangedByTeam1CaseDetails,
       currentMangedByTeam2CaseDetails,
@@ -146,14 +146,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
       ),
-      CaseDetailsIntegration(
-        crn = "ZZZZZZZ",
-        eventNumber = "1",
-        initialAppointment = InitialAppointment(LocalDate.now(), Staff(Name("Beverley", "Rose", "Smith"))),
-        probationStatus = "NEW_TO_PROBATION",
-        probationStatusDescription = "New to probation",
-        communityPersonManager = null,
-      ),
+      *extraCaseDetailsIntegrations
     )
   }
 
