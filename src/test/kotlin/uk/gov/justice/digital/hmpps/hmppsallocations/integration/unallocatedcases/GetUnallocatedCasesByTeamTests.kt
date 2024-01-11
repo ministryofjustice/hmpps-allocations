@@ -18,7 +18,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       Triple("J680648", false, false),
       Triple("X4565764", false, false),
       Triple("J680660", false, false),
-      Triple("X6666222", false, false)
+      Triple("X6666222", false, false),
+      Triple("XXXXXXX", true, false),
+      Triple("ZZZZZZZ", false, true)
     ))
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
@@ -151,7 +153,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       Triple("J680648", false, false),
       Triple("X4565764", false, false),
       Triple("J680660", false, false),
-      Triple("X6666222", false, false)
+      Triple("X6666222", false, false),
+      Triple("XXXXXXX", true, false),
+      Triple("ZZZZZZZ", false, true)
     ))
     insertCases()
 
@@ -210,7 +214,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       Triple("J680648", false, false),
       Triple("X4565764", false, false),
       Triple("J680660", false, false),
-      Triple("X6666222", false, false)
+      Triple("X6666222", false, false),
+      Triple("XXXXXXX", true, false),
+      Triple("ZZZZZZZ", false, true)
     ))
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()

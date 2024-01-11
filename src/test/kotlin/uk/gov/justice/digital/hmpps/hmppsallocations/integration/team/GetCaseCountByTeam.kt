@@ -20,7 +20,7 @@ class GetCaseCountByTeam : IntegrationTestBase() {
       .jsonPath("$[0].teamCode")
       .isEqualTo(teamCode)
       .jsonPath("$.[0].caseCount")
-      .isEqualTo(5)
+      .isEqualTo(7)
   }
 
   @Test
@@ -36,7 +36,7 @@ class GetCaseCountByTeam : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.[?(@.teamCode=='$firstTeamCode')].caseCount")
-      .isEqualTo(5)
+      .isEqualTo(7)
       .jsonPath("$.[?(@.teamCode=='$secondTeamCode')].caseCount")
       .isEqualTo(1)
   }

@@ -146,6 +146,14 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
       ),
+      CaseDetailsIntegration(
+        crn = "ZZZZZZZ",
+        eventNumber = "1",
+        initialAppointment = InitialAppointment(LocalDate.now(), Staff(Name("Beverley", "Rose", "Smith"))),
+        probationStatus = "NEW_TO_PROBATION",
+        probationStatusDescription = "New to probation",
+        communityPersonManager = null,
+      ),
     )
   }
 
