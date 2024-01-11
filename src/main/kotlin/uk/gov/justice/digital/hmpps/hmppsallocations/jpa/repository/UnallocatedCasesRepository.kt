@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.projection.CaseCountByT
 interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Long> {
   fun existsByCrn(crn: String): Boolean
 
-  fun existsByCrnAndConvictionNumber(crn: String, convictionNumber: Int): Boolean
   fun findByCrn(crn: String): List<UnallocatedCaseEntity>
 
   fun findCaseByCrnAndConvictionNumber(crn: String, convictionNumber: Int): UnallocatedCaseEntity?

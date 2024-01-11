@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
@@ -86,6 +87,23 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
+  fun userHasAccessToAllCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
+    val request = HttpRequest.request()
+      .withPath("/users/limited-access")
+      .withMethod("POST")
+      .withBody(
+        jacksonObjectMapper()
+          .writeValueAsString(caseAccessList.map { it.first }),
+      )
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(deliusUserAccessResponse(caseAccessList)),
+    )
+  }
+
   fun userHasAccess(crn: String, restricted: Boolean = false, excluded: Boolean = false) {
     val request = HttpRequest.request()
       .withPath("/users/limited-access")
@@ -100,7 +118,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun setupTeam1CaseDetails() {
+  fun setupTeam1CaseDetails(vararg extraCaseDetailsIntegrations: CaseDetailsIntegration) {
     deliusCaseDetailsResponse(
       currentMangedByTeam1CaseDetails,
       currentMangedByTeam2CaseDetails,
@@ -128,6 +146,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
       ),
+      *extraCaseDetailsIntegrations,
     )
   }
 

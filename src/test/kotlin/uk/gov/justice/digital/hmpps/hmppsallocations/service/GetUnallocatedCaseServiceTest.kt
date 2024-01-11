@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -36,9 +37,10 @@ internal class GetUnallocatedCaseServiceTest {
       )
       every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
       every { mockRepo.existsById(id) } returns false
-      coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(crn) } returns
-        DeliusCaseAccess(crn, userRestricted = false, false)
-
+      coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(listOf(crn)) } returns
+        DeliusUserAccess(
+          access = listOf(DeliusCaseAccess(crn, userRestricted = false, false)),
+        )
       coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) } returns emptyFlow()
       val cases = GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient)
         .getAllByTeam("TM1").toList()
@@ -60,9 +62,10 @@ internal class GetUnallocatedCaseServiceTest {
     )
 
     every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
-    every { mockRepo.existsByCrnAndConvictionNumber(crn, 1) } returns true
-    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(crn) } returns
-      DeliusCaseAccess(crn, userRestricted = true, true)
+    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(listOf(crn)) } returns
+      DeliusUserAccess(
+        access = listOf(DeliusCaseAccess(crn, userRestricted = true, true)),
+      )
 
     coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(emptyList()) } returns emptyFlow()
 

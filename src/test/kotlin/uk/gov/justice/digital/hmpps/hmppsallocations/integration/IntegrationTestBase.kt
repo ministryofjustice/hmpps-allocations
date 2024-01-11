@@ -55,6 +55,26 @@ abstract class IntegrationTestBase {
     convictionNumber = 4,
   )
 
+  val laoCase1 = UnallocatedCaseEntity(
+    null,
+    "Joe Bloggs",
+    "XXXXXXX",
+    "C2",
+    providerCode = "",
+    teamCode = "TEAM1",
+    convictionNumber = 1,
+  )
+
+  val laoCase2 = UnallocatedCaseEntity(
+    null,
+    "Joe Bloggs",
+    "ZZZZZZZ",
+    "C2",
+    providerCode = "",
+    teamCode = "TEAM1",
+    convictionNumber = 1,
+  )
+
   fun insertCases() {
     repository.saveAll(
       listOf(
@@ -113,6 +133,8 @@ abstract class IntegrationTestBase {
           teamCode = "TEAM1",
           convictionNumber = 1,
         ),
+        laoCase1,
+        laoCase2,
       ),
     )
   }
