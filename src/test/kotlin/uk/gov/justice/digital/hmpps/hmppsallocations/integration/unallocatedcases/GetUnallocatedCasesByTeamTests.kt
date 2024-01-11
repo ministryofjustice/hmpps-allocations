@@ -16,17 +16,19 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
-    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration
+    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
-    workforceAllocationsToDelius.userHasAccessToAllCases(listOf(
-      Triple("J678910", false, false),
-      Triple("J680648", false, false),
-      Triple("X4565764", false, false),
-      Triple("J680660", false, false),
-      Triple("X6666222", false, false),
-      Triple("XXXXXXX", true, false),
-      Triple("ZZZZZZZ", false, true)
-    ))
+    workforceAllocationsToDelius.userHasAccessToAllCases(
+      listOf(
+        Triple("J678910", false, false),
+        Triple("J680648", false, false),
+        Triple("X4565764", false, false),
+        Triple("J680660", false, false),
+        Triple("X6666222", false, false),
+        Triple("XXXXXXX", true, false),
+        Triple("ZZZZZZZ", false, true),
+      ),
+    )
     insertCases()
     val initialAppointment = LocalDate.of(2022, 10, 11)
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
@@ -179,15 +181,17 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `return error when error on Delius API call`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(listOf(
-      Triple("J678910", false, false),
-      Triple("J680648", false, false),
-      Triple("X4565764", false, false),
-      Triple("J680660", false, false),
-      Triple("X6666222", false, false),
-      Triple("XXXXXXX", true, false),
-      Triple("ZZZZZZZ", false, true)
-    ))
+    workforceAllocationsToDelius.userHasAccessToAllCases(
+      listOf(
+        Triple("J678910", false, false),
+        Triple("J680648", false, false),
+        Triple("X4565764", false, false),
+        Triple("J680660", false, false),
+        Triple("X6666222", false, false),
+        Triple("XXXXXXX", true, false),
+        Triple("ZZZZZZZ", false, true),
+      ),
+    )
     insertCases()
 
     workforceAllocationsToDelius.errorDeliusCaseDetailsResponse()
@@ -240,15 +244,17 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(listOf(
-      Triple("J678910", false, false),
-      Triple("J680648", false, false),
-      Triple("X4565764", false, false),
-      Triple("J680660", false, false),
-      Triple("X6666222", false, false),
-      Triple("XXXXXXX", true, false),
-      Triple("ZZZZZZZ", false, true)
-    ))
+    workforceAllocationsToDelius.userHasAccessToAllCases(
+      listOf(
+        Triple("J678910", false, false),
+        Triple("J680648", false, false),
+        Triple("X4565764", false, false),
+        Triple("J680660", false, false),
+        Triple("X6666222", false, false),
+        Triple("XXXXXXX", true, false),
+        Triple("ZZZZZZZ", false, true),
+      ),
+    )
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
 

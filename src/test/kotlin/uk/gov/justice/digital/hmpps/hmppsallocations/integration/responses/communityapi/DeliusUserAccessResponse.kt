@@ -11,9 +11,9 @@ fun deliusUserAccessResponse(crn: String, restricted: Boolean, excluded: Boolean
 fun deliusUserAccessResponse(caseAccessList: List<Triple<String, Boolean, Boolean>>): String =
   """ {
     "access": [
-      ${caseAccessList.joinToString { 
-        deliusCaseAccess(it.first, it.second, it.third)
-      }}
+      ${caseAccessList.joinToString {
+    deliusCaseAccess(it.first, it.second, it.third)
+  }}
     ]
   }"""
 

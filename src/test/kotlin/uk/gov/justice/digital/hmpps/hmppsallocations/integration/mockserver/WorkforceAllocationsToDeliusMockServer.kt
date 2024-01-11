@@ -93,7 +93,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
       .withMethod("POST")
       .withBody(
         jacksonObjectMapper()
-          .writeValueAsString(caseAccessList.map { it.first })
+          .writeValueAsString(caseAccessList.map { it.first }),
       )
 
     workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
@@ -146,7 +146,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
       ),
-      *extraCaseDetailsIntegrations
+      *extraCaseDetailsIntegrations,
     )
   }
 

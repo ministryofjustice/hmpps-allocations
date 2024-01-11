@@ -134,7 +134,7 @@ abstract class IntegrationTestBase {
           convictionNumber = 1,
         ),
         laoCase1,
-        laoCase2
+        laoCase2,
       ),
     )
   }
