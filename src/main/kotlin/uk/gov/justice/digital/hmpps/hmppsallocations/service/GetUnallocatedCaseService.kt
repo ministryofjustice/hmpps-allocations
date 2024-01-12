@@ -111,42 +111,50 @@ class GetUnallocatedCaseService(
 
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
-    val unallocatedCasesUserAccess = workforceAllocationsToDeliusApiClient.getUserAccess(
-      crns = unallocatedCasesFromRepo.map { it.crn },
-    ).access
-
-    val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
-      val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
-      caseAccess?.userExcluded == false && !caseAccess.userRestricted
-    }
-
-    val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient
-      .getDeliusCaseDetailsCases(cases = unallocatedCases)
-      .filter { deliusUnallocatedCase ->
-        unallocatedCases
-          .any { deliusUnallocatedCase.crn == it.crn && deliusUnallocatedCase.event.number.toInt() == it.convictionNumber }
-      }
-      .toList()
-
-    if (unallocatedCasesFromDelius.isEmpty()) {
+    if (unallocatedCasesFromRepo.isEmpty()) {
       return emptyList()
     } else {
-      val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
-        .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
-          teamCode,
-          unallocatedCasesFromDelius,
-        ).map { it.crn }
+      val unallocatedCasesUserAccess = workforceAllocationsToDeliusApiClient.getUserAccess(
+        crns = unallocatedCasesFromRepo.map { it.crn },
+      ).access
 
-      return unallocatedCasesFromDelius
-        .map { deliusCaseDetail ->
-          val unallocatedCase =
-            unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-          UnallocatedCase.from(
-            unallocatedCase,
-            deliusCaseDetail,
-            outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
-          )
+      val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
+        val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
+        caseAccess?.userExcluded == false && !caseAccess.userRestricted
+      }
+
+      if (unallocatedCases.isEmpty()) {
+        return emptyList()
+      } else {
+        val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient
+          .getDeliusCaseDetailsCases(cases = unallocatedCases)
+          .filter { deliusUnallocatedCase ->
+            unallocatedCases
+              .any { deliusUnallocatedCase.crn == it.crn && deliusUnallocatedCase.event.number.toInt() == it.convictionNumber }
+          }
+          .toList()
+
+        if (unallocatedCasesFromDelius.isEmpty()) {
+          return emptyList()
+        } else {
+          val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+            .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
+              teamCode,
+              unallocatedCasesFromDelius,
+            ).map { it.crn }
+
+          return unallocatedCasesFromDelius
+            .map { deliusCaseDetail ->
+              val unallocatedCase =
+                unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+              UnallocatedCase.from(
+                unallocatedCase,
+                deliusCaseDetail,
+                outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+              )
+            }
         }
+      }
     }
   }
 

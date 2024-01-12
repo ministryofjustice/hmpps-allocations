@@ -138,6 +138,44 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `Get unallocated cases by team where all cases are LAO cases`() {
+    insertCases()
+    workforceAllocationsToDelius.userHasAccessToAllCases(
+      listOf(
+        Triple("J678910", true, true),
+        Triple("J680648", true, true),
+        Triple("X4565764", true, true),
+        Triple("J680660", true, true),
+        Triple("X6666222", true, true),
+        Triple("XXXXXXX", true, true),
+        Triple("ZZZZZZZ", true, true),
+      ),
+    )
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.length()")
+      .isEqualTo(0)
+  }
+
+  @Test
+  fun `Get unallocated cases by team where 0 cases in database for team`() {
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.length()")
+      .isEqualTo(0)
+  }
+
+  @Test
   fun `Get unallocated cases by team where Delius gives back more than we expect and we filter out the extras`() {
     val extraUnexpectedCaseFromDelius = CaseDetailsIntegration(
       crn = "AAAAAAA",
