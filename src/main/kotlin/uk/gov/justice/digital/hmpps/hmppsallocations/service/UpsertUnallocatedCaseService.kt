@@ -30,7 +30,11 @@ class UpsertUnallocatedCaseService(
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
-        if (activeEvents.isEmpty()) { log.debug("No active events found for crn $crn") } else { log.debug("Active events found for crn $crn: $activeEvents") }
+        if (activeEvents.isEmpty()) {
+          log.debug("No active events found for crn $crn")
+        } else {
+          log.debug("Active events found for crn $crn: $activeEvents")
+        }
         hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
           log.debug("hmpps tier api client: getting tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()

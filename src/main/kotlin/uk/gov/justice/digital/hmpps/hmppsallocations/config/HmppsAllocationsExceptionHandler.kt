@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -134,6 +135,18 @@ class HmppsAllocationsExceptionHandler {
         ErrorResponse(
           status = INTERNAL_SERVER_ERROR,
           userMessage = "Unexpected error: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(NoResourceFoundException::class)
+  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity
+      .status(NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = NOT_FOUND.value(),
           developerMessage = e.message,
         ),
       )
