@@ -44,9 +44,16 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
          "description": "${caseDetailsIntegration.probationStatusDescription}"
       }
   """ +
+  handoverDate(caseDetailsIntegration.handoverDate) +
   initialAppointment(caseDetailsIntegration.initialAppointment) +
   communityPersonManager(caseDetailsIntegration.communityPersonManager) +
   "}".trimIndent()
+
+private fun handoverDate(handoverDate: String?) = if (handoverDate != null) {
+  ""","handoverDate": "$handoverDate" """
+} else {
+  ""","handoverDate": null """
+}
 
 private fun initialAppointment(initialAppointment: InitialAppointment?): String {
   return initialAppointment?.let {

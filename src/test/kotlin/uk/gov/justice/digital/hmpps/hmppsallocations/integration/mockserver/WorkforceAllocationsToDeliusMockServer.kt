@@ -62,6 +62,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
+    handoverDate = null,
   )
 
   private val currentMangedByTeam2CaseDetails = CaseDetailsIntegration(
@@ -71,6 +72,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Joe", null, "Bloggs"), "SPO", "TEAM2"),
+    handoverDate = null,
   )
 
   companion object {
@@ -129,6 +131,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "PREVIOUSLY_MANAGED",
         probationStatusDescription = "Previously managed",
         communityPersonManager = CommunityPersonManager(Name("Janie", null, "Jones"), "PO", "TEAM1"),
+        handoverDate = null,
       ),
       CaseDetailsIntegration(
         crn = "X4565764",
@@ -137,6 +140,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "NEW_TO_PROBATION",
         probationStatusDescription = "New to probation",
         communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
+        handoverDate = null,
       ),
       CaseDetailsIntegration(
         crn = "J680660",
@@ -145,6 +149,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "PREVIOUSLY_MANAGED",
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
+        handoverDate = null,
       ),
       *extraCaseDetailsIntegrations,
     )

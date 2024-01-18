@@ -165,6 +165,7 @@ data class DeliusCaseDetail(
   val probationStatus: ProbationStatus,
   val communityPersonManager: CommunityPersonManager?,
   val type: String,
+  val handoverDate: LocalDate?,
 )
 
 data class Event(val number: String)
