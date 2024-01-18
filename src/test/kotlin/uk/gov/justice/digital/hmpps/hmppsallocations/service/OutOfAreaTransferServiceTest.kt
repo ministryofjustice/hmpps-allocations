@@ -114,6 +114,7 @@ internal class OutOfAreaTransferServiceTest {
         teamCode = communityPersonManagerTeamCode,
       ),
       type = "",
+      handoverDate = mockk(),
     )
   }
 

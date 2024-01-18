@@ -139,6 +139,10 @@ abstract class IntegrationTestBase {
     )
   }
 
+  fun insertCase(unallocatedCase: UnallocatedCaseEntity) {
+    repository.save(unallocatedCase)
+  }
+
   @BeforeEach
   fun `clear queues and database`() {
     repository.deleteAll()

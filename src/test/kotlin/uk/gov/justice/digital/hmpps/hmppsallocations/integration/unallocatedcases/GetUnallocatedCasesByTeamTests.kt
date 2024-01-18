@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -74,6 +75,8 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].outOfAreaTransfer")
       .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].handoverDate")
+      .isEqualTo(null)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].sentenceDate")
       .isEqualTo(firstSentenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'X6666222')].initialAppointment.staff.name.forename")
@@ -184,6 +187,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       probationStatus = "NEW_TO_PROBATION",
       probationStatusDescription = "New to probation",
       communityPersonManager = null,
+      handoverDate = null,
     )
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
@@ -317,5 +321,71 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].sentenceLength")
       .isEqualTo("5 Weeks")
+  }
+
+  @Test
+  fun `Get unallocated cases which includes a custody-to-community case with a handover-date`() {
+    val handoverDate = "2024-12-01"
+    insertCases()
+
+    // insert extra C2C case to DB
+    val c2cCaseCrn = "AB77711"
+    insertCase(
+      unallocatedCase = UnallocatedCaseEntity(
+        id = null,
+        name = "Donald Duck",
+        crn = c2cCaseCrn,
+        tier = "A1",
+        providerCode = "",
+        teamCode = "TEAM1",
+        convictionNumber = 2,
+      ),
+    )
+
+    // mock Delius allocation-demand response (inc. c2c case) + LAO response (i.e. user access stuff)
+    val c2cCase = CaseDetailsIntegration(
+      crn = c2cCaseCrn,
+      eventNumber = "2",
+      initialAppointment = null,
+      probationStatus = "PREVIOUSLY_MANAGED",
+      probationStatusDescription = "Previously managed",
+      communityPersonManager = null,
+      handoverDate = handoverDate,
+    )
+    workforceAllocationsToDelius.setupTeam1CaseDetails(c2cCase)
+    workforceAllocationsToDelius.userHasAccessToAllCases(
+      listOf(
+        Triple("J678910", false, false),
+        Triple("J680648", false, false),
+        Triple("X4565764", false, false),
+        Triple("J680660", false, false),
+        Triple("X6666222", false, false),
+        Triple("XXXXXXX", true, false),
+        Triple("ZZZZZZZ", false, true),
+        Triple(c2cCaseCrn, false, false),
+      ),
+    )
+
+    // mock estate api call for out of areas related functionality
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'AB77711')].handoverDate")
+      .isEqualTo(handoverDate)
   }
 }

@@ -10,4 +10,5 @@ data class CaseDetailsIntegration(
   val probationStatus: String,
   val probationStatusDescription: String,
   val communityPersonManager: CommunityPersonManager?,
+  val handoverDate: String?,
 )
