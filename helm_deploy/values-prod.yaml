@@ -22,6 +22,7 @@ generic-service:
   serviceAccountName: workforce-management
 
 generic-prometheus-alerts:
+  alertSeverity: workforce-management-prod-alerts
   sqsOldestAlertQueueNames:
     - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue"
     - "manage-a-workforce-production-hmpps_allocation_domain_events_queue"
