@@ -42,4 +42,3 @@ generic-prometheus-alerts:
       HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_QUEUE_NAME: "sqs_queue_name"
     hmpps-allocations-offender-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME: "sqs_queue_name"
-
