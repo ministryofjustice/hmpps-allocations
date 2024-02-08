@@ -31,3 +31,6 @@ generic-service:
       HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME: "sqs_queue_name"
   scheduledDowntime:
     enabled: true
+
+generic-prometheus-alerts:
+  businessHoursOnly: true
