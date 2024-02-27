@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
@@ -16,10 +17,18 @@ class HmppsTierApiClient(private val webClient: WebClient) {
     .awaitExchangeOrNull { response ->
       when (response.statusCode()) {
         HttpStatus.OK -> response.awaitBody<TierDto>()
-        HttpStatus.NOT_FOUND -> null
+        HttpStatus.NOT_FOUND ->
+          {
+            log.debug("Tier not found for CRN $crn")
+            null
+          }
         else -> throw response.createExceptionAndAwait()
       }
     }?.tierScore
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 }
 private data class TierDto @JsonCreator constructor(
   @JsonProperty("tierScore")
