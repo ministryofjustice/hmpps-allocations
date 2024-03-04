@@ -34,14 +34,14 @@ class UpsertUnallocatedCaseService(
           log.debug("No active events found for crn $crn")
         } else {
           log.debug("Active events found for crn $crn: $activeEvents")
+          hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
+            log.debug("hmpps tier api client: getting tier for crn: $crn")
+            val name = unallocatedEvents.name.getCombinedName()
+            saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+            updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          }
         }
-        hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-          log.debug("hmpps tier api client: getting tier for crn: $crn")
-          val name = unallocatedEvents.name.getCombinedName()
-          saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
-          deleteOldEvents(storedUnallocatedEvents, activeEvents)
-        }
+        deleteOldEvents(storedUnallocatedEvents, activeEvents)
       }
     } ?: deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
