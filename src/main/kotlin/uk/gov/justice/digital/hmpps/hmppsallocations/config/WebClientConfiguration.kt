@@ -94,7 +94,7 @@ class WebClientConfiguration(
       .build()
   }
 
-  private fun getConnectionProvider() : ConnectionProvider {
+  private fun getConnectionProvider(): ConnectionProvider {
     return ConnectionProvider.builder("fixed")
       .maxConnections(500)
       .maxIdleTime(Duration.ofSeconds(20))
