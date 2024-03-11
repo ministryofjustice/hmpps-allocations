@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -15,16 +16,18 @@ import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
+class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient, private val maxRetries: Long = 3) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -41,6 +44,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .awaitExchange { response ->
         when (response.statusCode()) {
           HttpStatus.OK -> response.awaitBody()
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono<DeliusUserAccess>().block()!!
           else -> throw response.createExceptionAndAwait()
         }
       }
@@ -83,7 +87,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .get()
       .uri("/offenders/$crn/documents")
       .retrieve()
-      .bodyToFlow()
+      .bodyToFlow<Document>()
   }
 
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
@@ -92,6 +96,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("/offenders/$crn/documents/$documentId")
       .retrieve()
       .toEntity(Resource::class.java)
+      .retry(maxRetries)
   }
 
   fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
@@ -99,24 +104,35 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .get()
       .uri("/allocation-demand/$crn/$convictionNumber/case-view")
       .retrieve()
-      .bodyToMono()
+      .bodyToMono<DeliusCaseView>()
+      .retry(maxRetries)
   }
 
-  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
-    return webClient
+  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord =
+    webClient
       .get()
       .uri("/allocation-demand/$crn/$excludeConvictionNumber/probation-record")
-      .retrieve()
-      .awaitBody()
-  }
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody()
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono<DeliusProbationRecord>().retry(maxRetries).block()
+          else -> throw response.createExceptionAndAwait()
+        }
+      }!!
 
-  suspend fun getDeliusRisk(crn: String): DeliusRisk {
-    return webClient
+  suspend fun getDeliusRisk(crn: String): DeliusRisk =
+    webClient
       .get()
       .uri("/allocation-demand/$crn/risk")
-      .retrieve()
-      .awaitBody()
-  }
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody()
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono<DeliusRisk>()
+          else -> throw response.createExceptionAndAwait()
+      }
+      .retry(maxRetries)
+      .onErrorResume { Mono.empty() }.awaitSingleOrNull()
+}!!
 
   suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? =
     webClient
@@ -127,6 +143,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           HttpStatus.OK -> response.awaitBody()
           HttpStatus.NOT_FOUND -> null
           HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono<UnallocatedEvents>().retry(maxRetries).block()
           else -> throw response.createExceptionAndAwait()
         }
       }
@@ -135,8 +152,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     webClient
       .get()
       .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
-      .retrieve()
-      .awaitBody()
+      .awaitExchangeOrNull { response ->
+        when (response.statusCode()) {
+          HttpStatus.OK -> response.awaitBody()
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono<PersonOnProbationStaffDetailsResponse>().retry(maxRetries).block()
+          else -> throw response.createExceptionAndAwait()
+        }
+      }!!
 
   suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? =
     webClient
@@ -147,6 +169,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           HttpStatus.OK -> response.awaitBody()
           HttpStatus.NOT_FOUND -> null
           HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access allocated team for crn: $crn, event number: $convictionNumber")
+          HttpStatus.INTERNAL_SERVER_ERROR -> response.bodyToMono(AllocatedEvent::class.java).retry(maxRetries).block()
           else -> throw response.createExceptionAndAwait()
         }
       }

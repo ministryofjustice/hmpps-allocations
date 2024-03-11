@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder
@@ -12,12 +11,9 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import java.time.Duration
 
 @Configuration
 class WebClientConfiguration(
@@ -87,18 +83,8 @@ class WebClientConfiguration(
   ): WebClient {
     val oauth2Client = ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId(registrationId)
-    val clientConnector = ReactorClientHttpConnector(HttpClient.create(getConnectionProvider()))
     return builder.baseUrl(rootUri)
-      .clientConnector(clientConnector)
       .filter(oauth2Client)
       .build()
-  }
-
-  private fun getConnectionProvider(): ConnectionProvider {
-    return ConnectionProvider.builder("fixed")
-      .maxConnections(500)
-      .maxIdleTime(Duration.ofSeconds(20))
-      .maxLifeTime(Duration.ofSeconds(60))
-      .pendingAcquireTimeout(Duration.ofSeconds(120)).build()
   }
 }
