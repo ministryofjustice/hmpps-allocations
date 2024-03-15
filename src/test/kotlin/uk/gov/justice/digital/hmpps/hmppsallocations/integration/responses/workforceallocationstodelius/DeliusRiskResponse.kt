@@ -12,12 +12,18 @@ fun deliusRiskResponse() = """
     {
       "description": "ALT Under MAPPA Arrangements",
       "startDate": "2021-08-30",
-      "notes": "Some Notes"
+      "notes": "Some Notes",
+      "flag": {
+        "description": "MAPPA Risk"
+        }
     },
     {
       "description": "Suicide/self-harm",
       "startDate": "2021-08-30",
-      "notes": "Some Notes"
+      "notes": "Some Notes",
+      "flag": {
+        "description": "RoSH"
+        }
     }
   ],
   "inactiveRegistrations": [
@@ -25,7 +31,10 @@ fun deliusRiskResponse() = """
       "description": "Child Protection",
       "startDate": "2021-05-20",
       "endDate": "2021-08-30",
-      "notes": "Some Notes."
+      "notes": "Some Notes.",
+      "flag": {
+        "description": "Child Protection Flag"
+        }
     }
   ],
   "ogrs": {

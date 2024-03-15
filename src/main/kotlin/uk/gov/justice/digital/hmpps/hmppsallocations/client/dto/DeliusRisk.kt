@@ -17,9 +17,12 @@ data class Registrations constructor(
   val startDate: LocalDate,
   val endDate: LocalDate?,
   val notes: String?,
+  val flag: Flag,
 )
 
 data class Ogrs constructor(
   val lastUpdatedDate: LocalDate,
   val score: BigInteger,
 )
+
+data class Flag constructor(val description: String)
