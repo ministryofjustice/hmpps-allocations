@@ -59,6 +59,7 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val endDate: LocalDate?,
   @Schema(description = "Flag", example = "RoSH")
+  @JsonFormat(shape = JsonFormat.Shape.OBJECT)
   val flag: Flag,
 ) {
   companion object {
