@@ -60,14 +60,20 @@ dependencies {
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 }
 
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
-
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
       jvmTarget = "21"
+    }
+    compileKotlin {
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_21.toString()
+      }
+    }
+    compileTestKotlin {
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_21.toString()
+      }
     }
   }
   getByName("check") {
