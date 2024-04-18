@@ -34,7 +34,7 @@ allOpen {
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.2.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.2")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
 
@@ -60,14 +60,20 @@ dependencies {
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 }
 
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
-}
-
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "19"
+      jvmTarget = "21"
+    }
+    compileKotlin {
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_21.toString()
+      }
+    }
+    compileTestKotlin {
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_21.toString()
+      }
     }
   }
   getByName("check") {
