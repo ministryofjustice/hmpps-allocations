@@ -1,4 +1,4 @@
-{{- if .Values.refresh_environment }}
+{{- if .Values.refresh_environment -}}
 ---
 apiVersion: v1
 kind: ConfigMap
