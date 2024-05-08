@@ -3,7 +3,6 @@
 
 queue_cronjob_schedule: "*/15 7-21 * * 1-5"
 refresh_environment: "ALWAYS"
-refresh_cronjob_schedule: "*/30 21 * * 1,2,3,4,5"
 
 generic-service:
 

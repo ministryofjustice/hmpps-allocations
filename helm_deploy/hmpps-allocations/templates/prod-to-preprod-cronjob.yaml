@@ -39,7 +39,7 @@ kind: CronJob
 metadata:
   name: hmpps-hmpps-allocations-refresh-cronjob
 spec:
-  schedule: {{ .Values.refresh_cronjob_schedule }}
+  schedule: "*/30 21 * * 1,2,3,4,5"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
