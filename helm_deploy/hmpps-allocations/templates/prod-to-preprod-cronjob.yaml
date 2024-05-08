@@ -86,22 +86,22 @@ spec:
                 - name: DB_NAME_PREPROD
                   valueFrom:
                     secretKeyRef:
-                      name: rds-live-instance-output
+                      name: rds-allocation-instance-output
                       key: database_name
                 - name: DB_USER_PREPROD
                   valueFrom:
                     secretKeyRef:
-                      name: rds-live-instance-output
+                      name: rds-allocation-instance-output
                       key: database_username
                 - name: DB_PASS_PREPROD
                   valueFrom:
                     secretKeyRef:
-                      name: rds-live-instance-output
+                      name: rds-allocation-instance-output
                       key: database_password
                 - name: DB_HOST_PREPROD
                   valueFrom:
                     secretKeyRef:
-                      name: rds-live-instance-output
+                      name: rds-allocation-instance-output
                       key: rds_instance_address
           restartPolicy: "Never"
           volumes:
