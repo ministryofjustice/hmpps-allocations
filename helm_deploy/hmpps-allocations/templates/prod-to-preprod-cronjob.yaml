@@ -17,20 +17,19 @@ data:
     # Dump production data
     pg_dump --host="$DB_HOST" \
       --username="$DB_USER" \
-      --format=custom \
+      --on-conflict-do-nothing \
+      --column-inserts \
+      --data-only \
       --no-privileges \
       --verbose \
+      --table public.unallocated_cases \
       --file=/tmp/db.dump \
       "$DB_NAME"
 
     # Restore production data to preprod
     pg_restore --host="$DB_HOST_PREPROD" \
       --username="$DB_USER_PREPROD" \
-      --clean \
-      --no-owner \
-      --verbose \
-      --dbname="$DB_NAME_PREPROD" \
-      /tmp/db.dump
+      "$DB_NAME_PREPROD" < /tmp/db.dump
 
     rm -v /tmp/db.dump
 ---
@@ -39,7 +38,7 @@ kind: CronJob
 metadata:
   name: hmpps-hmpps-allocations-refresh-cronjob
 spec:
-  schedule: "*/30 21 * * 1,2,3,4,5"
+  schedule: "*/30 21 30 2 *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
