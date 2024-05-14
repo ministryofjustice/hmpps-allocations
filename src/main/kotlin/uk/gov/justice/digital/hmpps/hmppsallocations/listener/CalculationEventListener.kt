@@ -10,13 +10,11 @@ import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Component
 class CalculationEventListener(
   private val calculationTierService: TierCalculationService,
   private val objectMapper: ObjectMapper,
-  private val hmppsQueueService: HmppsQueueService,
 ) {
 
   @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -29,8 +27,7 @@ class CalculationEventListener(
 
   private fun readMessage(wrapper: String?): CalculationEventData {
     val message = objectMapper.readValue(wrapper, QueueMessage::class.java)
-    val queueName = hmppsQueueService.findByQueueName("tiercalculationqueue")?.queueName
-    log.info("Received message from SQS queue {} with messageId:{}", queueName, message.messageId)
+    log.info("Received message from SQS queue tiercalculationqueue with messageId:{}", message.messageId)
     return objectMapper.readValue(message.message, CalculationEventData::class.java)
   }
 
@@ -51,6 +48,4 @@ class CalculationEventListener(
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   data class QueueMessage(@JsonProperty("Message") val message: String, @JsonProperty("MessageId") val messageId: String?)
-
-  // data class Message(@JsonProperty("Message") val message: String)
 }
