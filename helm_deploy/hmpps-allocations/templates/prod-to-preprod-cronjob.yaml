@@ -36,7 +36,7 @@ data:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: hmpps-hmpps-allocations-refresh-cronjob
+  name: hmpps-allocations-refresh-cronjob
 spec:
   schedule: "*/30 21 30 2 *"
   concurrencyPolicy: Forbid
