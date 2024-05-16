@@ -11,13 +11,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
-  private val hmppsQueueService: HmppsQueueService,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -36,8 +34,8 @@ class OffenderEventListener(
 
   private fun getCrn(rawMessage: String): String {
     val message = objectMapper.readValue(rawMessage, QueueMessage::class.java)
-    val queueId = hmppsQueueService.findByQueueName("hmppsoffenderqueue")?.id
-    log.info("Received message from SQS queue {} with messageId: {}", queueId, message.messageId)
+    val queueName = System.getenv("HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_QUEUE_NAME") ?: "Queue Name Not Found"
+    log.info("Received message from SQS queue {} with messageId: {}", queueName, message.messageId)
     return objectMapper.readValue(message.message, HmppsOffenderEvent::class.java).crn
   }
 
