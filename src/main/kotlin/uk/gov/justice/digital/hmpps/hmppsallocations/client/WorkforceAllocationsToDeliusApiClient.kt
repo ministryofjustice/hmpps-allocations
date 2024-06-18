@@ -154,12 +154,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
-data class CaseIdentifier(var crn: String, var eventNumber: String)
+data class CaseIdentifier(val crn: String, val eventNumber: String)
 
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
 
 data class DeliusCaseDetail(
-  var crn: String,
+  val crn: String,
   val name: Name,
   val sentence: Sentence,
   val initialAppointment: InitialAppointment?,
@@ -170,11 +170,11 @@ data class DeliusCaseDetail(
   val handoverDate: LocalDate?,
 )
 
-data class Event(var number: String)
+data class Event(val number: String)
 
 data class ProbationStatus(
-  var status: String,
-  var description: String,
+  val status: String,
+  val description: String,
 )
 
 data class InitialAppointment(val date: LocalDate, val staff: Staff)
@@ -193,12 +193,12 @@ data class Name(var forename: String, var middleName: String?, var surname: Stri
   fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let { "$middleName " } ?: ""}$surname"
 }
 
-data class CommunityPersonManager(val name: Name, var grade: String?, var teamCode: String?)
+data class CommunityPersonManager(val name: Name, val grade: String?, val teamCode: String?)
 
-data class Sentence(val date: LocalDate, var length: String)
+data class Sentence(val date: LocalDate, val length: String)
 
 data class Document @JsonCreator constructor(
-  var id: String?,
+  val id: String?,
   var name: String,
   val dateCreated: ZonedDateTime?,
   val sensitive: Boolean,
@@ -210,7 +210,7 @@ data class Document @JsonCreator constructor(
 }
 
 data class DocumentRelatedTo @JsonCreator constructor(
-  var type: String,
+  val type: String,
   var name: String,
   var description: String,
   val event: DocumentEvent?,
@@ -222,13 +222,13 @@ data class DocumentRelatedTo @JsonCreator constructor(
 }
 
 data class DocumentEvent @JsonCreator constructor(
-  var eventType: String,
-  var eventNumber: String,
-  var mainOffence: String,
+  val eventType: String,
+  val eventNumber: String,
+  val mainOffence: String,
 )
 
 data class DeliusCaseAccess(
-  var crn: String,
+  val crn: String,
   val userRestricted: Boolean,
   val userExcluded: Boolean,
 )
@@ -238,5 +238,5 @@ data class DeliusUserAccess(
 )
 
 data class AllocatedEvent @JsonCreator constructor(
-  var teamCode: String,
+  val teamCode: String,
 )
