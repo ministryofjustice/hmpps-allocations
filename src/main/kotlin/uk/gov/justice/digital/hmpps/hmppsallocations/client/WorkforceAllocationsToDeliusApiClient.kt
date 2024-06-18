@@ -3,7 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import org.apache.commons.text.StringEscapeUtils
+import org.owasp.html.PolicyFactory
+import org.owasp.html.Sanitizers
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -28,6 +29,7 @@ import java.time.ZonedDateTime
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val policy: PolicyFactory = Sanitizers.FORMATTING.and(Sanitizers.LINKS)
   }
 
   suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess {
@@ -186,9 +188,9 @@ data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 
 data class Name(var forename: String, var middleName: String?, var surname: String) {
   init {
-    forename = StringEscapeUtils.ESCAPE_HTML4.translate(forename)
-    middleName = StringEscapeUtils.ESCAPE_HTML4.translate(middleName)
-    surname = StringEscapeUtils.ESCAPE_HTML4.translate(surname)
+    forename = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(forename)
+    middleName = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(middleName)
+    surname = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(surname)
   }
   fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let { "$middleName " } ?: ""}$surname"
 }
@@ -205,7 +207,7 @@ data class Document @JsonCreator constructor(
   val relatedTo: DocumentRelatedTo,
 ) {
   init {
-    name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
+    name = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(name)
   }
 }
 
@@ -216,8 +218,8 @@ data class DocumentRelatedTo @JsonCreator constructor(
   val event: DocumentEvent?,
 ) {
   init {
-    name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
-    description = StringEscapeUtils.ESCAPE_HTML4.translate(description)
+    name = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(name)
+    description = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(description)
   }
 }
 
