@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client.dto
 
-import org.apache.commons.text.StringEscapeUtils
+import org.owasp.html.Sanitizers
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import java.math.BigInteger
 import java.time.LocalDate
@@ -21,8 +21,8 @@ data class Registrations constructor(
   val flag: Flag,
 ) {
   init {
-    description = StringEscapeUtils.ESCAPE_HTML4.translate(description)
-    notes = StringEscapeUtils.ESCAPE_HTML4.translate(notes)
+    description = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(description)
+    notes = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(notes)
   }
 }
 
