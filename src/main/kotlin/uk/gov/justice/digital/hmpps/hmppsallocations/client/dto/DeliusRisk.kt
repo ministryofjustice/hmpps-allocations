@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client.dto
 
+import org.apache.commons.text.StringEscapeUtils
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import java.math.BigInteger
 import java.time.LocalDate
@@ -13,12 +14,16 @@ data class DeliusRisk constructor(
 )
 
 data class Registrations constructor(
-  val description: String,
+  var description: String,
   val startDate: LocalDate,
   val endDate: LocalDate?,
-  val notes: String?,
+  var notes: String?,
   val flag: Flag,
-)
+) {
+  init {
+    description = StringEscapeUtils.ESCAPE_HTML4.translate(description)
+    notes = StringEscapeUtils.ESCAPE_HTML4.translate(notes)
+}}
 
 data class Ogrs constructor(
   val lastUpdatedDate: LocalDate,

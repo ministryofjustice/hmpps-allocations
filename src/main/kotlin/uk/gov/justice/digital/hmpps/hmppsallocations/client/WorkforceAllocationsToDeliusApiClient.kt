@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -153,27 +154,29 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
-data class CaseIdentifier(val crn: String, val eventNumber: String)
+data class CaseIdentifier(var crn: String, var eventNumber: String)
+
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
 
 data class DeliusCaseDetail(
-  val crn: String,
+  var crn: String,
   val name: Name,
   val sentence: Sentence,
   val initialAppointment: InitialAppointment?,
   val event: Event,
   val probationStatus: ProbationStatus,
   val communityPersonManager: CommunityPersonManager?,
-  val type: String,
+  var type: String,
   val handoverDate: LocalDate?,
 )
 
-data class Event(val number: String)
+data class Event(var number: String)
 
 data class ProbationStatus(
-  val status: String,
-  val description: String,
+  var status: String,
+  var description: String,
 )
+
 data class InitialAppointment(val date: LocalDate, val staff: Staff)
 
 data class Staff @JsonCreator constructor(
@@ -181,37 +184,51 @@ data class Staff @JsonCreator constructor(
 )
 data class DeliusCaseDetails(val cases: List<DeliusCaseDetail>)
 
-data class Name(val forename: String, val middleName: String?, val surname: String) {
+data class Name(var forename: String, var middleName: String?, var surname: String) {
+  init {
+    forename = StringEscapeUtils.ESCAPE_HTML4.translate(forename)
+    middleName = StringEscapeUtils.ESCAPE_HTML4.translate(middleName)
+    surname = StringEscapeUtils.ESCAPE_HTML4.translate(surname)
+  }
   fun getCombinedName() = "$forename ${middleName?.takeUnless { it.isBlank() }?.let { "$middleName " } ?: ""}$surname"
 }
 
-data class CommunityPersonManager(val name: Name, val grade: String?, val teamCode: String?)
+data class CommunityPersonManager(val name: Name, var grade: String?, var teamCode: String?)
 
-data class Sentence(val date: LocalDate, val length: String)
+data class Sentence(val date: LocalDate, var length: String)
 
 data class Document @JsonCreator constructor(
-  val id: String?,
-  val name: String,
+  var id: String?,
+  var name: String,
   val dateCreated: ZonedDateTime?,
   val sensitive: Boolean,
   val relatedTo: DocumentRelatedTo,
-)
+) {
+  init {
+      name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
+  }
+}
 
 data class DocumentRelatedTo @JsonCreator constructor(
-  val type: String,
-  val name: String,
-  val description: String,
+  var type: String,
+  var name: String,
+  var description: String,
   val event: DocumentEvent?,
-)
+) {
+  init {
+    name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
+    description = StringEscapeUtils.ESCAPE_HTML4.translate(description)
+  }
+}
 
 data class DocumentEvent @JsonCreator constructor(
-  val eventType: String,
-  val eventNumber: String,
-  val mainOffence: String,
+  var eventType: String,
+  var eventNumber: String,
+  var mainOffence: String,
 )
 
 data class DeliusCaseAccess(
-  val crn: String,
+  var crn: String,
   val userRestricted: Boolean,
   val userExcluded: Boolean,
 )
@@ -221,5 +238,5 @@ data class DeliusUserAccess(
 )
 
 data class AllocatedEvent @JsonCreator constructor(
-  val teamCode: String,
+  var teamCode: String,
 )
