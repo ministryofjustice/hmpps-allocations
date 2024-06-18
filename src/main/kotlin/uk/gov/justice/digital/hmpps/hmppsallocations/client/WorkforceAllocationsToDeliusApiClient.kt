@@ -205,7 +205,7 @@ data class Document @JsonCreator constructor(
   val relatedTo: DocumentRelatedTo,
 ) {
   init {
-      name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
+    name = StringEscapeUtils.ESCAPE_HTML4.translate(name)
   }
 }
 

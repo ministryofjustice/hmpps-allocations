@@ -23,7 +23,8 @@ data class Registrations constructor(
   init {
     description = StringEscapeUtils.ESCAPE_HTML4.translate(description)
     notes = StringEscapeUtils.ESCAPE_HTML4.translate(notes)
-}}
+  }
+}
 
 data class Ogrs constructor(
   val lastUpdatedDate: LocalDate,

@@ -91,4 +91,3 @@ detekt {
   config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
-
