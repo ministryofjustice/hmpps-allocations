@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import com.fasterxml.jackson.annotation.JsonCreator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.owasp.html.PolicyFactory
 import org.owasp.html.Sanitizers
 import org.slf4j.LoggerFactory
@@ -12,19 +13,23 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
-import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
+
+private const val NUMBER_OF_RETRIES = 3L
+private const val RETRY_INTERVAL = 3L
 
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
@@ -125,14 +130,22 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     webClient
       .get()
       .uri("/allocation-demand/$crn/unallocated-events")
-      .awaitExchangeOrNull { response ->
-        when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody()
-          HttpStatus.NOT_FOUND -> null
-          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access offender details for $crn")
-          else -> throw response.createExceptionAndAwait()
-        }
+      .retrieve()
+      .onStatus({ status -> status.is5xxServerError }) {
+        Mono.error(AllocationsServerError("Internal server error"))
       }
+      .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+        Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+      }
+      .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+        Mono.empty()
+      }
+      .bodyToMono(UnallocatedEvents::class.java)
+      .retryWhen(
+        Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+          .filter { it is AllocationsServerError },
+      )
+      .awaitSingleOrNull()
 
   suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse =
     webClient
@@ -145,17 +158,25 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     webClient
       .get()
       .uri("allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber")
-      .awaitExchangeOrNull { response ->
-        when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody()
-          HttpStatus.NOT_FOUND -> null
-          HttpStatus.FORBIDDEN -> throw ForbiddenOffenderError("Unable to access allocated team for crn: $crn, event number: $convictionNumber")
-          else -> throw response.createExceptionAndAwait()
-        }
+      .retrieve()
+      .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+        Mono.empty()
       }
+      .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+        Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+      }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
+        Mono.error(AllocationsServerError("Internal server error"))
+      }
+      .bodyToMono(AllocatedEvent::class.java)
+      .retryWhen(
+        Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+          .filter { it is AllocationsServerError },
+      )
+      .awaitSingleOrNull()
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
+class AllocationsServerError(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 
 data class GetCaseDetails(val cases: List<CaseIdentifier>)
