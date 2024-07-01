@@ -163,7 +163,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         Mono.empty()
       }
       .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
-        Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+        Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
       }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
         Mono.error(AllocationsServerError("Internal server error"))
       }
