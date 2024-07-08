@@ -32,7 +32,7 @@ jobs:
           command:
             BRANCH_NAME=<< pipeline.git.branch >>
             PATTERN="^(main|epic.*)$"
-            if [[$BRANCH_NAME =~ $PATTERN ]]; then        
+            if [[ $BRANCH_NAME =~ $PATTERN ]]; then        
               ./gradlew check
             fi
           steps:
