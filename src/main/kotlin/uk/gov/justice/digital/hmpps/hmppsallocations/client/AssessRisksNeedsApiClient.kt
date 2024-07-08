@@ -22,6 +22,7 @@ import java.math.BigDecimal
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   // test comment WFP-2608
+  // another test comment
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     return webClient
