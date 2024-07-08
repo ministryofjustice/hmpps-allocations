@@ -68,6 +68,13 @@ workflows:
               only:
                 - main
                 - /epic.*/
+      - request-dev-approval:
+          type: approval
+          filters:
+            branches:
+              only:
+                - main
+                - /epic.*/
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -83,6 +90,7 @@ workflows:
             - validate
             - build_docker
             - helm_lint
+            - request-dev-approval
       - request-preprod-approval:
           type: approval
           requires:
