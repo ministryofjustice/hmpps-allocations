@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
+  //test comment WFP-2608
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     return webClient
