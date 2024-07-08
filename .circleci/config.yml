@@ -34,7 +34,8 @@ jobs:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
           steps:
             - slack/notify:
                 event: fail
@@ -65,7 +66,8 @@ workflows:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -75,7 +77,8 @@ workflows:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
           requires:
             - validate
             - build_docker
@@ -91,7 +94,8 @@ workflows:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
           requires:
             - validate
             - build_docker
@@ -113,6 +117,10 @@ workflows:
             - hmpps-allocations-prod
           requires:
             - request-prod-approval
+          filters:
+            branches:
+              only:
+                - main
   security:
     triggers:
       - schedule:
@@ -120,7 +128,8 @@ workflows:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
@@ -143,7 +152,8 @@ workflows:
           filters:
             branches:
               only:
-                - \b(main|epic-\w+)\b
+                - main
+                - /^epic-.*s/
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
