@@ -34,6 +34,7 @@ jobs:
             PATTERN="^(main|epic.*)$"
             if [[$BRANCH_NAME =~ $PATTERN ]]; then        
               ./gradlew check
+            fi
           steps:
             - slack/notify:
                 event: fail
