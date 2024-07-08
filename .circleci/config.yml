@@ -70,6 +70,10 @@ workflows:
                 - /epic.*/
       - request-dev-approval:
           type: approval
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
           filters:
             branches:
               only:
@@ -87,9 +91,6 @@ workflows:
                 - main
                 - /epic.*/
           requires:
-            - validate
-            - build_docker
-            - helm_lint
             - request-dev-approval
       - request-preprod-approval:
           type: approval
