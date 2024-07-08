@@ -29,10 +29,12 @@ jobs:
           name: Wait for localstack to be ready
           command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
       - run:
-          command: ./gradlew check
-      - when:
-          condition:
-            equal: [ main, << pipeline.git.branch >> ]
+          command:
+            ./gradlew check
+          filters:
+            branches:
+              only:
+                - \b(main|epic-\w+)\b
           steps:
             - slack/notify:
                 event: fail
@@ -63,7 +65,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - \b(main|epic-\w+)\b
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -73,7 +75,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - \b(main|epic-\w+)\b
           requires:
             - validate
             - build_docker
@@ -93,7 +95,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - \b(main|epic-\w+)\b
           requires:
             - request-preprod-approval
       - request-prod-approval:
@@ -119,7 +121,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - \b(main|epic-\w+)\b
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
@@ -142,7 +144,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - \b(main|epic-\w+)\b
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
