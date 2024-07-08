@@ -83,6 +83,10 @@ workflows:
             - validate
             - build_docker
             - helm_lint
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -97,14 +101,11 @@ workflows:
                 - main
                 - /^epic-.*s/
           requires:
-            - validate
-            - build_docker
-            - helm_lint
+            - request-preprod-approval
       - request-prod-approval:
           type: approval
           requires:
             - deploy_preprod
-            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
