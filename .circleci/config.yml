@@ -35,7 +35,7 @@ jobs:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
           steps:
             - slack/notify:
                 event: fail
@@ -67,7 +67,18 @@ workflows:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
+      - request-dev-approval:
+          type: approval
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+          filters:
+            branches:
+              only:
+                - main
+                - /epic.*/
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -78,11 +89,9 @@ workflows:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
           requires:
-            - validate
-            - build_docker
-            - helm_lint
+            - request-dev-approval
       - request-preprod-approval:
           type: approval
           requires:
@@ -99,13 +108,17 @@ workflows:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
           requires:
             - request-preprod-approval
       - request-prod-approval:
           type: approval
           requires:
             - deploy_preprod
+          filters:
+            branches:
+              only:
+                - main
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
@@ -130,7 +143,7 @@ workflows:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
@@ -154,7 +167,7 @@ workflows:
             branches:
               only:
                 - main
-                - /^epic-.*s/
+                - /epic.*/
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
