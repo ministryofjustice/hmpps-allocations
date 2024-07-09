@@ -46,7 +46,7 @@ data class Offence constructor(
 
 data class Requirement constructor(
   val mainCategory: String,
-  val subCategory: String,
+  val subCategory: String?,
   val length: String,
 )
 
