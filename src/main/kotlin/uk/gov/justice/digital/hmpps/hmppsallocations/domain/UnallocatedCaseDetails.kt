@@ -167,7 +167,7 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
   @Schema(description = "Main Category", example = "Unpaid Work")
   val mainCategory: String,
   @Schema(description = "Sub Category", example = "Regular")
-  val subCategory: String,
+  val subCategory: String?,
   @Schema(description = "Length", example = "100")
   val length: String?,
 ) {
