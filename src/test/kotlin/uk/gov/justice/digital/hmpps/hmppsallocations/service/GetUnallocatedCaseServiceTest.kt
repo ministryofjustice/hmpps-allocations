@@ -20,7 +20,6 @@ internal class GetUnallocatedCaseServiceTest {
   private val mockWorkforceAllocationsToDeliusApiClientClient: WorkforceAllocationsToDeliusApiClient = mockk()
   private val mockRepo: UnallocatedCasesRepository = mockk()
   private val mockOutOfAreaTransferService: OutOfAreaTransferService = mockk()
-  private val mockListOfUnallocatedCaseEntity: List<UnallocatedCaseEntity> = mockk()
 
   @Test
   fun `must not return unallocated cases which get deleted during enrichment`() {
@@ -74,7 +73,7 @@ internal class GetUnallocatedCaseServiceTest {
       GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1")
         .toList()
 
-    verify(exactly = 0) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(mockListOfUnallocatedCaseEntity)}
+    verify(exactly = 0) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity))}
     assertEquals(0, cases.size)
   }
 }
