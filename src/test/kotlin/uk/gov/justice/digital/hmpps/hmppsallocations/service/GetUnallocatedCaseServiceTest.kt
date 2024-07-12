@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
-import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -73,7 +72,7 @@ internal class GetUnallocatedCaseServiceTest {
       GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient).getAllByTeam("TM1")
         .toList()
 
-    verify { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) wasNot Called }
+    verify(exactly = 0) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
     assertEquals(0, cases.size)
   }
 }
