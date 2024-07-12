@@ -29,10 +29,13 @@ jobs:
           name: Wait for localstack to be ready
           command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
       - run:
-          command: ./gradlew check
-      - when:
-          condition:
-            equal: [ main, << pipeline.git.branch >> ]
+          command:
+            ./gradlew check
+          filters:
+            branches:
+              only:
+                - main
+                - /epic.*/
           steps:
             - slack/notify:
                 event: fail
@@ -64,6 +67,18 @@ workflows:
             branches:
               only:
                 - main
+                - /epic.*/
+      - request-dev-approval:
+          type: approval
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+          filters:
+            branches:
+              only:
+                - main
+                - /epic.*/
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -74,10 +89,13 @@ workflows:
             branches:
               only:
                 - main
+                - /epic.*/
           requires:
-            - validate
-            - build_docker
-            - helm_lint
+            - request-dev-approval
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -90,15 +108,17 @@ workflows:
             branches:
               only:
                 - main
+                - /epic.*/
           requires:
-            - validate
-            - build_docker
-            - helm_lint
+            - request-preprod-approval
       - request-prod-approval:
           type: approval
           requires:
             - deploy_preprod
-            - deploy_dev
+          filters:
+            branches:
+              only:
+                - main
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
@@ -111,6 +131,10 @@ workflows:
             - hmpps-allocations-prod
           requires:
             - request-prod-approval
+          filters:
+            branches:
+              only:
+                - main
   security:
     triggers:
       - schedule:
@@ -119,6 +143,7 @@ workflows:
             branches:
               only:
                 - main
+                - /epic.*/
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
@@ -142,6 +167,7 @@ workflows:
             branches:
               only:
                 - main
+                - /epic.*/
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
