@@ -50,6 +50,7 @@ dependencies {
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
+  implementation("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.3")
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
