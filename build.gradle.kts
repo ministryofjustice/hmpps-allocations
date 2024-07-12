@@ -3,7 +3,7 @@ plugins {
   kotlin("plugin.spring") version "1.9.24"
   kotlin("plugin.jpa") version "1.9.24"
   id("io.gitlab.arturbosch.detekt") version "1.23.6"
-  id("org.jetbrains.kotlin.plugin.allopen") version "1.9.24"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
 }
 
 configurations {
