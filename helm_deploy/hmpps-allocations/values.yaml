@@ -1,7 +1,7 @@
 generic-service:
   nameOverride: hmpps-allocations
 
-  replicaCount: 2
+  replicaCount: 3
 
   image:
     repository: quay.io/hmpps/hmpps-allocations
@@ -19,7 +19,7 @@ generic-service:
       nginx.ingress.kubernetes.io/custom-http-errors: "418"
       external-dns.alpha.kubernetes.io/aws-weight: "100"
       nginx.ingress.kubernetes.io/server-snippet: |
-        server_tokens off;
+        server_tokens of
         location /crn/reprocess {
           deny all;
           return 401;
