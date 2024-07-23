@@ -1,24 +1,32 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEmpty
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.time.delay
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchangeOrNull
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
-import org.springframework.web.reactive.function.client.exchangeToFlow
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
+import java.time.Duration
+
+private const val RETRY_ATTEMPTS = 3L
+
+private const val RETRY_DELAY = 1L
+
+private const val NOT_FOUND = "NOT_FOUND"
+
+private const val UNAVAILABLE = "UNAVAILABLE"
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
@@ -26,45 +34,63 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     return webClient
       .get()
       .uri("/assessments/timeline/crn/$crn")
-      .exchangeToMono { res ->
-        when (res.statusCode()) {
-          HttpStatus.NOT_FOUND -> res.releaseBody().then(Mono.defer { Mono.empty() })
-          HttpStatus.OK -> res.bodyToMono<Timeline>()
-            .mapNotNull { a -> a.timeline.filter { it.status == "COMPLETE" }.maxByOrNull { it.completed!! } }
-          else -> res.createException().flatMap { Mono.error(it.rootCause!!) }
-        }
-      }.awaitSingleOrNull()
+      .retrieve()
+      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.empty() }
+      .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
+      .bodyToMono<Timeline>()
+      .mapNotNull { timeline ->
+        timeline.timeline
+          .filter { it.status == "COMPLETE" }
+          .maxByOrNull { it.completed!! }
+      }
+      .retryWhen(Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY)))
+      .awaitSingleOrNull()
   }
 
   suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
       .uri("/risks/crn/$crn/widget")
-      .awaitExchangeOrNull { response ->
-        when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody()
-          HttpStatus.NOT_FOUND -> RoshSummary("NOT_FOUND", null, emptyMap())
-          else -> RoshSummary("UNAVAILABLE", null, emptyMap())
+      .retrieve()
+      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
+      .bodyToMono<RoshSummary>()
+      .retryWhen(Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY)))
+      .timeout(Duration.ofSeconds(20))
+      .onErrorResume { throwable ->
+        when (throwable.message) {
+          NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
+          else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
         }
       }
+      .awaitSingleOrNull()
   }
 
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
       .uri("/risks/crn/$crn/predictors/rsr/history")
-      .exchangeToFlow { response ->
-        flow {
-          when (response.statusCode()) {
-            HttpStatus.OK -> emitAll(response.bodyToFlow())
-            HttpStatus.NOT_FOUND -> notFound()
-            else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "UNAVAILABLE", null))
+      .retrieve()
+      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
+      .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
+      .bodyToFlow<RiskPredictor>()
+      .retryWhen(
+        { cause, attempt ->
+          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
+            delay(Duration.ofSeconds(RETRY_DELAY))
+            true
+          } else {
+            false
           }
-        }.onEmpty { notFound() }
+        },
+      )
+      .catch {
+        when (it.message) {
+          NOT_FOUND -> flowOf(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
+          else -> flowOf(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
+        }
       }
-  }
-
-  private suspend fun FlowCollector<RiskPredictor>.notFound() {
-    emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "NOT_FOUND", null))
+      .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
   }
 }
