@@ -21,7 +21,7 @@ class OffenderEventListener(
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
-    log.debug("Retrieved message CRN: $crn in OffenderEventListener")
+    log.debug("Processing message in OffenderEventListener for CRN: $crn")
     CoroutineScope(Dispatchers.Default).future {
       try {
         upsertUnallocatedCaseService.upsertUnallocatedCase(crn)

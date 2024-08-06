@@ -21,7 +21,7 @@ class CalculationEventListener(
   fun processMessage(rawMessage: String?) {
     val calculationEventData = readMessage(rawMessage)
     val crn = crnFrom(calculationEventData)
-    log.debug("Processing message CRN: $crn in CalculationEventListener")
+    log.debug("Processing message in CalculationEventListener for CRN: $crn")
     CoroutineScope(Dispatchers.Default).future {
       calculationTierService.updateTier(crn)
     }.get()
