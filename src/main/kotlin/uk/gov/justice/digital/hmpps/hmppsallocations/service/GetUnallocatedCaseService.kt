@@ -17,7 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -191,15 +190,6 @@ class GetUnallocatedCaseService(
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
       return UnallocatedCaseConfirmInstructions.from(
-        unallocatedCaseEntity,
-        personOnProbationStaffDetailsResponse,
-      ).takeUnless { restrictedOrExcluded(crn) }
-    }
-  }
-  suspend fun getCaseDecisionEvidencing(crn: String, convictionNumber: Long, staffCode: String): UnallocatedCaseDecisionEvidencing? {
-    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
-      val personOnProbationStaffDetailsResponse = workforceAllocationsToDeliusApiClient.personOnProbationStaffDetails(crn, staffCode)
-      return UnallocatedCaseDecisionEvidencing.from(
         unallocatedCaseEntity,
         personOnProbationStaffDetailsResponse,
       ).takeUnless { restrictedOrExcluded(crn) }
