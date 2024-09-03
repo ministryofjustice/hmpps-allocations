@@ -6,29 +6,36 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.future
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
+  private val lockMap: ConcurrentHashMap<String, Any>,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
     log.debug("Processing message in OffenderEventListener for CRN: $crn")
-    CoroutineScope(Dispatchers.Default).future {
-      try {
-        upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
-      } catch (e: ForbiddenOffenderError) {
-        log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+    val lock = lockMap.computeIfAbsent(crn) { Any() }
+    synchronized(lock) {
+      CoroutineScope(Dispatchers.Default).launch {
+        try {
+          upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+        } catch (e: ForbiddenOffenderError) {
+          log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+        } finally {
+          lockMap.remove(crn)
+        }
       }
-    }.get()
+    }
   }
 
   private fun getCrn(rawMessage: String): String {
