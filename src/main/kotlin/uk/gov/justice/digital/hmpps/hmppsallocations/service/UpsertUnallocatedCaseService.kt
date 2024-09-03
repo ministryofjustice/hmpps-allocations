@@ -42,7 +42,7 @@ class UpsertUnallocatedCaseService(
           val name = unallocatedEvents.name.getCombinedName()
           val lock = lockMap.computeIfAbsent(crn) { Any() }
           synchronized(lock) {
-            try{
+            try {
               saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
               updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
             } finally {
