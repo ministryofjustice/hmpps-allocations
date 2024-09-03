@@ -17,9 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
-  private val lockMap: ConcurrentHashMap<String, Any>,
 ) {
-
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
@@ -47,6 +45,7 @@ class OffenderEventListener(
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val lockMap = ConcurrentHashMap<String, Any>()
   }
 }
 
