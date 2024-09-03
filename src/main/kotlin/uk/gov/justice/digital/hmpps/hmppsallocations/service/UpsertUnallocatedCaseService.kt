@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class UpsertUnallocatedCaseService(
@@ -20,6 +21,7 @@ class UpsertUnallocatedCaseService(
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val lockMap = ConcurrentHashMap<String, Any>()
   }
 
   @Transactional
@@ -38,8 +40,15 @@ class UpsertUnallocatedCaseService(
         hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
           log.debug("hmpps tier api client: getting tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()
-          saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          val lock = lockMap.computeIfAbsent(crn) { Any() }
+          synchronized(lock) {
+            try{
+              saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+              updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+            } finally {
+              lockMap.remove(crn)
+            }
+          }
           deleteOldEvents(storedUnallocatedEvents, activeEvents)
         }
       }
