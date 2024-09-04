@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository
 
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
@@ -18,4 +19,13 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
 
   @Query("select u.teamCode AS teamCode, count(*) AS caseCount from UnallocatedCaseEntity u where u.teamCode in :teamCodes GROUP BY u.teamCode")
   fun getCaseCountByTeam(teamCodes: List<String>): List<CaseCountByTeam>
+
+  @Suppress("LongParameterList")
+  @Modifying
+  @Query(
+    value = """INSERT INTO unallocated_cases ("name", crn, tier, team_code, provider_code, conviction_number) VALUES (:name, :crn, :tier, :teamCode, :providerCode, :convictionNumber)
+      ON CONFLICT (crn, conviction_number) DO UPDATE SET "name" = excluded.name, tier = excluded.tier, team_code = excluded.team_code, provider_code = excluded.provider_code;""",
+    nativeQuery = true,
+  )
+  fun upsertUnallocatedCase(name: String, crn: String, tier: String, teamCode: String, providerCode: String, convictionNumber: Int)
 }
