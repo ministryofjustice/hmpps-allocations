@@ -34,16 +34,7 @@ class UnallocatedDataBaseOperationService(
       .forEach { createEvent ->
         logger.debug("Saving new event with CRN $crn, teamCode ${createEvent.teamCode}, convictionNumber ${createEvent.eventNumber.toInt()}")
         repository.upsertUnallocatedCase(name, crn, tier, createEvent.teamCode, createEvent.providerCode, Integer.parseInt(createEvent.eventNumber))
-        val savedEntity =
-          UnallocatedCaseEntity(
-            name = name,
-            crn = crn,
-            tier = tier,
-            providerCode = createEvent.providerCode,
-            teamCode = createEvent.teamCode,
-            convictionNumber = createEvent.eventNumber.toInt(),
-          )
-        telemetryService.trackAllocationDemandRaised(savedEntity)
+        telemetryService.trackAllocationDemandRaised(crn, createEvent.teamCode, createEvent.providerCode)
       }
   }
 

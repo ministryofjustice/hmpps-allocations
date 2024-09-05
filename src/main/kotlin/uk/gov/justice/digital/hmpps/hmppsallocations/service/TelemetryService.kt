@@ -33,13 +33,13 @@ class TelemetryService(@Autowired private val telemetryClient: TelemetryClient) 
     )
   }
 
-  fun trackAllocationDemandRaised(unallocatedCaseEntity: UnallocatedCaseEntity) {
+  fun trackAllocationDemandRaised(crn:String?, teamCode: String?, providerCode: String?) {
     trackEvent(
       TelemetryEventType.ALLOCATION_DEMAND_RAISED,
       mapOf(
-        CRN to unallocatedCaseEntity.crn,
-        TEAM_CODE to unallocatedCaseEntity.teamCode,
-        PROVIDER_CODE to unallocatedCaseEntity.providerCode,
+        CRN to crn,
+        TEAM_CODE to teamCode,
+        PROVIDER_CODE to providerCode,
       ),
     )
   }
