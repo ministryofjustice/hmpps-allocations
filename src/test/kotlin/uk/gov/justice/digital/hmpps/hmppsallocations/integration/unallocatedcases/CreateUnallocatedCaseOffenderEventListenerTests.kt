@@ -28,7 +28,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     verifyCase(case)
-    verifyTelemetry(crn)
+    verifyTelemetry(crn, 1)
   }
 
   @Test
@@ -48,7 +48,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(cases.toList().size).isEqualTo(1)
     verifyCase(case)
-    verifyTelemetry(crn)
+    verifyTelemetry(crn, 1)
   }
 
   @Test
@@ -81,8 +81,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     Assertions.assertFalse(repository.existsByCrn(crn))
   }
 
-  private fun verifyTelemetry(crn: String) {
-    verify(exactly = 1) {
+  private fun verifyTelemetry(crn: String, number: Int) {
+    verify(exactly = number) {
       telemetryClient.trackEvent(
         "AllocationDemandRaised",
         mapOf(
