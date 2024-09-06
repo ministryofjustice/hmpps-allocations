@@ -24,7 +24,7 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
   @Modifying
   @Query(
     value = """INSERT INTO unallocated_cases ("name", crn, tier, team_code, provider_code, conviction_number) VALUES (:name, :crn, :tier, :teamCode, :providerCode, :convictionNumber)
-      ON CONFLICT (crn, conviction_number) DO UPDATE SET "name" = excluded.name, tier = excluded.tier, team_code = excluded.team_code, provider_code = excluded.provider_code;""",
+      ON CONFLICT (conviction_number, crn) DO UPDATE SET "name" = excluded.name, tier = excluded.tier, team_code = excluded.team_code, provider_code = excluded.provider_code;""",
     nativeQuery = true,
   )
   fun upsertUnallocatedCase(name: String, crn: String, tier: String, teamCode: String, providerCode: String, convictionNumber: Int)
