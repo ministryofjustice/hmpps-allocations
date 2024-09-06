@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
@@ -22,15 +22,13 @@ class OffenderEventListener(
   fun processMessage(rawMessage: String) {
     val crn = getCrn(rawMessage)
     log.debug("Processing message in OffenderEventListener for CRN: $crn")
-    runBlocking {
+    CoroutineScope(Dispatchers.Default).future {
       try {
-        withContext(Dispatchers.IO) {
-          upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
-        }
+        upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
       } catch (e: ForbiddenOffenderError) {
         log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
       }
-    }
+    }.get()
   }
 
   private fun getCrn(rawMessage: String): String {
