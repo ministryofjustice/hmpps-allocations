@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 
 class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
@@ -26,23 +27,28 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     val case = repository.findAll().first()
 
-    assertThat(case.name).isEqualTo("Tester TestSurname")
-    assertThat(case.tier).isEqualTo("B3")
-    assertThat(case.teamCode).isEqualTo("TM1")
-    assertThat(case.providerCode).isEqualTo("PAC1")
-    assertThat(case.convictionNumber).isEqualTo(1)
+    verifyCase(case)
+    verifyTelemetry(crn, 1)
+  }
 
-    verify(exactly = 1) {
-      telemetryClient.trackEvent(
-        "AllocationDemandRaised",
-        mapOf(
-          "crn" to crn,
-          "teamCode" to "TM1",
-          "providerCode" to "PAC1",
-        ),
-        null,
-      )
-    }
+  @Test
+  fun `two messages will save only one record`() {
+    val crn = "J678910"
+    workforceAllocationsToDelius.userHasAccess(crn)
+    workforceAllocationsToDelius.unallocatedEventsResponse(crn)
+    hmppsTier.tierCalculationResponse(crn)
+
+    publishConvictionChangedMessage(crn)
+    publishConvictionChangedMessage(crn)
+
+    await untilCallTo { repository.count() } matches { it!! > 0 }
+
+    val cases = repository.findAll()
+    val case = cases.first()
+
+    assertThat(cases.toList().size).isEqualTo(1)
+    verifyCase(case)
+    verifyTelemetry(crn, 1)
   }
 
   @Test
@@ -73,5 +79,27 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
 
     Assertions.assertFalse(repository.existsByCrn(crn))
+  }
+
+  private fun verifyTelemetry(crn: String, number: Int) {
+    verify(exactly = number) {
+      telemetryClient.trackEvent(
+        "AllocationDemandRaised",
+        mapOf(
+          "crn" to crn,
+          "teamCode" to "TM1",
+          "providerCode" to "PAC1",
+        ),
+        null,
+      )
+    }
+  }
+
+  private fun verifyCase(case: UnallocatedCaseEntity) {
+    assertThat(case.name).isEqualTo("Tester TestSurname")
+    assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.teamCode).isEqualTo("TM1")
+    assertThat(case.providerCode).isEqualTo("PAC1")
+    assertThat(case.convictionNumber).isEqualTo(1)
   }
 }
