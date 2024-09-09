@@ -25,7 +25,10 @@ class OffenderEventListener(
     log.debug("Processing message in OffenderEventListener for CRN: $crn")
     CoroutineScope(Dispatchers.Default).future {
       try {
+        log.warn("Before upsert")
+
         upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+        log.warn("After")
       } catch (e: ForbiddenOffenderError) {
         log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
       } catch (e: EventsNotFoundError) {
