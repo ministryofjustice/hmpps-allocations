@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.EventsNotFoundError
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
 
@@ -27,6 +28,9 @@ class OffenderEventListener(
         upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
       } catch (e: ForbiddenOffenderError) {
         log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+      } catch (e: EventsNotFoundError) {
+        log.warn("Unable to find events for CRN $crn with error: ${e.message}")
+        upsertUnallocatedCaseService.deleteEventsForNoActiveEvents(crn)
       }
     }.get()
   }
