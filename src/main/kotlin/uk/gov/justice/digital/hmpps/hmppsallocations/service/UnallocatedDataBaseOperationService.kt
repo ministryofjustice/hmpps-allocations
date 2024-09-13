@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
 @Service
 class UnallocatedDataBaseOperationService(
@@ -46,10 +47,15 @@ class UnallocatedDataBaseOperationService(
       .filter { !activeEvents.containsKey(it.convictionNumber) }
       .forEach { deleteEvent ->
         logger.debug("Deleting event for CRN: ${deleteEvent.crn}, conviction number: ${deleteEvent.convictionNumber}, teamCode: ${deleteEvent.teamCode}")
-        repository.delete(deleteEvent)
-        logger.debug("Event $deleteEvent deleted")
-        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
-        telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
+        try {
+          repository.delete(deleteEvent)
+          logger.debug("Event {} deleted", deleteEvent)
+          val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
+          telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
+        } catch (e: EntityNotFoundException) {
+          logger.error(e.message)
+          logger.debug("Event with id ${deleteEvent.id} not found, probably already deleted")
+        }
       }
   }
 
