@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocatedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -93,5 +94,14 @@ class UnallocatedDataBaseOperationServiceTest {
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
     cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, uae.name, uae.tier)
     verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) }
+  }
+
+  @Test
+  fun deleteEventsForNoActiveEvents() = runTest{
+    val crn = "J77881"
+    coEvery { repository.findByCrn(crn) } returns storedUnallocatedEvents
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns DeliusCaseAccess(crn, false, false)
+    cut.deleteEventsForNoActiveEvents(crn)
+    verify(exactly = 2) { repository.delete(any())}
   }
 }

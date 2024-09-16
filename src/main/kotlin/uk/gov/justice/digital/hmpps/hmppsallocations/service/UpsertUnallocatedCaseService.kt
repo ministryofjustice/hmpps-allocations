@@ -43,15 +43,4 @@ class UpsertUnallocatedCaseService(
       }
     } ?: databaseService.deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
-
-  suspend fun deleteEventsForNoActiveEvents(crn: String) {
-    log.debug("delete events for crn: $crn")
-    val storedUnallocatedEvents = repository.findByCrn(crn)
-    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.run {
-      storedUnallocatedEvents.forEach {
-        repository.delete(it)
-        log.debug("Event ${it.id} deleted")
-      }
-    }
-  }
 }
