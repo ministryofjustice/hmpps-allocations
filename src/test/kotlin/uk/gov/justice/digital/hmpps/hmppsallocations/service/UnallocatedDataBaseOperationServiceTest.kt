@@ -97,11 +97,11 @@ class UnallocatedDataBaseOperationServiceTest {
   }
 
   @Test
-  fun deleteEventsForNoActiveEvents() = runTest{
+  fun deleteEventsForNoActiveEvents() = runTest {
     val crn = "J77881"
     coEvery { repository.findByCrn(crn) } returns storedUnallocatedEvents
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns DeliusCaseAccess(crn, false, false)
     cut.deleteEventsForNoActiveEvents(crn)
-    verify(exactly = 2) { repository.delete(any())}
+    verify(exactly = 2) { repository.delete(any()) }
   }
 }
