@@ -160,7 +160,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber")
       .retrieve()
       .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.empty()
+        Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
       }
       .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
         Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
@@ -178,6 +178,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
 class EventsNotFoundError(msg: String) : RuntimeException(msg)
+class EmptyTeamForEventException(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 
 data class GetCaseDetails(val cases: List<CaseIdentifier>)

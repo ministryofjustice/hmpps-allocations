@@ -3,8 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.EmptyTeamForEventException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -52,8 +53,10 @@ class UnallocatedDataBaseOperationService(
           logger.debug("Event $deleteEvent deleted")
           val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
           telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
-        } catch (e: EmptyResultDataAccessException) {
-          logger.error("Event with id ${deleteEvent.id} not found, probably already deleted; ${e.message}")
+        } catch (e: ObjectOptimisticLockingFailureException) {
+          logger.error("Event with id ${deleteEvent.id} Optimistic Locking failure, probably already deleted; ${e.message}")
+        } catch (e: EmptyTeamForEventException) {
+          logger.error("Event with id ${deleteEvent.id} could not find team; ${e.message}")
         }
       }
   }
