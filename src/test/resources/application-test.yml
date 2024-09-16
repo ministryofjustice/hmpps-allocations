@@ -5,6 +5,9 @@ spring:
         jwt:
           public-key-location: classpath:local-public-key.pub
 
+  datasource:
+    url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"
+
 server:
   shutdown: immediate
 
