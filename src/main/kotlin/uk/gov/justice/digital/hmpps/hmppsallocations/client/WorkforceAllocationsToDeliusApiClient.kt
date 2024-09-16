@@ -31,6 +31,7 @@ import java.time.ZonedDateTime
 private const val NUMBER_OF_RETRIES = 3L
 private const val RETRY_INTERVAL = 3L
 
+@Suppress("TooManyFunctions")
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

@@ -21,6 +21,7 @@ class UnallocatedDataBaseOperationService(
     private val logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  @Suppress("LongParameterList")
   @Transactional
   fun saveNewEvents(
     activeEvents: Map<Int, ActiveEvent>,
@@ -61,6 +62,7 @@ class UnallocatedDataBaseOperationService(
       }
   }
 
+  @Suppress("LongParameterList")
   @Transactional
   fun updateExistingEvents(
     activeEvents: Map<Int, ActiveEvent>,
