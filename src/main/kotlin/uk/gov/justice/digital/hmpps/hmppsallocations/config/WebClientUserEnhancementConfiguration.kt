@@ -102,6 +102,7 @@ class WebClientUserEnhancementConfiguration(
       }
   }
 
+  @Suppress("LongParameterList")
   private fun getOAuthWebClient(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,

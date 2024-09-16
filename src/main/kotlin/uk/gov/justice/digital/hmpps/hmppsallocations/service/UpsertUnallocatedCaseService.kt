@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
@@ -33,11 +34,16 @@ class UpsertUnallocatedCaseService(
         } else {
           log.debug("Active events found for crn $crn: $activeEvents")
         }
-        hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-          log.debug("hmpps tier api client: getting tier for crn: $crn")
-          val name = unallocatedEvents.name.getCombinedName()
-          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+        try {
+          hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
+            log.debug("hmpps tier api client: getting tier for crn: $crn")
+            val name = unallocatedEvents.name.getCombinedName()
+            databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+            databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          }
+        } catch (e: MissingTierException) {
+          log.error("Tier Missing for crn $crn; ${e.message}")
+        } finally {
           databaseService.deleteOldEvents(storedUnallocatedEvents, activeEvents)
         }
       }

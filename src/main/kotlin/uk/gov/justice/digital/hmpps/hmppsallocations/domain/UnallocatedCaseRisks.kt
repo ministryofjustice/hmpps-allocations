@@ -26,6 +26,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val convictionNumber: Int,
 ) {
   companion object {
+    @Suppress("LongParameterList")
     fun from(
       deliusRisk: DeliusRisk,
       case: UnallocatedCaseEntity,
