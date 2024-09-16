@@ -30,8 +30,10 @@ class WorkforceAllocationsToDeliusApiClientTest {
       Mono.just(ClientResponse.create(HttpStatus.NOT_FOUND).build())
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
-    val result = WorkforceAllocationsToDeliusApiClient(webClient).getUnallocatedEvents("999999")
-    assert(result == null)
+    val exception = assertThrows<RuntimeException> {
+      WorkforceAllocationsToDeliusApiClient(webClient).getUnallocatedEvents("999999")
+    }
+    assert(exception.message == "Unallocated events not found for 999999")
   }
 
   @Test

@@ -9,13 +9,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.EventsNotFoundError
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedDataBaseOperationService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
+  private val unallocatedDataBaseOperationService: UnallocatedDataBaseOperationService,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -27,6 +30,9 @@ class OffenderEventListener(
         upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
       } catch (e: ForbiddenOffenderError) {
         log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+      } catch (e: EventsNotFoundError) {
+        log.warn("Unable to find events for CRN $crn with error: ${e.message}")
+        unallocatedDataBaseOperationService.deleteEventsForNoActiveEvents(crn)
       }
     }.get()
   }

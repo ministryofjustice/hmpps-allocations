@@ -138,7 +138,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
       }
       .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.empty()
+        Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
       }
       .bodyToMono(UnallocatedEvents::class.java)
       .retryWhen(
@@ -177,6 +177,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
+class EventsNotFoundError(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 
 data class GetCaseDetails(val cases: List<CaseIdentifier>)

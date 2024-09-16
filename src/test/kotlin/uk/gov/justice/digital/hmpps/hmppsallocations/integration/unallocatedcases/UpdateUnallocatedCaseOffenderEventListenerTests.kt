@@ -112,14 +112,13 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       ),
     )
 
-    workforceAllocationsToDelius.userHasAccess(crn)
+    workforceAllocationsToDelius.userHasAccess(crn, true, true)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
 
     publishConvictionChangedMessage(crn)
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
-    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
   }
 

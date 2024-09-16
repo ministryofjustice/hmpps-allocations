@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
@@ -46,10 +47,14 @@ class UnallocatedDataBaseOperationService(
       .filter { !activeEvents.containsKey(it.convictionNumber) }
       .forEach { deleteEvent ->
         logger.debug("Deleting event for CRN: ${deleteEvent.crn}, conviction number: ${deleteEvent.convictionNumber}, teamCode: ${deleteEvent.teamCode}")
-        repository.delete(deleteEvent)
-        logger.debug("Event $deleteEvent deleted")
-        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
-        telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
+        try {
+          repository.delete(deleteEvent)
+          logger.debug("Event $deleteEvent deleted")
+          val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
+          telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
+        } catch (e: EmptyResultDataAccessException) {
+          logger.error("Event with id ${deleteEvent.id} not found, probably already deleted; ${e.message}")
+        }
       }
   }
 
@@ -67,5 +72,16 @@ class UnallocatedDataBaseOperationService(
         logger.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber}, teamCode ${activeEvent.teamCode}")
         repository.upsertUnallocatedCase(name, unallocatedCaseEntity.crn, tier, activeEvent.teamCode, activeEvent.providerCode, unallocatedCaseEntity.convictionNumber)
       }
+  }
+
+  suspend fun deleteEventsForNoActiveEvents(crn: String) {
+    logger.debug("delete events for crn: $crn")
+    val storedUnallocatedEvents = repository.findByCrn(crn)
+    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.run {
+      storedUnallocatedEvents.forEach {
+        repository.delete(it)
+        logger.debug("Event ${it.id} deleted")
+      }
+    }
   }
 }
