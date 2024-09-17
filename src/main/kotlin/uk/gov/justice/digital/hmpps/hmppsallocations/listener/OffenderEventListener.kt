@@ -35,6 +35,9 @@ class OffenderEventListener(
           upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
         } catch (e: ForbiddenOffenderError) {
           log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+        } catch (e: EventsNotFoundError) {
+          log.warn("Unable to find events for CRN $crn with error: ${e.message}")
+          unallocatedDataBaseOperationService.deleteEventsForNoActiveEvents(crn)
         }
       }.get()
     } catch (e: ListenerExecutionFailedException) {
