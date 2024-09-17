@@ -31,15 +31,16 @@ class CalculationEventListener(
         calculationTierService.updateTier(crn)
       }.get()
     } catch (e: ListenerExecutionFailedException) {
-      log.error("Problem handling message, putting on dlq; $rawMessage")
       sendToDlq(rawMessage!!)
+      log.error("Problem handling message, putting on dlq; $rawMessage")
     }
   }
 
   private fun sendToDlq(rawMessage: String) {
     val dlqName = System.getenv("HMPPS_SQS_QUEUES_TIERCALCULATIONQUEUE_DLQ_NAME") ?: "Queue Name Not Found"
     val dlqQueue = hmppsQueueService.findByDlqName(dlqName)!!
-    val request = SendMessageRequest.builder().queueUrl(dlqName).messageBody(rawMessage).build()
+    val message = objectMapper.readValue(rawMessage, QueueMessage::class.java)
+    val request = SendMessageRequest.builder().queueUrl(dlqName).messageBody(message.message).build()
     dlqQueue.sqsDlqClient?.sendMessage(request)
   }
 
