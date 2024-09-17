@@ -4,31 +4,47 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
+import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
+  private val hmppsQueueService: HmppsQueueService,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String) {
-    val crn = getCrn(rawMessage)
-    log.debug("Processing message in OffenderEventListener for CRN: $crn")
-    CoroutineScope(Dispatchers.Default).future {
-      try {
-        upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
-      } catch (e: ForbiddenOffenderError) {
-        log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
-      }
-    }.get()
+    try {
+      val crn = getCrn(rawMessage)
+      log.debug("Processing message in OffenderEventListener for CRN: $crn")
+      CoroutineScope(Dispatchers.Default).future {
+        try {
+          upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+        } catch (e: ForbiddenOffenderError) {
+          log.warn("Unable to access offender with CRN $crn with error: ${e.message}")
+        }
+      }.get()
+    } catch (e: ListenerExecutionFailedException) {
+      log.error("Problem handling message, putting on dlq; $rawMessage")
+      sendToDlq(rawMessage)
+    }
+  }
+
+  private fun sendToDlq(rawMessage: String) {
+    val dlqName = System.getenv("HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME") ?: "Queue Name Not Found"
+    val dlqQueue = hmppsQueueService.findByDlqName(dlqName)!!
+    val request = SendMessageRequest.builder().queueUrl(dlqName).messageBody(rawMessage).build()
+    dlqQueue.sqsDlqClient?.sendMessage(request)
   }
 
   private fun getCrn(rawMessage: String): String {
