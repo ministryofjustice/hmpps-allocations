@@ -31,6 +31,7 @@ import java.time.ZonedDateTime
 private const val NUMBER_OF_RETRIES = 3L
 private const val RETRY_INTERVAL = 3L
 
+@Suppress("TooManyFunctions")
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -138,7 +139,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
       }
       .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.empty()
+        Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
       }
       .bodyToMono(UnallocatedEvents::class.java)
       .retryWhen(
@@ -160,7 +161,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .uri("allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber")
       .retrieve()
       .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.empty()
+        Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
       }
       .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
         Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
@@ -177,6 +178,8 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
+class EventsNotFoundError(msg: String) : RuntimeException(msg)
+class EmptyTeamForEventException(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
 
 data class GetCaseDetails(val cases: List<CaseIdentifier>)

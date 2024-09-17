@@ -20,7 +20,7 @@ class HmppsTierApiClient(private val webClient: WebClient) {
         HttpStatus.NOT_FOUND ->
           {
             log.debug("Tier not found for CRN $crn")
-            null
+            throw MissingTierException("Tier not found for CRN $crn")
           }
         else -> throw response.createExceptionAndAwait()
       }
@@ -30,6 +30,8 @@ class HmppsTierApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
+class MissingTierException(msg: String) : RuntimeException()
+
 private data class TierDto @JsonCreator constructor(
   @JsonProperty("tierScore")
   val tierScore: String,

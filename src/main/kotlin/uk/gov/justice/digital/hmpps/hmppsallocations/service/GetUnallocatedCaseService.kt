@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseE
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import java.time.LocalDateTime
 
+@Suppress("TooManyFunctions")
 @Service
 class GetUnallocatedCaseService(
   private val unallocatedCasesRepository: UnallocatedCasesRepository,
@@ -53,6 +54,7 @@ class GetUnallocatedCaseService(
     }
   }
 
+  @Suppress("LongParameterList")
   private suspend fun callDeliusCaseViewAndCaseDetailApisInParallel(
     crn: String,
     convictionNumber: Long,
@@ -84,6 +86,7 @@ class GetUnallocatedCaseService(
         )
       }
 
+  @Suppress("LongParameterList")
   private suspend fun getRisksAndGenerateUnallocatedCaseDetails(
     crn: String,
     convictionNumber: Long,

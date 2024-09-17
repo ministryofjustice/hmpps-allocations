@@ -11,7 +11,9 @@ import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.EventsNotFoundError
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedDataBaseOperationService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
@@ -20,6 +22,7 @@ class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
   private val hmppsQueueService: HmppsQueueService,
+  private val unallocatedDataBaseOperationService: UnallocatedDataBaseOperationService,
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -37,7 +40,6 @@ class OffenderEventListener(
     } catch (e: ListenerExecutionFailedException) {
       sendToDlq(rawMessage)
       log.error("Problem handling message, putting on dlq; $rawMessage")
-
     }
   }
 

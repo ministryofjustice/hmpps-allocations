@@ -61,7 +61,6 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
 
-    assertThat(countMessagesOnOffenderEventDeadLetterQueue()).isEqualTo(0)
     assertThat(repository.count()).isEqualTo(0)
   }
 
