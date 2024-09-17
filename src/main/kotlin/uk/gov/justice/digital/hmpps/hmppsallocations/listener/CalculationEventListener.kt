@@ -37,7 +37,7 @@ class CalculationEventListener(
   }
 
   private fun sendToDlq(rawMessage: String) {
-    val dlqName = System.getenv("HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME") ?: "Queue Name Not Found"
+    val dlqName = System.getenv("HMPPS_SQS_QUEUES_TIERCALCULATIONQUEUE_DLQ_NAME") ?: "Queue Name Not Found"
     val dlqQueue = hmppsQueueService.findByDlqName(dlqName)!!
     val request = SendMessageRequest.builder().queueUrl(dlqName).messageBody(rawMessage).build()
     dlqQueue.sqsDlqClient?.sendMessage(request)
