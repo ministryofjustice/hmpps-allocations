@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
-import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
@@ -23,25 +21,12 @@ class CalculationEventListener(
 
   @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
-    try {
-      val calculationEventData = readMessage(rawMessage)
-      val crn = crnFrom(calculationEventData)
-      log.debug("Processing message in CalculationEventListener for CRN: $crn")
-      CoroutineScope(Dispatchers.Default).future {
-        calculationTierService.updateTier(crn)
-      }.get()
-    } catch (e: ListenerExecutionFailedException) {
-      sendToDlq(rawMessage!!)
-      log.error("Problem handling message, putting on dlq; $rawMessage")
-    }
-  }
-
-  private fun sendToDlq(rawMessage: String) {
-    val dlqName = System.getenv("HMPPS_SQS_QUEUES_TIERCALCULATIONQUEUE_DLQ_NAME") ?: "Queue Name Not Found"
-    val dlqQueue = hmppsQueueService.findByDlqName(dlqName)!!
-    val message = objectMapper.readValue(rawMessage, QueueMessage::class.java)
-    val request = SendMessageRequest.builder().queueUrl(dlqName).messageBody(message.message).build()
-    dlqQueue.sqsDlqClient?.sendMessage(request)
+    val calculationEventData = readMessage(rawMessage)
+    val crn = crnFrom(calculationEventData)
+    log.debug("Processing message in CalculationEventListener for CRN: $crn")
+    CoroutineScope(Dispatchers.Default).future {
+      calculationTierService.updateTier(crn)
+    }.get()
   }
 
   private fun readMessage(wrapper: String?): CalculationEventData {
