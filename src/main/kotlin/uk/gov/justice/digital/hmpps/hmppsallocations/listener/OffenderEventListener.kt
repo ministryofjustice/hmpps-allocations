@@ -13,13 +13,11 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.EventsNotFoundError
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ForbiddenOffenderError
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UnallocatedDataBaseOperationService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.UpsertUnallocatedCaseService
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Component
 class OffenderEventListener(
   private val objectMapper: ObjectMapper,
   private val upsertUnallocatedCaseService: UpsertUnallocatedCaseService,
-  private val hmppsQueueService: HmppsQueueService,
   private val unallocatedDataBaseOperationService: UnallocatedDataBaseOperationService,
 ) {
 

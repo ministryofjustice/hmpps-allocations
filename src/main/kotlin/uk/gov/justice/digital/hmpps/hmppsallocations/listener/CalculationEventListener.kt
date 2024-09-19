@@ -10,13 +10,11 @@ import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.TierCalculationService
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Component
 class CalculationEventListener(
   private val calculationTierService: TierCalculationService,
   private val objectMapper: ObjectMapper,
-  private val hmppsQueueService: HmppsQueueService,
 ) {
 
   @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
