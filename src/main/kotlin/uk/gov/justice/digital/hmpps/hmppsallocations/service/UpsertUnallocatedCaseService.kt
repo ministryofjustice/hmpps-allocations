@@ -5,16 +5,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
-import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
 @Service
 class UpsertUnallocatedCaseService(
+  private val databaseService: UnallocatedDataBaseOperationService,
   private val repository: UnallocatedCasesRepository,
   @Qualifier("hmppsTierApiClient") private val hmppsTierApiClient: HmppsTierApiClient,
-  private val telemetryService: TelemetryService,
   @Qualifier("workforceAllocationsToDeliusApiClient") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
 
@@ -35,74 +34,19 @@ class UpsertUnallocatedCaseService(
         } else {
           log.debug("Active events found for crn $crn: $activeEvents")
         }
-        hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-          log.debug("hmpps tier api client: getting tier for crn: $crn")
-          val name = unallocatedEvents.name.getCombinedName()
-          saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
-          deleteOldEvents(storedUnallocatedEvents, activeEvents)
+        try {
+          hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
+            log.debug("hmpps tier api client: getting tier for crn: $crn")
+            val name = unallocatedEvents.name.getCombinedName()
+            databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+            databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          }
+        } catch (e: MissingTierException) {
+          log.error("Tier Missing for crn $crn; ${e.message}")
+        } finally {
+          databaseService.deleteOldEvents(storedUnallocatedEvents, activeEvents)
         }
       }
-    } ?: deleteOldEvents(storedUnallocatedEvents, emptyMap())
-  }
-
-  private suspend fun deleteOldEvents(
-    storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    activeEvents: Map<Int, ActiveEvent>,
-  ) {
-    storedUnallocatedEvents
-      .filter { !activeEvents.containsKey(it.convictionNumber) }
-      .forEach { deleteEvent ->
-        log.debug("Deleting event for CRN: ${deleteEvent.crn}, conviction number: ${deleteEvent.convictionNumber}, teamCode: ${deleteEvent.teamCode}")
-        repository.delete(deleteEvent)
-        log.debug("Event $deleteEvent deleted")
-        val team = workforceAllocationsToDeliusApiClient.getAllocatedTeam(deleteEvent.crn, deleteEvent.convictionNumber)
-        telemetryService.trackUnallocatedCaseAllocated(deleteEvent, team?.teamCode)
-      }
-  }
-
-  private fun updateExistingEvents(
-    activeEvents: Map<Int, ActiveEvent>,
-    storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    name: String,
-    tier: String,
-  ) {
-    storedUnallocatedEvents
-      .filter { activeEvents.containsKey(it.convictionNumber) }
-      .forEach { unallocatedCaseEntity ->
-        val activeEvent = activeEvents[unallocatedCaseEntity.convictionNumber]!!
-        unallocatedCaseEntity.tier = tier
-        unallocatedCaseEntity.name = name
-        unallocatedCaseEntity.teamCode = activeEvent.teamCode
-        unallocatedCaseEntity.providerCode = activeEvent.providerCode
-        log.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber}, teamCode ${activeEvent.teamCode}")
-        repository.save(unallocatedCaseEntity)
-      }
-  }
-
-  private fun saveNewEvents(
-    activeEvents: Map<Int, ActiveEvent>,
-    storedUnallocatedEvents: List<UnallocatedCaseEntity>,
-    name: String,
-    crn: String,
-    tier: String,
-  ) {
-    activeEvents
-      .filter { activeEvent -> storedUnallocatedEvents.none { entry -> entry.convictionNumber == activeEvent.key } }
-      .map { it.value }
-      .forEach { createEvent ->
-        log.debug("Saving new event with CRN $crn, teamCode ${createEvent.teamCode}, convictionNumber ${createEvent.eventNumber.toInt()}")
-        val savedEntity = repository.save(
-          UnallocatedCaseEntity(
-            name = name,
-            crn = crn,
-            tier = tier,
-            providerCode = createEvent.providerCode,
-            teamCode = createEvent.teamCode,
-            convictionNumber = createEvent.eventNumber.toInt(),
-          ),
-        )
-        telemetryService.trackAllocationDemandRaised(savedEntity)
-      }
+    } ?: databaseService.deleteOldEvents(storedUnallocatedEvents, emptyMap())
   }
 }

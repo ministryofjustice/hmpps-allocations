@@ -11,3 +11,6 @@ assessment:
 assess-risks-needs:
   endpoint:
     url: http://localhost:8099
+spring:
+  datasource:
+    url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"

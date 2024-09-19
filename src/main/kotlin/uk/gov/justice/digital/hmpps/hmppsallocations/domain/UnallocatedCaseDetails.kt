@@ -61,7 +61,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
 ) {
 
   companion object {
-
+    @Suppress("LongParameterList")
     fun from(
       case: UnallocatedCaseEntity,
       deliusCaseView: DeliusCaseView,

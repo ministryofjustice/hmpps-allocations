@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDecisionEvidencing
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
@@ -115,19 +114,4 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
     @RequestParam(required = true) staffCode: String,
   ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
-
-  @Operation(summary = "Retrieve unallocated case decision evidencing by crn")
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "404", description = "Result Not Found"),
-    ],
-  )
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/unallocated/{crn}/convictions/{convictionNumber}/decision-evidencing")
-  suspend fun getDecisionEvidencing(
-    @PathVariable(required = true) crn: String,
-    @PathVariable(required = true) convictionNumber: Long,
-    @RequestParam(required = true) staffCode: String,
-  ): UnallocatedCaseDecisionEvidencing = getUnallocatedCaseService.getCaseDecisionEvidencing(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
 }

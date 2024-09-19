@@ -75,6 +75,7 @@ class WebClientConfiguration(
     return WorkforceAllocationsToDeliusApiClient(webClient)
   }
 
+  @Suppress("LongParameterList")
   private fun getOAuthWebClient(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,

@@ -20,8 +20,10 @@ class CalculationEventListener(
   @SqsListener("tiercalculationqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun processMessage(rawMessage: String?) {
     val calculationEventData = readMessage(rawMessage)
+    val crn = crnFrom(calculationEventData)
+    log.debug("Processing message in CalculationEventListener for CRN: $crn")
     CoroutineScope(Dispatchers.Default).future {
-      calculationTierService.updateTier(crnFrom(calculationEventData))
+      calculationTierService.updateTier(crn)
     }.get()
   }
 
