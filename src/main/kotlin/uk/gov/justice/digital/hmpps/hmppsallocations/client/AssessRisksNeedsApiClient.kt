@@ -18,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
 import java.time.Duration
-import org.slf4j.LoggerFactory
 
 private const val RETRY_ATTEMPTS = 3L
 
@@ -57,7 +56,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .bodyToMono<RoshSummary>()
       .retryWhen(
         Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-          .filter { it.message == UNAVAILABLE }
+          .filter { it.message == UNAVAILABLE },
       )
       .timeout(Duration.ofSeconds(20))
       .onErrorResume { throwable ->
@@ -95,8 +94,5 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
         }
       }
       .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
-  }
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
