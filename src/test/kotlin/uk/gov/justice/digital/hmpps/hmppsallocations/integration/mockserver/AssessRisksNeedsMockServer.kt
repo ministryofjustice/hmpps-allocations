@@ -83,7 +83,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
     val riskRequest =
       HttpRequest.request().withPath("/risks/crn/$crn/widget")
 
-    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(4)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(
         "{\n" +
           "  \"status\": 500,\n" +
@@ -117,7 +117,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
     val riskRequest =
       HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
 
-    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(4)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorUnavailableResponse()),
     )
   }

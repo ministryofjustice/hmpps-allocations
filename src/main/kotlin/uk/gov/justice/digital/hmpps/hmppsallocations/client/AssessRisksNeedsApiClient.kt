@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -56,8 +55,10 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
       .bodyToMono<RoshSummary>()
-      .retryWhen(Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-        .filter{ it.message == UNAVAILABLE})
+      .retryWhen(
+        Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
+          .filter { it.message == UNAVAILABLE }
+      )
       .timeout(Duration.ofSeconds(20))
       .onErrorResume { throwable ->
         when (throwable.message) {
@@ -74,8 +75,8 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .uri("/risks/crn/$crn/predictors/rsr/history")
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
+      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
       .bodyToFlow<RiskPredictor>()
       .retryWhen(
         { cause, attempt ->
@@ -89,8 +90,8 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       )
       .catch {
         when (it.message) {
-          NOT_FOUND -> flowOf(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
-          else -> flowOf(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
+          NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
+          else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
         }
       }
       .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
