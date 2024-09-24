@@ -116,6 +116,32 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.roshRisk.overallRisk")
       .isEqualTo("NOT_FOUND")
+
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
+    assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
+  }
+
+  @Test
+  fun `get case risks with no ROSH summary after retry`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    insertCases()
+    assessRisksNeedsApi.getRoshNotFoundForCrnRetry(crn)
+    assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber/risks")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.roshRisk.overallRisk")
+      .isEqualTo("NOT_FOUND")
+
+    assessRisksNeedsApi.verifyRoshCalled(crn, 2)
+    assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
   @Test
@@ -136,6 +162,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.roshRisk.overallRisk")
       .isEqualTo("UNAVAILABLE")
+    assessRisksNeedsApi.verifyRoshCalled(crn, 4)
+    assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
   @Test
@@ -158,6 +186,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("NOT_FOUND")
       .jsonPath("$.rsr.percentage")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
+    assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
   @Test
@@ -180,6 +210,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("UNAVAILABLE")
       .jsonPath("$.rsr.percentage")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
+    assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 4)
   }
 
   @Test
@@ -202,6 +234,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("NOT_FOUND")
       .jsonPath("$.rsr.percentage")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
   }
 
   @Test
