@@ -2,29 +2,35 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchangeOrNull
-import org.springframework.web.reactive.function.client.createExceptionAndAwait
+import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
+import java.time.Duration
+
+private const val NUMBER_OF_RETRIES = 3L
+private const val RETRY_INTERVAL = 3L
 
 class HmppsTierApiClient(private val webClient: WebClient) {
 
   suspend fun getTierByCrn(crn: String): String? = webClient
     .get()
     .uri("/crn/$crn/tier")
-    .awaitExchangeOrNull { response ->
-      when (response.statusCode()) {
-        HttpStatus.OK -> response.awaitBody<TierDto>()
-        HttpStatus.NOT_FOUND ->
-          {
-            log.debug("Tier not found for CRN $crn")
-            throw MissingTierException("Tier not found for CRN $crn")
-          }
-        else -> throw response.createExceptionAndAwait()
-      }
-    }?.tierScore
+    .retrieve()
+    .onStatus({ status -> status.is5xxServerError }) {
+      Mono.error(AllocationsServerError("Internal server error"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+      Mono.error(MissingTierException("Tier not found for CRN $crn"))
+    }
+    .bodyToMono(TierDto::class.java)
+    .retryWhen(
+      Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+        .filter { it is AllocationsServerError },
+    )
+    .awaitSingleOrNull()!!.tierScore
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
