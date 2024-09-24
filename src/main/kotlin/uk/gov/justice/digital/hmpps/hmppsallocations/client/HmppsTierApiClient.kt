@@ -23,6 +23,7 @@ class HmppsTierApiClient(private val webClient: WebClient) {
       Mono.error(AllocationsServerError("Internal server error"))
     }
     .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+      log.debug("Tier not found for crn $crn")
       Mono.error(MissingTierException("Tier not found for CRN $crn"))
     }
     .bodyToMono(TierDto::class.java)
