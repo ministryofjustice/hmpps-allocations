@@ -26,6 +26,7 @@ class JwtAuthHelper {
   @Bean
   fun jwtDecoder(): ReactiveJwtDecoder = NimbusReactiveJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
+  @Suppress("LongParameterList")
   fun createJwt(
     subject: String? = null,
     userId: String? = "${subject}_ID",

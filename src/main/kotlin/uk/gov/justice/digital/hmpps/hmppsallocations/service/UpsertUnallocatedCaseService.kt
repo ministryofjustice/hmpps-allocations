@@ -35,12 +35,11 @@ class UpsertUnallocatedCaseService(
           log.debug("Active events found for crn $crn: $activeEvents")
         }
         try {
-          hmppsTierApiClient.getTierByCrn(crn)?.let { tier ->
-            log.debug("hmpps tier api client: getting tier for crn: $crn")
-            val name = unallocatedEvents.name.getCombinedName()
-            databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-            databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
-          }
+          val tier = getTier(crn)
+          log.debug("hmpps tier api client: got tier for crn: $crn")
+          val name = unallocatedEvents.name.getCombinedName()
+          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
+          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
         } catch (e: MissingTierException) {
           log.error("Tier Missing for crn $crn; ${e.message}")
         } finally {
@@ -48,5 +47,9 @@ class UpsertUnallocatedCaseService(
         }
       }
     } ?: databaseService.deleteOldEvents(storedUnallocatedEvents, emptyMap())
+  }
+
+  suspend fun getTier(crn: String): String {
+    return hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
   }
 }
