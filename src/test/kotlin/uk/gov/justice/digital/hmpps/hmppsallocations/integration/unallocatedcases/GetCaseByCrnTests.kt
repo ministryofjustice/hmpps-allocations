@@ -161,6 +161,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.courtReport")
       .doesNotExist()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
   @Test
@@ -184,6 +185,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.assessment")
       .doesNotExist()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
   @Test
