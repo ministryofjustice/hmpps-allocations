@@ -5,12 +5,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import uk.gov.justice.digital.hmpps.hmppsallocations.auditing.AuditObject
+import uk.gov.justice.digital.hmpps.hmppsallocations.auditing.AuditService
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
@@ -24,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNot
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
   private val getUnallocatedCaseService: GetUnallocatedCaseService,
+  private val auditService: AuditService,
 ) {
   @Operation(summary = "Retrieve count of all unallocated cases by team")
   @ApiResponses(
@@ -50,6 +54,8 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseDetails {
+    val user = getLoggedInUser()
+    auditService.sendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "Get Unallocated Case")
     return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
 
@@ -65,9 +71,12 @@ class UnallocatedCasesController(
   suspend fun getUnallocatedCaseOverview(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
-  ): CaseOverview =
-    getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
+  ): CaseOverview {
+    val user = getLoggedInUser()
+    auditService.sendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "Get Unallocated Case Overview")
+    return getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+  }
 
   @Operation(summary = "Retrieve probation record")
   @ApiResponses(
@@ -81,9 +90,12 @@ class UnallocatedCasesController(
   suspend fun getUnallocatedCaseProbationRecord(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) excludeConvictionNumber: Long,
-  ): UnallocatedCaseConvictions =
-    getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
+  ): UnallocatedCaseConvictions {
+    val user = getLoggedInUser()
+    auditService.sendAuditMessage(CaseAuditObject(crn, excludeConvictionNumber.toString()), user, crn, "Get Unallocated Case Probation Record")
+    return getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+  }
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
   @ApiResponses(
@@ -97,8 +109,11 @@ class UnallocatedCasesController(
   suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
-  ): UnallocatedCaseRisks =
-    getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+  ): UnallocatedCaseRisks {
+    val user = getLoggedInUser()
+    auditService.sendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "Get Unallocated Risks")
+    return getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
+  }
 
   @Operation(summary = "Retrieve unallocated case confirm instructions by crn")
   @ApiResponses(
@@ -113,5 +128,26 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
     @RequestParam(required = true) staffCode: String,
-  ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
+  ): UnallocatedCaseConfirmInstructions {
+    val user = getLoggedInUser()
+    auditService.sendAuditMessage(
+      ConfirmInstructionsAuditObject(crn, convictionNumber.toString(), staffCode),
+      user,
+      crn,
+      "Get Unallocated Confirm Instructions",
+    )
+    return getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode)
+      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
+  }
+
+  private fun getLoggedInUser(): String {
+    try {
+      return SecurityContextHolder.getContext().authentication.name
+    } catch (e: NullPointerException) {
+      return "NoNameFound"
+    }
+  }
+
+  private class CaseAuditObject(crn: String, convictionNumber: String) : AuditObject
+  private class ConfirmInstructionsAuditObject(crn: String, convictionNumber: String, staffCode: String) : AuditObject
 }
