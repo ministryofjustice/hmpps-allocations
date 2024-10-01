@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Service
 class AuditService(
@@ -21,7 +22,7 @@ class AuditService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun sendAuditMessage(
+  fun createAndSendAuditMessage(
     auditObject: AuditObject,
     loggedInUser: String,
     crn: String,
@@ -33,11 +34,12 @@ class AuditService(
         .messageBody(
           objectMapper.writeValueAsString(
             AuditMessage(
-              crn,
-              loggedInUser,
-              auditObject,
+              UUID.randomUUID().toString(),
               operation,
               LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+              loggedInUser,
+              "hmpps-allocations",
+              objectMapper.writeValueAsString(auditObject),
             ),
           ),
         )
@@ -48,5 +50,26 @@ class AuditService(
     }
   }
 
-  private class AuditMessage(crn: String, loggedInUser: String, auditObject: AuditObject, operation: String, operationDateTime: String)
+  fun sendAuditMessage(operationId: String, what: String, who: String, service: String, details: String) {
+    try {
+      val sendMessage = SendMessageRequest.builder()
+        .queueUrl(hmppsAuditQueue.queueUrl)
+        .messageBody(
+          objectMapper.writeValueAsString(
+            AuditMessage(
+              operationId,
+              what,
+              LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+              who,
+              service,
+              objectMapper.writeValueAsString(details),
+            ),
+          ),
+        )
+        .build()
+      hmppsAuditQueue.sqsClient.sendMessage(sendMessage)
+    } catch (e: MissingQueueException) {
+      log.error("Queue missing, can't find queue {}", e.message)
+    }
+  }
 }

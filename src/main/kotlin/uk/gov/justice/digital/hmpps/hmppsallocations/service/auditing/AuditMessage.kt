@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service.auditing
 
 data class AuditMessage(
-  val auditObject: AuditObject,
-  val crn: String,
-  val operation: String,
-  val loggedInUser: String,
+  val operationId: String,
+  val what: String,
+  val `when`: String,
+  val who: String,
+  val service: String,
+  val details: String,
 )

@@ -44,7 +44,7 @@ class AuditServiceTest {
     val futureResponse = CompletableFuture.completedFuture(SendMessageResponse.builder().build())
     every { objectMapper.writeValueAsString(any()) } returns "{crn:\"0000000\"}"
     every { sqsClient.sendMessage(any<SendMessageRequest>()) } returns futureResponse
-    cut.sendAuditMessage(
+    cut.createAndSendAuditMessage(
       AuditObjectForTest("0000000"),
       "testUser",
       "0000000",

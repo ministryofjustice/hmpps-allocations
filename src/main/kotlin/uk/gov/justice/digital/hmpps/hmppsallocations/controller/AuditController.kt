@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
@@ -11,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.auditing.AuditMessa
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.auditing.AuditService
 
 @RestController
-class AuditController(private val auditService: AuditService) {
+class AuditController(private val auditService: AuditService, private val objectMapper: ObjectMapper) {
   @Operation(summary = "Send Audit Details")
   @ApiResponses(
     value = [
@@ -23,10 +24,11 @@ class AuditController(private val auditService: AuditService) {
   @PostMapping("allocations/contact/audit")
   fun sendAuditDetails(@RequestBody(required = true) auditMessage: AuditMessage) {
     auditService.sendAuditMessage(
-      auditMessage.auditObject,
-      auditMessage.loggedInUser,
-      auditMessage.crn,
-      auditMessage.operation,
+      auditMessage.operationId,
+      auditMessage.what,
+      auditMessage.who,
+      auditMessage.service,
+      auditMessage.details,
     )
   }
 }
