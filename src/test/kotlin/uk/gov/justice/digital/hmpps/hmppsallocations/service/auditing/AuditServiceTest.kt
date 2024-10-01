@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsallocations.auditing
+package uk.gov.justice.digital.hmpps.hmppsallocations.service.auditing
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.MockKAnnotations
