@@ -19,7 +19,7 @@ class AuditController(private val auditService: AuditService) {
       ApiResponse(responseCode = "500", description = "Internal server error"),
     ],
   )
-  @PreAuthorize("hasAnyRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @PostMapping("allocations/contact/audit")
   fun sendAuditDetails(@RequestBody(required = true) auditMessage: AuditMessage) {
     auditService.sendAuditMessage(
