@@ -55,7 +55,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseDetails {
     val user = getLoggedInUser()
-    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "GET_UNALLOCATED_CASE")
+    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, "GET_UNALLOCATED_CASE")
     return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
 
@@ -73,7 +73,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
   ): CaseOverview {
     val user = getLoggedInUser()
-    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "GET_UNALLOCATED_CASE_OVERVIEW")
+    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, "GET_UNALLOCATED_CASE_OVERVIEW")
     return getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
@@ -92,7 +92,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) excludeConvictionNumber: Long,
   ): UnallocatedCaseConvictions {
     val user = getLoggedInUser()
-    auditService.createAndSendAuditMessage(CaseAuditObject(crn, excludeConvictionNumber.toString()), user, crn, "GET_UNALLOCATED_CASE_PROBATION_RECORD")
+    auditService.createAndSendAuditMessage(CaseAuditObject(crn, excludeConvictionNumber.toString()), user, "GET_UNALLOCATED_CASE_PROBATION_RECORD")
     return getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
@@ -111,7 +111,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseRisks {
     val user = getLoggedInUser()
-    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, crn, "GET_UNALLOCATED_RISKS")
+    auditService.createAndSendAuditMessage(CaseAuditObject(crn, convictionNumber.toString()), user, "GET_UNALLOCATED_RISKS")
     return getUnallocatedCaseService.getCaseRisks(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
   }
 
@@ -133,7 +133,6 @@ class UnallocatedCasesController(
     auditService.createAndSendAuditMessage(
       ConfirmInstructionsAuditObject(crn, convictionNumber.toString(), staffCode),
       user,
-      crn,
       "GET_UNALLOCATED_CONFIRM_INSTRUCTIONS",
     )
     return getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode)

@@ -25,7 +25,6 @@ class AuditService(
   fun createAndSendAuditMessage(
     auditObject: AuditObject,
     loggedInUser: String,
-    crn: String,
     operation: String,
   ) {
     try {

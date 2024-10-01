@@ -47,7 +47,6 @@ class AuditServiceTest {
     cut.createAndSendAuditMessage(
       AuditObjectForTest("0000000"),
       "testUser",
-      "0000000",
       "TestOperation",
     )
     verify(exactly = 1) { sqsClient.sendMessage(any<SendMessageRequest>()) }
