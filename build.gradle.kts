@@ -1,9 +1,9 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.3"
-  kotlin("plugin.spring") version "2.0.0"
-  kotlin("plugin.jpa") version "2.0.0"
-  id("io.gitlab.arturbosch.detekt") version "1.23.6"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
+  kotlin("plugin.spring") version "2.0.20"
+  kotlin("plugin.jpa") version "2.0.20"
+  id("io.gitlab.arturbosch.detekt") version "1.23.7"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.20"
 }
 
 configurations {
@@ -18,7 +18,7 @@ configurations {
 configurations.matching { it.name == "detekt" }.all {
   resolutionStrategy.eachDependency {
     if (requested.group == "org.jetbrains.kotlin") {
-      useVersion("1.9.23")
+      useVersion("2.0.10")
     }
   }
 }
@@ -36,31 +36,31 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.5.0")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.9.0")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.3")
+  runtimeOnly("org.postgresql:postgresql:42.7.4")
 
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.13.10")
+  testImplementation("io.mockk:mockk:1.13.12")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }
 
 tasks {
