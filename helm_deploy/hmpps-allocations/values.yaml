@@ -8,6 +8,11 @@ generic-service:
     tag: app_version # override at deployment time
     port: 8080
 
+  service:
+    ports:
+      http: null  # Disable HTTP by setting it to null
+      https: 443  # Only expose port 443 for HTTPS
+
   ingress:
     enabled: true
     host: app-hostname.local # override per environment
@@ -16,6 +21,11 @@ generic-service:
     v1_2_enabled: true
     v0_47_enabled: false
     annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/hsts: "true"
+      nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
+      nginx.ingress.kubernetes.io/hsts-preload: "true"
       nginx.ingress.kubernetes.io/custom-http-errors: "418"
       external-dns.alpha.kubernetes.io/aws-weight: "100"
       nginx.ingress.kubernetes.io/server-snippet: |
