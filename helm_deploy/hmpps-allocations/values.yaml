@@ -13,6 +13,27 @@ generic-service:
       http: null  # Disable HTTP by setting it to null
       https: 443  # Only expose port 443 for HTTPS
 
+  spec:
+    ingressClassName: default
+    rules:
+      - host: app-hostname.local
+        http:
+          paths:
+            - backend:
+                service:
+                  name: hmpps-allocations
+                  port:
+                    number: 443  # Change to 443 to use HTTPS
+              path: /
+              pathType: ImplementationSpecific
+            - backend:
+                service:
+                  name: hmpps-allocations
+                  port:
+                    number: 443  # Change to 443 for health endpoint as well
+              path: /health
+              pathType: ImplementationSpecific
+
   ingress:
     enabled: true
     host: app-hostname.local # override per environment
