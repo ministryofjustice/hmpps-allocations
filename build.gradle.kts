@@ -1,9 +1,9 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
-  kotlin("plugin.spring") version "2.0.20"
-  kotlin("plugin.jpa") version "2.0.20"
+  kotlin("plugin.spring") version "2.0.21"
+  kotlin("plugin.jpa") version "2.0.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.7"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.20"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.21"
 }
 
 configurations {
@@ -58,7 +58,7 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.13.12")
+  testImplementation("io.mockk:mockk:1.13.13")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }
