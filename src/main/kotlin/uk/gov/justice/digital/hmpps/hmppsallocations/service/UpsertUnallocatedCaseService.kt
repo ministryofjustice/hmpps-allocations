@@ -2,12 +2,15 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+
+const val LAO = "LAO logging"
 
 @Service
 class UpsertUnallocatedCaseService(
@@ -25,7 +28,20 @@ class UpsertUnallocatedCaseService(
   suspend fun upsertUnallocatedCase(crn: String) {
     log.debug("upsert unallocated case for crn: $crn")
     val storedUnallocatedEvents = repository.findByCrn(crn)
-    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userRestricted }?.let {
+    val userAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)
+    MDC.put(LAO, "Incoming cases" )
+    if (userAccess!!.userRestricted) {
+      log.info ("Allocations receiving a Restricted case CRN, not included: $crn")
+    }
+    else if (userAccess.userExcluded) {
+      log.info ("Allocations receiving a Excluded case CRN, case included: $crn")
+    }
+    else {
+      log.info ("Allocations receiving a non LAO case CRN, case case included: $crn")
+    }
+    MDC.remove(LAO)
+
+    userAccess.takeUnless { it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
