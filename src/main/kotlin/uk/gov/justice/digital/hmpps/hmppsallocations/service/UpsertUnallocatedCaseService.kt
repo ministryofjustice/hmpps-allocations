@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
 const val LAO = "LAO logging"
+private const val CRN = "CRN"
 
 @Service
 class UpsertUnallocatedCaseService(
@@ -30,6 +31,7 @@ class UpsertUnallocatedCaseService(
     val storedUnallocatedEvents = repository.findByCrn(crn)
     val userAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)
     MDC.put(LAO, "Incoming cases" )
+    MDC.put(CRN, crn)
     if (userAccess!!.userRestricted) {
       log.info ("Allocations receiving a Restricted case CRN, not included: $crn")
     }
@@ -40,6 +42,7 @@ class UpsertUnallocatedCaseService(
       log.info ("Allocations receiving a non LAO case CRN, case case included: $crn")
     }
     MDC.remove(LAO)
+    MDC.remove(CRN)
 
     userAccess.takeUnless { it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
