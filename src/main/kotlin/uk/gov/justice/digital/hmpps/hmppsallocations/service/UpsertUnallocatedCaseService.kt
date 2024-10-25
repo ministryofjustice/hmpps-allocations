@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.LaoStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
 const val LAO = "LAO logging"
@@ -74,10 +75,4 @@ class UpsertUnallocatedCaseService(
   suspend fun getTier(crn: String): String {
     return hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
   }
-}
-
-enum class LaoStatus {
-  UNRESTRICTED,
-  RESTRICTED,
-  EXCLUDED,
 }
