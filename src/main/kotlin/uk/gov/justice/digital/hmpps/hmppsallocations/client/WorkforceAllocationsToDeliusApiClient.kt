@@ -54,11 +54,11 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .awaitBody()
   }
-  suspend fun geUserAccessByCrnUsers(crn: String, users: List<String>): DeliusLimitedAccessDetails {
+  suspend fun geUserAccessByCrnUsers(crn: String, staffCodes: List<String>): DeliusLimitedAccessDetails {
     return webClient
       .post()
       .uri("person/$crn/limited-access")
-      .bodyValue(users)
+      .bodyValue(staffCodes)
       .retrieve()
       .awaitBody()
   }
