@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
 const val LAO = "LAO logging"
+const val LAO_STATUS = "LAO status"
 private const val CRN = "CRN"
 
 @Service
@@ -33,14 +34,18 @@ class UpsertUnallocatedCaseService(
     MDC.put(LAO, "Incoming cases")
     MDC.put(CRN, crn)
     if (userAccess!!.userRestricted) {
+      MDC.put(LAO_STATUS, LaoStatus.RESTRICTED.name)
       log.info("Allocations receiving a Restricted case CRN, not included: $crn")
     } else if (userAccess.userExcluded) {
+      MDC.put(LAO_STATUS, LaoStatus.EXCLUDED.name)
       log.info("Allocations receiving a Excluded case CRN, case included: $crn")
     } else {
+      MDC.put(LAO_STATUS, LaoStatus.UNRESTRICTED.name)
       log.info("Allocations receiving a non LAO case CRN, case case included: $crn")
     }
     MDC.remove(LAO)
     MDC.remove(CRN)
+    MDC.remove(LAO_STATUS)
 
     userAccess.takeUnless { it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
@@ -69,4 +74,10 @@ class UpsertUnallocatedCaseService(
   suspend fun getTier(crn: String): String {
     return hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
   }
+}
+
+enum class LaoStatus {
+  UNRESTRICTED,
+  RESTRICTED,
+  EXCLUDED,
 }
