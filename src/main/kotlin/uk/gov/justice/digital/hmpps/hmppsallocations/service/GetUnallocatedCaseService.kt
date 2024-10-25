@@ -32,6 +32,8 @@ class GetUnallocatedCaseService(
   private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+  @Qualifier("laoService")
+  private val laoService: LaoService,
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
@@ -122,7 +124,7 @@ class GetUnallocatedCaseService(
 
       val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
         val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
-        caseAccess?.userExcluded == false && !caseAccess.userRestricted
+        caseAccess?.userRestricted == false
       }
 
       if (unallocatedCases.isEmpty()) {
@@ -149,10 +151,13 @@ class GetUnallocatedCaseService(
             .map { deliusCaseDetail ->
               val unallocatedCase =
                 unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn }
               UnallocatedCase.from(
                 unallocatedCase,
                 deliusCaseDetail,
                 outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+                excluded,
+                excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
               )
             }
         }

@@ -36,6 +36,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
     workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
 
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -154,6 +159,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -199,6 +209,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = true,
       extraUnexpectedCaseFromDelius,
@@ -299,6 +314,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
 
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
@@ -366,6 +385,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       ),
     )
 
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     // mock estate api call for out of areas related functionality
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
@@ -377,6 +401,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
+
+    workforceAllocationsToDelius.setAllUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")

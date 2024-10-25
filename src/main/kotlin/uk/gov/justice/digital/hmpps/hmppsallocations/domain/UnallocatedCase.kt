@@ -32,12 +32,16 @@ data class UnallocatedCase @JsonCreator constructor(
   val sentenceLength: String?,
   val convictionNumber: Int,
   val outOfAreaTransfer: Boolean,
+  val excluded: Boolean,
+  val apopExcluded: Boolean,
 ) {
   companion object {
     fun from(
       case: UnallocatedCaseEntity,
       deliusCaseDetail: DeliusCaseDetail,
       outOfAreaTransfer: Boolean,
+      excluded: Boolean,
+      apopExcluded: Boolean,
     ): UnallocatedCase {
       return UnallocatedCase(
         name = "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
@@ -57,6 +61,8 @@ data class UnallocatedCase @JsonCreator constructor(
         convictionNumber = case.convictionNumber,
         outOfAreaTransfer = outOfAreaTransfer,
         handoverDate = deliusCaseDetail.handoverDate,
+        excluded = excluded,
+        apopExcluded = apopExcluded,
       )
     }
   }

@@ -155,6 +155,52 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
+  fun setAllUsersByCrn(crns: List<String>) {
+    crns.forEach { it -> setAllUsersByCrn(it) }
+  }
+  fun setAllUsersByCrn(crn: String) {
+    val request = HttpRequest.request()
+      .withPath("/person/$crn/limited-access/all")
+      .withMethod("GET")
+
+    workforceAllocationsToDelius.`when`(request).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(
+          """{
+    "crn": "X340257",
+    "excludedFrom": [
+        {
+            "username": "Test2",
+            "staffCode": "TS4J273"
+        },
+        {
+            "username": "Test3",
+            "staffCode": "TS4A127"
+        }
+    ],
+    "restrictedTo": [],
+    "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
+    "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
+}""",
+
+        ),
+    )
+  }
+
+  fun setApopUsers() {
+    val request = HttpRequest.request()
+      .withPath("/users")
+      .withMethod("GET")
+
+    workforceAllocationsToDelius.`when`(request).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody("""[{"username": "Test2", "staffCode": "Fred"}]"""),
+    )
+  }
   fun errorDeliusCaseDetailsResponse() {
     val initialAppointmentRequest =
       HttpRequest.request().withPath("/allocation-demand")
