@@ -113,6 +113,7 @@ class GetUnallocatedCaseService(
     }.takeUnless { restrictedOrExcluded(crn) }
   }
 
+  @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCasesFromRepo.isEmpty()) {

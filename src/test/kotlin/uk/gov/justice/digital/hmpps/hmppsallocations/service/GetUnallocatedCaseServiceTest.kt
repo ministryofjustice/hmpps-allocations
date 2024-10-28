@@ -108,33 +108,4 @@ internal class GetUnallocatedCaseServiceTest {
     verify(exactly = 0) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
     assertEquals(0, cases.size)
   }
-
-  fun `must  return unallocated cases which are excluded and not restricted `() = runBlocking {
-    val crn = "X123456"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(
-      name = "restricted",
-      crn = crn,
-      providerCode = "PC1",
-      teamCode = "TM1",
-      tier = "C2",
-      id = 2L,
-      convictionNumber = 1,
-    )
-
-    every { mockRepo.findByTeamCode("TM1") } returns listOf(unallocatedCaseEntity)
-    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getUserAccess(listOf(crn)) } returns
-      DeliusUserAccess(
-        access = listOf(DeliusCaseAccess(crn, userRestricted = false, true)),
-      )
-
-    coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(emptyList()) } returns emptyFlow()
-    coEvery { mockLaoService.getCrnRestrictions(crn) } returns
-      DeliusCrnRestrictions(true, false, false)
-    val cases =
-      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("TM1")
-        .toList()
-
-    verify(exactly = 0) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
-    assertEquals(0, cases.size)
-  }
 }

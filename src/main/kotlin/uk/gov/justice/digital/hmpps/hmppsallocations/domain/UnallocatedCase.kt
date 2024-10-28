@@ -36,6 +36,7 @@ data class UnallocatedCase @JsonCreator constructor(
   val apopExcluded: Boolean,
 ) {
   companion object {
+    @Suppress("LongParameterList")
     fun from(
       case: UnallocatedCaseEntity,
       deliusCaseDetail: DeliusCaseDetail,
