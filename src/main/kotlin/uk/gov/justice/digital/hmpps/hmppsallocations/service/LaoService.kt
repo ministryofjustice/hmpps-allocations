@@ -17,9 +17,6 @@ class LaoService(
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn)
     var apopExcluded = false
 
-    limitedAccessDetails.restrictedTo.isNotEmpty()
-    limitedAccessDetails.excludedFrom.isNotEmpty()
-
     limitedAccessDetails.restrictedTo.forEach {
       if (staffCodes.contains(it.staffCode)) {
         apopExcluded = true
