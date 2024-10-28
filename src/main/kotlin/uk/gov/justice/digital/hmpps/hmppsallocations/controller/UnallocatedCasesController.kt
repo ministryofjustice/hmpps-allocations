@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -41,6 +42,7 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Unauthorized"),
       ApiResponse(responseCode = "404", description = "Result Not Found"),
     ],
   )
@@ -50,7 +52,8 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseDetails {
-    return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    val userName = SecurityContextHolder.getContext().authentication.name
+    return getUnallocatedCaseService.getCase(crn, convictionNumber, userName) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
   }
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")

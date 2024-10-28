@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForExclusionReasonException
 import java.time.LocalDateTime
 
 @Suppress("TooManyFunctions")
@@ -32,9 +33,13 @@ class GetUnallocatedCaseService(
   private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+  private val exclusionService: ExclusionService,
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
+  suspend fun getCase(crn: String, convictionNumber: Long, userName: String): UnallocatedCaseDetails? {
+    if (exclusionService.checkIfAnyUserExcluded(crn)) {
+      throw NotAllowedForExclusionReasonException(crn, "A user of APoP is excluded from viewing this case")
+    }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
       val getDeliusCaseViewApiCall = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
