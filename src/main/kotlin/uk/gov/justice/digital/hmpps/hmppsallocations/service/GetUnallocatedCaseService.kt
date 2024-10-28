@@ -152,7 +152,7 @@ class GetUnallocatedCaseService(
             .map { deliusCaseDetail ->
               val unallocatedCase =
                 unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn }
+              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
               UnallocatedCase.from(
                 unallocatedCase,
                 deliusCaseDetail,
