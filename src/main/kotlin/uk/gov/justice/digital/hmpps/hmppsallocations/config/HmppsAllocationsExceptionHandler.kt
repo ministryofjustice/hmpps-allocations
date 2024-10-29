@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForExclusionReasonException
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
 @RestControllerAdvice
 class HmppsAllocationsExceptionHandler {
@@ -37,15 +37,15 @@ class HmppsAllocationsExceptionHandler {
       )
   }
 
-  @ExceptionHandler(NotAllowedForExclusionReasonException::class)
-  fun handleNotAllowedForExclusionReasonException(e: NotAllowedForExclusionReasonException): ResponseEntity<ErrorResponse> {
+  @ExceptionHandler(NotAllowedForLAOException::class)
+  fun handleNotAllowedForLAOException(e: NotAllowedForLAOException): ResponseEntity<ErrorResponse> {
     log.error("NotAllowedForExclusionReasonException: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.FORBIDDEN)
       .body(
         ErrorResponse(
           status = FORBIDDEN,
-          userMessage = "Not Allowed For Exclusion Reason Exception: ${e.message}",
+          userMessage = "Access is denied (Limited Access Offender): ${e.message}",
           developerMessage = e.message,
           moreInfo = e.crn,
         ),

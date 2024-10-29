@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForExclusionReasonException
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 import java.time.LocalDateTime
 
 @Suppress("TooManyFunctions")
@@ -38,7 +38,7 @@ class GetUnallocatedCaseService(
 
   suspend fun getCase(crn: String, convictionNumber: Long, userName: String): UnallocatedCaseDetails? {
     if (exclusionService.checkIfAnyUserExcluded(crn)) {
-      throw NotAllowedForExclusionReasonException(crn, "A user of APoP is excluded from viewing this case")
+      throw NotAllowedForLAOException("LAO Restricted Case", crn)
     }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
