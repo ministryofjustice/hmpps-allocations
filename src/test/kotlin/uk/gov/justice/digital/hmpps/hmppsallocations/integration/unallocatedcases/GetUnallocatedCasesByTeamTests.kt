@@ -162,11 +162,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("XXXXXXX", true, true),
         Triple("ZZZZZZZ", true, true),
       ),
-//    )
-//    workforceAllocationsToDelius.setExcludedUsersByCrn(
-//      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
-//    )
-//    workforceAllocationsToDelius.setApopUsers()
+    )
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
