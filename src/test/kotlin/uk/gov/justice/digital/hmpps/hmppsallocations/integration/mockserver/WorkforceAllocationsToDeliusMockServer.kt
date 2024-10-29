@@ -89,7 +89,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun userHasAccessToAllCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
+  fun setuserAccessToCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
     val request = HttpRequest.request()
       .withPath("/users/limited-access")
       .withMethod("POST")

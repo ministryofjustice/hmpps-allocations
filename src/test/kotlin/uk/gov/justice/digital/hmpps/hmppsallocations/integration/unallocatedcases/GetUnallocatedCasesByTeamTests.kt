@@ -19,7 +19,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
     vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -152,7 +152,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team where all cases are LAO cases`() {
     insertCases()
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", true, true),
         Triple("J680648", true, true),
@@ -238,7 +238,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `return error when error on Delius API call`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -301,7 +301,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -372,7 +372,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       handoverDate = handoverDate,
     )
     workforceAllocationsToDelius.setupTeam1CaseDetails(c2cCase)
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
