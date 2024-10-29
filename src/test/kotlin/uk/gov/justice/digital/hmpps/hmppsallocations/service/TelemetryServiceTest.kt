@@ -30,9 +30,9 @@ class TelemetryServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
     coEvery { telemetryClient.trackEvent(TelemetryEventType.EventAllocated.eventName, any(), null) } returns Unit
-    telemetryService.trackUnallocatedCaseAllocated(uce, teamCode)
+    telemetryService.trackUnallocatedCaseAllocated(unallocatedCaseEntity, teamCode)
     verify(exactly = 1) { telemetryClient.trackEvent(TelemetryEventType.EventAllocated.eventName, any(), null) }
   }
 
