@@ -132,6 +132,75 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo(false)
   }
 
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndRestrictedUsers(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
+  ) {
+
+    workforceAllocationsToDelius.setuserAccessToCases(
+      listOf(
+        Triple("J678910", true, false),
+        Triple("J680648", false, true),
+        Triple("X4565764", false, true),
+        Triple("J680660", true, true),
+        Triple("X6666222", true, true),
+        Triple("XXXXXXX", true, true),
+        Triple("ZZZZZZZ", true, true),
+      ),
+    )
+    insertCases()
+
+    val initialAppointment = LocalDate.of(2022, 10, 11)
+    val firstSentenceDate = LocalDate.of(2022, 11, 5)
+
+    workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
+
+    // NOt excluded
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
+
+    //excluded user
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
+    // excluded APoP User
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
+
+
+    workforceAllocationsToDelius.setApopUsers()
+
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.length()")
+      .isEqualTo(2)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
+      .isEqualTo("Previously managed")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
+      .isEqualTo("Janie")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.surname")
+      .isEqualTo("Jones")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.grade")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].excluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].apopExcluded")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].status")
+      .isEqualTo("New to probation")
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].offenderManager")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].excluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
+      .isEqualTo(true)
+  }
   @Test
   fun `Get unallocated cases by team where probation-estate API is successful and does not return restricted cases`() {
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
@@ -149,6 +218,22 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
   }
 
+  @Test
+  fun `Get unallocated cases by team where probation-estate API is successful and cases have restrictions`() {
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndRestrictedUsers(
+      probationEstateTeamsAndRegionsApiIsWorking = true,
+    )
+  }
   @Test
   fun `Get unallocated cases by team where all cases are LAO cases`() {
     insertCases()
