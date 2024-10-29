@@ -136,7 +136,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
     vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
-
     workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", true, false),
@@ -159,12 +158,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
 
-    //excluded user
+    // excluded user
     workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
     // excluded APoP User
     workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
-
-
     workforceAllocationsToDelius.setApopUsers()
 
     webTestClient.get()
@@ -201,6 +198,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
       .isEqualTo(true)
   }
+
   @Test
   fun `Get unallocated cases by team where probation-estate API is successful and does not return restricted cases`() {
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
@@ -234,6 +232,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       probationEstateTeamsAndRegionsApiIsWorking = true,
     )
   }
+
   @Test
   fun `Get unallocated cases by team where all cases are LAO cases`() {
     insertCases()

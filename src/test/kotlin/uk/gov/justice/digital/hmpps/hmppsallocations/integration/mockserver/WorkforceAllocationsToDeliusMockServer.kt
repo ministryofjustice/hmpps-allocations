@@ -46,13 +46,16 @@ class WorkforceAllocationsToDeliusApiExtension : BeforeAllCallback, AfterAllCall
   override fun beforeAll(context: ExtensionContext?) {
     workforceAllocationsToDelius = WorkforceAllocationsToDeliusMockServer()
   }
+
   override fun beforeEach(context: ExtensionContext?) {
     workforceAllocationsToDelius.reset()
   }
+
   override fun afterAll(context: ExtensionContext?) {
     workforceAllocationsToDelius.stop()
   }
 }
+
 class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   private val currentMangedByTeam1CaseDetails = CaseDetailsIntegration(
@@ -213,7 +216,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
 
-          ),
+        ),
     )
   }
 
@@ -235,9 +238,10 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "N/A"
 }""",
 
-          ),
+        ),
     )
   }
+
   fun setApopUsers() {
     val request = HttpRequest.request()
       .withPath("/users")
@@ -250,6 +254,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withBody("""[{"username": "Test2", "staffCode": "Fred"}]"""),
     )
   }
+
   fun errorDeliusCaseDetailsResponse() {
     val initialAppointmentRequest =
       HttpRequest.request().withPath("/allocation-demand")
@@ -351,6 +356,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber)),
     )
   }
+
   fun probationRecordSingleActiveEventReponse(crn: String, convictionNumber: Int) {
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(
