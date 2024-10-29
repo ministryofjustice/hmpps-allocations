@@ -155,10 +155,11 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun setAllUsersByCrn(crns: List<String>) {
-    crns.forEach { it -> setAllUsersByCrn(it) }
+  fun setExcludedUsersByCrn(crns: List<String>) {
+    crns.forEach { setExcludedUsersByCrn(it) }
   }
-  fun setAllUsersByCrn(crn: String) {
+
+  fun setExcludedUsersByCrn(crn: String) {
     val request = HttpRequest.request()
       .withPath("/person/$crn/limited-access/all")
       .withMethod("GET")
@@ -169,7 +170,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withContentType(MediaType.APPLICATION_JSON)
         .withBody(
           """{
-    "crn": "X340257",
+    "crn": $crn,
     "excludedFrom": [
         {
             "username": "Test2",

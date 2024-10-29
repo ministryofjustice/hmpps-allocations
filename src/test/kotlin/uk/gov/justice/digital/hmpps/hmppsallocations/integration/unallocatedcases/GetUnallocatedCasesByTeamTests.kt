@@ -36,7 +36,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
     workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
 
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
     )
     workforceAllocationsToDelius.setApopUsers()
@@ -79,6 +79,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].caseType")
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].excluded")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].apopExcluded")
       .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].handoverDate")
       .isEqualTo(null)
@@ -159,7 +163,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
     )
     workforceAllocationsToDelius.setApopUsers()
@@ -209,7 +213,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
     )
     workforceAllocationsToDelius.setApopUsers()
@@ -314,7 +318,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
     )
     workforceAllocationsToDelius.setApopUsers()
@@ -385,7 +389,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       ),
     )
 
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
     )
     workforceAllocationsToDelius.setApopUsers()
@@ -402,7 +406,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       ),
     )
 
-    workforceAllocationsToDelius.setAllUsersByCrn(
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
       listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
     )
     workforceAllocationsToDelius.setApopUsers()
