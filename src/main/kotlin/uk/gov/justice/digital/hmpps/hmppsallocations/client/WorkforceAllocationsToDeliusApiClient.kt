@@ -18,9 +18,9 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAccessRestrictionDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusLimitedAccessDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
@@ -40,6 +40,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     private val policy: PolicyFactory = Sanitizers.FORMATTING.and(Sanitizers.LINKS)
   }
 
+  /*
+   * returns a list of all users with permission to use the aPop tool (Delius role 'MAABT001')
+   */
   suspend fun getApopUsers(): List<DeliusApopUser> {
     return webClient
       .get()
@@ -47,14 +50,15 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       .retrieve()
       .awaitBody()
   }
-  suspend fun getAllUserAccessByCrn(crn: String): DeliusLimitedAccessDetails {
+  suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails {
     return webClient
       .get()
       .uri("person/$crn/limited-access/all")
       .retrieve()
       .awaitBody()
   }
-  suspend fun geUserAccessByCrnUsers(crn: String, staffCodes: List<String>): DeliusLimitedAccessDetails {
+
+  suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails {
     return webClient
       .post()
       .uri("person/$crn/limited-access")

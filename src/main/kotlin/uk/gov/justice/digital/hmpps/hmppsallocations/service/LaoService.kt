@@ -13,12 +13,12 @@ class LaoService(
 
   suspend fun getCrnRestrictions(crn: String): DeliusCrnRestrictions {
     val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val staffCodes = apopUsers.map { it.staffCode }
-    val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn)
+    val apopUsersStaffCodes = apopUsers.map { it.staffCode }
+    val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     var apopExcluded = false
 
     limitedAccessDetails.excludedFrom.forEach {
-      if (staffCodes.contains(it.staffCode)) {
+      if (apopUsersStaffCodes.contains(it.staffCode)) {
         apopExcluded = true
         return@forEach
       }
@@ -27,5 +27,5 @@ class LaoService(
     return DeliusCrnRestrictions(limitedAccessDetails.excludedFrom.isNotEmpty(), limitedAccessDetails.restrictedTo.isNotEmpty(), apopExcluded)
   }
 
-  suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>) = workforceAllocationsToDeliusApiClient.geUserAccessByCrnUsers(crn, staffCodes)
+  suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>) = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
 }

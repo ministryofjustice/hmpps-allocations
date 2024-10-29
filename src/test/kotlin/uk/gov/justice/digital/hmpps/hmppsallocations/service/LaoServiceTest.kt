@@ -8,8 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAccessRestrictionDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusLimitedAccessDetails
 
 class LaoServiceTest {
 
@@ -28,7 +28,7 @@ class LaoServiceTest {
   fun `non lao case`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
-    coEvery { workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn) } returns DeliusLimitedAccessDetails(
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
       crn = crn,
       restrictedTo = emptyList(),
       excludedFrom = emptyList(),
@@ -46,7 +46,7 @@ class LaoServiceTest {
   fun `lao excluded case`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "not fred", staffCode = "9991"))
-    coEvery { workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn) } returns DeliusLimitedAccessDetails(
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
       crn = crn,
       restrictedTo = emptyList(),
       excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "12345")),
@@ -64,8 +64,8 @@ class LaoServiceTest {
   fun `lao restricted case`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
-    coEvery { workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn) } returns
-      DeliusLimitedAccessDetails(
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns
+      DeliusAccessRestrictionDetails(
         crn = crn,
         restrictedTo = listOf(DeliusApopUser(username = "fred", staffCode = "12345")),
         excludedFrom = emptyList(),
@@ -82,7 +82,7 @@ class LaoServiceTest {
   fun `lao aPoP excluded case`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "fred", staffCode = "12345"))
-    coEvery { workforceAllocationsToDeliusApiClient.getAllUserAccessByCrn(crn) } returns DeliusLimitedAccessDetails(
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
       crn = crn,
       restrictedTo = emptyList(),
       excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "12345")),
