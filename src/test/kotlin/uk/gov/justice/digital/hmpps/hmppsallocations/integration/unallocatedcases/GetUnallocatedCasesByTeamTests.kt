@@ -133,7 +133,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get unallocated cases by team where probation-estate API is successful and does not return LAO cases`() {
+  fun `Get unallocated cases by team where probation-estate API is successful and does not return restricted cases`() {
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
