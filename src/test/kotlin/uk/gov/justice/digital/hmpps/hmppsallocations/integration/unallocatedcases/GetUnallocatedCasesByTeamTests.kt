@@ -19,7 +19,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
     vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -35,6 +35,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     val firstSentenceDate = LocalDate.of(2022, 11, 5)
 
     workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
+
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
@@ -74,6 +79,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].caseType")
       .isEqualTo("CUSTODY")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].excluded")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].apopExcluded")
       .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].handoverDate")
       .isEqualTo(null)
@@ -123,8 +132,75 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo(false)
   }
 
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndRestrictedUsers(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
+  ) {
+    workforceAllocationsToDelius.setuserAccessToCases(
+      listOf(
+        Triple("J678910", true, false),
+        Triple("J680648", false, true),
+        Triple("X4565764", false, true),
+        Triple("J680660", true, true),
+        Triple("X6666222", true, true),
+        Triple("XXXXXXX", true, true),
+        Triple("ZZZZZZZ", true, true),
+      ),
+    )
+    insertCases()
+
+    val initialAppointment = LocalDate.of(2022, 10, 11)
+    val firstSentenceDate = LocalDate.of(2022, 11, 5)
+
+    workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
+
+    // NOt excluded
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
+
+    // excluded user
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
+    // excluded APoP User
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
+    workforceAllocationsToDelius.setApopUsers()
+
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.length()")
+      .isEqualTo(2)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
+      .isEqualTo("Previously managed")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
+      .isEqualTo("Janie")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.surname")
+      .isEqualTo("Jones")
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.grade")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].excluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].apopExcluded")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].status")
+      .isEqualTo("New to probation")
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].offenderManager")
+      .doesNotExist()
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].outOfAreaTransfer")
+      .isEqualTo(false)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].excluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
+      .isEqualTo(true)
+  }
+
   @Test
-  fun `Get unallocated cases by team where probation-estate API is successful and does not return LAO cases`() {
+  fun `Get unallocated cases by team where probation-estate API is successful and does not return restricted cases`() {
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
         "TEAM1" to "Team 1",
@@ -141,9 +217,26 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `Get unallocated cases by team where probation-estate API is successful and cases have restrictions`() {
+    hmppsProbateEstate.regionsAndTeamsSuccessResponse(
+      teams = listOf(
+        "TEAM1" to "Team 1",
+        "TEAM2" to "Team 2",
+      ),
+      regions = listOf(
+        "REGION1" to "Region 1",
+        "REGION2" to "Region 2",
+      ),
+    )
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndRestrictedUsers(
+      probationEstateTeamsAndRegionsApiIsWorking = true,
+    )
+  }
+
+  @Test
   fun `Get unallocated cases by team where all cases are LAO cases`() {
     insertCases()
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", true, true),
         Triple("J680648", true, true),
@@ -154,6 +247,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
+
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -199,6 +293,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = true,
       extraUnexpectedCaseFromDelius,
@@ -223,7 +322,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `return error when error on Delius API call`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -286,7 +385,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   @Test
   fun `must return sentence length`() {
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -299,6 +398,10 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
 
     workforceAllocationsToDelius.setupTeam1CaseDetails()
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
 
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
@@ -353,7 +456,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       handoverDate = handoverDate,
     )
     workforceAllocationsToDelius.setupTeam1CaseDetails(c2cCase)
-    workforceAllocationsToDelius.userHasAccessToAllCases(
+    workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
         Triple("J678910", false, false),
         Triple("J680648", false, false),
@@ -366,6 +469,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       ),
     )
 
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
     // mock estate api call for out of areas related functionality
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
       teams = listOf(
@@ -377,6 +485,11 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
+
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ", "AB77711"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
