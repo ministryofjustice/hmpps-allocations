@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 import java.time.LocalDateTime
 
 @Suppress("TooManyFunctions")
@@ -33,13 +32,11 @@ class GetUnallocatedCaseService(
   private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
-  private val exclusionService: ExclusionService,
+  @Qualifier("laoService")
+  private val laoService: LaoService,
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long, userName: String): UnallocatedCaseDetails? {
-    if (exclusionService.checkIfAnyUserExcluded(crn)) {
-      throw NotAllowedForLAOException("LAO Restricted Case", crn)
-    }
+  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
       val getDeliusCaseViewApiCall = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
@@ -116,6 +113,7 @@ class GetUnallocatedCaseService(
     }.takeUnless { restrictedOrExcluded(crn) }
   }
 
+  @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCasesFromRepo.isEmpty()) {
@@ -127,7 +125,7 @@ class GetUnallocatedCaseService(
 
       val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
         val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
-        caseAccess?.userExcluded == false && !caseAccess.userRestricted
+        caseAccess?.userRestricted == false
       }
 
       if (unallocatedCases.isEmpty()) {
@@ -154,10 +152,13 @@ class GetUnallocatedCaseService(
             .map { deliusCaseDetail ->
               val unallocatedCase =
                 unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
               UnallocatedCase.from(
                 unallocatedCase,
                 deliusCaseDetail,
                 outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+                excluded,
+                excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
               )
             }
         }
