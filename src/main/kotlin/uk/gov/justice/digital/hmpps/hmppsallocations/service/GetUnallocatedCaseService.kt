@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictionDetail
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
@@ -207,5 +209,16 @@ class GetUnallocatedCaseService(
 
   suspend fun restrictedOrExcluded(crn: String): Boolean {
     return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userExcluded || userRestricted } ?: true
+  }
+
+  suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
+    val deliusAccessRestrictionDetails = laoService.getCrnRestrictionsForUsers(crn, staffCodes)
+    val restrictedStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
+
+    val crnStaffRestrictions = CrnStaffRestrictions(crn, emptyList())
+    staffCodes.forEach {
+      crnStaffRestrictions.staffRestrictions.plus(CrnStaffRestrictionDetail(it, restrictedStaffCodes.contains(it)))
+    }
+    return crnStaffRestrictions
   }
 }
