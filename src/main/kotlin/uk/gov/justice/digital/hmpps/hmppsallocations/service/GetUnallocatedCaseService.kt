@@ -37,7 +37,7 @@ class GetUnallocatedCaseService(
   private val laoService: LaoService,
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long, userName: String): UnallocatedCaseDetails? {
+  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
     if (laoService.getCrnRestrictions(crn).apopUserExcluded) {
       throw NotAllowedForLAOException(crn, "A user of APoP is excluded from viewing this case")
     }

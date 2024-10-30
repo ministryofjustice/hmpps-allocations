@@ -158,6 +158,24 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
+  fun setGetApopUsers() {
+    val request = HttpRequest.request()
+      .withPath("/users")
+      .withMethod("GET")
+    workforceAllocationsToDelius.`when`(request).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(
+          """[{
+            "username": "Test2",
+            "staffCode": "TS4J273"
+          }]
+          """,
+        ),
+    )
+  }
+
   fun setExcludedUsersByCrn(crns: List<String>) {
     crns.forEach { setExcludedUsersByCrn(it) }
   }

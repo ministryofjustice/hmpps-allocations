@@ -21,6 +21,7 @@ import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
+@Suppress("TooManyFunctions")
 @RestControllerAdvice
 class HmppsAllocationsExceptionHandler {
   @ExceptionHandler(ValidationException::class)
