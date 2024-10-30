@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictionDetail
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictions
 
 @Service
@@ -27,5 +29,14 @@ class LaoService(
     return DeliusCrnRestrictions(limitedAccessDetails.excludedFrom.isNotEmpty(), limitedAccessDetails.restrictedTo.isNotEmpty(), apopExcluded)
   }
 
-  suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>) = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
+  suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>): CrnStaffRestrictions {
+    val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
+    val restrictedStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
+
+    val arrStaffRestrictions = ArrayList<CrnStaffRestrictionDetail>()
+    staffCodes.forEach {
+      arrStaffRestrictions.add(CrnStaffRestrictionDetail(it, restrictedStaffCodes.contains(it)))
+    }
+    return CrnStaffRestrictions(crn, arrStaffRestrictions)
+  }
 }

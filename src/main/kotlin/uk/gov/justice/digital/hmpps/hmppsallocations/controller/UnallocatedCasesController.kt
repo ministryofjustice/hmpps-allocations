@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
@@ -118,4 +119,13 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
     @RequestParam(required = true) staffCode: String,
   ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn and conviction $convictionNumber")
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/restrictions")
+  suspend fun getCaseRestrictionsByStaffCodes(
+    @PathVariable(required = true) crn: String,
+    @RequestParam(required = true) staffCodes: List<String>,
+  ): CrnStaffRestrictions =
+    getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodes)
+      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 }
