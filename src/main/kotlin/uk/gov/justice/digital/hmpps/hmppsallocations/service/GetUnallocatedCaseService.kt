@@ -39,7 +39,7 @@ class GetUnallocatedCaseService(
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
     if (laoService.getCrnRestrictions(crn).apopUserExcluded) {
-      throw NotAllowedForLAOException(crn, "A user of APoP is excluded from viewing this case")
+      throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
     }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
