@@ -175,7 +175,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         ),
     )
   }
-
+  
   fun setExcludedUsersByCrn(crns: List<String>) {
     crns.forEach { setExcludedUsersByCrn(it) }
   }
