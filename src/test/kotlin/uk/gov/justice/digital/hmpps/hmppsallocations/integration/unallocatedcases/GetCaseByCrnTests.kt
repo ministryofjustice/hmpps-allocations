@@ -10,7 +10,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can get case by crn and convictionNumber`() {
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
     canGetCaseByCrnAndConvictionNumber()
@@ -18,14 +18,14 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can get 403 when apop user is excluded`() {
-    workforceAllocationsToDelius.setGetApopUsers()
-    workforceAllocationsToDelius.setExcludedUsersByCrn("J678910")
+    workforceAllocationsToDelius.setApopUsers()
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J678910", "Fred")
     canGet403WhenApopUserExcluded()
   }
 
   @Test
   fun `can get case and outOfAreaTransfer is true`() {
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
@@ -45,7 +45,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can get case and outOfAreaTransfer is true but probate-estate-api is down`() {
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
@@ -56,7 +56,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `can still get case when case-details Delius API responds with Internal Server Error`() {
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
@@ -171,7 +171,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing court report`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
@@ -197,7 +197,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn missing assessment`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
@@ -221,9 +221,8 @@ class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `get 404 if crn not found`() {
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.userHasAccess("J678912")
-    workforceAllocationsToDelius.setGetApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     webTestClient.get()
       .uri("/cases/unallocated/J678912/convictions/9")
@@ -247,7 +246,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `retrieve main address`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
@@ -290,7 +289,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `return a no fixed abode address`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
@@ -321,7 +320,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `must return sentence length`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
@@ -345,7 +344,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and not found rosh and not found rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess(crn)
     insertCases()
@@ -379,7 +378,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   fun `can get case by crn and unavailable rosh and unavailable rsr and no regist`() {
     val crn = "J678910"
     val convictionNumber = 1
-    workforceAllocationsToDelius.setGetApopUsers()
+    workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
