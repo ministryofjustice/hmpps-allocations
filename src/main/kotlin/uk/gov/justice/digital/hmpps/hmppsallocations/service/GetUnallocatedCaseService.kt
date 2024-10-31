@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
@@ -21,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetai
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 import java.time.LocalDateTime
 
 @Suppress("TooManyFunctions")
@@ -32,9 +34,14 @@ class GetUnallocatedCaseService(
   private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+  @Qualifier("laoService")
+  private val laoService: LaoService,
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
+    if (laoService.getCrnRestrictions(crn).apopUserExcluded) {
+      throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
+    }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
       val getDeliusCaseViewApiCall = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
@@ -111,6 +118,7 @@ class GetUnallocatedCaseService(
     }.takeUnless { restrictedOrExcluded(crn) }
   }
 
+  @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCasesFromRepo.isEmpty()) {
@@ -122,7 +130,7 @@ class GetUnallocatedCaseService(
 
       val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
         val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
-        caseAccess?.userExcluded == false && !caseAccess.userRestricted
+        caseAccess?.userRestricted == false
       }
 
       if (unallocatedCases.isEmpty()) {
@@ -149,10 +157,13 @@ class GetUnallocatedCaseService(
             .map { deliusCaseDetail ->
               val unallocatedCase =
                 unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
               UnallocatedCase.from(
                 unallocatedCase,
                 deliusCaseDetail,
                 outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+                excluded,
+                excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
               )
             }
         }
@@ -201,5 +212,13 @@ class GetUnallocatedCaseService(
 
   suspend fun restrictedOrExcluded(crn: String): Boolean {
     return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userExcluded || userRestricted } ?: true
+  }
+
+  suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
+    return laoService.getCrnRestrictionsForUsers(crn, staffCodes)
+  }
+
+  suspend fun isCrnRestricted(crn: String, forApopUser: Boolean): Boolean? {
+    return laoService.isCrnRestricted(crn, forApopUser)
   }
 }
