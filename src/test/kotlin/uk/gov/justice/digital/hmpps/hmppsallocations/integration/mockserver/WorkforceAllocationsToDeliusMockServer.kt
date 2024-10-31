@@ -46,16 +46,13 @@ class WorkforceAllocationsToDeliusApiExtension : BeforeAllCallback, AfterAllCall
   override fun beforeAll(context: ExtensionContext?) {
     workforceAllocationsToDelius = WorkforceAllocationsToDeliusMockServer()
   }
-
   override fun beforeEach(context: ExtensionContext?) {
     workforceAllocationsToDelius.reset()
   }
-
   override fun afterAll(context: ExtensionContext?) {
     workforceAllocationsToDelius.stop()
   }
 }
-
 class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   private val currentMangedByTeam1CaseDetails = CaseDetailsIntegration(
@@ -92,7 +89,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun setuserAccessToCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
+  fun userHasAccessToAllCases(caseAccessList: List<Triple<String, Boolean, Boolean>>) {
     val request = HttpRequest.request()
       .withPath("/users/limited-access")
       .withMethod("POST")
@@ -155,103 +152,6 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         handoverDate = null,
       ),
       *extraCaseDetailsIntegrations,
-    )
-  }
-
-  fun setExcludedUsersByCrn(crns: List<String>) {
-    crns.forEach { setExcludedUsersByCrn(it) }
-  }
-
-  fun setExcludedUsersByCrn(crn: String) {
-    val request = HttpRequest.request()
-      .withPath("/person/$crn/limited-access/all")
-      .withMethod("GET")
-
-    workforceAllocationsToDelius.`when`(request).respond(
-      HttpResponse.response()
-        .withStatusCode(200)
-        .withContentType(MediaType.APPLICATION_JSON)
-        .withBody(
-          """{
-    "crn": "$crn",
-    "excludedFrom": [
-        {
-            "username": "Test2",
-            "staffCode": "TS4J273"
-        },
-        {
-            "username": "Test3",
-            "staffCode": "TS4A127"
-        }
-    ],
-    "restrictedTo": [],
-    "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
-    "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
-}""",
-
-        ),
-    )
-  }
-
-  fun setExcludedUsersByCrn(crn: String, staffCode: String) {
-    val request = HttpRequest.request()
-      .withPath("/person/$crn/limited-access/all")
-      .withMethod("GET")
-
-    workforceAllocationsToDelius.`when`(request).respond(
-      HttpResponse.response()
-        .withStatusCode(200)
-        .withContentType(MediaType.APPLICATION_JSON)
-        .withBody(
-          """{
-    "crn": "$crn",
-    "excludedFrom": [
-        {
-            "username": "Test2",
-            "staffCode": "$staffCode"
-        }
-    ],
-    "restrictedTo": [],
-    "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
-    "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
-}""",
-
-        ),
-    )
-  }
-
-  fun setNotExcludedUsersByCrn(crn: String) {
-    val request = HttpRequest.request()
-      .withPath("/person/$crn/limited-access/all")
-      .withMethod("GET")
-
-    workforceAllocationsToDelius.`when`(request).respond(
-      HttpResponse.response()
-        .withStatusCode(200)
-        .withContentType(MediaType.APPLICATION_JSON)
-        .withBody(
-          """{
-    "crn": "$crn",
-    "excludedFrom": [],
-    "restrictedTo": [],
-    "exclusionMessage": "N/A",
-    "restrictionMessage": "N/A"
-}""",
-
-        ),
-    )
-  }
-
-  fun setApopUsers() {
-    val request = HttpRequest.request()
-      .withPath("/users")
-      .withMethod("GET")
-
-    workforceAllocationsToDelius.`when`(request).respond(
-      HttpResponse.response()
-        .withStatusCode(200)
-        .withContentType(MediaType.APPLICATION_JSON)
-        .withBody("""[{"username": "Test2", "staffCode": "Fred"}]"""),
     )
   }
 
@@ -356,7 +256,6 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withContentType(MediaType.APPLICATION_JSON).withBody(deliusProbationRecordSingleInactiveEventResponse(crn, convictionNumber)),
     )
   }
-
   fun probationRecordSingleActiveEventReponse(crn: String, convictionNumber: Int) {
     val probationRecordRequest = HttpRequest.request().withPath("/allocation-demand/$crn/$convictionNumber/probation-record")
     workforceAllocationsToDelius.`when`(probationRecordRequest, Times.exactly(1)).respond(

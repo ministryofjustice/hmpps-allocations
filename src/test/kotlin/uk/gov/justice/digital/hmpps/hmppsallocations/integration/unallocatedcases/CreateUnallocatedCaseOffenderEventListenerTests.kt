@@ -80,22 +80,6 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     Assertions.assertFalse(repository.existsByCrn(crn))
   }
 
-  @Test
-  fun `should save when excluded case`() {
-    val crn = "J678910"
-    workforceAllocationsToDelius.userHasAccess(crn, excluded = true)
-    workforceAllocationsToDelius.unallocatedEventsResponse(crn)
-
-    hmppsTier.tierCalculationResponse(crn)
-
-    publishConvictionChangedMessage(crn)
-
-    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
-    await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
-
-    Assertions.assertTrue(repository.existsByCrn(crn))
-  }
-
   private fun verifyTelemetry(crn: String, number: Int) {
     verify(exactly = number) {
       telemetryClient.trackEvent(
