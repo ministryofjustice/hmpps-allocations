@@ -165,4 +165,66 @@ class LaoServiceTest {
     assert(crnStaffRestrictions.staffRestrictions.get(0).staffCode == "123")
     assert(crnStaffRestrictions.staffRestrictions.get(1).staffCode == "456")
   }
+
+  @Test
+  fun `is not restricted when no users are restricted`() = runTest {
+    val crn = "X1234567"
+    val deliusAccessRestrictionDetails = DeliusAccessRestrictionDetails(
+      crn = crn,
+      excludedFrom = emptyList(),
+      restrictedTo = emptyList(),
+      exclusionMessage = "",
+      restrictionMessage = "",
+    )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "green", staffCode = "12345"))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns deliusAccessRestrictionDetails
+
+    assert(!laoService.isCrnRestricted(crn, false))
+  }
+
+  @Test
+  fun `is restricted when users are restricted and we don't care about apop users`() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "green", staffCode = "12345"))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
+      crn = crn,
+      restrictedTo = emptyList(),
+      excludedFrom = listOf(DeliusApopUser(username = "green", staffCode = "non apop")),
+      exclusionMessage = "sorry",
+      restrictionMessage = "sorry",
+    )
+
+    assert(laoService.isCrnRestricted(crn, false))
+  }
+
+  @Test
+  fun `is not restricted when only non apop users are restricted and we are checking apop users`() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "green", staffCode = "12345"))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
+      crn = crn,
+      restrictedTo = emptyList(),
+      excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "not apop")),
+      exclusionMessage = "sorry",
+      restrictionMessage = "sorry",
+    )
+
+    assert(!laoService.isCrnRestricted(crn, true))
+  }
+
+  @Test
+  fun `is restricted when apop users are restricted and we are checking apop users`() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "fred", staffCode = "apop"))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
+      crn = crn,
+      restrictedTo = emptyList(),
+      excludedFrom = listOf(DeliusApopUser(username = "green", staffCode = "apop")),
+      exclusionMessage = "sorry",
+      restrictionMessage = "sorry",
+    )
+
+    assert(laoService.isCrnRestricted(crn, true))
+  }
 }

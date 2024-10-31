@@ -217,4 +217,8 @@ class GetUnallocatedCaseService(
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
     return laoService.getCrnRestrictionsForUsers(crn, staffCodes)
   }
+
+  suspend fun isCrnRestricted(crn: String, forApopUser: Boolean): Boolean? {
+    return laoService.isCrnRestricted(crn, forApopUser)
+  }
 }
