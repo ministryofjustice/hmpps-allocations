@@ -2,19 +2,12 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.LaoStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
-
-const val LAO = "LAO logging"
-const val LAO_STATUS = "LAO status"
-private const val CRN = "CRN"
 
 @Service
 class UpsertUnallocatedCaseService(
@@ -32,9 +25,7 @@ class UpsertUnallocatedCaseService(
   suspend fun upsertUnallocatedCase(crn: String) {
     log.debug("upsert unallocated case for crn: $crn")
     val storedUnallocatedEvents = repository.findByCrn(crn)
-    val userAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)
-    logLaoStatus(crn, userAccess)
-    userAccess.takeUnless { it!!.userRestricted }?.let {
+    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
@@ -56,27 +47,6 @@ class UpsertUnallocatedCaseService(
         }
       }
     } ?: databaseService.deleteOldEvents(storedUnallocatedEvents, emptyMap())
-  }
-
-  private fun logLaoStatus(
-    crn: String,
-    userAccess: DeliusCaseAccess?,
-  ) {
-    MDC.put(LAO, "Incoming cases")
-    MDC.put(CRN, crn)
-    if (userAccess!!.userRestricted) {
-      MDC.put(LAO_STATUS, LaoStatus.RESTRICTED.name)
-      log.info("Allocations receiving a Restricted case CRN, not included: $crn")
-    } else if (userAccess.userExcluded) {
-      MDC.put(LAO_STATUS, LaoStatus.EXCLUDED.name)
-      log.info("Allocations receiving a Excluded case CRN, case included: $crn")
-    } else {
-      MDC.put(LAO_STATUS, LaoStatus.UNRESTRICTED.name)
-      log.info("Allocations receiving a non LAO case CRN, case case included: $crn")
-    }
-    MDC.remove(LAO)
-    MDC.remove(CRN)
-    MDC.remove(LAO_STATUS)
   }
 
   suspend fun getTier(crn: String): String {
