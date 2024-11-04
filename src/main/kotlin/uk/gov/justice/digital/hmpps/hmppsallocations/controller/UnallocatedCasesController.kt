@@ -131,12 +131,18 @@ class UnallocatedCasesController(
     getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodes)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Unauthorized"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/unallocated/{crn}/restricted")
   suspend fun isCaseRestricted(
     @PathVariable(required = true) crn: String,
-    @RequestParam(required = false, defaultValue = "false") forApopUser: Boolean,
   ): Boolean =
-    getUnallocatedCaseService.isCrnRestricted(crn, forApopUser)
+    getUnallocatedCaseService.isCrnRestricted(crn)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 }

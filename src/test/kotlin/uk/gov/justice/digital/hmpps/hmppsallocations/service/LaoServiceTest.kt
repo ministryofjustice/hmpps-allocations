@@ -7,9 +7,11 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAccessRestrictionDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
 class LaoServiceTest {
 
@@ -180,7 +182,7 @@ class LaoServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "green", staffCode = "12345"))
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns deliusAccessRestrictionDetails
 
-    assert(!laoService.isCrnRestricted(crn, false))
+    assert(!laoService.isCrnRestricted(crn))
   }
 
   @Test
@@ -195,26 +197,26 @@ class LaoServiceTest {
       restrictionMessage = "sorry",
     )
 
-    assert(laoService.isCrnRestricted(crn, false))
+    assert(laoService.isCrnRestricted(crn))
   }
 
   @Test
-  fun `is not restricted when only non apop users are restricted and we are checking apop users`() = runTest {
+  fun `throws 403 when case is restricted to certain individuals only`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "green", staffCode = "12345"))
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
       crn = crn,
-      restrictedTo = emptyList(),
-      excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "not apop")),
+      restrictedTo = listOf(DeliusApopUser(username = "JamesBond", staffCode = "007")),
+      excludedFrom = emptyList(),
       exclusionMessage = "sorry",
       restrictionMessage = "sorry",
     )
 
-    assert(!laoService.isCrnRestricted(crn, true))
+    assertThrows<NotAllowedForLAOException> { (laoService.isCrnRestricted(crn)) }
   }
 
   @Test
-  fun `is restricted when apop users are restricted and we are checking apop users`() = runTest {
+  fun `throws 403 when an apop user is excluded`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(DeliusApopUser(username = "fred", staffCode = "apop"))
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
@@ -225,6 +227,6 @@ class LaoServiceTest {
       restrictionMessage = "sorry",
     )
 
-    assert(laoService.isCrnRestricted(crn, true))
+    assertThrows<NotAllowedForLAOException> { (laoService.isCrnRestricted(crn)) }
   }
 }
