@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictionDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
 @Service
 class LaoService(
@@ -15,7 +16,7 @@ class LaoService(
 
   suspend fun getCrnRestrictions(crn: String): DeliusCrnRestrictions {
     val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val apopUsersStaffCodes = apopUsers.map { it.staffCode }
+    val apopUsersStaffCodes = apopUsers.filter { it.staffCode != null }.map { it.staffCode }
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     var apopExcluded = false
 
@@ -29,31 +30,32 @@ class LaoService(
     return DeliusCrnRestrictions(limitedAccessDetails.excludedFrom.isNotEmpty(), limitedAccessDetails.restrictedTo.isNotEmpty(), apopExcluded)
   }
 
-  suspend fun isCrnRestricted(crn: String, forApopUsers: Boolean): Boolean {
+  suspend fun isCrnRestricted(crn: String): Boolean {
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
 
-    // No exclusions
-    if (limitedAccessDetails.excludedFrom.isEmpty()) {
+    // Nobody excluded from and nobody restricted to
+    if (limitedAccessDetails.excludedFrom.isEmpty() && limitedAccessDetails.restrictedTo.isEmpty()) {
       return false
     }
 
-    // exclusions, not checking apopusers
-    if (!forApopUsers) {
-      return true
+    // restricted to certain individuals only
+    if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
+      throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
     }
 
     val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
     val apopUsersStaffCodes = apopUsers.map { it.staffCode }
 
-    limitedAccessDetails.excludedFrom.forEach {
+    // Case is excluded from certain individuals
+
+    limitedAccessDetails.excludedFrom.filter { it.staffCode != null }.forEach {
       if (apopUsersStaffCodes.contains(it.staffCode)) {
-        // apop user excluded
-        return true
+        // Case excluded from an APoP user
+        throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
       }
     }
 
-    // no apop user excluded
-    return false
+    return true
   }
 
   suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>): CrnStaffRestrictions {
