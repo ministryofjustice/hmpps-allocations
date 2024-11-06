@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.StaffCodesRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
@@ -126,9 +127,9 @@ class UnallocatedCasesController(
   @PostMapping("/cases/unallocated/{crn}/restrictions")
   suspend fun getCaseRestrictionsByStaffCodes(
     @PathVariable(required = true) crn: String,
-    @RequestBody(required = true) staffCodes: List<String>,
+    @RequestBody(required = true) staffCodesRequest: StaffCodesRequest,
   ): CrnStaffRestrictions =
-    getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodes)
+    getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodesRequest.staffCodes)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 
   @ApiResponses(
