@@ -32,7 +32,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     return webClient
       .get()
-      .uri("/assessments/timeline/crn/$crn")
+      .uri("/assessments/timeline/crn/{crn}", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
       .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
@@ -49,7 +49,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
-      .uri("/risks/crn/$crn/widget")
+      .uri("/risks/crn/{crn}/widget", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
@@ -71,7 +71,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
-      .uri("/risks/crn/$crn/predictors/rsr/history")
+      .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
