@@ -53,7 +53,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails {
     return webClient
       .get()
-      .uri("person/$crn/limited-access/all")
+      .uri("person/{crn}/limited-access/all", crn)
       .retrieve()
       .awaitBody()
   }
@@ -61,7 +61,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails {
     return webClient
       .post()
-      .uri("person/$crn/limited-access")
+      .uri("person/{crn}/limited-access", crn)
       .bodyValue(staffCodes)
       .retrieve()
       .awaitBody()
@@ -118,7 +118,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   fun getDocuments(crn: String): Flow<Document> {
     return webClient
       .get()
-      .uri("/offenders/$crn/documents")
+      .uri("/offenders/{crn}/documents", crn)
       .retrieve()
       .bodyToFlow()
   }
@@ -126,7 +126,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
     return webClient
       .get()
-      .uri("/offenders/$crn/documents/$documentId")
+      .uri("/offenders/{crn}/documents/{documentId}", crn, documentId)
       .retrieve()
       .toEntity(Resource::class.java)
   }
@@ -134,7 +134,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
     return webClient
       .get()
-      .uri("/allocation-demand/$crn/$convictionNumber/case-view")
+      .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
       .retrieve()
       .bodyToMono()
   }
@@ -142,7 +142,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
     return webClient
       .get()
-      .uri("/allocation-demand/$crn/$excludeConvictionNumber/probation-record")
+      .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
       .retrieve()
       .awaitBody()
   }
@@ -150,7 +150,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getDeliusRisk(crn: String): DeliusRisk {
     return webClient
       .get()
-      .uri("/allocation-demand/$crn/risk")
+      .uri("/allocation-demand/{crn}/risk", crn)
       .retrieve()
       .awaitBody()
   }
@@ -158,7 +158,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? =
     webClient
       .get()
-      .uri("/allocation-demand/$crn/unallocated-events")
+      .uri("/allocation-demand/{crn}/unallocated-events", crn)
       .retrieve()
       .onStatus({ status -> status.is5xxServerError }) {
         Mono.error(AllocationsServerError("Internal server error"))
@@ -179,14 +179,14 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse =
     webClient
       .get()
-      .uri("/allocation-demand/impact?crn=$crn&staff=$staffCode")
+      .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
       .retrieve()
       .awaitBody()
 
   suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? =
     webClient
       .get()
-      .uri("allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber")
+      .uri("allocation-completed/order-manager?crn={crn}&eventNumber={convictionNumber}", crn, convictionNumber)
       .retrieve()
       .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
         Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
