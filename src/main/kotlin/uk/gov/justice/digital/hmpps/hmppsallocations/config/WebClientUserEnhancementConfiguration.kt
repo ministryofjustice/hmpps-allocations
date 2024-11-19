@@ -4,20 +4,12 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.endpoint.WebClientReactiveClientCredentialsTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.web.reactive.function.BodyInserters.FormInserter
-import org.springframework.web.reactive.function.client.ClientRequest
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -30,10 +22,16 @@ class WebClientUserEnhancementConfiguration(
 ) {
 
   @Bean
-  fun assessRisksNeedsWebClientUserEnhancedAppScope(builder: WebClient.Builder): WebClient {
-    return builder.baseUrl(assessRisksNeedsApiRootUri)
-      .filter(AuthTokenFilterFunction())
-      .build()
+  fun assessRisksNeedsWebClientUserEnhancedAppScope(
+    clientRegistrationRepository: ReactiveClientRegistrationRepository,
+    builder: WebClient.Builder,
+  ): WebClient {
+    return getOAuthWebClient(
+      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
+      builder,
+      assessRisksNeedsApiRootUri,
+      "assess-risks-needs-api",
+    )
   }
 
   @Bean
@@ -47,7 +45,7 @@ class WebClientUserEnhancementConfiguration(
     builder: WebClient.Builder,
   ): WebClient {
     return getOAuthWebClient(
-      authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder),
+      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
       builder,
       assessmentApiRootUri,
       "assessment-api",
@@ -60,7 +58,7 @@ class WebClientUserEnhancementConfiguration(
     builder: WebClient.Builder,
   ): WebClient {
     return getOAuthWebClient(
-      authorizedClientManagerUserEnhanced(clientRegistrationRepository, builder),
+      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
       builder,
       workforceAllocationsToDeliusApiRootUri,
       "workforce-allocations-to-delius-api",
@@ -72,37 +70,16 @@ class WebClientUserEnhancementConfiguration(
     return WorkforceAllocationsToDeliusApiClient(webClient)
   }
 
-  private fun authorizedClientManagerUserEnhanced(clients: ReactiveClientRegistrationRepository?, builder: WebClient.Builder): ReactiveOAuth2AuthorizedClientManager {
-    val service: ReactiveOAuth2AuthorizedClientService = InMemoryReactiveOAuth2AuthorizedClientService(clients)
+  private fun authorizedClientManagerUserEnhanced(clients: ReactiveClientRegistrationRepository): ReactiveOAuth2AuthorizedClientManager {
+    val service = InMemoryReactiveOAuth2AuthorizedClientService(clients)
     val manager = AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clients, service)
-    val reactiveClientCredentialsTokenResponseClient = WebClientReactiveClientCredentialsTokenResponseClient()
-
-    reactiveClientCredentialsTokenResponseClient.setWebClient(builder.filter(userEnhancedTokenRequestProcessor()).build())
-
-    val reactiveAuthorizedClientProvider = ReactiveOAuth2AuthorizedClientProviderBuilder
-      .builder()
-      .clientCredentials { reactiveClientCredentialsGrantBuilder: ReactiveOAuth2AuthorizedClientProviderBuilder.ClientCredentialsGrantBuilder ->
-        reactiveClientCredentialsGrantBuilder.accessTokenResponseClient(reactiveClientCredentialsTokenResponseClient)
-      }.build()
-
-    manager.setAuthorizedClientProvider(reactiveAuthorizedClientProvider)
+    val provider = ReactiveOAuth2AuthorizedClientProviderBuilder.builder()
+      .clientCredentials()
+      .build()
+    manager.setAuthorizedClientProvider(provider)
     return manager
   }
 
-  fun userEnhancedTokenRequestProcessor(): ExchangeFilterFunction = ExchangeFilterFunction.ofRequestProcessor { request ->
-    ReactiveSecurityContextHolder.getContext()
-      .map(SecurityContext::getAuthentication)
-      .map(Authentication::getName)
-      .map { username ->
-        val clientRequest = ClientRequest.from(request)
-        if (request.body() is FormInserter<*>) {
-          clientRequest.body((request.body() as FormInserter<String>).with("username", username))
-        }
-        clientRequest.build()
-      }
-  }
-
-  @Suppress("LongParameterList")
   private fun getOAuthWebClient(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
