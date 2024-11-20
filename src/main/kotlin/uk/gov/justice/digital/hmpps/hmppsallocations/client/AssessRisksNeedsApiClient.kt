@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.time.delay
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -33,6 +34,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     return webClient
       .get()
       .uri("/assessments/timeline/crn/{crn}", crn)
+      .header("Authorization", getBearerToken())
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
       .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
@@ -46,10 +48,18 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .awaitSingleOrNull()
   }
 
+  private fun getBearerToken(): String? {
+    SecurityContextHolder.getContext().authentication?.let {
+      return "Bearer ${it.credentials}"
+    }
+    return null
+  }
+
   suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
       .uri("/risks/crn/{crn}/widget", crn)
+      .header("Authorization", getBearerToken())
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
@@ -72,6 +82,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     return webClient
       .get()
       .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
+      .header("Authorization", getBearerToken())
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
