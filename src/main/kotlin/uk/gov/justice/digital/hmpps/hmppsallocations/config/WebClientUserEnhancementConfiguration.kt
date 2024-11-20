@@ -32,7 +32,7 @@ class WebClientUserEnhancementConfiguration(
       authorizedClientManagerUserEnhanced(clientRegistrationRepository),
       builder,
       assessRisksNeedsApiRootUri,
-      "assess-risks-needs-api",
+      "arn-api",
     )
   }
 
