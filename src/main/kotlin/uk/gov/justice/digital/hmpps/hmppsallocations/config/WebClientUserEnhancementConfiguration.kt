@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
@@ -22,6 +23,7 @@ class WebClientUserEnhancementConfiguration(
 ) {
 
   @Bean
+  @Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope")
   fun assessRisksNeedsWebClientUserEnhancedAppScope(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
@@ -34,7 +36,9 @@ class WebClientUserEnhancementConfiguration(
     )
   }
 
+  @Primary
   @Bean
+  @Qualifier("assessRisksNeedsApiClientUserEnhanced")
   fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient {
     return AssessRisksNeedsApiClient(webClient)
   }
