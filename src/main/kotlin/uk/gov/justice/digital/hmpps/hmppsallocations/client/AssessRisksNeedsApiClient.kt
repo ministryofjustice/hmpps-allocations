@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.time.delay
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.reactive.function.client.WebClient
@@ -29,8 +31,13 @@ private const val NOT_FOUND = "NOT_FOUND"
 private const val UNAVAILABLE = "UNAVAILABLE"
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
+    log.info("In getLatestCompleteAssessment for crn $crn")
+    // log.info("bearer token is ${getBearerToken()}")
     return webClient
       .get()
       .uri("/assessments/timeline/crn/{crn}", crn)
@@ -48,11 +55,16 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .awaitSingleOrNull()
   }
 
-  private fun getBearerToken(): String? {
+  private fun getBearerToken(): String? = runBlocking {
+    log.info("Getting bearer token")
+    // log.info("SecurityContextHolder.getContext().authentication is ${SecurityContextHolder.getContext().authentication}")
     SecurityContextHolder.getContext().authentication?.let {
-      return "Bearer ${it.credentials}"
+      log.info("Authorities: size ${it.authorities.size}")
+      it.authorities.toList().forEach { log.info("Authority: $it") }
+      return@runBlocking "Bearer ${it.credentials}"
     }
-    return null
+    log.info("No bearer token found")
+    return@runBlocking null
   }
 
   suspend fun getRosh(crn: String): RoshSummary? {
