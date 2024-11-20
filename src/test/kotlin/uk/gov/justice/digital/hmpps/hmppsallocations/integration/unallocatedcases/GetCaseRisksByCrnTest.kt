@@ -1,13 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
 import java.math.BigDecimal
 
-@Disabled
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
   @Test
