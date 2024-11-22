@@ -31,9 +31,9 @@ class AuthAwareTokenConverter : Converter<Jwt, Mono<AbstractAuthenticationToken>
       )
     } else {
       Principal(
-      userName = claims["sub"] as String,
-      userId = claims["client_id"] as String,
-      isClientGrantType = true,
+        userName = claims["sub"] as String,
+        userId = claims["client_id"] as String,
+        isClientGrantType = true,
       )
     }
   }

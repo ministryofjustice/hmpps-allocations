@@ -42,14 +42,14 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     log.info("In getLatestCompleteAssessment for crn $crn")
     val token = getJwtToken().awaitSingleOrNull()
     log.info("JWT Token: $token")
-    //token is correct here
+    // token is correct here
     return webClient
       .get()
       .uri("/assessments/timeline/crn/{crn}", crn)
       .headers { headers ->
         headers.setBearerAuth(token!!)
         log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
-        //token is correct here
+        // token is correct here
       }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
@@ -73,7 +73,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .headers { headers ->
         headers.setBearerAuth(token!!)
         log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
-        //token is correct here
+        // token is correct here
       }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
@@ -102,7 +102,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .headers { headers ->
         headers.setBearerAuth(token!!)
         log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
-        //token is correct here
+        // token is correct here
       }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
