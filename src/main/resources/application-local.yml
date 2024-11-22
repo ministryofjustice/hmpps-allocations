@@ -48,8 +48,7 @@ oauth:
     url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 spring:
   datasource:
-    url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}?sslmode=prefer"
-
+    url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"
 logging:
   level:
     uk.gov.justice.digital.hmpps.hmppsallocations: INFO

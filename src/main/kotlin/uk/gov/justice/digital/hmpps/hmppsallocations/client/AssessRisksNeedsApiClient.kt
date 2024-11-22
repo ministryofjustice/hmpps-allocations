@@ -5,11 +5,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.oauth2.core.OAuth2AccessToken
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -37,11 +40,17 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     log.info("In getLatestCompleteAssessment for crn $crn")
-    // log.info("bearer token is ${getBearerToken()}")
+    val token = getJwtToken().awaitSingleOrNull()
+    log.info("JWT Token: $token")
+    //token is correct here
     return webClient
       .get()
       .uri("/assessments/timeline/crn/{crn}", crn)
-      .header("Authorization", getBearerToken())
+      .headers { headers ->
+        headers.setBearerAuth(token!!)
+        log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
+        //token is correct here
+      }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
       .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
@@ -55,23 +64,17 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .awaitSingleOrNull()
   }
 
-  private fun getBearerToken(): String? = runBlocking {
-    log.info("Getting bearer token")
-    // log.info("SecurityContextHolder.getContext().authentication is ${SecurityContextHolder.getContext().authentication}")
-    SecurityContextHolder.getContext().authentication?.let {
-      log.info("Authorities: size ${it.authorities.size}")
-      it.authorities.toList().forEach { log.info("Authority: $it") }
-      return@runBlocking "Bearer ${it.credentials}"
-    }
-    log.info("No bearer token found")
-    return@runBlocking null
-  }
-
   suspend fun getRosh(crn: String): RoshSummary? {
+    val token = getJwtToken().awaitSingleOrNull()
+    log.info("JWT Token: $token")
     return webClient
       .get()
       .uri("/risks/crn/{crn}/widget", crn)
-      .header("Authorization", getBearerToken())
+      .headers { headers ->
+        headers.setBearerAuth(token!!)
+        log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
+        //token is correct here
+      }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
@@ -91,10 +94,16 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   }
 
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
+    val token = getJwtToken().awaitSingleOrNull()
+    log.info("JWT Token: $token")
     return webClient
       .get()
       .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
-      .header("Authorization", getBearerToken())
+      .headers { headers ->
+        headers.setBearerAuth(token!!)
+        log.info("Headers: ${headers.get(HttpHeaders.AUTHORIZATION)}")
+        //token is correct here
+      }
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
@@ -117,5 +126,20 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
         }
       }
       .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
+  }
+
+  fun getJwtToken(): Mono<String?> {
+    return ReactiveSecurityContextHolder.getContext()
+      .mapNotNull { securityContext ->
+        val authentication = securityContext.authentication
+        log.info("In web client the principal is ${authentication.principal}")
+        log.info("In web client the authorities are ${authentication.authorities}")
+        when (authentication) {
+          is BearerTokenAuthentication -> authentication.token.tokenValue
+          is OAuth2AccessToken -> authentication.tokenValue
+          is JwtAuthenticationToken -> authentication.token.tokenValue
+          else -> null
+        }
+      }
   }
 }

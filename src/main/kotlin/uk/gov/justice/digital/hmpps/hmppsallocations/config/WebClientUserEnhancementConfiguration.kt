@@ -1,17 +1,24 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
+import org.springframework.security.oauth2.core.OAuth2AccessToken
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
@@ -22,23 +29,28 @@ class WebClientUserEnhancementConfiguration(
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
+  }
+
+  private fun assessRisksNeedsWebClient(builder: WebClient.Builder): WebClient {
+    return builder.baseUrl(assessRisksNeedsApiRootUri)
+      .filter(logRequest())
+      .filter(withAuth())
+      .defaultHeader("Content-Type", "application/json")
+      .build()
+  }
+
   @Bean
   @Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope")
   fun assessRisksNeedsWebClientUserEnhancedAppScope(
-    clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
   ): WebClient {
-    return getOAuthWebClient(
-      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
-      builder,
-      assessRisksNeedsApiRootUri,
-      "arn-api",
-    )
+    log.info("in assess risks need web client user enhanced app scope")
+    return assessRisksNeedsWebClient(builder)
   }
 
-  @Primary
   @Bean
-  @Qualifier("assessRisksNeedsApiClientUserEnhanced")
   fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient {
     return AssessRisksNeedsApiClient(webClient)
   }
@@ -69,6 +81,15 @@ class WebClientUserEnhancementConfiguration(
     )
   }
 
+  private fun logRequest(): ExchangeFilterFunction {
+    return ExchangeFilterFunction.ofRequestProcessor { request: ClientRequest ->
+      request.headers().forEach { name, values ->
+        values.forEach { value -> println("Request Header: $name=$value") }
+      }
+      Mono.just(request)
+    }
+  }
+
   @Bean
   fun workforceAllocationsToDeliusApiClientUserEnhanced(@Qualifier("workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
     return WorkforceAllocationsToDeliusApiClient(webClient)
@@ -94,6 +115,27 @@ class WebClientUserEnhancementConfiguration(
     oauth2Client.setDefaultClientRegistrationId(registrationId)
     return builder.baseUrl(rootUri)
       .filter(oauth2Client)
+      .filter(logRequest())
       .build()
+  }
+
+  private fun withAuth(): ExchangeFilterFunction {
+    return ExchangeFilterFunction.ofRequestProcessor { request ->
+      ReactiveSecurityContextHolder.getContext()
+        .map { securityContext ->
+          val authentication = securityContext.authentication
+          val token = when (authentication) {
+            is BearerTokenAuthentication -> authentication.token.tokenValue
+            is OAuth2AccessToken -> authentication.tokenValue
+            is JwtAuthenticationToken -> authentication.token.tokenValue
+            else -> null
+          }
+          token?.let {
+            ClientRequest.from(request)
+              .header("Authorization", "Bearer $it")
+              .build()
+          } ?: request
+        }
+    }
   }
 }

@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -120,6 +122,8 @@ class GetUnallocatedCaseService(
 
   @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
+    log.info("Getting all unallocated cases for team $teamCode")
+    log.info("Security Context ${SecurityContextHolder.getContext().authentication}")
     val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCasesFromRepo.isEmpty()) {
       return emptyList()
@@ -220,5 +224,9 @@ class GetUnallocatedCaseService(
 
   suspend fun isCrnRestricted(crn: String): Boolean? {
     return laoService.isCrnRestricted(crn)
+  }
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
