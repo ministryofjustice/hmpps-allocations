@@ -36,7 +36,7 @@ class JwtAuthHelper {
     clientId: String = "hmpps-allocations-client",
     userName: String = "TomJones",
     name: String = "Tom Jones",
-    authSource: String =  "delius",
+    authSource: String = "delius",
     isClientIdGrantType: Boolean = false,
     jwtId: String = UUID.randomUUID().toString(),
   ): String {
