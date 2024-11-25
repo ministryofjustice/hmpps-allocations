@@ -1,10 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.health
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class InfoTest : IntegrationTestBase() {
 
