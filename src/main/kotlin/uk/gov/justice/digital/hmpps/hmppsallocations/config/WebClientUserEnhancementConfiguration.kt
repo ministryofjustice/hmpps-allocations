@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -18,7 +17,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 
@@ -29,15 +27,9 @@ class WebClientUserEnhancementConfiguration(
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 
-  companion object {
-    val log = LoggerFactory.getLogger(this::class.java)
-  }
-
   private fun assessRisksNeedsWebClient(builder: WebClient.Builder): WebClient {
     return builder.baseUrl(assessRisksNeedsApiRootUri)
-      .filter(logRequest())
       .filter(withAuth())
-      .defaultHeader("Content-Type", "application/json")
       .build()
   }
 
@@ -46,7 +38,6 @@ class WebClientUserEnhancementConfiguration(
   fun assessRisksNeedsWebClientUserEnhancedAppScope(
     builder: WebClient.Builder,
   ): WebClient {
-    log.info("in assess risks need web client user enhanced app scope")
     return assessRisksNeedsWebClient(builder)
   }
 
@@ -81,15 +72,6 @@ class WebClientUserEnhancementConfiguration(
     )
   }
 
-  private fun logRequest(): ExchangeFilterFunction {
-    return ExchangeFilterFunction.ofRequestProcessor { request: ClientRequest ->
-      request.headers().forEach { name, values ->
-        values.forEach { value -> println("Request Header: $name=$value") }
-      }
-      Mono.just(request)
-    }
-  }
-
   @Bean
   fun workforceAllocationsToDeliusApiClientUserEnhanced(@Qualifier("workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
     return WorkforceAllocationsToDeliusApiClient(webClient)
@@ -115,7 +97,6 @@ class WebClientUserEnhancementConfiguration(
     oauth2Client.setDefaultClientRegistrationId(registrationId)
     return builder.baseUrl(rootUri)
       .filter(oauth2Client)
-      .filter(logRequest())
       .build()
   }
 
