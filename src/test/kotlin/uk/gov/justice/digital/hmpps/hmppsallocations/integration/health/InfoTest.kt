@@ -26,6 +26,6 @@ class InfoTest : IntegrationTestBase() {
       .expectStatus().isOk
 //      .expectBody().jsonPath("build.version").value<String> {
 //        assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-      }
+//      }
   }
 }
