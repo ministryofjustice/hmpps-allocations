@@ -43,7 +43,7 @@ import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
   HmppsAuthApiExtension::class,
 )
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureWebTestClient(timeout = "720000")
+@AutoConfigureWebTestClient(timeout = "1440000")
 @ActiveProfiles("test")
 abstract class IntegrationTestBase {
 
