@@ -208,6 +208,10 @@ abstract class IntegrationTestBase {
         subject = "SOME_USER",
         roles = roles,
         clientId = "some-client",
+        userName = "TomJones",
+        name = "Tom Jones",
+        authSource = "delius",
+
       ),
     )
   }

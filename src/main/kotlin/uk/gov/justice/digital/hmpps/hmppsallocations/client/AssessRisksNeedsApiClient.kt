@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.time.delay
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
@@ -28,6 +29,9 @@ private const val NOT_FOUND = "NOT_FOUND"
 private const val UNAVAILABLE = "UNAVAILABLE"
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     return webClient
