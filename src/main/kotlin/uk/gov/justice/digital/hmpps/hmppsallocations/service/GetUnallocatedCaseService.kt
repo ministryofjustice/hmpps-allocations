@@ -41,17 +41,22 @@ class GetUnallocatedCaseService(
 ) {
 
   suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
+    log.info("lao check")
     if (laoService.getCrnRestrictions(crn).apopUserExcluded) {
       throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
     }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+      log.info("gettingLatestAssessment")
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
+      log.info("gettingCaseView")
       val getDeliusCaseViewApiCall = workforceAllocationsToDeliusApiClient.getDeliusCaseView(crn, convictionNumber)
+      log.info("gettingCaseView api call")
       val getDeliusCaseDetailsApiCall = workforceAllocationsToDeliusApiClient
         .getDeliusCaseDetails(
           crn,
           convictionNumber,
         )
+      log.info("apis in parallell call")
       callDeliusCaseViewAndCaseDetailApisInParallel(
         crn,
         convictionNumber,
@@ -61,6 +66,7 @@ class GetUnallocatedCaseService(
         getDeliusCaseDetailsApiCall,
       )
     }
+    log.info("out of parallee")
   }
 
   @Suppress("LongParameterList")
@@ -75,6 +81,7 @@ class GetUnallocatedCaseService(
     Mono.zip(getDeliusCaseViewCall, getDeliusCaseDetailsCall)
       .awaitSingle()
       .let {
+        log.info("in one")
         val caseView = it.t1
         val caseDetails = it.t2
         val caseIsOutOfAreaTransfer = if (caseDetails.cases.firstOrNull() != null) {
