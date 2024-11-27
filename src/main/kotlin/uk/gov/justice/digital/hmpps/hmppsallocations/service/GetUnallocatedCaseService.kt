@@ -192,14 +192,18 @@ class GetUnallocatedCaseService(
 
   suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
-
+      log.info("getting risk")
       val fred = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
       log.info("got delius risk $fred")
+      val george = assessRisksNeedsApiClient.getRiskPredictors(crn)
+      log.info("got risk predictors")
+      val charlie = assessRisksNeedsApiClient.getRosh(crn)
+      log.info("got rosh ")
       return UnallocatedCaseRisks.from(
         fred,
         unallocatedCaseEntity,
-        assessRisksNeedsApiClient.getRosh(crn),
-        assessRisksNeedsApiClient.getRiskPredictors(crn)
+        charlie,
+        george
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
       ).takeUnless { restrictedOrExcluded(crn) }
