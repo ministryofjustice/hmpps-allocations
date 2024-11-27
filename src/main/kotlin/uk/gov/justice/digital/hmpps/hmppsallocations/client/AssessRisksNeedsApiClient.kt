@@ -1,9 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
@@ -11,7 +9,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
-import org.springframework.web.reactive.function.client.exchangeToFlow
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
@@ -82,19 +79,28 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     log.info("arn rsr $crn")
     return webClient
       .get()
-      .uri("/risks/crn/$crn/predictors/rsr/history")
-      .exchangeToFlow { response ->
-        flow {
-          when (response.statusCode()) {
-            HttpStatus.OK -> emitAll(response.bodyToFlow())
-            HttpStatus.NOT_FOUND -> notFound()
-            else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "UNAVAILABLE", null))
-          }
-        }.onEmpty { notFound() }
+      .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
+      .retrieve()
+      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+      .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
+      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
+      .bodyToFlow<RiskPredictor>()
+//      .retryWhen(
+//        { cause, attempt ->
+//          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
+//            delay(Duration.ofSeconds(RETRY_DELAY))
+//            true
+//          } else {
+//            false
+//          }
+//        },
+//      )
+      .catch {
+        when (it.message) {
+          NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
+          else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
+        }
       }
-  }
-
-  private suspend fun FlowCollector<RiskPredictor>.notFound() {
-    emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), "NOT_FOUND", null))
+      .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
   }
 }
