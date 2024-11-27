@@ -3,9 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onEmpty
-import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
@@ -87,16 +85,16 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
       .bodyToFlow<RiskPredictor>()
-      .retryWhen(
-        { cause, attempt ->
-          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
-            delay(Duration.ofSeconds(RETRY_DELAY))
-            true
-          } else {
-            false
-          }
-        },
-      )
+//      .retryWhen(
+//        { cause, attempt ->
+//          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
+//            delay(Duration.ofSeconds(RETRY_DELAY))
+//            true
+//          } else {
+//            false
+//          }
+//        },
+//      )
       .catch {
         when (it.message) {
           NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))

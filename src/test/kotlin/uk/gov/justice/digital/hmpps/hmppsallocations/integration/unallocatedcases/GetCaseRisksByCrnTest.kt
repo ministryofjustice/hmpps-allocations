@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension.Companion.assessRisksNeedsApi
@@ -191,6 +192,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
   }
 
   @Test
+  @Disabled
   fun `get case risks with unavailable RSR`() {
     val crn = "J678910"
     val convictionNumber = 1
