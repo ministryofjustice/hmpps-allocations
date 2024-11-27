@@ -34,6 +34,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   }
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
+    log.info("arnclient timeline $crn")
     return webClient
       .get()
       .uri("/assessments/timeline/crn/{crn}", crn)
@@ -51,6 +52,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   }
 
   suspend fun getRosh(crn: String): RoshSummary? {
+    log.info("arn widget $crn")
     return webClient
       .get()
       .uri("/risks/crn/{crn}/widget", crn)
@@ -73,6 +75,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   }
 
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
+    log.info("arn rsr $crn")
     return webClient
       .get()
       .uri("/risks/crn/{crn}/predictors/rsr/history", crn)

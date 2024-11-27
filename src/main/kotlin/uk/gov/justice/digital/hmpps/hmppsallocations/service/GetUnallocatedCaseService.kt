@@ -192,8 +192,11 @@ class GetUnallocatedCaseService(
 
   suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+
+      val fred = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
+      log.info("got delius risk $fred")
       return UnallocatedCaseRisks.from(
-        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+        fred,
         unallocatedCaseEntity,
         assessRisksNeedsApiClient.getRosh(crn),
         assessRisksNeedsApiClient.getRiskPredictors(crn)
