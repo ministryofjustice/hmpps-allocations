@@ -111,6 +111,7 @@ class GetUnallocatedCaseService(
     assessment: Assessment?,
     outOfAreaTransfer: Boolean,
   ): UnallocatedCaseDetails? {
+    log.info("gettingCaseRisks")
     val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
     return UnallocatedCaseDetails.from(
       unallocatedCaseEntity,

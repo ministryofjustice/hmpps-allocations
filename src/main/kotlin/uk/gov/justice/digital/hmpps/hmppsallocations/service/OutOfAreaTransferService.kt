@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
@@ -71,5 +72,8 @@ class OutOfAreaTransferService(
     }
   } else {
     null
+  }
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
