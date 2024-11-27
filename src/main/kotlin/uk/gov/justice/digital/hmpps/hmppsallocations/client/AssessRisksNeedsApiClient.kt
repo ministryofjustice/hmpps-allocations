@@ -47,7 +47,10 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .filter { it.status == "COMPLETE" }
           .maxByOrNull { it.completed!! }
       }
-      .retryWhen(Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY)))
+      .retryWhen(
+        Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
+          .filter { it.message == UNAVAILABLE },
+      )
       .awaitSingleOrNull()
   }
 
