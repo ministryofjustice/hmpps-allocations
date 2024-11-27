@@ -233,7 +233,8 @@ class GetUnallocatedCaseService(
   }
 
   suspend fun restrictedOrExcluded(crn: String): Boolean {
-    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userExcluded || userRestricted } ?: true
+    log.info("check restricted or excluded")
+    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userRestricted } ?: true
   }
 
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
