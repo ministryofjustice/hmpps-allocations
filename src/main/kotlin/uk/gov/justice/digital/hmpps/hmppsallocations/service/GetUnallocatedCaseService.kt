@@ -113,6 +113,7 @@ class GetUnallocatedCaseService(
   ): UnallocatedCaseDetails? {
     log.info("gettingCaseRisks")
     val unallocatedCaseRisks = getCaseRisks(crn, convictionNumber)
+    log.info("Got case risk")
     return UnallocatedCaseDetails.from(
       unallocatedCaseEntity,
       caseView,
@@ -191,7 +192,7 @@ class GetUnallocatedCaseService(
   }
 
   suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
-    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
+    val harry = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       log.info("getting risk")
       val fred = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
       log.info("got delius risk $fred")
@@ -208,6 +209,8 @@ class GetUnallocatedCaseService(
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
       ).takeUnless { restrictedOrExcluded(crn) }
     }
+    log.info("got findUnallocatedCaseByConvictionNumber")
+    return harry
   }
 
   fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
