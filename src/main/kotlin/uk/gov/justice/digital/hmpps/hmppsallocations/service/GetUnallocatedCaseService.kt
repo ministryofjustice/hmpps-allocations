@@ -111,13 +111,13 @@ class GetUnallocatedCaseService(
       assessment,
       unallocatedCaseRisks,
       outOfAreaTransfer,
-    ).takeUnless { restrictedOrExcluded(crn) }
+    ).takeUnless { excluded(crn) }
   }
 
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
-    }.takeUnless { restrictedOrExcluded(crn) }
+    }.takeUnless { excluded(crn) }
   }
 
   @SuppressWarnings("LongMethod")
@@ -178,7 +178,7 @@ class GetUnallocatedCaseService(
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
     return findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { restrictedOrExcluded(crn) }
+      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { excluded(crn) }
     }
   }
 
@@ -191,7 +191,7 @@ class GetUnallocatedCaseService(
         assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
-      ).takeUnless { restrictedOrExcluded(crn) }
+      ).takeUnless { excluded(crn) }
     }
   }
 
@@ -210,12 +210,13 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConfirmInstructions.from(
         unallocatedCaseEntity,
         personOnProbationStaffDetailsResponse,
-      ).takeUnless { restrictedOrExcluded(crn) }
+      ).takeUnless { excluded(crn) }
     }
   }
 
-  suspend fun restrictedOrExcluded(crn: String): Boolean {
-    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userExcluded || userRestricted } ?: true
+  suspend fun excluded(crn: String): Boolean {
+    log.info("check restricted or excluded")
+    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userRestricted } ?: true
   }
 
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
