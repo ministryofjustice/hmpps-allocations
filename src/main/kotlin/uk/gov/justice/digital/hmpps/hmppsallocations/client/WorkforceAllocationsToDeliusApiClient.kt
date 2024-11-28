@@ -148,7 +148,6 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   }
 
   suspend fun getDeliusRisk(crn: String): DeliusRisk {
-    log.info("Deluius risk for $crn")
     return webClient
       .get()
       .uri("/allocation-demand/{crn}/risk", crn)
