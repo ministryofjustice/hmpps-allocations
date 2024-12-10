@@ -34,7 +34,7 @@ class UpsertUnallocatedCaseService(
     val storedUnallocatedEvents = repository.findByCrn(crn)
     val userAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)
     logLaoStatus(crn, userAccess)
-    userAccess.takeUnless { it!!.userRestricted }?.let {
+    userAccess.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
@@ -66,10 +66,10 @@ class UpsertUnallocatedCaseService(
     MDC.put(CRN, crn)
     if (userAccess!!.userRestricted) {
       MDC.put(LAO_STATUS, LaoStatus.RESTRICTED.name)
-      log.info("Allocations receiving a Restricted case CRN, not included: $crn")
+      log.info("Allocations receiving a Restricted case CRN, case included: $crn")
     } else if (userAccess.userExcluded) {
       MDC.put(LAO_STATUS, LaoStatus.EXCLUDED.name)
-      log.info("Allocations receiving a Excluded case CRN, case included: $crn")
+      log.info("Allocations receiving an Excluded case CRN, case included: $crn")
     } else {
       MDC.put(LAO_STATUS, LaoStatus.UNRESTRICTED.name)
       log.info("Allocations receiving a non LAO case CRN, case case included: $crn")

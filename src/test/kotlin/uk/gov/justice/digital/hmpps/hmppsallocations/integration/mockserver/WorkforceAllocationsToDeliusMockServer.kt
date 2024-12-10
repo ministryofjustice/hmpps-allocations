@@ -402,7 +402,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
 
   fun unallocatedEventsNotFoundResponse(crn: String) {
     val request = HttpRequest.request().withPath("/allocation-demand/$crn/unallocated-events")
-    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+    workforceAllocationsToDelius.`when`(request, Times.exactly(4)).respond(
       HttpResponse.response().withStatusCode(404),
     )
   }

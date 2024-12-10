@@ -75,7 +75,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(uce)
     cut.upsertUnallocatedCase(crn)
-    verify(exactly = 0) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
+    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 
   @Test

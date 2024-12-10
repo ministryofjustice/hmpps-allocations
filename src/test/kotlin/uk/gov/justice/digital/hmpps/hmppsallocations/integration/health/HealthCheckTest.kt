@@ -35,8 +35,6 @@ class HealthCheckTest : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isOk
-//      .expectBody()
-//      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
@@ -46,8 +44,6 @@ class HealthCheckTest : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isOk
-//      .expectBody()
-//      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
@@ -57,7 +53,5 @@ class HealthCheckTest : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isOk
-//      .expectBody()
-//      .jsonPath("status").isEqualTo("UP")
   }
 }

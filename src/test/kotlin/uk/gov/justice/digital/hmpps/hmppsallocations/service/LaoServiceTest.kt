@@ -77,7 +77,7 @@ class LaoServiceTest {
     val restrictions = laoService.getCrnRestrictions(crn)
     assert(restrictions.hasRestriction)
     assert(!restrictions.hasExclusion)
-    assert(!restrictions.apopUserExcluded)
+    assert(restrictions.apopUserExcluded)
   }
 
   @Test

@@ -172,7 +172,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(2)
+      .isEqualTo(5)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
       .isEqualTo("Previously managed")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
@@ -196,6 +196,12 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].excluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.crn == 'J678910')].apopExcluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.crn == 'J680660')].apopExcluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.crn == 'X6666222')].apopExcluded")
       .isEqualTo(true)
   }
 
@@ -247,7 +253,17 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
+    workforceAllocationsToDelius.setupTeam1CaseDetails()
 
+    // NOt excluded
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
+
+    // excluded user
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
+    // excluded APoP User
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
+    workforceAllocationsToDelius.setApopUsers()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
@@ -256,7 +272,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(0)
+      .isEqualTo(5)
   }
 
   @Test
