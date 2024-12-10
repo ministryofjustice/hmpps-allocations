@@ -17,7 +17,7 @@ class HmppsTierApiClient(private val webClient: WebClient) {
 
   suspend fun getTierByCrn(crn: String): String? = webClient
     .get()
-    .uri("/crn/$crn/tier")
+    .uri("/crn/{crn}/tier", crn)
     .retrieve()
     .onStatus({ status -> status.is5xxServerError }) {
       Mono.error(AllocationsServerError("Internal server error"))

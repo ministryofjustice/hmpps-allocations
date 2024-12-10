@@ -19,7 +19,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
+@Suppress("TooManyFunctions")
 @RestControllerAdvice
 class HmppsAllocationsExceptionHandler {
   @ExceptionHandler(ValidationException::class)
@@ -32,6 +34,21 @@ class HmppsAllocationsExceptionHandler {
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
           developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(NotAllowedForLAOException::class)
+  fun handleNotAllowedForLAOException(e: NotAllowedForLAOException): ResponseEntity<ErrorResponse> {
+    log.error("NotAllowedForLAOException: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.FORBIDDEN)
+      .body(
+        ErrorResponse(
+          status = FORBIDDEN,
+          userMessage = "Access Denied (LAO): ${e.message}",
+          developerMessage = e.message,
+          moreInfo = e.crn,
         ),
       )
   }
