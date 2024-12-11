@@ -70,7 +70,6 @@ class UpsertUnallocatedCaseService(
     } else if (userAccess.userExcluded) {
       MDC.put(LAO_STATUS, LaoStatus.EXCLUDED.name)
       log.info("Allocations receiving an Excluded case CRN, case included: $crn")
-    } else {
       MDC.put(LAO_STATUS, LaoStatus.UNRESTRICTED.name)
       log.info("Allocations receiving a non LAO case CRN, case case included: $crn")
     }
