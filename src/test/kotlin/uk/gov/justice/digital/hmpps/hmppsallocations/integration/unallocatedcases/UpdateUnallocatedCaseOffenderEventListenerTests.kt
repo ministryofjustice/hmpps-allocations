@@ -112,8 +112,9 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       ),
     )
 
-    workforceAllocationsToDelius.userHasAccess(crn, true, true)
+    workforceAllocationsToDelius.userHasAccess(crn, false, true)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
+    workforceAllocationsToDelius.setuserAccessToCases(listOf(Triple(crn, false, true)))
 
     publishConvictionChangedMessage(crn)
 
