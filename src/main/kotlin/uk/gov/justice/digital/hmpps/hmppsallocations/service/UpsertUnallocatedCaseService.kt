@@ -34,7 +34,7 @@ class UpsertUnallocatedCaseService(
     val storedUnallocatedEvents = repository.findByCrn(crn)
     val userAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)
     logLaoStatus(crn, userAccess)
-    userAccess.let {
+    userAccess?.let {
       workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.let { unallocatedEvents ->
         log.debug("workforce to delius api client: getting unallocated events for crn $crn")
         val activeEvents = unallocatedEvents.activeEvents.associateBy { it.eventNumber.toInt() }
