@@ -82,7 +82,7 @@ class UnallocatedDataBaseOperationService(
   suspend fun deleteEventsForNoActiveEvents(crn: String) {
     logger.debug("delete events for crn: $crn")
     val storedUnallocatedEvents = repository.findByCrn(crn)
-    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userExcluded || it.userRestricted }?.run {
+    workforceAllocationsToDeliusApiClient.getUserAccess(crn = crn)?.takeUnless { it.userRestricted }?.run {
       storedUnallocatedEvents.forEach {
         repository.delete(it)
         logger.debug("Event ${it.id} deleted")
