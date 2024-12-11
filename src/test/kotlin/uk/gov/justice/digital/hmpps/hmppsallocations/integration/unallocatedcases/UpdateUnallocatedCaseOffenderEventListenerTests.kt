@@ -112,9 +112,35 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       ),
     )
 
-    workforceAllocationsToDelius.userHasAccess(crn, false, false)
+    workforceAllocationsToDelius.userHasAccess(crn, true, true)
     workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
     workforceAllocationsToDelius.setuserAccessToCases(listOf(Triple(crn, true, true)))
+
+    publishConvictionChangedMessage(crn)
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(repository.count()).isEqualTo(0)
+  }
+
+  @Test
+  fun `delete when excluded crn is not found`() {
+    val crn = "J678910"
+
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        name = "Tester TestSurname",
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
+    )
+
+    workforceAllocationsToDelius.userHasAccess(crn, false, true)
+    workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
+    workforceAllocationsToDelius.setuserAccessToCases(listOf(Triple(crn, false, true)))
 
     publishConvictionChangedMessage(crn)
 
