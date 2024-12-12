@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -123,7 +122,6 @@ class GetUnallocatedCaseService(
   @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     log.info("Getting all unallocated cases for team $teamCode")
-    log.info("Security Context ${SecurityContextHolder.getContext().authentication}")
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCases.isEmpty()) {
       return emptyList()
