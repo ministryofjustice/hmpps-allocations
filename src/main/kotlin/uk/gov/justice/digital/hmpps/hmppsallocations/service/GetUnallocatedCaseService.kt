@@ -117,7 +117,7 @@ class GetUnallocatedCaseService(
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
-    }
+    }.takeUnless { restricted(crn) }
   }
 
   @SuppressWarnings("LongMethod")
@@ -171,7 +171,7 @@ class GetUnallocatedCaseService(
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
     return findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(it, probationRecord)
+      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { restricted(crn) }
     }
   }
 
@@ -205,6 +205,10 @@ class GetUnallocatedCaseService(
         personOnProbationStaffDetailsResponse,
       )
     }
+  }
+
+  suspend fun restricted(crn: String): Boolean {
+    return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userRestricted } ?: true
   }
 
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {

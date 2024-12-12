@@ -13,7 +13,6 @@ class HealthCheckTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-//      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
@@ -21,11 +20,6 @@ class HealthCheckTest : IntegrationTestBase() {
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk
-//      .expectBody().jsonPath("components.healthInfo.details.version").value(
-//        Consumer<String> {
-//          assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-//        },
-//      )
   }
 
   @Test

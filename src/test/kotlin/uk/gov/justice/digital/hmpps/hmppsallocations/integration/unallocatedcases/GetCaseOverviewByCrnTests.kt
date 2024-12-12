@@ -43,8 +43,12 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
 
   @Test
   fun `get 404 if crn is restricted or excluded`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910", true, false)
+    insertCases()
     webTestClient.get()
-      .uri("/cases/unallocated/J678912/convictions/1/overview")
+      .uri("/cases/unallocated/J678910/convictions/1/overview")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
