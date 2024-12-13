@@ -42,7 +42,7 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `get 404 if crn is restricted or excluded`() {
+  fun `get 404 if crn is restricted `() {
     val crn = "J678910"
     val convictionNumber = 1
     WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910", true, false)
@@ -53,5 +53,47 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isNotFound
+  }
+
+  @Test
+  fun `get 404 if crn is restricted and excluded`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910", true, true)
+    insertCases()
+    webTestClient.get()
+      .uri("/cases/unallocated/J678910/convictions/1/overview")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isNotFound
+  }
+
+  @Test
+  fun `get 200 if crn is not restricted or excluded`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910", false, false)
+    insertCases()
+    webTestClient.get()
+      .uri("/cases/unallocated/J678910/convictions/1/overview")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+  }
+
+  @Test
+  fun `get 200 if crn is excluded`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    WorkforceAllocationsToDeliusApiExtension.workforceAllocationsToDelius.userHasAccess("J678910", false, true)
+    insertCases()
+    webTestClient.get()
+      .uri("/cases/unallocated/J678910/convictions/1/overview")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
   }
 }

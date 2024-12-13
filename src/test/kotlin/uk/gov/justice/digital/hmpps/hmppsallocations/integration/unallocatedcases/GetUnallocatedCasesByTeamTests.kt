@@ -186,7 +186,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].excluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].apopExcluded")
-      .isEqualTo(false)
+      .isEqualTo(false) // ** has excluded users but not  Apop users
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].status")
       .isEqualTo("New to probation")
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].offenderManager")
@@ -196,9 +196,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].excluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
-      .isEqualTo(true)
+      .isEqualTo(true) // ** has excluded users that are  Apop users
       .jsonPath("$.[?(@.crn == 'J678910')].apopExcluded")
-      .isEqualTo(true)
+      .isEqualTo(true) // ** restricted case
       .jsonPath("$.[?(@.crn == 'J680660')].apopExcluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.crn == 'X6666222')].apopExcluded")
@@ -240,7 +240,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get unallocated cases by team where all cases are LAO cases`() {
+  fun `Get unallocated cases by team where all cases are LAO restricted cases`() {
     insertCases()
     workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
@@ -255,15 +255,6 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     )
     workforceAllocationsToDelius.setupTeam1CaseDetails()
 
-    // NOt excluded
-    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
-    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
-
-    // excluded user
-    workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
-    // excluded APoP User
-    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
-    workforceAllocationsToDelius.setApopUsers()
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
