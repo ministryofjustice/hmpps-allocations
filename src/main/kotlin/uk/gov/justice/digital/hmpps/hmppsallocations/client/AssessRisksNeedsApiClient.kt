@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.time.delay
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlow
@@ -28,11 +29,14 @@ private const val NOT_FOUND = "NOT_FOUND"
 private const val UNAVAILABLE = "UNAVAILABLE"
 
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     return webClient
       .get()
-      .uri("/assessments/timeline/crn/$crn")
+      .uri("/assessments/timeline/crn/{crn}", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
       .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
@@ -42,14 +46,17 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .filter { it.status == "COMPLETE" }
           .maxByOrNull { it.completed!! }
       }
-      .retryWhen(Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY)))
+      .retryWhen(
+        Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
+          .filter { it.message == UNAVAILABLE },
+      )
       .awaitSingleOrNull()
   }
 
   suspend fun getRosh(crn: String): RoshSummary? {
     return webClient
       .get()
-      .uri("/risks/crn/$crn/widget")
+      .uri("/risks/crn/{crn}/widget", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
@@ -71,7 +78,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     return webClient
       .get()
-      .uri("/risks/crn/$crn/predictors/rsr/history")
+      .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
       .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }

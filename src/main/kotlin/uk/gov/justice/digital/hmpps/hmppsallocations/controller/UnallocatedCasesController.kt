@@ -7,10 +7,15 @@ import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictionStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.StaffCodesRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
@@ -20,6 +25,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
+private const val UNALLOCATED_CASE_NOT_FOUND_FOR = "Unallocated case Not Found for"
+
+@Suppress("StringLiteralDuplication")
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class UnallocatedCasesController(
@@ -41,6 +49,7 @@ class UnallocatedCasesController(
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Unauthorized"),
       ApiResponse(responseCode = "404", description = "Result Not Found"),
     ],
   )
@@ -50,7 +59,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
   ): UnallocatedCaseDetails {
-    return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+    return getUnallocatedCaseService.getCase(crn, convictionNumber) ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn")
   }
 
   @Operation(summary = "Retrieve unallocated case overview by crn and conviction id")
@@ -67,7 +76,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) convictionNumber: Long,
   ): CaseOverview =
     getUnallocatedCaseService.getCaseOverview(crn, convictionNumber)
-      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn")
 
   @Operation(summary = "Retrieve probation record")
   @ApiResponses(
@@ -83,7 +92,7 @@ class UnallocatedCasesController(
     @PathVariable(required = true) excludeConvictionNumber: Long,
   ): UnallocatedCaseConvictions =
     getUnallocatedCaseService.getCaseConvictions(crn, excludeConvictionNumber)
-      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+      ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn")
 
   @Operation(summary = "Retrieve unallocated case risks by crn")
   @ApiResponses(
@@ -113,5 +122,44 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
     @RequestParam(required = true) staffCode: String,
-  ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("Unallocated case Not Found for $crn and conviction $convictionNumber")
+  ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode) ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn and conviction $convictionNumber")
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @PostMapping("/cases/unallocated/{crn}/restrictions")
+  suspend fun getCaseRestrictionsByStaffCodes(
+    @PathVariable(required = true) crn: String,
+    @RequestBody(required = true) staffCodesRequest: StaffCodesRequest,
+  ): CrnStaffRestrictions =
+    getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodesRequest.staffCodes)
+      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Unauthorized"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/unallocated/{crn}/restricted")
+  suspend fun isCaseRestricted(
+    @PathVariable(required = true) crn: String,
+  ): Boolean =
+    getUnallocatedCaseService.isCrnRestricted(crn)
+      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
+
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Unauthorized"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/{crn}/restrictions")
+  suspend fun getCaseRestrictions(
+    @PathVariable(required = true) crn: String,
+  ): DeliusCrnRestrictionStatus =
+    getUnallocatedCaseService.getCaseRestrictions(crn)
+      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 }
