@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictionStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.StaffCodesRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
@@ -146,20 +145,5 @@ class UnallocatedCasesController(
     @PathVariable(required = true) crn: String,
   ): Boolean =
     getUnallocatedCaseService.isCrnRestricted(crn)
-      ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
-
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "200", description = "OK"),
-      ApiResponse(responseCode = "403", description = "Unauthorized"),
-      ApiResponse(responseCode = "404", description = "Result Not Found"),
-    ],
-  )
-  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/{crn}/restrictions")
-  suspend fun getCaseRestrictions(
-    @PathVariable(required = true) crn: String,
-  ): DeliusCrnRestrictionStatus =
-    getUnallocatedCaseService.getCaseRestrictions(crn)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 }
