@@ -243,7 +243,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .jsonPath("$.assessment")
       .doesNotExist()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskAssesmentCalled(crn, 1)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskAssesmentCalled(crn, 2)
   }
 
   @Test
