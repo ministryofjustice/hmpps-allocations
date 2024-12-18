@@ -231,7 +231,6 @@ class GetUnallocatedCaseService(
   suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus {
     return laoService.getCrnRestrictionStatus(crn)
   }
-
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }

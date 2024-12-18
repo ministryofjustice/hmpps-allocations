@@ -147,7 +147,7 @@ class UnallocatedCasesController(
   ): Boolean =
     getUnallocatedCaseService.isCrnRestricted(crn)
       ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
-
+      
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
