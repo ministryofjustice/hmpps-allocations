@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictionStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
@@ -227,6 +228,9 @@ class GetUnallocatedCaseService(
     return laoService.isCrnRestricted(crn)
   }
 
+  suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus {
+    return laoService.getCrnRestrictionStatus(crn)
+  }
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
