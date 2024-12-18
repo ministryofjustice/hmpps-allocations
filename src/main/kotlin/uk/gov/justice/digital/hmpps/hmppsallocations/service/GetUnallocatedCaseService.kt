@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -112,66 +111,58 @@ class GetUnallocatedCaseService(
       assessment,
       unallocatedCaseRisks,
       outOfAreaTransfer,
-    ).takeUnless { excluded(crn) }
+    )
   }
 
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
       CaseOverview.from(it)
-    }.takeUnless { excluded(crn) }
+    }.takeUnless { restricted(crn) }
   }
 
   @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
     log.info("Getting all unallocated cases for team $teamCode")
-    log.info("Security Context ${SecurityContextHolder.getContext().authentication}")
-    val unallocatedCasesFromRepo = unallocatedCasesRepository.findByTeamCode(teamCode)
-    if (unallocatedCasesFromRepo.isEmpty()) {
+    val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
+    if (unallocatedCases.isEmpty()) {
       return emptyList()
     } else {
       val unallocatedCasesUserAccess = workforceAllocationsToDeliusApiClient.getUserAccess(
-        crns = unallocatedCasesFromRepo.map { it.crn },
+        crns = unallocatedCases.map { it.crn },
       ).access
 
-      val unallocatedCases = unallocatedCasesFromRepo.filter { uc ->
-        val caseAccess = unallocatedCasesUserAccess.firstOrNull { uc.crn == it.crn }
-        caseAccess?.userRestricted == false
-      }
+      val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient
+        .getDeliusCaseDetailsCases(cases = unallocatedCases)
+        .filter { deliusUnallocatedCase ->
+          unallocatedCases
+            .any { deliusUnallocatedCase.crn == it.crn && deliusUnallocatedCase.event.number.toInt() == it.convictionNumber }
+        }
+        .toList()
 
-      if (unallocatedCases.isEmpty()) {
+      if (unallocatedCasesFromDelius.isEmpty()) {
         return emptyList()
       } else {
-        val unallocatedCasesFromDelius = workforceAllocationsToDeliusApiClient
-          .getDeliusCaseDetailsCases(cases = unallocatedCases)
-          .filter { deliusUnallocatedCase ->
-            unallocatedCases
-              .any { deliusUnallocatedCase.crn == it.crn && deliusUnallocatedCase.event.number.toInt() == it.convictionNumber }
+        val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
+          .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
+            teamCode,
+            unallocatedCasesFromDelius,
+          ).map { it.crn }
+
+        return unallocatedCasesFromDelius
+          .map { deliusCaseDetail ->
+            val unallocatedCase =
+              unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
+            val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
+            val restricted = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userRestricted }
+
+            UnallocatedCase.from(
+              unallocatedCase,
+              deliusCaseDetail,
+              outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
+              excluded || restricted,
+              restricted || excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
+            )
           }
-          .toList()
-
-        if (unallocatedCasesFromDelius.isEmpty()) {
-          return emptyList()
-        } else {
-          val crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion = outOfAreaTransferService
-            .getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
-              teamCode,
-              unallocatedCasesFromDelius,
-            ).map { it.crn }
-
-          return unallocatedCasesFromDelius
-            .map { deliusCaseDetail ->
-              val unallocatedCase =
-                unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-              val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
-              UnallocatedCase.from(
-                unallocatedCase,
-                deliusCaseDetail,
-                outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
-                excluded,
-                excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
-              )
-            }
-        }
       }
     }
   }
@@ -179,7 +170,7 @@ class GetUnallocatedCaseService(
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
     return findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { excluded(crn) }
+      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { restricted(crn) }
     }
   }
 
@@ -192,7 +183,7 @@ class GetUnallocatedCaseService(
         assessRisksNeedsApiClient.getRiskPredictors(crn)
           .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
           .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
-      ).takeUnless { excluded(crn) }
+      )
     }
   }
 
@@ -211,12 +202,11 @@ class GetUnallocatedCaseService(
       return UnallocatedCaseConfirmInstructions.from(
         unallocatedCaseEntity,
         personOnProbationStaffDetailsResponse,
-      ).takeUnless { excluded(crn) }
+      )
     }
   }
 
-  suspend fun excluded(crn: String): Boolean {
-    log.info("check restricted or excluded")
+  suspend fun restricted(crn: String): Boolean {
     return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userRestricted } ?: true
   }
 

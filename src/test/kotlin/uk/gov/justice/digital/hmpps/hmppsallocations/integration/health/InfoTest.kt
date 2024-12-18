@@ -12,8 +12,6 @@ class InfoTest : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isOk
-//      .expectBody()
-//      .jsonPath("build.name").isEqualTo("hmpps-allocations")
   }
 
   @Test
@@ -21,8 +19,5 @@ class InfoTest : IntegrationTestBase() {
     webTestClient.get().uri("/info")
       .exchange()
       .expectStatus().isOk
-//      .expectBody().jsonPath("build.version").value<String> {
-//        assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-//      }
   }
 }

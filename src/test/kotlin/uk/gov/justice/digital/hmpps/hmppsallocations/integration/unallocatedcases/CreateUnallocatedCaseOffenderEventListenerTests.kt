@@ -65,7 +65,7 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `do not save when restricted case`() {
+  fun `should save when restricted case`() {
     val crn = "J678910"
     workforceAllocationsToDelius.userHasAccess(crn, restricted = true)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
@@ -77,13 +77,29 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
     await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
 
-    Assertions.assertFalse(repository.existsByCrn(crn))
+    Assertions.assertTrue(repository.existsByCrn(crn))
   }
 
   @Test
   fun `should save when excluded case`() {
     val crn = "J678910"
     workforceAllocationsToDelius.userHasAccess(crn, excluded = true)
+    workforceAllocationsToDelius.unallocatedEventsResponse(crn)
+
+    hmppsTier.tierCalculationResponse(crn)
+
+    publishConvictionChangedMessage(crn)
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+    await untilCallTo { countMessagesOnOffenderEventDeadLetterQueue() } matches { it == 0 }
+
+    Assertions.assertTrue(repository.existsByCrn(crn))
+  }
+
+  @Test
+  fun `should save when restricted and excluded case`() {
+    val crn = "J678910"
+    workforceAllocationsToDelius.userHasAccess(crn, restricted = true, excluded = true)
     workforceAllocationsToDelius.unallocatedEventsResponse(crn)
 
     hmppsTier.tierCalculationResponse(crn)
