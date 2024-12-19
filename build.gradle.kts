@@ -1,9 +1,9 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
-  kotlin("plugin.spring") version "2.0.21"
-  kotlin("plugin.jpa") version "2.0.21"
+  kotlin("plugin.spring") version "2.1.0"
+  kotlin("plugin.jpa") version "2.1.0"
   id("io.gitlab.arturbosch.detekt") version "1.23.7"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.0.21"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
 }
 
 configurations {
@@ -34,19 +34,19 @@ allOpen {
 dependencies {
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.1.4")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.1.4")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.0")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.1")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.1")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.9.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.0")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
@@ -60,7 +60,7 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.13.13")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.0")
 }
 
 tasks {
