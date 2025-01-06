@@ -71,7 +71,7 @@ class UpsertUnallocatedCaseService(
       MDC.put(LAO_STATUS, LaoStatus.EXCLUDED.name)
       log.info("Allocations receiving an Excluded case CRN, case included: $crn")
       MDC.put(LAO_STATUS, LaoStatus.UNRESTRICTED.name)
-      log.info("Allocations receiving a non LAO case CRN, case case included: $crn")
+      log.info("Allocations receiving a non LAO case CRN, case included: $crn")
     }
     MDC.remove(LAO)
     MDC.remove(CRN)
