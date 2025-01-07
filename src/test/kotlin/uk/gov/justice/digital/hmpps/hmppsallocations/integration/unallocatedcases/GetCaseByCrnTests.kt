@@ -218,7 +218,32 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .doesNotExist()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
+  @Test
+  fun `can get case by crn missing assessment2`() {
+    val crn = "J678910"
+    val convictionNumber = 1
+    workforceAllocationsToDelius.setApopUsers()
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    insertCases()
+    workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.notFoundAssessmentForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
 
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.assessment")
+      .doesNotExist()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskAssesmentCalled(crn, 1)
+  }
   @Test
   fun `get 404 if crn not found`() {
     workforceAllocationsToDelius.setApopUsers()

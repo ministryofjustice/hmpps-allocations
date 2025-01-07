@@ -195,6 +195,13 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       VerificationTimes.exactly(times),
     )
   }
+  fun verifyRiskAssesmentCalled(crn: String, times: Int) {
+    assessRisksNeedsApi.verify(
+      HttpRequest.request()
+        .withPath("/assessments/timeline/crn/$crn"),
+      VerificationTimes.exactly(times),
+    )
+  }
 
   fun getAssessmentsForCrn(crn: String) {
     val assessmentRequest = HttpRequest.request().withPath("/assessments/timeline/crn/$crn")
@@ -205,6 +212,10 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   fun notFoundAssessmentForCrn(crn: String) {
     val assessmentRequest = HttpRequest.request().withPath("/assessments/timeline/crn/$crn")
+    assessRisksNeedsApi.`when`(assessmentRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR .value()).withContentType(MediaType.APPLICATION_JSON)
+        .withBody(assessmentNotFoundResponse(crn)),
+    )
     assessRisksNeedsApi.`when`(assessmentRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON)
         .withBody(assessmentNotFoundResponse(crn)),
