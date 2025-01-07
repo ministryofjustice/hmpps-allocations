@@ -28,6 +28,8 @@ private const val NOT_FOUND = "NOT_FOUND"
 
 private const val UNAVAILABLE = "UNAVAILABLE"
 
+private const val SERVER_EXCEPTION = "SERVER_ERROR"
+
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   companion object {
     val log = LoggerFactory.getLogger(this::class.java)
@@ -39,6 +41,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .uri("/assessments/timeline/crn/{crn}", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
+      .onStatus({ it.is5xxServerError }) { res -> res.createException().flatMap { Mono.error(Exception(SERVER_EXCEPTION)) } }
       .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
       .bodyToMono<Timeline>()
       .mapNotNull { timeline ->
@@ -48,7 +51,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       }
       .retryWhen(
         Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-          .filter { it.message == UNAVAILABLE },
+          .filter { it is Exception && it.message == SERVER_EXCEPTION },
       )
       .awaitSingleOrNull()
   }
@@ -81,12 +84,12 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
       .retrieve()
       .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-      .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
+      .onStatus({ it.is5xxServerError }) { Mono.error(Exception(SERVER_EXCEPTION)) }
       .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
       .bodyToFlow<RiskPredictor>()
       .retryWhen(
         { cause, attempt ->
-          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
+          if (cause.message == SERVER_EXCEPTION && attempt < RETRY_ATTEMPTS) {
             delay(Duration.ofSeconds(RETRY_DELAY))
             true
           } else {
