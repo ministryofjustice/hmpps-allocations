@@ -218,6 +218,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .doesNotExist()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
+
   @Test
   fun `can get case by crn missing assessment2`() {
     val crn = "J678910"
@@ -244,6 +245,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.verifyRiskAssesmentCalled(crn, 1)
   }
+
   @Test
   fun `get 404 if crn not found`() {
     workforceAllocationsToDelius.setApopUsers()
