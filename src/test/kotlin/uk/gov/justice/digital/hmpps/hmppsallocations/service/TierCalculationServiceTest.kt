@@ -37,11 +37,11 @@ class TierCalculationServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
     coEvery { repository.existsByCrn(crn) }.returns(true)
-    coEvery { repository.findByCrn(crn) } returns listOf(uce)
+    coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
     coEvery { hmppsTierApiClient.getTierByCrn(crn) }.returns(tier)
-    coEvery { repository.save(uce) } returns uce
+    coEvery { repository.save(unallocatedCaseEntity) } returns unallocatedCaseEntity
     service.updateTier(crn)
     verify(exactly = 1) { repository.save(any()) }
   }

@@ -33,7 +33,7 @@ class UpsertUnallocatedCaseServiceTest {
   lateinit var workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 
   @InjectMockKs
-  lateinit var cut: UpsertUnallocatedCaseService
+  lateinit var upsertUnallocatedCaseService: UpsertUnallocatedCaseService
 
   @BeforeEach
   fun setUp() {
@@ -47,15 +47,15 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
-    val dca = DeliusCaseAccess(crn, false, false)
-    val ae = ActiveEvent("1", teamCode, providerCode)
-    val uae = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(ae))
-    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns dca
-    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns uae
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val deliusCaseAccess = DeliusCaseAccess(crn, false, false)
+    val activeEvent = ActiveEvent("1", teamCode, providerCode)
+    val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns deliusCaseAccess
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
-    coEvery { repository.findByCrn(crn) } returns listOf(uce)
-    cut.upsertUnallocatedCase(crn)
+    coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
+    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 
@@ -66,15 +66,15 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
-    val dca = DeliusCaseAccess(crn, true, false)
-    val ae = ActiveEvent("1", teamCode, providerCode)
-    val uae = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(ae))
-    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns dca
-    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns uae
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val deliusCaseAccess = DeliusCaseAccess(crn, true, false)
+    val activeEvent = ActiveEvent("1", teamCode, providerCode)
+    val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns deliusCaseAccess
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
-    coEvery { repository.findByCrn(crn) } returns listOf(uce)
-    cut.upsertUnallocatedCase(crn)
+    coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
+    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 
@@ -85,15 +85,15 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
-    val dca = DeliusCaseAccess(crn, false, true)
-    val ae = ActiveEvent("1", teamCode, providerCode)
-    val uae = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(ae))
-    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns dca
-    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns uae
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val deliusCaseAccess = DeliusCaseAccess(crn, false, true)
+    val activeEvent = ActiveEvent("1", teamCode, providerCode)
+    val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns deliusCaseAccess
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
-    coEvery { repository.findByCrn(crn) } returns listOf(uce)
-    cut.upsertUnallocatedCase(crn)
+    coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
+    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 }

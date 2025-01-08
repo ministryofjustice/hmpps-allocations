@@ -48,7 +48,7 @@ class UnallocatedDataBaseOperationServiceTest {
   lateinit var workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 
   @InjectMockKs
-  lateinit var cut: UnallocatedDataBaseOperationService
+  lateinit var databaseService: UnallocatedDataBaseOperationService
 
   @BeforeEach
   fun setUp() {
@@ -59,7 +59,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `delete the correct event`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(0)
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedTeam(any(), any()) } returns AllocatedEvent(unallocatedCaseEntity.teamCode)
-    cut.deleteOldEvents(storedUnallocatedEvents, activeEvents)
+    databaseService.deleteOldEvents(storedUnallocatedEvents, activeEvents)
     verify(exactly = 1) { repository.delete(storedUnallocatedEvents.get(1)) }
     verify(exactly = 1) { telemetryService.trackUnallocatedCaseAllocated(storedUnallocatedEvents.get(1), any()) }
   }
@@ -68,31 +68,31 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `conviction number the same - dont delete`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEventsSameConNumber.get(0)
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedTeam(any(), any()) } returns AllocatedEvent(unallocatedCaseEntity.teamCode)
-    cut.deleteOldEvents(storedUnallocatedEventsSameConNumber, activeEvents)
+    databaseService.deleteOldEvents(storedUnallocatedEventsSameConNumber, activeEvents)
     verify(exactly = 0) { telemetryService.trackUnallocatedCaseAllocated(any(), any()) }
   }
 
   @Test
   fun `will save a new event`() = runTest {
-    val uae = storedUnallocatedEvents.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, uae.name, uae.crn, uae.teamCode)
+    databaseService.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 1) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `wont save if the event isnt eligible`() = runTest {
-    val uae = storedUnallocatedEvents.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, uae.name, uae.crn, uae.teamCode)
+    databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 0) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `update event if tier is different`() {
-    val uae = storedUnallocatedEventsForUpdate.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEventsForUpdate.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, uae.name, uae.tier)
+    databaseService.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier)
     verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) }
   }
 
@@ -101,7 +101,7 @@ class UnallocatedDataBaseOperationServiceTest {
     val crn = "J77881"
     coEvery { repository.findByCrn(crn) } returns storedUnallocatedEvents
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns DeliusCaseAccess(crn, false, false)
-    cut.deleteEventsForNoActiveEvents(crn)
+    databaseService.deleteEventsForNoActiveEvents(crn)
     verify(exactly = 2) { repository.delete(any()) }
   }
 }
