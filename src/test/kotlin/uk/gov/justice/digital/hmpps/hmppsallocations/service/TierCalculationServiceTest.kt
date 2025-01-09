@@ -23,7 +23,7 @@ class TierCalculationServiceTest {
   lateinit var repository: UnallocatedCasesRepository
 
   @InjectMockKs
-  lateinit var service: TierCalculationService
+  lateinit var cut: TierCalculationService
 
   @BeforeEach
   fun setUp() {
@@ -37,12 +37,12 @@ class TierCalculationServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val uce = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
     coEvery { repository.existsByCrn(crn) }.returns(true)
-    coEvery { repository.findByCrn(crn) } returns listOf(uce)
+    coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
     coEvery { hmppsTierApiClient.getTierByCrn(crn) }.returns(tier)
-    coEvery { repository.save(uce) } returns uce
-    service.updateTier(crn)
+    coEvery { repository.save(unallocatedCaseEntity) } returns unallocatedCaseEntity
+    cut.updateTier(crn)
     verify(exactly = 1) { repository.save(any()) }
   }
 
@@ -50,7 +50,7 @@ class TierCalculationServiceTest {
   fun getTier() = runTest {
     val crn = "X1234567"
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns "C2"
-    val actual = service.getTier(crn)
+    val actual = cut.getTier(crn)
     assertEquals("C2", actual)
   }
 }

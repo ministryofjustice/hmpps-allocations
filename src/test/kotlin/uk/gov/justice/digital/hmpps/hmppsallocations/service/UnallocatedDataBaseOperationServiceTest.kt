@@ -74,25 +74,25 @@ class UnallocatedDataBaseOperationServiceTest {
 
   @Test
   fun `will save a new event`() = runTest {
-    val uae = storedUnallocatedEvents.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, uae.name, uae.crn, uae.teamCode)
+    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 1) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `wont save if the event isnt eligible`() = runTest {
-    val uae = storedUnallocatedEvents.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, uae.name, uae.crn, uae.teamCode)
+    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 0) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `update event if tier is different`() {
-    val uae = storedUnallocatedEventsForUpdate.get(1)
+    val unallocatedCaseEntity = storedUnallocatedEventsForUpdate.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, uae.name, uae.tier)
+    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier)
     verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) }
   }
 
