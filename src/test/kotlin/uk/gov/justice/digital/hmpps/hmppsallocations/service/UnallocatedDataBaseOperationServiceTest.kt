@@ -48,7 +48,7 @@ class UnallocatedDataBaseOperationServiceTest {
   lateinit var workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 
   @InjectMockKs
-  lateinit var databaseService: UnallocatedDataBaseOperationService
+  lateinit var cut: UnallocatedDataBaseOperationService
 
   @BeforeEach
   fun setUp() {
@@ -59,7 +59,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `delete the correct event`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(0)
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedTeam(any(), any()) } returns AllocatedEvent(unallocatedCaseEntity.teamCode)
-    databaseService.deleteOldEvents(storedUnallocatedEvents, activeEvents)
+    cut.deleteOldEvents(storedUnallocatedEvents, activeEvents)
     verify(exactly = 1) { repository.delete(storedUnallocatedEvents.get(1)) }
     verify(exactly = 1) { telemetryService.trackUnallocatedCaseAllocated(storedUnallocatedEvents.get(1), any()) }
   }
@@ -68,7 +68,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `conviction number the same - dont delete`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEventsSameConNumber.get(0)
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedTeam(any(), any()) } returns AllocatedEvent(unallocatedCaseEntity.teamCode)
-    databaseService.deleteOldEvents(storedUnallocatedEventsSameConNumber, activeEvents)
+    cut.deleteOldEvents(storedUnallocatedEventsSameConNumber, activeEvents)
     verify(exactly = 0) { telemetryService.trackUnallocatedCaseAllocated(any(), any()) }
   }
 
@@ -76,7 +76,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `will save a new event`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    databaseService.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
+    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 1) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
@@ -84,7 +84,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `wont save if the event isnt eligible`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
+    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
     verify(exactly = 0) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
@@ -92,7 +92,7 @@ class UnallocatedDataBaseOperationServiceTest {
   fun `update event if tier is different`() {
     val unallocatedCaseEntity = storedUnallocatedEventsForUpdate.get(1)
     coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    databaseService.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier)
+    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier)
     verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) }
   }
 
@@ -101,7 +101,7 @@ class UnallocatedDataBaseOperationServiceTest {
     val crn = "J77881"
     coEvery { repository.findByCrn(crn) } returns storedUnallocatedEvents
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crn, any()) } returns DeliusCaseAccess(crn, false, false)
-    databaseService.deleteEventsForNoActiveEvents(crn)
+    cut.deleteEventsForNoActiveEvents(crn)
     verify(exactly = 2) { repository.delete(any()) }
   }
 }

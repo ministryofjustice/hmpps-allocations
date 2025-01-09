@@ -33,7 +33,7 @@ class UpsertUnallocatedCaseServiceTest {
   lateinit var workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient
 
   @InjectMockKs
-  lateinit var upsertUnallocatedCaseService: UpsertUnallocatedCaseService
+  lateinit var cut: UpsertUnallocatedCaseService
 
   @BeforeEach
   fun setUp() {
@@ -55,7 +55,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
-    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+    cut.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 
@@ -74,7 +74,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
-    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+    cut.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 
@@ -93,7 +93,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns unallocatedEvents
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
-    upsertUnallocatedCaseService.upsertUnallocatedCase(crn)
+    cut.upsertUnallocatedCase(crn)
     verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
   }
 }
