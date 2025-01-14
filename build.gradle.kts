@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.2"
   kotlin("plugin.spring") version "2.0.21"
@@ -65,17 +67,17 @@ dependencies {
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "21"
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_21)
     }
     compileKotlin {
-      kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
       }
     }
     compileTestKotlin {
-      kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
       }
     }
   }
