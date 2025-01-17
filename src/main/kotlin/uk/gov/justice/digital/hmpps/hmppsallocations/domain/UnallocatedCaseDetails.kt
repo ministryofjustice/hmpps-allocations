@@ -68,32 +68,30 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       assessment: Assessment?,
       unallocatedCaseRisks: UnallocatedCaseRisks?,
       outOfAreaTransfer: Boolean,
-    ): UnallocatedCaseDetails {
-      return UnallocatedCaseDetails(
-        deliusCaseView.name.getCombinedName(),
-        case.crn, case.tier, deliusCaseView.sentence.startDate,
-        deliusCaseView.gender,
-        deliusCaseView.dateOfBirth,
-        deliusCaseView.age,
-        deliusCaseView.offences.map { UnallocatedCaseOffence.from(it) },
-        deliusCaseView.sentence.endDate,
-        deliusCaseView.sentence.description,
-        deliusCaseView.requirements.map { UnallocatedCaseRequirement.from(it) },
-        deliusCaseView.pncNumber,
-        UnallocatedCaseDocument.from(deliusCaseView.courtReport),
-        UnallocatedAssessment.from(assessment),
-        UnallocatedCaseDocument.from(deliusCaseView.cpsPack),
-        UnallocatedCaseDocument.from(deliusCaseView.preConvictionDocument),
-        deliusCaseView.mainAddress,
-        deliusCaseView.sentence.length,
-        case.convictionNumber,
-        unallocatedCaseRisks?.roshRisk?.getOverallRisk(),
-        unallocatedCaseRisks?.rsr?.level,
-        unallocatedCaseRisks?.ogrs?.score,
-        unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
-        outOfAreaTransfer,
-      )
-    }
+    ): UnallocatedCaseDetails = UnallocatedCaseDetails(
+      deliusCaseView.name.getCombinedName(),
+      case.crn, case.tier, deliusCaseView.sentence.startDate,
+      deliusCaseView.gender,
+      deliusCaseView.dateOfBirth,
+      deliusCaseView.age,
+      deliusCaseView.offences.map { UnallocatedCaseOffence.from(it) },
+      deliusCaseView.sentence.endDate,
+      deliusCaseView.sentence.description,
+      deliusCaseView.requirements.map { UnallocatedCaseRequirement.from(it) },
+      deliusCaseView.pncNumber,
+      UnallocatedCaseDocument.from(deliusCaseView.courtReport),
+      UnallocatedAssessment.from(assessment),
+      UnallocatedCaseDocument.from(deliusCaseView.cpsPack),
+      UnallocatedCaseDocument.from(deliusCaseView.preConvictionDocument),
+      deliusCaseView.mainAddress,
+      deliusCaseView.sentence.length,
+      case.convictionNumber,
+      unallocatedCaseRisks?.roshRisk?.getOverallRisk(),
+      unallocatedCaseRisks?.rsr?.level,
+      unallocatedCaseRisks?.ogrs?.score,
+      unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
+      outOfAreaTransfer,
+    )
   }
 }
 
@@ -109,14 +107,12 @@ data class OffenderManagerDetails @JsonCreator constructor(
 
   companion object {
 
-    fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? {
-      return communityPersonManager?.name?.forename?.takeUnless { probationStatus == "New to probation" }?.let {
-        OffenderManagerDetails(
-          communityPersonManager.name.forename,
-          communityPersonManager.name.surname,
-          gradeFrom(probationStatus, communityPersonManager.grade),
-        )
-      }
+    fun from(communityPersonManager: CommunityPersonManager?, probationStatus: String): OffenderManagerDetails? = communityPersonManager?.name?.forename?.takeUnless { probationStatus == "New to probation" }?.let {
+      OffenderManagerDetails(
+        communityPersonManager.name.forename,
+        communityPersonManager.name.surname,
+        gradeFrom(probationStatus, communityPersonManager.grade),
+      )
     }
 
     private fun gradeFrom(probationStatus: String, grade: String?): String? {
@@ -135,12 +131,10 @@ data class InitialAppointmentDetails @JsonCreator constructor(
   val staff: Staff?,
 ) {
   companion object {
-    fun from(initialAppointment: InitialAppointment?): InitialAppointmentDetails {
-      return InitialAppointmentDetails(
-        initialAppointment?.date,
-        initialAppointment?.staff,
-      )
-    }
+    fun from(initialAppointment: InitialAppointment?): InitialAppointmentDetails = InitialAppointmentDetails(
+      initialAppointment?.date,
+      initialAppointment?.staff,
+    )
   }
 }
 
@@ -153,13 +147,11 @@ data class UnallocatedCaseOffence @JsonCreator constructor(
   val subCategory: String,
 ) {
   companion object {
-    fun from(offence: Offence): UnallocatedCaseOffence {
-      return UnallocatedCaseOffence(
-        offence.mainOffence,
-        offence.mainCategory,
-        offence.subCategory,
-      )
-    }
+    fun from(offence: Offence): UnallocatedCaseOffence = UnallocatedCaseOffence(
+      offence.mainOffence,
+      offence.mainCategory,
+      offence.subCategory,
+    )
   }
 }
 
@@ -172,13 +164,11 @@ data class UnallocatedCaseRequirement @JsonCreator constructor(
   val length: String?,
 ) {
   companion object {
-    fun from(requirement: Requirement): UnallocatedCaseRequirement {
-      return UnallocatedCaseRequirement(
-        requirement.mainCategory,
-        requirement.subCategory,
-        requirement.length,
-      )
-    }
+    fun from(requirement: Requirement): UnallocatedCaseRequirement = UnallocatedCaseRequirement(
+      requirement.mainCategory,
+      requirement.subCategory,
+      requirement.length,
+    )
   }
 }
 
@@ -194,15 +184,13 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
   val name: String,
 ) {
   companion object {
-    fun from(document: CaseViewDocument?): UnallocatedCaseDocument? {
-      return document?.let {
-        UnallocatedCaseDocument(
-          it.description,
-          it.dateCreated,
-          it.documentId,
-          it.documentName,
-        )
-      }
+    fun from(document: CaseViewDocument?): UnallocatedCaseDocument? = document?.let {
+      UnallocatedCaseDocument(
+        it.description,
+        it.dateCreated,
+        it.documentId,
+        it.documentName,
+      )
     }
   }
 }
@@ -214,10 +202,8 @@ data class UnallocatedAssessment @JsonCreator constructor(
   val type: String,
 ) {
   companion object {
-    fun from(assessment: Assessment?): UnallocatedAssessment? {
-      return assessment?.let {
-        UnallocatedAssessment(assessment.completed!!, assessment.assessmentType)
-      }
+    fun from(assessment: Assessment?): UnallocatedAssessment? = assessment?.let {
+      UnallocatedAssessment(assessment.completed!!, assessment.assessmentType)
     }
   }
 }

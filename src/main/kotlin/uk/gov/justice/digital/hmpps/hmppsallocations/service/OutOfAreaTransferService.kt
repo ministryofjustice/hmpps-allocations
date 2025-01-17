@@ -13,12 +13,10 @@ class OutOfAreaTransferService(
   suspend fun isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
     currentTeamCode: String,
     unallocatedCasesFromDelius: DeliusCaseDetail,
-  ): Boolean {
-    return getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
-      currentTeamCode,
-      listOf(unallocatedCasesFromDelius),
-    ).firstOrNull() != null
-  }
+  ): Boolean = getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
+    currentTeamCode,
+    listOf(unallocatedCasesFromDelius),
+  ).firstOrNull() != null
   suspend fun getCasesThatAreCurrentlyManagedOutsideOfCurrentTeamsRegion(
     currentTeamCode: String,
     unallocatedCasesFromDelius: List<DeliusCaseDetail>,

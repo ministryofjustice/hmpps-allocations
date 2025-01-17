@@ -10,9 +10,7 @@ import reactor.core.publisher.Mono
 
 class AuthTokenFilterFunction : ExchangeFilterFunction {
 
-  override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-    return AuthTokenResponseMono(request, next)
-  }
+  override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> = AuthTokenResponseMono(request, next)
 }
 
 class AuthTokenResponseMono(

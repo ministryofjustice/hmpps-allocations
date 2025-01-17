@@ -32,9 +32,7 @@ class UnallocatedCasesDocumentController(@Qualifier("workforceAllocationsToDeliu
   fun getUnallocatedCaseDocument(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) documentId: String,
-  ): Mono<ResponseEntity<Resource>> {
-    return workforceAllocationsToDeliusApiClient.getDocumentById(crn, documentId)
-  }
+  ): Mono<ResponseEntity<Resource>> = workforceAllocationsToDeliusApiClient.getDocumentById(crn, documentId)
 
   @Operation(summary = "Retrieve all documents by CRN")
   @ApiResponses(

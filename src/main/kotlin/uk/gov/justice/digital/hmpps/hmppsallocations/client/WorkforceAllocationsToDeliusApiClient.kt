@@ -43,165 +43,139 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   /*
    * returns a list of all users with permission to use the aPop tool (Delius role 'MAABT001')
    */
-  suspend fun getApopUsers(): List<DeliusApopUser> {
-    return webClient
-      .get()
-      .uri("/users")
-      .retrieve()
-      .awaitBody()
-  }
-  suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails {
-    return webClient
-      .get()
-      .uri("person/{crn}/limited-access/all", crn)
-      .retrieve()
-      .awaitBody()
-  }
+  suspend fun getApopUsers(): List<DeliusApopUser> = webClient
+    .get()
+    .uri("/users")
+    .retrieve()
+    .awaitBody()
+  suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails = webClient
+    .get()
+    .uri("person/{crn}/limited-access/all", crn)
+    .retrieve()
+    .awaitBody()
 
-  suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails {
-    return webClient
-      .post()
-      .uri("person/{crn}/limited-access", crn)
-      .bodyValue(staffCodes)
-      .retrieve()
-      .awaitBody()
-  }
-  suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess {
-    return webClient
-      .post()
-      .uri { ub ->
-        ub.path("/users/limited-access")
-        username?.also { ub.queryParam("username", it) }
-        ub.build()
+  suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails = webClient
+    .post()
+    .uri("person/{crn}/limited-access", crn)
+    .bodyValue(staffCodes)
+    .retrieve()
+    .awaitBody()
+  suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess = webClient
+    .post()
+    .uri { ub ->
+      ub.path("/users/limited-access")
+      username?.also { ub.queryParam("username", it) }
+      ub.build()
+    }
+    .bodyValue(crns)
+    .awaitExchange { response ->
+      when (response.statusCode()) {
+        HttpStatus.OK -> response.awaitBody()
+        else -> throw response.createExceptionAndAwait()
       }
-      .bodyValue(crns)
-      .awaitExchange { response ->
-        when (response.statusCode()) {
-          HttpStatus.OK -> response.awaitBody()
-          else -> throw response.createExceptionAndAwait()
-        }
-      }
-  }
+    }
 
-  suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? =
-    getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
+  suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? = getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
-  fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> =
-    getDeliusCaseDetails(
-      caseDetails = GetCaseDetails(
-        cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) },
-      ),
+  fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> = getDeliusCaseDetails(
+    caseDetails = GetCaseDetails(
+      cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) },
+    ),
+  )
+    .flatMapIterable { it.cases }
+    .asFlow()
+
+  fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> = getDeliusCaseDetails(
+    caseDetails = GetCaseDetails(
+      listOf(CaseIdentifier(crn, convictionNumber.toString())),
+    ),
+  ).onErrorReturn(
+    DeliusCaseDetails(
+      cases = emptyList(),
+    ),
+  )
+
+  private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> = webClient
+    .post()
+    .uri("/allocation-demand")
+    .body(Mono.just(caseDetails), GetCaseDetails::class.java)
+    .retrieve()
+    .bodyToMono(DeliusCaseDetails::class.java)
+
+  fun getDocuments(crn: String): Flow<Document> = webClient
+    .get()
+    .uri("/offenders/{crn}/documents", crn)
+    .retrieve()
+    .bodyToFlow()
+
+  fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> = webClient
+    .get()
+    .uri("/offenders/{crn}/documents/{documentId}", crn, documentId)
+    .retrieve()
+    .toEntity(Resource::class.java)
+
+  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> = webClient
+    .get()
+    .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
+    .retrieve()
+    .bodyToMono()
+
+  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord = webClient
+    .get()
+    .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
+    .retrieve()
+    .awaitBody()
+
+  suspend fun getDeliusRisk(crn: String): DeliusRisk = webClient
+    .get()
+    .uri("/allocation-demand/{crn}/risk", crn)
+    .retrieve()
+    .awaitBody()
+
+  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? = webClient
+    .get()
+    .uri("/allocation-demand/{crn}/unallocated-events", crn)
+    .retrieve()
+    .onStatus({ status -> status.is5xxServerError }) {
+      Mono.error(AllocationsServerError("Internal server error"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+      Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+      Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
+    }
+    .bodyToMono(UnallocatedEvents::class.java)
+    .retryWhen(
+      Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+        .filter { it is AllocationsServerError },
     )
-      .flatMapIterable { it.cases }
-      .asFlow()
+    .awaitSingleOrNull()
 
-  fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> =
-    getDeliusCaseDetails(
-      caseDetails = GetCaseDetails(
-        listOf(CaseIdentifier(crn, convictionNumber.toString())),
-      ),
-    ).onErrorReturn(
-      DeliusCaseDetails(
-        cases = emptyList(),
-      ),
+  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
+    .get()
+    .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
+    .retrieve()
+    .awaitBody()
+
+  suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? = webClient
+    .get()
+    .uri("allocation-completed/order-manager?crn={crn}&eventNumber={convictionNumber}", crn, convictionNumber)
+    .retrieve()
+    .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+      Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+      Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
+    }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
+      Mono.error(AllocationsServerError("Internal server error"))
+    }
+    .bodyToMono(AllocatedEvent::class.java)
+    .retryWhen(
+      Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+        .filter { it is AllocationsServerError },
     )
-
-  private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> {
-    return webClient
-      .post()
-      .uri("/allocation-demand")
-      .body(Mono.just(caseDetails), GetCaseDetails::class.java)
-      .retrieve()
-      .bodyToMono(DeliusCaseDetails::class.java)
-  }
-
-  fun getDocuments(crn: String): Flow<Document> {
-    return webClient
-      .get()
-      .uri("/offenders/{crn}/documents", crn)
-      .retrieve()
-      .bodyToFlow()
-  }
-
-  fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> {
-    return webClient
-      .get()
-      .uri("/offenders/{crn}/documents/{documentId}", crn, documentId)
-      .retrieve()
-      .toEntity(Resource::class.java)
-  }
-
-  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
-    return webClient
-      .get()
-      .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
-      .retrieve()
-      .bodyToMono()
-  }
-
-  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
-    return webClient
-      .get()
-      .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
-      .retrieve()
-      .awaitBody()
-  }
-
-  suspend fun getDeliusRisk(crn: String): DeliusRisk {
-    return webClient
-      .get()
-      .uri("/allocation-demand/{crn}/risk", crn)
-      .retrieve()
-      .awaitBody()
-  }
-
-  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? =
-    webClient
-      .get()
-      .uri("/allocation-demand/{crn}/unallocated-events", crn)
-      .retrieve()
-      .onStatus({ status -> status.is5xxServerError }) {
-        Mono.error(AllocationsServerError("Internal server error"))
-      }
-      .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
-        Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
-      }
-      .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
-      }
-      .bodyToMono(UnallocatedEvents::class.java)
-      .retryWhen(
-        Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-          .filter { it is AllocationsServerError },
-      )
-      .awaitSingleOrNull()
-
-  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse =
-    webClient
-      .get()
-      .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
-      .retrieve()
-      .awaitBody()
-
-  suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? =
-    webClient
-      .get()
-      .uri("allocation-completed/order-manager?crn={crn}&eventNumber={convictionNumber}", crn, convictionNumber)
-      .retrieve()
-      .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-        Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
-      }
-      .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
-        Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
-      }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
-        Mono.error(AllocationsServerError("Internal server error"))
-      }
-      .bodyToMono(AllocatedEvent::class.java)
-      .retryWhen(
-        Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-          .filter { it is AllocationsServerError },
-      )
-      .awaitSingleOrNull()
+    .awaitSingleOrNull()
 }
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)

@@ -55,9 +55,8 @@ private fun handoverDate(handoverDate: String?) = if (handoverDate != null) {
   ""","handoverDate": null """
 }
 
-private fun initialAppointment(initialAppointment: InitialAppointment?): String {
-  return initialAppointment?.let {
-    """
+private fun initialAppointment(initialAppointment: InitialAppointment?): String = initialAppointment?.let {
+  """
       ,"initialAppointment": {
         "date": ${initialAppointment.date?.format(DateTimeFormatter.ofPattern("\"yyyy-MM-dd\""))},
         "staff": {
@@ -71,13 +70,11 @@ private fun initialAppointment(initialAppointment: InitialAppointment?): String 
           "grade": "string"
         }
         }
-    """.trimIndent()
-  } ?: ""
-}
+  """.trimIndent()
+} ?: ""
 
-private fun communityPersonManager(communityPersonManager: CommunityPersonManager?): String {
-  return communityPersonManager?.let {
-    """
+private fun communityPersonManager(communityPersonManager: CommunityPersonManager?): String = communityPersonManager?.let {
+  """
       ,"communityPersonManager": {
         "code": "N54B999",
         "name": {
@@ -87,9 +84,8 @@ private fun communityPersonManager(communityPersonManager: CommunityPersonManage
         "teamCode": "${communityPersonManager.teamCode}"
         ${showGrade(communityPersonManager)}
       }
-    """.trimIndent()
-  } ?: ""
-}
+  """.trimIndent()
+} ?: ""
 
 private fun showGrade(communityPersonManager: CommunityPersonManager): String {
   if (communityPersonManager.grade != null) {

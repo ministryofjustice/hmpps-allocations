@@ -25,16 +25,14 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
     fun from(
       case: UnallocatedCaseEntity,
       probationRecord: DeliusProbationRecord,
-    ): UnallocatedCaseConvictions {
-      return UnallocatedCaseConvictions(
-        probationRecord.name.getCombinedName(),
-        case.crn,
-        case.tier,
-        probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
-        probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
-        case.convictionNumber,
-      )
-    }
+    ): UnallocatedCaseConvictions = UnallocatedCaseConvictions(
+      probationRecord.name.getCombinedName(),
+      case.crn,
+      case.tier,
+      probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
+      probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
+      case.convictionNumber,
+    )
   }
 }
 
@@ -54,16 +52,14 @@ data class UnallocatedCaseConviction @JsonCreator constructor(
 ) {
   companion object {
 
-    fun from(sentencedEvent: SentencedEvent): UnallocatedCaseConviction {
-      return UnallocatedCaseConviction(
-        sentencedEvent.sentence.description,
-        sentencedEvent.sentence.length,
-        UnallocatedCaseConvictionPractitioner.from(sentencedEvent.manager),
-        sentencedEvent.sentence.startDate,
-        sentencedEvent.sentence.terminationDate,
-        sentencedEvent.offences.map { UnallocatedCaseConvictionOffence.from(it) },
-      )
-    }
+    fun from(sentencedEvent: SentencedEvent): UnallocatedCaseConviction = UnallocatedCaseConviction(
+      sentencedEvent.sentence.description,
+      sentencedEvent.sentence.length,
+      UnallocatedCaseConvictionPractitioner.from(sentencedEvent.manager),
+      sentencedEvent.sentence.startDate,
+      sentencedEvent.sentence.terminationDate,
+      sentencedEvent.offences.map { UnallocatedCaseConvictionOffence.from(it) },
+    )
   }
 }
 
@@ -74,9 +70,7 @@ data class UnallocatedCaseConvictionPractitioner @JsonCreator constructor(
   val grade: String?,
 ) {
   companion object {
-    fun from(communityEventManager: CommunityEventManager?): UnallocatedCaseConvictionPractitioner? {
-      return communityEventManager?.let { UnallocatedCaseConvictionPractitioner(it.name.getCombinedName(), it.grade) }
-    }
+    fun from(communityEventManager: CommunityEventManager?): UnallocatedCaseConvictionPractitioner? = communityEventManager?.let { UnallocatedCaseConvictionPractitioner(it.name.getCombinedName(), it.grade) }
   }
 }
 
@@ -87,8 +81,6 @@ data class UnallocatedCaseConvictionOffence @JsonCreator constructor(
   val mainOffence: Boolean,
 ) {
   companion object {
-    fun from(sentenceOffence: SentenceOffence): UnallocatedCaseConvictionOffence {
-      return UnallocatedCaseConvictionOffence(sentenceOffence.description, sentenceOffence.main)
-    }
+    fun from(sentenceOffence: SentenceOffence): UnallocatedCaseConvictionOffence = UnallocatedCaseConvictionOffence(sentenceOffence.description, sentenceOffence.main)
   }
 }

@@ -23,7 +23,5 @@ class TierCalculationService(
     }
   }
 
-  suspend fun getTier(crn: String): String {
-    return hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
-  }
+  suspend fun getTier(crn: String): String = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
 }

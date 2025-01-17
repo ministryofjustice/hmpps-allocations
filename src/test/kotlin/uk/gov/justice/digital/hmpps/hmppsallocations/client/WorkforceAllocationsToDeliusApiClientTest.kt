@@ -12,8 +12,7 @@ import reactor.core.publisher.Mono
 class WorkforceAllocationsToDeliusApiClientTest {
   @Test
   fun `test 500 retries on delius client`() = runBlocking {
-    val exchangeFunction = ExchangeFunction {
-        request ->
+    val exchangeFunction = ExchangeFunction { request ->
       Mono.just(ClientResponse.create(HttpStatus.INTERNAL_SERVER_ERROR).build())
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
@@ -25,8 +24,7 @@ class WorkforceAllocationsToDeliusApiClientTest {
 
   @Test
   fun `test 404 on delius client`() = runBlocking {
-    val exchangeFunction = ExchangeFunction {
-        request ->
+    val exchangeFunction = ExchangeFunction { request ->
       Mono.just(ClientResponse.create(HttpStatus.NOT_FOUND).build())
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
@@ -38,8 +36,7 @@ class WorkforceAllocationsToDeliusApiClientTest {
 
   @Test
   fun `test 403 on delius client`() = runBlocking {
-    val exchangeFunction = ExchangeFunction {
-        request ->
+    val exchangeFunction = ExchangeFunction { request ->
       Mono.just(ClientResponse.create(HttpStatus.FORBIDDEN).build())
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()

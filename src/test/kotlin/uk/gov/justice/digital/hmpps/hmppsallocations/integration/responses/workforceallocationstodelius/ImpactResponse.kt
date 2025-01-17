@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius
 
-fun impactResponse(crn: String, staffCode: String): String {
-  return """
+fun impactResponse(crn: String, staffCode: String): String = """
   {
       "crn": "$crn",
       "name": {
@@ -19,5 +18,4 @@ fun impactResponse(crn: String, staffCode: String): String {
           "grade": "PO"
       }
   }
-  """.trimIndent()
-}
+""".trimIndent()

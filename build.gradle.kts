@@ -94,3 +94,7 @@ detekt {
   config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
+// pin version of ktlint as HMPPS gradle orb 6.1.2 brings in dependency with older, breaking version. Remove when updated.
+ktlint {
+  version.set("1.4.1")
+}

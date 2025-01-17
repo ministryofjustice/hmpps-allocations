@@ -32,19 +32,17 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
       case: UnallocatedCaseEntity,
       rosh: RoshSummary?,
       riskPredictor: RiskPredictor?,
-    ): UnallocatedCaseRisks {
-      return UnallocatedCaseRisks(
-        case.name,
-        case.crn,
-        case.tier,
-        deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
-        rosh,
-        UnallocatedCaseRsr.from(riskPredictor),
-        UnallocatedCaseOgrs.from(deliusRisk.ogrs),
-        case.convictionNumber,
-      )
-    }
+    ): UnallocatedCaseRisks = UnallocatedCaseRisks(
+      case.name,
+      case.crn,
+      case.tier,
+      deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
+      deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
+      rosh,
+      UnallocatedCaseRsr.from(riskPredictor),
+      UnallocatedCaseOgrs.from(deliusRisk.ogrs),
+      case.convictionNumber,
+    )
   }
 }
 
@@ -64,15 +62,13 @@ data class UnallocatedCaseRegistration @JsonCreator constructor(
   val flag: Flag,
 ) {
   companion object {
-    fun from(registrations: Registrations): UnallocatedCaseRegistration {
-      return UnallocatedCaseRegistration(
-        registrations.description,
-        registrations.startDate,
-        registrations.notes,
-        registrations.endDate,
-        Flag(registrations.flag.description),
-      )
-    }
+    fun from(registrations: Registrations): UnallocatedCaseRegistration = UnallocatedCaseRegistration(
+      registrations.description,
+      registrations.startDate,
+      registrations.notes,
+      registrations.endDate,
+      Flag(registrations.flag.description),
+    )
   }
 }
 
@@ -87,9 +83,7 @@ data class UnallocatedCaseRsr @JsonCreator constructor(
   val percentage: BigDecimal?,
 ) {
   companion object {
-    fun from(rp: RiskPredictor?): UnallocatedCaseRsr? {
-      return rp?.let { UnallocatedCaseRsr(it.rsrScoreLevel, it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
-    }
+    fun from(rp: RiskPredictor?): UnallocatedCaseRsr? = rp?.let { UnallocatedCaseRsr(it.rsrScoreLevel, it.completedDate?.toLocalDate(), it.rsrPercentageScore) }
   }
 }
 
@@ -101,8 +95,6 @@ data class UnallocatedCaseOgrs @JsonCreator constructor(
   val score: BigInteger,
 ) {
   companion object {
-    fun from(ogrs: Ogrs?): UnallocatedCaseOgrs? {
-      return ogrs?.let { UnallocatedCaseOgrs(it.lastUpdatedDate, it.score) }
-    }
+    fun from(ogrs: Ogrs?): UnallocatedCaseOgrs? = ogrs?.let { UnallocatedCaseOgrs(it.lastUpdatedDate, it.score) }
   }
 }

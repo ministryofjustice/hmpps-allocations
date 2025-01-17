@@ -14,7 +14,10 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.probationestate.regionsAndTeamsResponseBody
 
-class ProbateEstateApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class ProbateEstateApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
 
   companion object {
     lateinit var hmppsProbateEstate: ProbateEstateMockServer
