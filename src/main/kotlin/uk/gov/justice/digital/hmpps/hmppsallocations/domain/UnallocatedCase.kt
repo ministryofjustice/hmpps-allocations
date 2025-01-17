@@ -43,28 +43,26 @@ data class UnallocatedCase @JsonCreator constructor(
       outOfAreaTransfer: Boolean,
       excluded: Boolean,
       apopExcluded: Boolean,
-    ): UnallocatedCase {
-      return UnallocatedCase(
-        name = "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
-        crn = deliusCaseDetail.crn,
-        tier = case.tier,
-        sentenceDate = deliusCaseDetail.sentence.date,
-        initialAppointment = InitialAppointmentDetails.from(
-          deliusCaseDetail.initialAppointment,
-        ),
-        status = deliusCaseDetail.probationStatus.description,
-        offenderManager = OffenderManagerDetails.from(
-          deliusCaseDetail.communityPersonManager,
-          deliusCaseDetail.probationStatus.description,
-        ),
-        caseType = deliusCaseDetail.type,
-        sentenceLength = deliusCaseDetail.sentence.length,
-        convictionNumber = case.convictionNumber,
-        outOfAreaTransfer = outOfAreaTransfer,
-        handoverDate = deliusCaseDetail.handoverDate,
-        excluded = excluded,
-        apopExcluded = apopExcluded,
-      )
-    }
+    ): UnallocatedCase = UnallocatedCase(
+      name = "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
+      crn = deliusCaseDetail.crn,
+      tier = case.tier,
+      sentenceDate = deliusCaseDetail.sentence.date,
+      initialAppointment = InitialAppointmentDetails.from(
+        deliusCaseDetail.initialAppointment,
+      ),
+      status = deliusCaseDetail.probationStatus.description,
+      offenderManager = OffenderManagerDetails.from(
+        deliusCaseDetail.communityPersonManager,
+        deliusCaseDetail.probationStatus.description,
+      ),
+      caseType = deliusCaseDetail.type,
+      sentenceLength = deliusCaseDetail.sentence.length,
+      convictionNumber = case.convictionNumber,
+      outOfAreaTransfer = outOfAreaTransfer,
+      handoverDate = deliusCaseDetail.handoverDate,
+      excluded = excluded,
+      apopExcluded = apopExcluded,
+    )
   }
 }

@@ -10,7 +10,10 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension.Companion.hmppsTier
 
-class TierApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class TierApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
 
   companion object {
 

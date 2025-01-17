@@ -10,7 +10,10 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.MediaType
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.HmppsAuthApiExtension.Companion.hmppsAuth
 
-class HmppsAuthApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class HmppsAuthApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
 
   companion object {
     lateinit var hmppsAuth: HmppsAuthMockServer

@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.2"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.7"
@@ -65,17 +67,17 @@ dependencies {
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "21"
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_21)
     }
     compileKotlin {
-      kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
       }
     }
     compileTestKotlin {
-      kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
+      compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
       }
     }
   }
@@ -91,4 +93,8 @@ tasks.named<JavaExec>("bootRun") {
 detekt {
   config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
+}
+// pin version of ktlint as HMPPS gradle orb 6.1.2 brings in dependency with older, breaking version. Remove when updated.
+ktlint {
+  version.set("1.4.1")
 }

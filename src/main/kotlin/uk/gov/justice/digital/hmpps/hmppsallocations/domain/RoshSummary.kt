@@ -8,7 +8,5 @@ data class RoshSummary @JsonCreator constructor(
   val assessedOn: LocalDate?,
   val riskInCommunity: Map<String, String?>,
 ) {
-  fun getOverallRisk(): String {
-    return overallRisk ?: "NOT_FOUND"
-  }
+  fun getOverallRisk(): String = overallRisk ?: "NOT_FOUND"
 }

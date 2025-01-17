@@ -78,7 +78,5 @@ class UpsertUnallocatedCaseService(
     MDC.remove(LAO_STATUS)
   }
 
-  suspend fun getTier(crn: String): String {
-    return hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
-  }
+  suspend fun getTier(crn: String): String = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
 }
