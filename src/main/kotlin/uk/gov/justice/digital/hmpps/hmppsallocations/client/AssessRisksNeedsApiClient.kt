@@ -40,6 +40,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     .uri("/assessments/timeline/crn/{crn}", crn)
     .retrieve()
     .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
+    .onStatus({ it.is5xxServerError }) { res -> res.createException().flatMap { Mono.error(Exception(SERVER_EXCEPTION)) } }
     .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
     .bodyToMono<Timeline>()
     .mapNotNull { timeline ->
