@@ -27,55 +27,43 @@ class WebClientUserEnhancementConfiguration(
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
 ) {
 
-  private fun assessRisksNeedsWebClient(builder: WebClient.Builder): WebClient {
-    return builder.baseUrl(assessRisksNeedsApiRootUri)
-      .filter(withAuth())
-      .build()
-  }
+  private fun assessRisksNeedsWebClient(builder: WebClient.Builder): WebClient = builder.baseUrl(assessRisksNeedsApiRootUri)
+    .filter(withAuth())
+    .build()
 
   @Bean
   @Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope")
   fun assessRisksNeedsWebClientUserEnhancedAppScope(
     builder: WebClient.Builder,
-  ): WebClient {
-    return assessRisksNeedsWebClient(builder)
-  }
+  ): WebClient = assessRisksNeedsWebClient(builder)
 
   @Bean
-  fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient {
-    return AssessRisksNeedsApiClient(webClient)
-  }
+  fun assessRisksNeedsApiClientUserEnhanced(@Qualifier("assessRisksNeedsWebClientUserEnhancedAppScope") webClient: WebClient): AssessRisksNeedsApiClient = AssessRisksNeedsApiClient(webClient)
 
   @Bean
   fun assessmentWebClientUserEnhancedAppScope(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(
-      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
-      builder,
-      assessmentApiRootUri,
-      "assessment-api",
-    )
-  }
+  ): WebClient = getOAuthWebClient(
+    authorizedClientManagerUserEnhanced(clientRegistrationRepository),
+    builder,
+    assessmentApiRootUri,
+    "assessment-api",
+  )
 
   @Bean
   fun workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope(
     clientRegistrationRepository: ReactiveClientRegistrationRepository,
     builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(
-      authorizedClientManagerUserEnhanced(clientRegistrationRepository),
-      builder,
-      workforceAllocationsToDeliusApiRootUri,
-      "workforce-allocations-to-delius-api",
-    )
-  }
+  ): WebClient = getOAuthWebClient(
+    authorizedClientManagerUserEnhanced(clientRegistrationRepository),
+    builder,
+    workforceAllocationsToDeliusApiRootUri,
+    "workforce-allocations-to-delius-api",
+  )
 
   @Bean
-  fun workforceAllocationsToDeliusApiClientUserEnhanced(@Qualifier("workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
-    return WorkforceAllocationsToDeliusApiClient(webClient)
-  }
+  fun workforceAllocationsToDeliusApiClientUserEnhanced(@Qualifier("workforceAllocationsToDeliusApiWebClientUserEnhancedAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient = WorkforceAllocationsToDeliusApiClient(webClient)
 
   private fun authorizedClientManagerUserEnhanced(clients: ReactiveClientRegistrationRepository): ReactiveOAuth2AuthorizedClientManager {
     val service = InMemoryReactiveOAuth2AuthorizedClientService(clients)
@@ -87,6 +75,7 @@ class WebClientUserEnhancementConfiguration(
     return manager
   }
 
+  @Suppress("LongParameterList")
   private fun getOAuthWebClient(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
@@ -100,23 +89,21 @@ class WebClientUserEnhancementConfiguration(
       .build()
   }
 
-  private fun withAuth(): ExchangeFilterFunction {
-    return ExchangeFilterFunction.ofRequestProcessor { request ->
-      ReactiveSecurityContextHolder.getContext()
-        .map { securityContext ->
-          val authentication = securityContext.authentication
-          val token = when (authentication) {
-            is BearerTokenAuthentication -> authentication.token.tokenValue
-            is OAuth2AccessToken -> authentication.tokenValue
-            is JwtAuthenticationToken -> authentication.token.tokenValue
-            else -> null
-          }
-          token?.let {
-            ClientRequest.from(request)
-              .header("Authorization", "Bearer $it")
-              .build()
-          } ?: request
+  private fun withAuth(): ExchangeFilterFunction = ExchangeFilterFunction.ofRequestProcessor { request ->
+    ReactiveSecurityContextHolder.getContext()
+      .map { securityContext ->
+        val authentication = securityContext.authentication
+        val token = when (authentication) {
+          is BearerTokenAuthentication -> authentication.token.tokenValue
+          is OAuth2AccessToken -> authentication.tokenValue
+          is JwtAuthenticationToken -> authentication.token.tokenValue
+          else -> null
         }
-    }
+        token?.let {
+          ClientRequest.from(request)
+            .header("Authorization", "Bearer $it")
+            .build()
+        } ?: request
+      }
   }
 }

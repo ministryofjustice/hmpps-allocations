@@ -21,14 +21,12 @@ data class UnallocatedCaseConfirmInstructions @JsonCreator constructor(
     fun from(
       case: UnallocatedCaseEntity,
       personOnProbationStaffDetailsResponse: PersonOnProbationStaffDetailsResponse,
-    ): UnallocatedCaseConfirmInstructions {
-      return UnallocatedCaseConfirmInstructions(
-        personOnProbationStaffDetailsResponse.name,
-        case.crn,
-        case.tier,
-        case.convictionNumber,
-        personOnProbationStaffDetailsResponse.staff,
-      )
-    }
+    ): UnallocatedCaseConfirmInstructions = UnallocatedCaseConfirmInstructions(
+      personOnProbationStaffDetailsResponse.name,
+      case.crn,
+      case.tier,
+      case.convictionNumber,
+      personOnProbationStaffDetailsResponse.staff,
+    )
   }
 }

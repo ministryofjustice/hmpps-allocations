@@ -97,26 +97,24 @@ internal class OutOfAreaTransferServiceTest {
     crn: String,
     probationStatus: String,
     communityPersonManagerTeamCode: String,
-  ): DeliusCaseDetail {
-    return DeliusCaseDetail(
+  ): DeliusCaseDetail = DeliusCaseDetail(
+    name = mockk(),
+    crn = crn,
+    sentence = mockk(),
+    initialAppointment = mockk(),
+    event = mockk(),
+    probationStatus = ProbationStatus(
+      status = probationStatus,
+      description = probationStatus,
+    ),
+    communityPersonManager = CommunityPersonManager(
       name = mockk(),
-      crn = crn,
-      sentence = mockk(),
-      initialAppointment = mockk(),
-      event = mockk(),
-      probationStatus = ProbationStatus(
-        status = probationStatus,
-        description = probationStatus,
-      ),
-      communityPersonManager = CommunityPersonManager(
-        name = mockk(),
-        grade = "",
-        teamCode = communityPersonManagerTeamCode,
-      ),
-      type = "",
-      handoverDate = mockk(),
-    )
-  }
+      grade = "",
+      teamCode = communityPersonManagerTeamCode,
+    ),
+    type = "",
+    handoverDate = mockk(),
+  )
 
   @Test
   fun `must not return unallocated cases which get deleted during enrichment`() {

@@ -33,73 +33,67 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
-    return webClient
-      .get()
-      .uri("/assessments/timeline/crn/{crn}", crn)
-      .retrieve()
-      .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
-      .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
-      .bodyToMono<Timeline>()
-      .mapNotNull { timeline ->
-        timeline.timeline
-          .filter { it.status == "COMPLETE" }
-          .maxByOrNull { it.completed!! }
-      }
-      .retryWhen(
-        Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-          .filter { it.message == UNAVAILABLE },
-      )
-      .awaitSingleOrNull()
-  }
+  suspend fun getLatestCompleteAssessment(crn: String): Assessment? = webClient
+    .get()
+    .uri("/assessments/timeline/crn/{crn}", crn)
+    .retrieve()
+    .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
+    .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
+    .bodyToMono<Timeline>()
+    .mapNotNull { timeline ->
+      timeline.timeline
+        .filter { it.status == "COMPLETE" }
+        .maxByOrNull { it.completed!! }
+    }
+    .retryWhen(
+      Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
+        .filter { it.message == UNAVAILABLE },
+    )
+    .awaitSingleOrNull()
 
-  suspend fun getRosh(crn: String): RoshSummary? {
-    return webClient
-      .get()
-      .uri("/risks/crn/{crn}/widget", crn)
-      .retrieve()
-      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
-      .bodyToMono<RoshSummary>()
-      .retryWhen(
-        Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-          .filter { it.message == UNAVAILABLE },
-      )
-      .timeout(Duration.ofSeconds(20))
-      .onErrorResume { throwable ->
-        when (throwable.message) {
-          NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
-          else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
-        }
+  suspend fun getRosh(crn: String): RoshSummary? = webClient
+    .get()
+    .uri("/risks/crn/{crn}/widget", crn)
+    .retrieve()
+    .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+    .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
+    .bodyToMono<RoshSummary>()
+    .retryWhen(
+      Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
+        .filter { it.message == UNAVAILABLE },
+    )
+    .timeout(Duration.ofSeconds(20))
+    .onErrorResume { throwable ->
+      when (throwable.message) {
+        NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
+        else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
       }
-      .awaitSingleOrNull()
-  }
+    }
+    .awaitSingleOrNull()
 
-  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
-    return webClient
-      .get()
-      .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
-      .retrieve()
-      .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-      .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
-      .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
-      .bodyToFlow<RiskPredictor>()
-      .retryWhen(
-        { cause, attempt ->
-          if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
-            delay(Duration.ofSeconds(RETRY_DELAY))
-            true
-          } else {
-            false
-          }
-        },
-      )
-      .catch {
-        when (it.message) {
-          NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
-          else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> = webClient
+    .get()
+    .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
+    .retrieve()
+    .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+    .onStatus({ it.is5xxServerError }) { Mono.error(Exception("SERVER_ERROR")) }
+    .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
+    .bodyToFlow<RiskPredictor>()
+    .retryWhen(
+      { cause, attempt ->
+        if (cause.message == "SERVER_ERROR" && attempt < RETRY_ATTEMPTS) {
+          delay(Duration.ofSeconds(RETRY_DELAY))
+          true
+        } else {
+          false
         }
+      },
+    )
+    .catch {
+      when (it.message) {
+        NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
+        else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
       }
-      .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
-  }
+    }
+    .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
 }

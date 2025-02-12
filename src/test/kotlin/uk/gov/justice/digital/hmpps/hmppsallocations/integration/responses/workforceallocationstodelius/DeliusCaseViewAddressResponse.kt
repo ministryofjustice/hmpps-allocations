@@ -31,9 +31,8 @@ fun deliusCaseViewAddressResponse(caseViewAddressIntegration: CaseViewAddressInt
   }
 """.trimIndent()
 
-fun address(caseViewAddressIntegration: CaseViewAddressIntegration?): String {
-  return caseViewAddressIntegration?.let {
-    """
+fun address(caseViewAddressIntegration: CaseViewAddressIntegration?): String = caseViewAddressIntegration?.let {
+  """
       "mainAddress": {
       ${addressFieldOrEmpty("buildingName",caseViewAddressIntegration.buildingName)} 
       ${addressFieldOrEmpty("addressNumber",caseViewAddressIntegration.addressNumber)}
@@ -46,8 +45,7 @@ fun address(caseViewAddressIntegration: CaseViewAddressIntegration?): String {
       "typeDescription": "${caseViewAddressIntegration.typeDescription}",
       "startDate": "${caseViewAddressIntegration.startDate}"
     },
-    """.trimIndent()
-  } ?: ""
-}
+  """.trimIndent()
+} ?: ""
 
 fun addressFieldOrEmpty(key: String, value: String?) = value?.let { "\"$key\":\"$value\"," } ?: ""

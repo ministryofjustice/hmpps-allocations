@@ -68,17 +68,15 @@ class HmppsAllocationsExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedException::class)
-  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse?>? {
-    return ResponseEntity
-      .status(FORBIDDEN)
-      .body(
-        ErrorResponse(
-          status = FORBIDDEN,
-          userMessage = "Access is denied",
-          developerMessage = e.message,
-        ),
-      )
-  }
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse?>? = ResponseEntity
+    .status(FORBIDDEN)
+    .body(
+      ErrorResponse(
+        status = FORBIDDEN,
+        userMessage = "Access is denied",
+        developerMessage = e.message,
+      ),
+    )
 
   @ExceptionHandler(EntityNotFoundException::class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -133,15 +131,13 @@ class HmppsAllocationsExceptionHandler {
   }
 
   @ExceptionHandler(WebClientResponseException.NotFound::class)
-  fun handle(e: WebClientResponseException.NotFound): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
-    return ResponseEntity(
-      uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
-        status = 404,
-        developerMessage = e.message,
-      ),
-      NOT_FOUND,
-    )
-  }
+  fun handle(e: WebClientResponseException.NotFound): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> = ResponseEntity(
+    uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+      status = 404,
+      developerMessage = e.message,
+    ),
+    NOT_FOUND,
+  )
 
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
@@ -158,16 +154,14 @@ class HmppsAllocationsExceptionHandler {
   }
 
   @ExceptionHandler(NoResourceFoundException::class)
-  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(NOT_FOUND)
-      .body(
-        ErrorResponse(
-          status = NOT_FOUND.value(),
-          developerMessage = e.message,
-        ),
-      )
-  }
+  fun handleEntityNotFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND.value(),
+        developerMessage = e.message,
+      ),
+    )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

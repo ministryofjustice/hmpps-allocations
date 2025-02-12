@@ -15,13 +15,11 @@ data class CaseOverview @JsonCreator constructor(
   val convictionNumber: Int,
 ) {
   companion object {
-    fun from(case: UnallocatedCaseEntity): CaseOverview {
-      return CaseOverview(
-        case.name,
-        case.crn,
-        case.tier,
-        case.convictionNumber,
-      )
-    }
+    fun from(case: UnallocatedCaseEntity): CaseOverview = CaseOverview(
+      case.name,
+      case.crn,
+      case.tier,
+      case.convictionNumber,
+    )
   }
 }

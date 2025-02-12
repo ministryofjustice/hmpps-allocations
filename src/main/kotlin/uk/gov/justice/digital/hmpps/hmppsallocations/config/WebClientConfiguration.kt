@@ -40,40 +40,28 @@ class WebClientConfiguration(
   fun hmppsTierWebClientAppScope(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManager, builder, hmppsTierApiRootUri, "hmpps-tier-api")
-  }
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, hmppsTierApiRootUri, "hmpps-tier-api")
 
   @Bean
-  fun hmppsTierApiClient(@Qualifier("hmppsTierWebClientAppScope") webClient: WebClient): HmppsTierApiClient {
-    return HmppsTierApiClient(webClient)
-  }
+  fun hmppsTierApiClient(@Qualifier("hmppsTierWebClientAppScope") webClient: WebClient): HmppsTierApiClient = HmppsTierApiClient(webClient)
 
   @Bean
   fun hmppsProbationEstateAppScope(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManager, builder, hmppsProbationEstateApiRootUri, "hmpps-probation-estate-api")
-  }
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, hmppsProbationEstateApiRootUri, "hmpps-probation-estate-api")
 
   @Bean
-  fun hmppsProbationEstateApiClient(@Qualifier("hmppsProbationEstateAppScope") webClient: WebClient): HmppsProbationEstateApiClient {
-    return HmppsProbationEstateApiClient(webClient)
-  }
+  fun hmppsProbationEstateApiClient(@Qualifier("hmppsProbationEstateAppScope") webClient: WebClient): HmppsProbationEstateApiClient = HmppsProbationEstateApiClient(webClient)
 
   @Bean
   fun workforceAllocationsToDeliusApiClientWebClientAppScope(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
-  ): WebClient {
-    return getOAuthWebClient(authorizedClientManager, builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
-  }
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, workforceAllocationsToDeliusApiRootUri, "workforce-allocations-to-delius-api")
 
   @Bean
-  fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient {
-    return WorkforceAllocationsToDeliusApiClient(webClient)
-  }
+  fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient = WorkforceAllocationsToDeliusApiClient(webClient)
 
   @Suppress("LongParameterList")
   private fun getOAuthWebClient(

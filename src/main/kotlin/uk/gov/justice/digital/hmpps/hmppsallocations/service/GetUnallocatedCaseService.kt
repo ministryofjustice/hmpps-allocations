@@ -72,29 +72,28 @@ class GetUnallocatedCaseService(
     assessment: Assessment?,
     getDeliusCaseViewCall: Mono<DeliusCaseView>,
     getDeliusCaseDetailsCall: Mono<DeliusCaseDetails>,
-  ): UnallocatedCaseDetails? =
-    Mono.zip(getDeliusCaseViewCall, getDeliusCaseDetailsCall)
-      .awaitSingle()
-      .let {
-        val caseView = it.t1
-        val caseDetails = it.t2
-        val caseIsOutOfAreaTransfer = if (caseDetails.cases.firstOrNull() != null) {
-          outOfAreaTransferService.isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
-            currentTeamCode = unallocatedCaseEntity.teamCode,
-            unallocatedCasesFromDelius = caseDetails.cases.first(),
-          )
-        } else {
-          false
-        }
-        getRisksAndGenerateUnallocatedCaseDetails(
-          crn,
-          convictionNumber,
-          unallocatedCaseEntity,
-          caseView,
-          assessment,
-          caseIsOutOfAreaTransfer,
+  ): UnallocatedCaseDetails? = Mono.zip(getDeliusCaseViewCall, getDeliusCaseDetailsCall)
+    .awaitSingle()
+    .let {
+      val caseView = it.t1
+      val caseDetails = it.t2
+      val caseIsOutOfAreaTransfer = if (caseDetails.cases.firstOrNull() != null) {
+        outOfAreaTransferService.isCaseCurrentlyManagedOutsideOfCurrentTeamsRegion(
+          currentTeamCode = unallocatedCaseEntity.teamCode,
+          unallocatedCasesFromDelius = caseDetails.cases.first(),
         )
+      } else {
+        false
       }
+      getRisksAndGenerateUnallocatedCaseDetails(
+        crn,
+        convictionNumber,
+        unallocatedCaseEntity,
+        caseView,
+        assessment,
+        caseIsOutOfAreaTransfer,
+      )
+    }
 
   @Suppress("LongParameterList")
   private suspend fun getRisksAndGenerateUnallocatedCaseDetails(
@@ -115,11 +114,9 @@ class GetUnallocatedCaseService(
     ).takeUnless { excluded(crn) }
   }
 
-  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? {
-    return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
-      CaseOverview.from(it)
-    }.takeUnless { excluded(crn) }
-  }
+  suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
+    CaseOverview.from(it)
+  }.takeUnless { excluded(crn) }
 
   @SuppressWarnings("LongMethod")
   suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
@@ -196,9 +193,8 @@ class GetUnallocatedCaseService(
     }
   }
 
-  fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> =
-    Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
-      .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
+  fun getCaseCountByTeam(teamCodes: List<String>): Flux<CaseCountByTeam> = Flux.fromIterable(unallocatedCasesRepository.getCaseCountByTeam(teamCodes))
+    .map { CaseCountByTeam(it.getTeamCode(), it.getCaseCount()) }
 
   private fun findUnallocatedCaseByConvictionNumber(
     crn: String,
@@ -220,17 +216,11 @@ class GetUnallocatedCaseService(
     return workforceAllocationsToDeliusApiClient.getUserAccess(crn)?.run { userRestricted } ?: true
   }
 
-  suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? {
-    return laoService.getCrnRestrictionsForUsers(crn, staffCodes)
-  }
+  suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? = laoService.getCrnRestrictionsForUsers(crn, staffCodes)
 
-  suspend fun isCrnRestricted(crn: String): Boolean? {
-    return laoService.isCrnRestricted(crn)
-  }
+  suspend fun isCrnRestricted(crn: String): Boolean? = laoService.isCrnRestricted(crn)
 
-  suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus {
-    return laoService.getCrnRestrictionStatus(crn)
-  }
+  suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus = laoService.getCrnRestrictionStatus(crn)
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }

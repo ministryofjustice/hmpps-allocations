@@ -37,7 +37,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workf
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.impactResponse
 import java.time.LocalDate
 
-class WorkforceAllocationsToDeliusApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class WorkforceAllocationsToDeliusApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
 
   companion object {
     lateinit var workforceAllocationsToDelius: WorkforceAllocationsToDeliusMockServer

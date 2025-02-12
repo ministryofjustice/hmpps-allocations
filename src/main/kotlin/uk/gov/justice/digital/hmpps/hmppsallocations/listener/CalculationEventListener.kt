@@ -34,8 +34,7 @@ class CalculationEventListener(
     return objectMapper.readValue(message.message, CalculationEventData::class.java)
   }
 
-  private fun crnFrom(calculationEventData: CalculationEventData) =
-    calculationEventData.personReference.identifiers.first { it.type == "CRN" }.value
+  private fun crnFrom(calculationEventData: CalculationEventData) = calculationEventData.personReference.identifiers.first { it.type == "CRN" }.value
 
   data class CalculationEventData(val personReference: PersonReference)
 

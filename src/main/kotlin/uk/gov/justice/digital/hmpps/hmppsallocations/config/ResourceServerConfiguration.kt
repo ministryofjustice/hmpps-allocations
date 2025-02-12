@@ -12,24 +12,22 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 @EnableReactiveMethodSecurity(useAuthorizationManager = false)
 class ResourceServerConfiguration {
   @Bean
-  fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-    return http
-      .csrf { it.disable() }
-      .authorizeExchange {
-        it.pathMatchers(
-          "/webjars/**",
-          "/favicon.ico",
-          "/health/**",
-          "/info",
-          "/v3/api-docs/**",
-          "/swagger-ui/**",
-          "/swagger-ui.html",
-          "/queue-admin/**",
-          "/crn/reprocess",
-        ).permitAll().anyExchange().authenticated()
-      }
-      .oauth2ResourceServer {
-        it.jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
-      }.build()
-  }
+  fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http
+    .csrf { it.disable() }
+    .authorizeExchange {
+      it.pathMatchers(
+        "/webjars/**",
+        "/favicon.ico",
+        "/health/**",
+        "/info",
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/queue-admin/**",
+        "/crn/reprocess",
+      ).permitAll().anyExchange().authenticated()
+    }
+    .oauth2ResourceServer {
+      it.jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
+    }.build()
 }

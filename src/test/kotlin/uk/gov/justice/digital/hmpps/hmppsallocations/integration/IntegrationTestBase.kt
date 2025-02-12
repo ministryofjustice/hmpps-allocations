@@ -233,11 +233,9 @@ abstract class IntegrationTestBase {
       )
   }
 
-  protected fun countMessagesOnOffenderEventQueue(): Int =
-    hmppsOffenderSqsClient.countAllMessagesOnQueue(hmppsOffenderQueue.queueUrl).get()
+  protected fun countMessagesOnOffenderEventQueue(): Int = hmppsOffenderSqsClient.countAllMessagesOnQueue(hmppsOffenderQueue.queueUrl).get()
 
-  protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int? =
-    hmppsOffenderSqsDlqClient?.countAllMessagesOnQueue(hmppsOffenderQueue.dlqUrl!!)?.get()
+  protected fun countMessagesOnOffenderEventDeadLetterQueue(): Int? = hmppsOffenderSqsDlqClient?.countAllMessagesOnQueue(hmppsOffenderQueue.dlqUrl!!)?.get()
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 
@@ -247,8 +245,7 @@ abstract class IntegrationTestBase {
     PersonReference(listOf(PersonReferenceType("CRN", crn))),
   )
 
-  private fun getNumberOfMessagesCurrentlyOnQueue(client: SqsAsyncClient, queueUrl: String): Int? =
-    client.countAllMessagesOnQueue(queueUrl).get()
+  private fun getNumberOfMessagesCurrentlyOnQueue(client: SqsAsyncClient, queueUrl: String): Int? = client.countAllMessagesOnQueue(queueUrl).get()
 
   protected fun whenCalculationQueueIsEmpty() {
     await untilCallTo {

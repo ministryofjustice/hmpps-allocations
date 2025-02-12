@@ -8,21 +8,18 @@ fun deliusUserAccessResponse(crn: String, restricted: Boolean, excluded: Boolean
   }
 """.trimIndent()
 
-fun deliusUserAccessResponse(caseAccessList: List<Triple<String, Boolean, Boolean>>): String =
-  """ {
+fun deliusUserAccessResponse(caseAccessList: List<Triple<String, Boolean, Boolean>>): String = """ {
     "access": [
       ${caseAccessList.joinToString {
-    deliusCaseAccess(it.first, it.second, it.third)
-  }}
+  deliusCaseAccess(it.first, it.second, it.third)
+}}
     ]
   }"""
 
-fun deliusCaseAccess(crn: String, restricted: Boolean, excluded: Boolean): String {
-  return """
+fun deliusCaseAccess(crn: String, restricted: Boolean, excluded: Boolean): String = """
   {
     "crn": "$crn",
     "userRestricted": $restricted,
     "userExcluded": $excluded
   }
   """
-}

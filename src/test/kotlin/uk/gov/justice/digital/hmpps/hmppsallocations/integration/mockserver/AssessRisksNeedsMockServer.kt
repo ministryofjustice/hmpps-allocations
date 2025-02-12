@@ -20,7 +20,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.asses
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponseNoOverallRisk
 
-class AssessRisksNeedsApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class AssessRisksNeedsApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
 
   companion object {
     lateinit var assessRisksNeedsApi: AssessRisksNeedsMockServer
