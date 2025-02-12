@@ -21,10 +21,14 @@ class LaoService(
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     var apopExcluded = false
 
-    limitedAccessDetails.excludedFrom.forEach {
-      if (apopUsersStaffCodes.contains(it.staffCode)) {
-        apopExcluded = true
-        return@forEach
+    if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
+      apopExcluded = true
+    } else {
+      limitedAccessDetails.excludedFrom.forEach {
+        if (apopUsersStaffCodes.contains(it.staffCode)) {
+          apopExcluded = true
+          return@forEach
+        }
       }
     }
 

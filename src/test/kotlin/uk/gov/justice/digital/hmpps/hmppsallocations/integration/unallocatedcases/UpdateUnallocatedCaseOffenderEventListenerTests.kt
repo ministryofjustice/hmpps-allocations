@@ -150,6 +150,32 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
   }
 
   @Test
+  fun `delete when restricted crn is not found`() {
+    val crn = "J678910"
+
+    repository.save(
+      UnallocatedCaseEntity(
+        crn = crn,
+        name = "Tester TestSurname",
+        tier = "B3",
+        providerCode = "",
+        teamCode = "",
+        convictionNumber = 1,
+      ),
+    )
+
+    workforceAllocationsToDelius.userHasAccess(crn, true, false)
+    workforceAllocationsToDelius.unallocatedEventsNotFoundResponse(crn)
+    workforceAllocationsToDelius.setuserAccessToCases(listOf(Triple(crn, true, false)))
+
+    publishConvictionChangedMessage(crn)
+
+    await untilCallTo { countMessagesOnOffenderEventQueue() } matches { it == 0 }
+
+    assertThat(repository.count()).isEqualTo(0)
+  }
+
+  @Test
   fun `should not be able to insert more than one row of crn conviction id combination`() {
     val crn = "J678910"
     repository.save(

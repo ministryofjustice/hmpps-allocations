@@ -172,7 +172,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(2)
+      .isEqualTo(5)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].status")
       .isEqualTo("Previously managed")
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].offenderManager.forenames")
@@ -186,7 +186,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].excluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'J680648')].apopExcluded")
-      .isEqualTo(false)
+      .isEqualTo(false) // ** has excluded users but not  Apop users
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].status")
       .isEqualTo("New to probation")
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].offenderManager")
@@ -196,6 +196,12 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].excluded")
       .isEqualTo(true)
       .jsonPath("$.[?(@.convictionNumber == 3 && @.crn == 'X4565764')].apopExcluded")
+      .isEqualTo(true) // ** has excluded users that are  Apop users
+      .jsonPath("$.[?(@.crn == 'J678910')].apopExcluded")
+      .isEqualTo(true) // ** restricted case
+      .jsonPath("$.[?(@.crn == 'J680660')].apopExcluded")
+      .isEqualTo(true)
+      .jsonPath("$.[?(@.crn == 'X6666222')].apopExcluded")
       .isEqualTo(true)
   }
 
@@ -234,7 +240,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get unallocated cases by team where all cases are LAO cases`() {
+  fun `Get unallocated cases by team where all cases are LAO restricted cases`() {
     insertCases()
     workforceAllocationsToDelius.setuserAccessToCases(
       listOf(
@@ -247,6 +253,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
+    workforceAllocationsToDelius.setupTeam1CaseDetails()
 
     webTestClient.get()
       .uri("/team/TEAM1/cases/unallocated")
@@ -256,7 +263,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.length()")
-      .isEqualTo(0)
+      .isEqualTo(5)
   }
 
   @Test

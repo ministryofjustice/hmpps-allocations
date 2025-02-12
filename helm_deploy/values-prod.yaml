@@ -4,6 +4,7 @@
 queue_cronjob_schedule: "*/15 * * * *"
 
 generic-service:
+  replicaCount: 3
 
   ingress:
     host: hmpps-allocations.hmpps.service.justice.gov.uk
