@@ -40,7 +40,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.2")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.3")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
