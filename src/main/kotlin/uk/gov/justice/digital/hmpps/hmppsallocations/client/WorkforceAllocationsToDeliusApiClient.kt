@@ -257,7 +257,7 @@ data class DocumentEvent @JsonCreator constructor(
 
 data class DeliusCaseAccess(
   val crn: String,
-  val userRestricted: Boolean,
+  var userRestricted: Boolean,
   val userExcluded: Boolean,
 )
 

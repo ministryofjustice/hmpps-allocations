@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
@@ -207,7 +208,7 @@ class GetUnallocatedCaseService(
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? = laoService.getCrnRestrictionsForUsers(crn, staffCodes)
 
   suspend fun isCrnRestricted(crn: String): Boolean? = laoService.isCrnRestricted(crn)
-
+  suspend fun getCaseRestrictions(crn: List<String>): DeliusUserAccess = laoService.getCrnRestrictions(crn)
   suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus = laoService.getCrnRestrictionStatus(crn)
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
