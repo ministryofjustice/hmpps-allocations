@@ -165,6 +165,6 @@ class UnallocatedCasesController(
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @PostMapping("/cases/restrictions/crn/list")
   suspend fun getCaseRestrictions(
-    @RequestParam(required = true) crnList: CrnListRequest,
-  ): DeliusUserAccess = getUnallocatedCaseService.getCaseRestrictions(crnList.crns)
+    @RequestBody(required = true) crnListRequest: CrnListRequest,
+  ): DeliusUserAccess = getUnallocatedCaseService.getCaseRestrictions(crnListRequest.crns)
 }
