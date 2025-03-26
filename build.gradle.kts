@@ -4,7 +4,8 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.0.0"
   kotlin("plugin.spring") version "2.1.0"
   kotlin("plugin.jpa") version "2.1.0"
-  id("io.gitlab.arturbosch.detekt") version "1.23.7"
+  kotlin("jvm") version "2.0.21"
+  id("io.gitlab.arturbosch.detekt") version "1.23.8"
   id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
 }
 
@@ -34,6 +35,7 @@ allOpen {
 }
 
 dependencies {
+  implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
   implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.4")
@@ -91,6 +93,7 @@ tasks.named<JavaExec>("bootRun") {
 }
 
 detekt {
+  toolVersion = "1.23.8"
   config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
