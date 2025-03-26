@@ -102,3 +102,4 @@ oauth:
 springdoc:
   swagger-ui:
     version: 5.20.0
+    path: /swagger-ui.html
