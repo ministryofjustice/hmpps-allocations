@@ -93,10 +93,11 @@ management:
       show-details: always
       probes:
         enabled: true
+      access: unrestricted
     info:
       cache:
         time-to-live: 2000ms
-
+      access: unrestricted
 oauth:
   endpoint.url: http://localhost:8090/auth
 springdoc:

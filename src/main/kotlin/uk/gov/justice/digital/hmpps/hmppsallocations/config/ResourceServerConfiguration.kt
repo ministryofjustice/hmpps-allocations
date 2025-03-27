@@ -28,6 +28,8 @@ class ResourceServerConfiguration {
       ).permitAll().anyExchange().authenticated()
     }
     .oauth2ResourceServer {
-      it.jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
+      it.jwt { jwtConfigurer ->
+        jwtConfigurer.jwtAuthenticationConverter(AuthAwareTokenConverter())
+      }
     }.build()
 }
