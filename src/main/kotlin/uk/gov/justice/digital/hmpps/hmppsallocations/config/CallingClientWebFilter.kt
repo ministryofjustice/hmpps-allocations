@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.config
 
 import com.nimbusds.jwt.SignedJWT
 import io.opentelemetry.api.trace.Span
-import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
