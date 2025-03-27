@@ -16,6 +16,7 @@ class ResourceServerConfiguration {
     .csrf { it.disable() }
     .authorizeExchange {
       it.pathMatchers(
+        "/actuator/**",
         "/webjars/**",
         "/favicon.ico",
         "/health/**",

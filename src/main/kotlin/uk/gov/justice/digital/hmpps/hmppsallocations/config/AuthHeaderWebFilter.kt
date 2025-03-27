@@ -12,11 +12,19 @@ import reactor.core.publisher.Mono
 @Component
 class AuthHeaderWebFilter : WebFilter {
   override fun filter(serverWebExchange: ServerWebExchange, webFilterChain: WebFilterChain): Mono<Void> {
-    val authHeader = serverWebExchange.request.headers[HttpHeaders.AUTHORIZATION]?.firstOrNull() ?: "none"
+    val path = serverWebExchange.request.uri.path
+    if (path.startsWith("/v3/api") || path.startsWith("/health") || path.startsWith("/info") || path.startsWith("/swagger")) {
+      return webFilterChain.filter(serverWebExchange)
+    }
+    val authHeader = serverWebExchange.request.headers[HttpHeaders.AUTHORIZATION]?.firstOrNull()
     return ReactiveSecurityContextHolder.getContext()
       .flatMap { securityContext: SecurityContext ->
-        webFilterChain.filter(serverWebExchange).contextWrite {
-          it.put(HttpHeaders.AUTHORIZATION, authHeader)
+        if (authHeader != null) {
+          webFilterChain.filter(serverWebExchange).contextWrite {
+            it.put(HttpHeaders.AUTHORIZATION, authHeader)
+          }
+        } else {
+          webFilterChain.filter(serverWebExchange)
         }
       }
   }
