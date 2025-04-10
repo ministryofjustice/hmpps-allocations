@@ -48,9 +48,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.1")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
@@ -62,9 +62,9 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.13.17")
+  testImplementation("io.mockk:mockk:1.14.0")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks {
