@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictionDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictions
@@ -33,6 +34,31 @@ class LaoService(
     }
 
     return DeliusCrnRestrictions(limitedAccessDetails.excludedFrom.isNotEmpty(), limitedAccessDetails.restrictedTo.isNotEmpty(), apopExcluded)
+  }
+
+  suspend fun getCrnRestrictions(crns: List<String>): DeliusUserAccess {
+    val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
+    val apopUsersStaffCodes = apopUsers.filter { it.staffCode != null }.map { it.staffCode }
+    val crnsAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crns).access
+
+    crnsAccess.forEach {
+      if (!it.userRestricted) {
+        if (it.userExcluded) {
+          val limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
+
+          var apopExcluded = false
+          limitedAccessDetail.excludedFrom.forEach {
+            if (apopUsersStaffCodes.contains(it.staffCode)) {
+              apopExcluded = true
+              return@forEach
+            }
+          }
+          it.userRestricted = apopExcluded
+        }
+      }
+    }
+
+    return DeliusUserAccess(crnsAccess)
   }
 
   suspend fun getCrnRestrictionStatus(crn: String): DeliusCrnRestrictionStatus {

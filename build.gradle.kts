@@ -2,10 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.0.0"
-  kotlin("plugin.spring") version "2.1.0"
-  kotlin("plugin.jpa") version "2.1.0"
-  id("io.gitlab.arturbosch.detekt") version "1.23.7"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.1.0"
+  kotlin("plugin.spring") version "2.1.20"
+  kotlin("plugin.jpa") version "2.1.20"
+  kotlin("jvm") version "2.1.20"
+  id("io.gitlab.arturbosch.detekt") version "1.23.8"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.1.20"
 }
 
 configurations {
@@ -20,7 +21,7 @@ configurations {
 configurations.matching { it.name == "detekt" }.all {
   resolutionStrategy.eachDependency {
     if (requested.group == "org.jetbrains.kotlin") {
-      useVersion("2.0.10")
+      useVersion("2.0.21")
     }
   }
 }
@@ -34,11 +35,12 @@ allOpen {
 }
 
 dependencies {
+  implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.1")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.2")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.4")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
 
@@ -46,9 +48,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.1")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
@@ -57,12 +59,12 @@ dependencies {
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
+  testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.13.16")
+  testImplementation("io.mockk:mockk:1.14.0")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks {
@@ -91,6 +93,7 @@ tasks.named<JavaExec>("bootRun") {
 }
 
 detekt {
+  toolVersion = "1.23.8"
   config.setFrom("src/test/resources/detekt-config.yml")
   buildUponDefaultConfig = true
 }
