@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
@@ -74,6 +75,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
         else -> throw response.createExceptionAndAwait()
       }
     }
+
+  suspend fun getTeamsByStaffId(staffId: String): DeliusTeams = webClient
+    .get()
+    .uri("staff/{staffId}/teams", staffId)
+    .retrieve()
+    .awaitBody()
 
   suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? = getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
