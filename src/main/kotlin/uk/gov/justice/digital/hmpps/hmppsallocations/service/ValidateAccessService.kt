@@ -14,12 +14,12 @@ class ValidateAccessService(
   private val getRegionsService: GetRegionsService,
 ) {
   suspend fun validateUserAccess(crn: String, staffCode: String): Boolean {
-    val allowedRegions = getRegionsService.getRegionsByUser(staffCode)
+    val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
     val probationEstateForPoP = workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.activeEvents?.map { it.teamCode }
     val probationEstateRegions =
       hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForPoP ?: emptyList()).flatten().toSet())
-        ?.map { it.region }
-    val result = allowedRegions.regions.intersect(probationEstateRegions?.toSet() ?: emptySet()).size > 0
+        ?.map { it.region.code }
+    val result = allowedRegions.intersect(probationEstateRegions?.toSet() ?: emptySet()).size > 0
     if (!result) {
       throw NotAllowedForAccessException("User does not have access to crn:", crn)
     }
