@@ -17,8 +17,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowe
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class RegionAccessController(private val getRegionsService: GetRegionsService,
-                             private val validateAccessService: ValidateAccessService) {
+class RegionAccessController(
+  private val getRegionsService: GetRegionsService,
+  private val validateAccessService: ValidateAccessService,
+) {
 
   @Operation(summary = "Retrieve all user regions")
   @ApiResponses(
@@ -39,12 +41,10 @@ class RegionAccessController(private val getRegionsService: GetRegionsService,
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/user/{staffId}/crn/{crn}/is-allowed")
-  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String): ResponseEntity<Void> {
-    return try {
-      validateAccessService.validateUserAccess(staffId, crn)
-      ResponseEntity.ok().build()
-    } catch (e: NotAllowedForAccessException) {
-      ResponseEntity.status(403).build()
-    }
+  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String): ResponseEntity<Void> = try {
+    validateAccessService.validateUserAccess(staffId, crn)
+    ResponseEntity.ok().build()
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity.status(403).build()
   }
 }
