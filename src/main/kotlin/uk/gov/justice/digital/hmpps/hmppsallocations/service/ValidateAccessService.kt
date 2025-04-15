@@ -21,7 +21,7 @@ class ValidateAccessService(
         ?.map { it.region.code }
     val result = allowedRegions.intersect(probationEstateRegions?.toSet() ?: emptySet()).size > 0
     if (!result) {
-      throw NotAllowedForAccessException("User does not have access to crn:", crn)
+      throw NotAllowedForAccessException("User $staffCode does not have access to $crn due to region", crn)
     }
     return true
   }

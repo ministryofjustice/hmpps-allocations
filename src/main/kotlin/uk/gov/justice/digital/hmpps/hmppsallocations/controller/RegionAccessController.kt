@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -41,10 +42,10 @@ class RegionAccessController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/user/{staffId}/crn/{crn}/is-allowed")
-  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String): ResponseEntity<Void> = try {
+  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String): ResponseEntity<String> = try {
     validateAccessService.validateUserAccess(staffId, crn)
-    ResponseEntity.ok().build()
+    ResponseEntity<String>("Ok", HttpStatus.OK)
   } catch (e: NotAllowedForAccessException) {
-    ResponseEntity.status(403).build()
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
   }
 }
