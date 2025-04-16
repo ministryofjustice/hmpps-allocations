@@ -43,6 +43,7 @@ class ValidateAccessServiceTest {
     val teamCode = "N54ERET"
     val region = "N54"
     val staffId = "KennySmith1"
+    val convictionNumber = "1"
     coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(any()) } returns UnallocatedEvents(
       crn,
       Name("Bob", "Smith", "Jones"),
@@ -59,7 +60,7 @@ class ValidateAccessServiceTest {
     )
     coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region))
 
-    val actualResult = validateAccessService.validateUserAccess(crn, staffId)
+    val actualResult = validateAccessService.validateUserAccess(crn, staffId, convictionNumber)
 
     assert(actualResult)
   }
@@ -71,6 +72,7 @@ class ValidateAccessServiceTest {
     val region = "N54"
     val otherRegion = "N55"
     val staffId = "KennySmith2"
+    val convictionNumber = "1"
     coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(any()) } returns UnallocatedEvents(
       crn,
       Name("Bob", "Smith", "Jones"),
@@ -87,6 +89,6 @@ class ValidateAccessServiceTest {
     )
     coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(otherRegion))
 
-    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(crn, staffId) }
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(crn, staffId, convictionNumber) }
   }
 }
