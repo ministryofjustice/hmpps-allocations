@@ -122,7 +122,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         .withStatusCode(200)
         .withContentType(MediaType.APPLICATION_JSON)
         .withBody(
-                """
+          """
           {
               "teams": [
                   {
@@ -174,8 +174,9 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
                       }
                   }
               ]
-          }
-        """.trimIndent(),
+}
+""",
+
         ),
     )
   }
@@ -260,7 +261,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
 
-          ),
+        ),
     )
   }
 
@@ -287,7 +288,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
 
-          ),
+        ),
     )
   }
 
@@ -309,7 +310,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "N/A"
 }""",
 
-          ),
+        ),
     )
   }
 

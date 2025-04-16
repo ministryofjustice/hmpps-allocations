@@ -8,7 +8,6 @@ class GetRegionsByUserTests : IntegrationTestBase() {
 
   @Test
   fun `Get teams for user is successful`() {
-
     val userId = "User1"
     workforceAllocationsToDelius.setuserTeams(userId)
 
