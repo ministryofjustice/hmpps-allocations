@@ -112,6 +112,74 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
+  fun setuserTeams(userId: String) {
+    val request = HttpRequest.request()
+      .withPath("/staff/$userId/teams")
+      .withMethod("GET")
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(
+                """
+          {
+              "teams": [
+                  {
+                      "code": "S03F01",
+                      "description": "My Team 1",
+                      "localAdminUnit": {
+                          "code": "WPTNWS",
+                          "description": "North Wales",
+                          "probationDeliveryUnit": {
+                              "code": "WPTNWS",
+                              "description": "North Wales",
+                              "provider": {
+                                  "code": "N03",
+                                  "description": "Wales"
+                              }
+                          }
+                      }
+                  },
+                  {
+                      "code": "S03F01",
+                      "description": "My Team 1",
+                      "localAdminUnit": {
+                          "code": "WPTNWS",
+                          "description": "North Wales",
+                          "probationDeliveryUnit": {
+                              "code": "WPTNWS",
+                              "description": "North Wales",
+                              "provider": {
+                                  "code": "N04",
+                                  "description": "Gales"
+                              }
+                          }
+                      }
+                  },
+                  {
+                      "code": "S03F02",
+                      "description": "Your Team 1",
+                      "localAdminUnit": {
+                          "code": "WPTNWS",
+                          "description": "North Wales",
+                          "probationDeliveryUnit": {
+                              "code": "WPTNWS",
+                              "description": "North Wales",
+                              "provider": {
+                                  "code": "N03",
+                                  "description": "Barry"
+                              }
+                          }
+                      }
+                  }
+              ]
+          }
+        """.trimIndent(),
+        ),
+    )
+  }
+
   fun userHasAccess(crn: String, restricted: Boolean = false, excluded: Boolean = false) {
     val request = HttpRequest.request()
       .withPath("/users/limited-access")
@@ -192,7 +260,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
 
-        ),
+          ),
     )
   }
 
@@ -219,7 +287,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
 
-        ),
+          ),
     )
   }
 
@@ -241,7 +309,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "restrictionMessage": "N/A"
 }""",
 
-        ),
+          ),
     )
   }
 

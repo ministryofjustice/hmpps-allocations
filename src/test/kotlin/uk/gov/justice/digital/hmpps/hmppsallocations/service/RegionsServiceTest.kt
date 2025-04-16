@@ -33,10 +33,10 @@ class RegionsServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
     coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
       listOf(
-        TeamWithLau("N53", "N53 desc", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("a1", "desc")))),
-        TeamWithLau("N54", "Camelot", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("a1", "desc")))),
-        TeamWithLau("N54", "Camelot", Lau("lau3", "Lakes", Pdu("B12", "flintstone", Provider("a1", "desc")))),
-        TeamWithLau("N55", "Camelot", Lau("lau3", "Lakes", Pdu("B12", "flintstone", Provider("a1", "desc")))),
+        TeamWithLau("N53", "Midlands", Lau("lau1", "lauDesc", Pdu("D1", "Dessert", Provider("a1", "one")))),
+        TeamWithLau("N54", "Camelot", Lau("lau1", "Avalon", Pdu("D2", "RoundTable", Provider("a2", "two")))),
+        TeamWithLau("N54", "Camelot", Lau("lau3", "Lakes", Pdu("B12", "Small Heath", Provider("a3", "desc")))),
+        TeamWithLau("N55", "Yorkshire", Lau("lau3", "Lakes", Pdu("B13", "flintstone", Provider("a4", "four")))),
       ),
     )
 
