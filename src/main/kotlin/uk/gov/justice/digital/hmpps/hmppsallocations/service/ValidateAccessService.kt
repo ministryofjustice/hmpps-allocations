@@ -17,12 +17,12 @@ class ValidateAccessService(
     val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
     val probationEstateForPoP = workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.activeEvents?.filter { it.eventNumber == convictionNumber }
       ?.map { it.teamCode }?.distinct()?.get(0)
-    val probationEstateRegions =
+    val probationEstateRegion =
       hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForPoP ?: ""))
-        ?.map { it.region.code }
-    val result = allowedRegions.intersect(probationEstateRegions?.toSet() ?: emptySet()).size > 0
+        ?.map { it.region.code }?.get(0)
+    val result = allowedRegions.contains(probationEstateRegion)
     if (!result) {
-      throw NotAllowedForAccessException("User $staffCode does not have access to $crn due to region $probationEstateRegions", crn)
+      throw NotAllowedForAccessException("User $staffCode does not have access to $crn due to region $probationEstateRegion", crn)
     }
     return true
   }
