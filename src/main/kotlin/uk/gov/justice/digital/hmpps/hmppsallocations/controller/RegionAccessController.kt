@@ -42,10 +42,10 @@ class RegionAccessController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/user/{staffId}/crn/{crn}/conviction/{convictionNumber}/is-allowed")
-  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<String> = try {
+  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<Void> = try {
     validateAccessService.validateUserAccess(staffId, crn, convictionNumber)
-    ResponseEntity<String>("Ok", HttpStatus.OK)
+    ResponseEntity.status(HttpStatus.OK).build()
   } catch (e: NotAllowedForAccessException) {
-    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+    ResponseEntity.status(HttpStatus.FORBIDDEN).build()
   }
 }
