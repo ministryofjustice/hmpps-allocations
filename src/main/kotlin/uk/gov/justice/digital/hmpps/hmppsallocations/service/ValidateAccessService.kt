@@ -13,7 +13,7 @@ class ValidateAccessService(
   private val hmppsProbationEstateApiClient: HmppsProbationEstateApiClient,
   private val getRegionsService: GetRegionsService,
 ) {
-  suspend fun validateUserAccess(crn: String, staffCode: String, convictionNumber: String): Boolean {
+  suspend fun validateUserAccess(staffCode: String, crn: String, convictionNumber: String): Boolean {
     val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
     val probationEstateForPoP = workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.activeEvents?.filter { it.eventNumber == convictionNumber }
       ?.map { it.teamCode }?.distinct()?.get(0)
