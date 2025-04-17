@@ -13,6 +13,6 @@ class GetRegionsService(
 
   suspend fun getRegionsByUser(staffId: String): RegionList {
     val teams = workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId)
-    return RegionList(teams.teams.map { it.code }.distinct())
+    return RegionList(teams.teams.map { it.localAdminUnit.probationDeliveryUnit.provider.code }.distinct())
   }
 }
