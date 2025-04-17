@@ -44,7 +44,7 @@ class ValidateAccessServiceTest {
     val region = "N54"
     val staffId = "KennySmith1"
     val convictionNumber = "1"
-    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(any()) } returns UnallocatedEvents(
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns UnallocatedEvents(
       crn,
       Name("Bob", "Smith", "Jones"),
       listOf(
@@ -55,12 +55,12 @@ class ValidateAccessServiceTest {
         ),
       ),
     )
-    coEvery { probationEstateApiClient.getRegionsAndTeams(any()) } returns listOf(
+    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
       ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
     )
-    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region))
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(region))
 
-    val actualResult = validateAccessService.validateUserAccess(crn, staffId, convictionNumber)
+    val actualResult = validateAccessService.validateUserAccess(staffId, crn, convictionNumber)
 
     assert(actualResult)
   }
@@ -84,11 +84,11 @@ class ValidateAccessServiceTest {
         ),
       ),
     )
-    coEvery { probationEstateApiClient.getRegionsAndTeams(any()) } returns listOf(
+    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
       ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
     )
-    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(otherRegion))
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(otherRegion))
 
-    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(crn, staffId, convictionNumber) }
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
   }
 }
