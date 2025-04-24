@@ -30,8 +30,8 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{staffId}/regions")
-  suspend fun getAccessibleRegionsByUser(@PathVariable staffId: String): RegionList = getRegionsService.getRegionsByUser(staffId)
+  @GetMapping("/user/{userName}/regions")
+  suspend fun getAccessibleRegionsByUser(@PathVariable userName: String): RegionList = getRegionsService.getRegionsByUser(userName)
 
   @Operation(summary = "Check for user access")
   @ApiResponses(
@@ -41,9 +41,9 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{staffId}/crn/{crn}/conviction/{convictionNumber}/is-allowed")
-  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<String> = try {
-    validateAccessService.validateUserAccess(staffId, crn, convictionNumber)
+  @GetMapping("/user/{userName}/crn/{crn}/conviction/{convictionNumber}/is-allowed")
+  suspend fun getValidatedAccess(@PathVariable userName: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccess(userName, crn, convictionNumber)
     ResponseEntity<String>("Ok", HttpStatus.OK)
   } catch (e: NotAllowedForAccessException) {
     ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
