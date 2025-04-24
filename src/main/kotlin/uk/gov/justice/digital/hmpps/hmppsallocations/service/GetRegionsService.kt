@@ -14,9 +14,9 @@ class GetRegionsService(
 
   suspend fun getRegionsByUser(userName: String): RegionList {
     val users = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val staffCodes = users.filter { it.username == userName && it.staffCode != null }.map { it.staffCode }.distinct()
+    val staffCodes = users.filter { it.username.uppercase() == userName.uppercase() && it.staffCode != null }.map { it.staffCode }.distinct()
     if (staffCodes.isEmpty() || staffCodes.first() == null) {
-      throw EntityNotFoundException("User name not found :$staffCodes")
+      throw EntityNotFoundException("User name not found :$userName")
     } else {
       val teams = workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffCodes.first()!!)
       return RegionList(teams.teams.map { it.localAdminUnit.probationDeliveryUnit.provider.code }.distinct())
