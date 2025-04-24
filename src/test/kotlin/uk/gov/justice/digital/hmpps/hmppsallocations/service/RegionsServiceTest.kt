@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Lau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Pdu
@@ -29,8 +30,11 @@ class RegionsServiceTest {
 
   @Test
   fun `returns correct regions`() = runTest {
+    val userName = "001"
     val staffId = "N25789"
-    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
+      DeliusApopUser(username = userName, staffCode = staffId),
+    )
     coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
       listOf(
         TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N53", "Mids")))),
@@ -40,7 +44,7 @@ class RegionsServiceTest {
       ),
     )
 
-    val regions = regionsService.getRegionsByUser(staffId)
+    val regions = regionsService.getRegionsByUser(userName)
     assert(regions.regions.size == 3)
     assert(regions.regions.contains("N53"))
     assert(regions.regions.contains("N54"))
@@ -49,12 +53,16 @@ class RegionsServiceTest {
 
   @Test
   fun `returns empty list if no regions allowed`() = runTest {
-    val staffId = "67871"
+    val userName = "001"
+    val staffId = "N25789"
+    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
+      DeliusApopUser(username = userName, staffCode = staffId),
+    )
     coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
       emptyList(),
     )
 
-    val regions = regionsService.getRegionsByUser(staffId)
+    val regions = regionsService.getRegionsByUser(userName)
     assert(regions.regions.isEmpty())
   }
 }
