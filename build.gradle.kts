@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.0.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
   kotlin("plugin.spring") version "2.1.20"
   kotlin("plugin.jpa") version "2.1.20"
   kotlin("jvm") version "2.1.20"
@@ -38,8 +38,8 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.4")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.4")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.5")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.5")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
