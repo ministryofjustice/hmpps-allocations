@@ -59,4 +59,3 @@ data class QueueMessage(
   @JsonProperty("Message") val message: String,
   @JsonProperty("MessageId") val messageId: String?,
 )
-

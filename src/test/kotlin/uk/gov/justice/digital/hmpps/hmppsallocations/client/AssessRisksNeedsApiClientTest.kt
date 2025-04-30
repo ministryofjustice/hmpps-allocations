@@ -9,9 +9,6 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,7 +22,7 @@ class AssessRisksNeedsApiClientTest {
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
           .body("""{"timeline":[{"status":"COMPLETE","completed":"2023-01-01T12:00:00","assessmentType":"12345"}]}""")
-          .build()
+          .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
@@ -63,7 +60,7 @@ class AssessRisksNeedsApiClientTest {
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
           .body("""{"overallRisk":"HIGH","assessedOn":"2023-01-01","riskInCommunity":{"COMMUNITY":"HIGH"}}""")
-          .build()
+          .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
@@ -90,7 +87,7 @@ class AssessRisksNeedsApiClientTest {
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
           .body("""[{"rsrPercentageScore":0.5,"rsrScoreLevel":"HIGH","completedDate":"2023-01-01T12:00:00"}]""")
-          .build()
+          .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()

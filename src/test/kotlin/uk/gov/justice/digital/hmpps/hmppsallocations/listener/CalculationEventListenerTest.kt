@@ -42,5 +42,4 @@ class CalculationEventListenerTest {
 
     coVerify { tierCalculationService.updateTier(crn) }
   }
-
 }

@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.Exceptions
 import reactor.core.publisher.Mono
 
 class HmppsTierApiClientTest {
@@ -43,7 +42,7 @@ class HmppsTierApiClientTest {
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
           .body("""{"tierScore":"A1"}""")
-          .build()
+          .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
