@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Lau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Pdu
@@ -31,11 +30,7 @@ class RegionsServiceTest {
   @Test
   fun `returns correct regions`() = runTest {
     val userName = "001"
-    val staffId = "N25789"
-    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
-      DeliusApopUser(username = userName, staffCode = staffId),
-    )
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName) } returns DeliusTeams(
       listOf(
         TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N53", "Mids")))),
         TeamWithLau("a2", "Camelot", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N54", "East")))),
@@ -54,11 +49,7 @@ class RegionsServiceTest {
   @Test
   fun `returns empty list if no regions allowed`() = runTest {
     val userName = "001"
-    val staffId = "N25789"
-    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
-      DeliusApopUser(username = userName, staffCode = staffId),
-    )
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName) } returns DeliusTeams(
       emptyList(),
     )
 
