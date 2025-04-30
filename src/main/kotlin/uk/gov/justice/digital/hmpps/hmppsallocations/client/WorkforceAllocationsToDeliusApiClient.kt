@@ -78,7 +78,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
 
   suspend fun getTeamsByUsername(username: String): DeliusTeams = webClient
     .get()
-    .uri("user/{username}/teams", username)
+    .uri("users/{username}/teams", username)
     .retrieve()
     .awaitBody()
 
