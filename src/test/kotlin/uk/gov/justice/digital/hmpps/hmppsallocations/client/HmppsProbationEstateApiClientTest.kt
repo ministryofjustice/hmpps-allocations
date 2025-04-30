@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
