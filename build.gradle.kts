@@ -40,7 +40,7 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.5")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.5")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.4")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
 
@@ -62,7 +62,7 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.14.0")
+  testImplementation("io.mockk:mockk:1.14.2")
   testImplementation("com.ninja-squad:springmockk:4.0.2")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
