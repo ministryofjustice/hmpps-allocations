@@ -82,6 +82,12 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .retrieve()
     .awaitBody()
 
+  suspend fun getTeamsByUserName(userName: String): DeliusTeams = webClient
+    .get()
+    .uri("users/{userName}/teams", userName)
+    .retrieve()
+    .awaitBody()
+
   suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? = getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
   fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> = getDeliusCaseDetails(

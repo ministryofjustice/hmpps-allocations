@@ -35,7 +35,12 @@ class RegionsServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
       DeliusApopUser(username = userName, staffCode = staffId),
     )
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUserName(userName) } returns DeliusTeams(
+      listOf(
+        Provider("N53", "Reg1"),
+        Provider("N54", "Reg2"),
+        Provider("N55", "Reg3"),
+      ),
       listOf(
         TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N53", "Mids")))),
         TeamWithLau("a2", "Camelot", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N54", "East")))),
@@ -54,14 +59,10 @@ class RegionsServiceTest {
   @Test
   fun `returns empty list if no regions allowed`() = runTest {
     val userName = "001"
-    val staffId = "N25789"
-    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns listOf(
-      DeliusApopUser(username = userName, staffCode = staffId),
-    )
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUserName(userName) } returns DeliusTeams(
+      emptyList(),
       emptyList(),
     )
-
     val regions = regionsService.getRegionsByUser(userName)
     assert(regions.regions.isEmpty())
   }
