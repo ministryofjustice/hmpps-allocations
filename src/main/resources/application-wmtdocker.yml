@@ -1,32 +1,37 @@
 hmpps.sqs:
   provider: localstack
+  localstackUrl: http://localhost:4566
   queues:
     tiercalculationqueue:
-      queueName: hmpps_tier_event_queue
-      dlqName: hmpps_tier_event_dlq
-      subscribeTopicId: hmppsdomaintopic
-      subscribeFilter: '{"eventType":[ "TIER_CALCULATION_COMPLETE"] }'
+      queueName: hmpps_tier_event_queue`
+      # dlqName: hmpps_tier_event_dlq
+      #subscribeTopicId: hmppsdomaintopic
+      #subscribeFilter: '{"eventType":[ "TIER_CALCULATION_COMPLETE"] }'
+      #dlqMaxReceiveCount: 1
     hmppsoffenderqueue:
       queueName: hmpps_offender_event_queue
-      dlqName: hmpps_offender_event_dlq
-      subscribeTopicId: hmppsoffendertopic
-      subscribeFilter: '{"eventType":[ "SENTENCE_CHANGED"] }'
-  topics:
-    hmppsdomaintopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
-    hmppsoffendertopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+      #dlqName: hmpps_offender_event_dlq
+      #subscribeTopicId: hmppsoffendertopic
+      #subscribeFilter: '{"eventType":[ "CONVICTION_CHANGED", "OFFENDER_MANAGER_CHANGED"] }'
+      #dlqMaxReceiveCount: 1
 
-hmpps-tier:
-  endpoint:
-    url: http://localhost:8082
 
 hmpps-probation-estate:
   endpoint:
     url: http://localhost:8099
+workforce-allocations-to-delius:
+  endpoint:
+    url: http://localhost:8099
+hmpps-tier:
+  endpoint:
+    url: http://localhost:8099
+assessment:
+  endpoint:
+    url: http://localhost:8099
+assess-risks-needs:
+  endpoint:
+    url: http://localhost:8099
 
-oauth:
-  endpoint.url: http://localhost:9090/auth
-
-datasource:
-  url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/postgres"
