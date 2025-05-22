@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
@@ -15,6 +16,9 @@ class LaoService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)!!
+  }
 
   suspend fun getCrnRestrictions(crn: String): DeliusCrnRestrictions {
     val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
@@ -114,12 +118,22 @@ class LaoService(
   }
 
   suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>): CrnStaffRestrictions {
+    val validStaffCodes: ArrayList<String> = ArrayList()
+    staffCodes.forEach { staffCode ->
+      try {
+        validStaffCodes.add(workforceAllocationsToDeliusApiClient.getOfficerView(staffCode).code)
+      } catch (exception: Exception) {
+        log.warn("Officer with code $staffCode not found with message ${exception.message} for crn $crn")
+      }
+    }
     val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
     val restrictedStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
 
     val arrStaffRestrictions = ArrayList<CrnStaffRestrictionDetail>()
     staffCodes.forEach {
-      arrStaffRestrictions.add(CrnStaffRestrictionDetail(it, restrictedStaffCodes.contains(it)))
+      var result = !validStaffCodes.contains(it)
+      if (!result) result = restrictedStaffCodes.contains(it)
+      arrStaffRestrictions.add(CrnStaffRestrictionDetail(it, result))
     }
     return CrnStaffRestrictions(crn, arrStaffRestrictions)
   }
