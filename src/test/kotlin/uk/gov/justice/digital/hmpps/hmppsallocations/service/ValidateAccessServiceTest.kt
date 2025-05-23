@@ -17,7 +17,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
+import kotlin.collections.listOf
 
 class ValidateAccessServiceTest {
   @MockK
@@ -35,6 +37,32 @@ class ValidateAccessServiceTest {
   @BeforeEach
   fun setUp() {
     MockKAnnotations.init(this, relaxUnitFun = true)
+  }
+
+  @Test
+  fun `returns a 404 if probation estate not found`() = runTest {
+    val crn = "X123456"
+    val staffId = "KennySmith1"
+    val convictionNumber = "1"
+    val region = "N54"
+    val teamCode = "N54ERET"
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns null
+    coEvery { probationEstateApiClient.getRegionsAndTeams(any()) } returns emptyList()
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(region))
+    assertThrows<EntityNotFoundException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
+  }
+
+  @Test
+  fun `returns a 404 if regions service returns empty list`() = runTest {
+    val crn = "X123456"
+    val staffId = "KennySmith1"
+    val convictionNumber = "1"
+    val region = "N54"
+    val teamCode = "N54ERET"
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn) } returns null
+    coEvery { probationEstateApiClient.getRegionsAndTeams(any()) } returns emptyList()
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(emptyList())
+    assertThrows<EntityNotFoundException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
   }
 
   @Test
