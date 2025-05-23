@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
-  kotlin("plugin.spring") version "2.1.20"
-  kotlin("plugin.jpa") version "2.1.20"
-  kotlin("jvm") version "2.1.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.2.0"
+  kotlin("plugin.spring") version "2.1.21"
+  kotlin("plugin.jpa") version "2.1.21"
+  kotlin("jvm") version "2.1.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.1.20"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.1.21"
 }
 
 configurations {
@@ -38,11 +38,11 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.5")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.5")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.4")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.0")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.5")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.8")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
