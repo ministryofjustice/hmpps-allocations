@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.reactive.function.client.awaitExchange
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -27,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -49,6 +51,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .uri("/users")
     .retrieve()
     .awaitBody()
+
+  suspend fun getOfficerView(staffCode: String): OfficerView = webClient
+    .get()
+    .uri("/staff/{staffCode}/officer-view", staffCode)
+    .retrieve()
+    .awaitBodyOrNull<OfficerView>() ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
+
   suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails = webClient
     .get()
     .uri("person/{crn}/limited-access/all", crn)
@@ -184,6 +193,16 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     )
     .awaitSingleOrNull()
 }
+
+data class OfficerView(
+  val code: String,
+  val name: Name,
+  val grade: String,
+  val email: String,
+  val casesDueToEndInNext4Weeks: Int,
+  val releasesWithinNext4Weeks: Int,
+  val paroleReportsToCompleteInNext4Weeks: Int,
+)
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
