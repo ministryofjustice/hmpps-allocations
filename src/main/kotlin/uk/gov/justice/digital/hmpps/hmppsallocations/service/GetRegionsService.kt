@@ -10,8 +10,8 @@ class GetRegionsService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
-  suspend fun getRegionsByUser(staffId: String): RegionList {
-    val teams = workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId)
+  suspend fun getRegionsByUser(userName: String): RegionList {
+    val teams = workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName)
     return RegionList(teams.datasets.map { it.code }.distinct())
   }
 }
