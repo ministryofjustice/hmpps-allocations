@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Dataset
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Lau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Pdu
@@ -33,6 +34,11 @@ class RegionsServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
     coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
       listOf(
+        Dataset("N53", "Mids"),
+        Dataset("N54", "East"),
+        Dataset("N55", "West"),
+      ),
+      listOf(
         TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N53", "Mids")))),
         TeamWithLau("a2", "Camelot", Lau("lau1", "lauDesc", Pdu("fred", "flintstone", Provider("N54", "East")))),
         TeamWithLau("a3", "Camelot", Lau("lau3", "Lakes", Pdu("B12", "flintstone", Provider("N54", "East")))),
@@ -51,6 +57,7 @@ class RegionsServiceTest {
   fun `returns empty list if no regions allowed`() = runTest {
     val staffId = "67871"
     coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+      emptyList(),
       emptyList(),
     )
 
