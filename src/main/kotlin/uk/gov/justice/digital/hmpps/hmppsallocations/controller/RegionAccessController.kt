@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetRegionsService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ValidateAccessService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
 
 @RestController
@@ -30,22 +31,25 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{staffId}/regions")
-  suspend fun getAccessibleRegionsByUser(@PathVariable staffId: String): RegionList = getRegionsService.getRegionsByUser(staffId)
+  @GetMapping("/user/{userName}/regions")
+  suspend fun getAccessibleRegionsByUser(@PathVariable userName: String): RegionList = getRegionsService.getRegionsByUser(userName)
 
   @Operation(summary = "Check for user access")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
       ApiResponse(responseCode = "403", description = "Forbidden"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{staffId}/crn/{crn}/conviction/{convictionNumber}/is-allowed")
-  suspend fun getValidatedAccess(@PathVariable staffId: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<Void> = try {
-    validateAccessService.validateUserAccess(staffId, crn, convictionNumber)
-    ResponseEntity.status(HttpStatus.OK).build()
+  @GetMapping("/user/{userName}/crn/{crn}/conviction/{convictionNumber}/is-allowed")
+  suspend fun getValidatedAccess(@PathVariable userName: String, @PathVariable crn: String, @PathVariable convictionNumber: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccess(userName, crn, convictionNumber)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
   } catch (e: NotAllowedForAccessException) {
-    ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
 }

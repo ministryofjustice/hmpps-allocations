@@ -30,9 +30,8 @@ class RegionsServiceTest {
 
   @Test
   fun `returns correct regions`() = runTest {
-    val staffId = "N25789"
-    coEvery { workforceAllocationsToDeliusApiClient.getApopUsers() } returns emptyList()
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    val userName = "001"
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName) } returns DeliusTeams(
       listOf(
         Dataset("N53", "Mids"),
         Dataset("N54", "East"),
@@ -46,7 +45,7 @@ class RegionsServiceTest {
       ),
     )
 
-    val regions = regionsService.getRegionsByUser(staffId)
+    val regions = regionsService.getRegionsByUser(userName)
     assert(regions.regions.size == 3)
     assert(regions.regions.contains("N53"))
     assert(regions.regions.contains("N54"))
@@ -55,13 +54,13 @@ class RegionsServiceTest {
 
   @Test
   fun `returns empty list if no regions allowed`() = runTest {
-    val staffId = "67871"
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByStaffId(staffId) } returns DeliusTeams(
+    val userName = "001"
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName) } returns DeliusTeams(
       emptyList(),
       emptyList(),
     )
 
-    val regions = regionsService.getRegionsByUser(staffId)
+    val regions = regionsService.getRegionsByUser(userName)
     assert(regions.regions.isEmpty())
   }
 }

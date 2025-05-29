@@ -22,8 +22,9 @@ class OffenderEventListener(
 ) {
 
   @SqsListener("hmppsoffenderqueue", factory = "hmppsQueueContainerFactoryProxy")
-  fun processMessage(rawMessage: String) {
-    val crn = getCrn(rawMessage)
+  fun processMessage(rawMessage: String?) {
+    val offenderEvent = readMessage(rawMessage)
+    val crn = offenderEvent.crn
     log.debug("Processing message in OffenderEventListener for CRN: $crn")
     CoroutineScope(Dispatchers.Default).future {
       try {
@@ -37,11 +38,11 @@ class OffenderEventListener(
     }.get()
   }
 
-  private fun getCrn(rawMessage: String): String {
-    val message = objectMapper.readValue(rawMessage, QueueMessage::class.java)
+  private fun readMessage(wrapper: String?): HmppsOffenderEvent {
+    val message = objectMapper.readValue(wrapper, QueueMessage::class.java)
     val queueName = System.getenv("HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_QUEUE_NAME") ?: "Queue Name Not Found"
     log.info("Received message from SQS queue {} with messageId: {}", queueName, message.messageId)
-    return objectMapper.readValue(message.message, HmppsOffenderEvent::class.java).crn
+    return objectMapper.readValue(message.message, HmppsOffenderEvent::class.java)
   }
 
   companion object {
@@ -57,8 +58,4 @@ data class HmppsOffenderEvent(
 data class QueueMessage(
   @JsonProperty("Message") val message: String,
   @JsonProperty("MessageId") val messageId: String?,
-)
-
-data class SQSMessage(
-  @JsonProperty("Message") val message: String,
 )
