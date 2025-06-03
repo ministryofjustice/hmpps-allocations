@@ -45,4 +45,88 @@ class WorkforceAllocationsToDeliusApiClientTest {
     }
     assert(exception.message == "Unable to access offender details for 999999")
   }
+
+  @Test
+  fun `test object constructs when complete response from delius`() = runBlocking {
+    val incompleteResponse = """{
+      "datasets": [
+    {
+      "code": "N01",
+      "description": "Region 1"
+    }
+  ],
+  "teams": [
+    {
+      "code": "N01T1",
+      "description": "Team1",
+      "localAdminUnit": {
+        "code": "N01LAU1",
+        "description": "LAU1",
+        "probationDeliveryUnit": {
+          "code": "N01PDU1",
+          "description": "PDU 1",
+          "provider": {
+            "code": "N01",
+            "description": "Region 1"
+          }
+        }
+      }
+    }
+  ]
+  }  
+    """.trimIndent()
+
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(
+        ClientResponse.create(HttpStatus.OK)
+          .header("Content-Type", "application/json")
+          .body(incompleteResponse)
+          .build(),
+      )
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val result = WorkforceAllocationsToDeliusApiClient(webClient).getTeamsByUsername("JoeBloggs")
+  }
+
+  @Test
+  fun `test object constructs when incomplete response from delius`() = runBlocking {
+    val incompleteResponse = """{
+      "datasets": [
+    {
+      "code": "N01",
+      "description": ""
+    }
+  ],
+  "teams": [
+    {
+      "code": "N01T1",
+      "description": "Team1",
+      "localAdminUnit": {
+        "code": "N01LAU1",
+        "description": "LAU1",
+        "probationDeliveryUnit": {
+          "code": "",
+          "description": "PDU 1",
+          "provider": {
+            "code": "N01",
+            "description": "Region 1"
+          }
+        }
+      }
+    }
+  ]
+  }  
+    """.trimIndent()
+
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(
+        ClientResponse.create(HttpStatus.OK)
+          .header("Content-Type", "application/json")
+          .body(incompleteResponse)
+          .build(),
+      )
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val result = WorkforceAllocationsToDeliusApiClient(webClient).getTeamsByUsername("JoeBloggs")
+  }
 }
