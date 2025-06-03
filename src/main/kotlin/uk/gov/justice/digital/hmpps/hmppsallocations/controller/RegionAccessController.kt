@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetRegionsService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.ValidateAccessService
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
 
 @RestController
@@ -38,6 +39,7 @@ class RegionAccessController(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
       ApiResponse(responseCode = "403", description = "Forbidden"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
@@ -47,5 +49,7 @@ class RegionAccessController(
     ResponseEntity<String>("Ok", HttpStatus.OK)
   } catch (e: NotAllowedForAccessException) {
     ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
 }
