@@ -83,7 +83,7 @@ class LaoServiceTest {
   }
 
   @Test
-  fun `returns correct restrictions object for a case that has excluded users inluding current user`() = runTest {
+  fun `returns correct restrictions object for a case that has excluded users including current user`() = runTest {
     val crn = "X1234567"
 
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
@@ -410,6 +410,23 @@ class LaoServiceTest {
     assert(restrictions.crn == crn)
     assert(restrictions.isRestricted)
     assert(restrictions.isRedacted)
+  }
+
+  @Test
+  fun `returns correct restriction status object for a case that is restricted to certain users including current user `() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns
+      DeliusAccessRestrictionDetails(
+        crn = crn,
+        restrictedTo = listOf(DeliusApopUser(username = "AllowedUser", staffCode = "12345")),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+    val restrictions = laoService.getCrnRestrictionStatus("AllowedUser", crn)
+    assert(restrictions.crn == crn)
+    assert(restrictions.isRestricted)
+    assert(!restrictions.isRedacted)
   }
 
   @Test
