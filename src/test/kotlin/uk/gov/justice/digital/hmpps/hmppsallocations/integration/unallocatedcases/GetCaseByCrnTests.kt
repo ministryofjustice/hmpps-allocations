@@ -19,7 +19,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
   @Test
   fun `can get 403 when apop user is excluded`() {
     workforceAllocationsToDelius.setApopUsers()
-    workforceAllocationsToDelius.setExcludedUsersByCrn("J678910", "Fred")
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J678910", "Fred", "TomJones")
     canGet403WhenApopUserExcluded()
   }
 
