@@ -270,6 +270,47 @@ class LaoServiceTest {
   }
 
   @Test
+  fun `returns correct restrictions some users are in the restricted To list `() = runTest {
+    val crn = "X1234567"
+    val deliusAccessRestrictionDetails = DeliusAccessRestrictionDetails(
+      crn = crn,
+      restrictedTo = listOf(
+        DeliusApopUser("user1", "123"),
+      ),
+      excludedFrom = emptyList(),
+      exclusionMessage = "",
+      restrictionMessage = "",
+    )
+
+    coEvery {
+      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
+        crn,
+        listOf("123", "456"),
+      )
+    } returns deliusAccessRestrictionDetails
+
+    listOf("123", "456", "789").forEach { staffCode ->
+      coEvery { workforceAllocationsToDeliusApiClient.getOfficerView(staffCode) } returns OfficerView(
+        staffCode,
+        Name("John", "Paul", "Smith"),
+        "PO",
+        "email@email.com",
+        1,
+        1,
+        1,
+      )
+    }
+
+    val crnStaffRestrictions = laoService.getCrnRestrictionsForUsers(crn, listOf("123", "456"))
+
+    assert(crnStaffRestrictions.staffRestrictions.size == 2)
+    assert(!crnStaffRestrictions.staffRestrictions.get(0).isExcluded)
+    assert(crnStaffRestrictions.staffRestrictions.get(1).isExcluded)
+    assert(crnStaffRestrictions.staffRestrictions.get(0).staffCode == "123")
+    assert(crnStaffRestrictions.staffRestrictions.get(1).staffCode == "456")
+  }
+
+  @Test
   fun `is not restricted when no users are restricted`() = runTest {
     val crn = "X1234567"
     val deliusAccessRestrictionDetails = DeliusAccessRestrictionDetails(
@@ -286,7 +327,7 @@ class LaoServiceTest {
   }
 
   @Test
-  fun `is restricted is on excluded list`() = runTest {
+  fun `is restricted is when there are exclusions`() = runTest {
     val crn = "X1234567"
 
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
@@ -297,11 +338,11 @@ class LaoServiceTest {
       restrictionMessage = "sorry",
     )
 
-    assert(!laoService.isCrnRestricted("not", crn))
+    assert(laoService.isCrnRestricted("not", crn))
   }
 
   @Test
-  fun `is restricted when user is excluded `() = runTest {
+  fun `is forbidden when user is excluded `() = runTest {
     val crn = "X1234567"
 
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
@@ -316,7 +357,7 @@ class LaoServiceTest {
   }
 
   @Test
-  fun `throws 403 when case is restricted to certain individuals only`() = runTest {
+  fun `throws 403 when case is restricted and user not on list`() = runTest {
     val crn = "X1234567"
 
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
@@ -331,7 +372,7 @@ class LaoServiceTest {
   }
 
   @Test
-  fun `throws 403 when an  user is excluded`() = runTest {
+  fun `throws 403 when the user is excluded`() = runTest {
     val crn = "X1234567"
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
       crn = crn,
@@ -342,6 +383,34 @@ class LaoServiceTest {
     )
 
     assertThrows<NotAllowedForLAOException> { (laoService.isCrnRestricted("excludeduser", crn)) }
+  }
+
+  @Test
+  fun `correctly flags that a crn is LAO when there are restrictions `() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
+      crn = crn,
+      excludedFrom = emptyList(),
+      restrictedTo = listOf(DeliusApopUser(username = "allowedUser", staffCode = "apop"), DeliusApopUser(username = "anotheruser", staffCode = "apop2")),
+      exclusionMessage = "sorry",
+      restrictionMessage = "sorry",
+    )
+
+    assert(laoService.isCrnRestricted("allowedUser", crn))
+  }
+
+  @Test
+  fun `correctly flags that a crn is LAO when there are exclusions`() = runTest {
+    val crn = "X1234567"
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn) } returns DeliusAccessRestrictionDetails(
+      crn = crn,
+      restrictedTo = emptyList(),
+      excludedFrom = listOf(DeliusApopUser(username = "excludeduser", staffCode = "apop"), DeliusApopUser(username = "anotherexcludeduser", staffCode = "apop2")),
+      exclusionMessage = "sorry",
+      restrictionMessage = "sorry",
+    )
+
+    assert(laoService.isCrnRestricted("allowedUser", crn))
   }
 
   @Test
