@@ -88,7 +88,7 @@ class LaoService(
       }
     }
 
-    return false
+    return limitedAccessDetails.excludedFrom.isNotEmpty() || limitedAccessDetails.restrictedTo.isNotEmpty()
   }
 
   suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>): CrnStaffRestrictions {
@@ -110,7 +110,9 @@ class LaoService(
       if (!isExcluded) {
         if (restrictedToStaffCodes.isNotEmpty()) {
           isExcluded = !restrictedToStaffCodes.contains(it)
-        } else {
+        }
+
+        if (!isExcluded) {
           isExcluded = excludedFromStaffCodes.contains(it)
         }
       }
