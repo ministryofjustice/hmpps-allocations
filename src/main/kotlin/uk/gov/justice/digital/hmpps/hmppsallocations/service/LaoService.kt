@@ -100,7 +100,7 @@ class LaoService(
         log.warn("Officer with code $staffCode not found with message ${exception.message} for crn $crn")
       }
     }
-    val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
+    val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     val excludedFromStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
     val restrictedToStaffCodes = deliusAccessRestrictionDetails.restrictedTo.map { it.staffCode }
 

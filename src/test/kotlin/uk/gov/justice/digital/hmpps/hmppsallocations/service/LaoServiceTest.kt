@@ -112,9 +112,8 @@ class LaoServiceTest {
     )
 
     coEvery {
-      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
+      workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(
         crn,
-        listOf("123", "456", "789"),
       )
     } returns deliusAccessRestrictionDetails
 
@@ -153,9 +152,8 @@ class LaoServiceTest {
     )
 
     coEvery {
-      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
+      workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(
         crn,
-        listOf("123", "456", "789", "DUMMY"),
       )
     } returns deliusAccessRestrictionDetails
 
@@ -197,10 +195,7 @@ class LaoServiceTest {
     )
 
     coEvery {
-      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
-        crn,
-        listOf("123", "456", "789"),
-      )
+      workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     } returns deliusAccessRestrictionDetails
 
     listOf("123", "456", "789").forEach { staffCode ->
@@ -242,9 +237,8 @@ class LaoServiceTest {
     )
 
     coEvery {
-      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
+      workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(
         crn,
-        listOf("123", "456"),
       )
     } returns deliusAccessRestrictionDetails
 
@@ -283,9 +277,8 @@ class LaoServiceTest {
     )
 
     coEvery {
-      workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(
+      workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(
         crn,
-        listOf("123", "456"),
       )
     } returns deliusAccessRestrictionDetails
 
