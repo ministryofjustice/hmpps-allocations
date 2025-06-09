@@ -14,11 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Dataset
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Lau
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Pdu
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Provider
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamOverview
@@ -163,11 +160,11 @@ class ValidateAccessServiceTest {
 
     coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
 
-    coEvery {  probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails (
+    coEvery { probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails(
       unallowedRegion,
       "Not for an allowed region",
       RegionOverview(unallowedRegion, "Region name"),
-      emptyList()
+      emptyList(),
     )
 
     assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, pdu) }
@@ -183,11 +180,11 @@ class ValidateAccessServiceTest {
 
     coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
 
-    coEvery {  probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails (
+    coEvery { probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails(
       pdu,
       "pdu in the allowed regions",
       RegionOverview(region, "Region name"),
-      emptyList()
+      emptyList(),
     )
 
     assert(validateAccessService.validateUserAccess(staffId, pdu))
