@@ -48,7 +48,7 @@ class ValidateAccessService(
       return true
     }
 
-    throw NotAllowedForAccessException("User $userName does not have access to pdu $pdu", "", )
+    throw NotAllowedForAccessException("User $userName does not have access to pdu $pdu", "")
   }
 
   suspend fun validateUserRegionAccess(userName: String, region: String): Boolean {
@@ -60,6 +60,6 @@ class ValidateAccessService(
       return true
     }
 
-    throw NotAllowedForAccessException("User $userName does not have access to region $region", "", )
+    throw NotAllowedForAccessException("User $userName does not have access to region $region", "")
   }
 }
