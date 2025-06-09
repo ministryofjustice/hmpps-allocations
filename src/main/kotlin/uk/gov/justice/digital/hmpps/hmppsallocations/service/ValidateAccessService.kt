@@ -38,11 +38,10 @@ class ValidateAccessService(
   }
 
   suspend fun validateUserAccess(userName: String, pdu: String): Boolean {
-    val deliusTeams = workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName)
-    val allowedRegions = deliusTeams.datasets.map { it.code }.distinct()
-    val pduTeams = deliusTeams.teams.filter { it.localAdminUnit.probationDeliveryUnit.code == pdu }.map { it.localAdminUnit.probationDeliveryUnit.provider.code }
+    val allowedRegions = getRegionsService.getRegionsByUser(userName).regions
 
-    val validPdu = pduTeams.any { allowedRegions.contains(it) }
+    val pduRegion = hmppsProbationEstateApiClient.getProbationDeliveryUnitByCode(pdu)?.region?.code
+    val validPdu = allowedRegions.contains(pduRegion)
 
     if (validPdu) {
       return true

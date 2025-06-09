@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Dataset
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Lau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Pdu
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Provider
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
@@ -160,21 +161,16 @@ class ValidateAccessServiceTest {
     val staffId = "KennySmith2"
     val pdu = "PDU1"
 
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(any()) } returns DeliusTeams(
-      listOf(
-        Dataset(region, "Mids"),
-        Dataset(otherRegion, "East"),
-        Dataset("N55", "West"),
-      ),
-      listOf(
-        TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("NotThisOne", "flintstone", Provider(region, "Mids")))),
-        TeamWithLau("a2", "Camelot", Lau("lau1", "lauDesc", Pdu("NorThisOne", "flintstone", Provider(region, "East")))),
-        TeamWithLau("a3", "Camelot", Lau("lau3", "Lakes", Pdu(pdu, "flintstone", Provider(unallowedRegion, "East")))),
-        TeamWithLau("Na455", "Camelot", Lau("lau3", "Lakes", Pdu("NorThisOne", "flintstone", Provider(region, "West")))),
-      ),
+    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
+
+    coEvery {  probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails (
+      unallowedRegion,
+      "Not for an allowed region",
+      RegionOverview(unallowedRegion, "Region name"),
+      emptyList()
     )
 
-    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, "InvalidRegion") }
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, pdu) }
   }
 
   @Test
@@ -185,18 +181,13 @@ class ValidateAccessServiceTest {
     val staffId = "KennySmith2"
     val pdu = "PDU1"
 
-    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(any()) } returns DeliusTeams(
-      listOf(
-        Dataset(region, "Mids"),
-        Dataset(otherRegion, "East"),
-        Dataset("N55", "West"),
-      ),
-      listOf(
-        TeamWithLau("a1", "N53 desc", Lau("lau1", "lauDesc", Pdu("NotThisOne", "flintstone", Provider(unallowedRegion, "Mids")))),
-        TeamWithLau("a2", "Camelot", Lau("lau1", "lauDesc", Pdu("NorThisOne", "flintstone", Provider(unallowedRegion, "East")))),
-        TeamWithLau("a3", "Camelot", Lau("lau3", "Lakes", Pdu(pdu, "flintstone", Provider(region, "East")))),
-        TeamWithLau("Na455", "Camelot", Lau("lau3", "Lakes", Pdu("NorThisOne", "flintstone", Provider(unallowedRegion, "West")))),
-      ),
+    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
+
+    coEvery {  probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails (
+      pdu,
+      "pdu in the allowed regions",
+      RegionOverview(region, "Region name"),
+      emptyList()
     )
 
     assert(validateAccessService.validateUserAccess(staffId, pdu))

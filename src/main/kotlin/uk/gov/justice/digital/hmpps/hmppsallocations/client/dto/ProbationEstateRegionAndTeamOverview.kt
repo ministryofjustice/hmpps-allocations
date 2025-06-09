@@ -3,6 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.client.dto
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class ProbationDeliveryUnitDetails @JsonCreator constructor(
+  val code: String,
+  val name: String,
+  val region: RegionOverview,
+  val teams: List<TeamOverview>,
+)
 data class ProbationEstateRegionAndTeamOverview @JsonCreator constructor(
   @JsonProperty("region")
   val region: RegionOverview,
