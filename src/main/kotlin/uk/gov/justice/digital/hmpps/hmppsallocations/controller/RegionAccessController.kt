@@ -52,4 +52,26 @@ class RegionAccessController(
   } catch (e: EntityNotFoundException) {
     ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/user/{userName}/pdu/{pdu}")
+  suspend fun getValidatedPduAccess(@PathVariable userName: String, @PathVariable pdu: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccess(userName, pdu)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
+  }
+
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/user/{userName}/region/{region}")
+  suspend fun getValidatedRegionAccess(@PathVariable userName: String, @PathVariable region: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserRegionAccess(userName, region)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
+  }
 }
