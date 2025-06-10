@@ -62,7 +62,7 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{userName}/pdu/{pdu}")
+  @GetMapping("/user/{userName}/pdu/{pdu}/is-allowed")
   suspend fun getValidatedPduAccess(@PathVariable userName: String, @PathVariable pdu: String): ResponseEntity<String> = try {
     validateAccessService.validateUserAccess(userName, pdu)
     ResponseEntity<String>("Ok", HttpStatus.OK)
@@ -81,7 +81,7 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{userName}/region/{region}")
+  @GetMapping("/user/{userName}/region/{region}/is-allowed")
   suspend fun getValidatedRegionAccess(@PathVariable userName: String, @PathVariable region: String): ResponseEntity<String> = try {
     validateAccessService.validateUserRegionAccess(userName, region)
     ResponseEntity<String>("Ok", HttpStatus.OK)
