@@ -494,13 +494,14 @@ class LaoServiceTest {
   @Test
   fun `returns correct restriction statuses object for a a list of cases`() = runTest {
     val crns = listOf("crn1", "crn2", "crn3", "crn4", "crn5", "crn6", "crn7", "crn8", "crn9", "crn10")
+    val currentUser = "ThisUser"
 
     val deliusUserAccess = DeliusUserAccess(
       access = listOf(
         DeliusCaseAccess(crn = "crn1", userRestricted = false, userExcluded = false), // no restrictions
         DeliusCaseAccess(crn = "crn2", userRestricted = false, userExcluded = false), // no restrictions
         DeliusCaseAccess(crn = "crn3", userRestricted = false, userExcluded = true), // excluded
-        DeliusCaseAccess(crn = "crn4", userRestricted = true, userExcluded = false), // restricted
+        DeliusCaseAccess(crn = "crn4", userRestricted = true, userExcluded = false), // restricted but we are in list so not
         DeliusCaseAccess(crn = "crn5", userRestricted = false, userExcluded = true), // excluded
         DeliusCaseAccess(crn = "crn6", userRestricted = false, userExcluded = false), // no restriction
         DeliusCaseAccess(crn = "crn7", userRestricted = false, userExcluded = false), // no restrictions
@@ -511,11 +512,89 @@ class LaoServiceTest {
       ),
     )
 
-    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crns, "randomUser") } returns
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn3") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn3",
+        restrictedTo = emptyList(),
+        excludedFrom = listOf(DeliusApopUser(username = currentUser, staffCode = "12343")), // not curent user
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn4") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn4",
+        restrictedTo = listOf(DeliusApopUser(username = currentUser, staffCode = "12343")),
+        excludedFrom = emptyList(), // APoP user
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn5") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn5",
+        restrictedTo = emptyList(),
+        excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "Notstaff")),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn8") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn8",
+        restrictedTo = emptyList(),
+        excludedFrom = listOf(DeliusApopUser(username = "005", staffCode = "12345")), // APoP user
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn9") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn9",
+        restrictedTo = listOf(DeliusApopUser(username = currentUser, staffCode = "12345")),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn10") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn10",
+        restrictedTo = emptyList(),
+        excludedFrom = listOf(DeliusApopUser(username = "fred", staffCode = "Notstaff")),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn11") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn11",
+        restrictedTo = listOf(DeliusApopUser(username = currentUser, staffCode = "Notstaff")),
+        excludedFrom = listOf(DeliusApopUser(username = currentUser, staffCode = "Notstaff")),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crns) } returns
       deliusUserAccess
 
-    val restrictions = laoService.getCrnRestrictions("randomUser", crns)
+    val restrictions = laoService.getCrnRestrictions(currentUser, crns)
 
-    assert(restrictions.equals(deliusUserAccess))
+    val checkDeliusUserAccess = DeliusUserAccess(
+      access = listOf(
+        DeliusCaseAccess(crn = "crn1", userRestricted = false, userExcluded = false),
+        DeliusCaseAccess(crn = "crn2", userRestricted = false, userExcluded = false),
+        DeliusCaseAccess(crn = "crn3", userRestricted = true, userExcluded = true), // we are  exclusion list - so restricted
+        DeliusCaseAccess(crn = "crn4", userRestricted = false, userExcluded = true), // restricted but we are in list so not restricted
+        DeliusCaseAccess(crn = "crn5", userRestricted = false, userExcluded = true),
+        DeliusCaseAccess(crn = "crn6", userRestricted = false, userExcluded = false),
+        DeliusCaseAccess(crn = "crn7", userRestricted = false, userExcluded = false),
+        DeliusCaseAccess(crn = "crn8", userRestricted = false, userExcluded = true), // We are not on exclusion list
+        DeliusCaseAccess(crn = "crn9", userRestricted = false, userExcluded = true), // Not restricted because we are on the restricted list
+        DeliusCaseAccess(crn = "crn10", userRestricted = false, userExcluded = true),
+        DeliusCaseAccess(crn = "crn11", userRestricted = true, userExcluded = true), // user on both lists thus restricted
+      ),
+    )
+    assert(restrictions.equals(checkDeliusUserAccess))
   }
 }
