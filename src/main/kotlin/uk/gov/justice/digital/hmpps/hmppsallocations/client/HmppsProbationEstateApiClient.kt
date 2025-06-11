@@ -6,6 +6,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionsAndTeamsRequest
 
@@ -25,6 +26,12 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
         }
       }
     }
+
+  suspend fun getProbationDeliveryUnitByCode(pduCode: String): ProbationDeliveryUnitDetails? = webClient
+    .get()
+    .uri("/probationDeliveryUnit/{pduCode}", pduCode)
+    .retrieve()
+    .awaitBody()
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
