@@ -40,7 +40,6 @@ class LaoService(
 
     crnsAccess.forEach {
       if (it.userRestricted || it.userExcluded) {
-        it.userExcluded = true
         val limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
 
         var apopExcluded = false
@@ -53,6 +52,7 @@ class LaoService(
         }
 
         it.userRestricted = apopExcluded
+        it.userExcluded = true
       }
     }
 
