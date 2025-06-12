@@ -597,6 +597,7 @@ class LaoServiceTest {
     )
     assert(restrictions.equals(checkDeliusUserAccess))
   }
+
   @Test
   fun `returns correct restriction statuses object for another  list of cases`() = runTest {
     val crns = listOf("crn1", "crn2")
