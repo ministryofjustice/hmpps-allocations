@@ -597,4 +597,49 @@ class LaoServiceTest {
     )
     assert(restrictions.equals(checkDeliusUserAccess))
   }
+
+  @Test
+  fun `returns correct restriction statuses object for another  list of cases`() = runTest {
+    val crns = listOf("crn1", "crn2")
+    val currentUser = "ThisUser"
+    val otherUser = "anotherUser"
+
+    val deliusUserAccess = DeliusUserAccess(
+      access = listOf(
+        DeliusCaseAccess(crn = "crn1", userRestricted = true, userExcluded = false), // no restrictions
+        DeliusCaseAccess(crn = "crn2", userRestricted = false, userExcluded = true), // no restrictions
+      ),
+    )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn1") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn1",
+        restrictedTo = listOf(DeliusApopUser(username = currentUser, staffCode = "12343"), DeliusApopUser(username = "restrictedUser", staffCode = "12343")),
+        excludedFrom = emptyList(), //  curent user
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn2") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn2",
+        restrictedTo = emptyList(),
+        excludedFrom = listOf(DeliusApopUser(username = otherUser, staffCode = "42343")), // APoP user
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crns) } returns
+      deliusUserAccess
+
+    val restrictions = laoService.getCrnRestrictions(currentUser, crns)
+
+    val checkDeliusUserAccess = DeliusUserAccess(
+      access = listOf(
+        DeliusCaseAccess(crn = "crn1", userRestricted = false, userExcluded = true),
+        DeliusCaseAccess(crn = "crn2", userRestricted = false, userExcluded = true),
+      ),
+    )
+    assert(restrictions.equals(checkDeliusUserAccess))
+  }
 }
