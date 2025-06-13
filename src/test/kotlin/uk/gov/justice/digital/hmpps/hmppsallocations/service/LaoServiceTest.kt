@@ -614,7 +614,7 @@ class LaoServiceTest {
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn1") } returns
       DeliusAccessRestrictionDetails(
         crn = "crn1",
-        restrictedTo = listOf(DeliusApopUser(username = currentUser, staffCode = "12343"), DeliusApopUser(username = "restrictedUser", staffCode = "12343")),
+        restrictedTo = listOf(DeliusApopUser(username = currentUser.lowercase(), staffCode = "12343"), DeliusApopUser(username = "restrictedUser", staffCode = "12343")),
         excludedFrom = emptyList(), //  curent user
         exclusionMessage = "sorry",
         restrictionMessage = "sorry",
@@ -624,7 +624,7 @@ class LaoServiceTest {
       DeliusAccessRestrictionDetails(
         crn = "crn2",
         restrictedTo = emptyList(),
-        excludedFrom = listOf(DeliusApopUser(username = otherUser, staffCode = "42343")), // APoP user
+        excludedFrom = listOf(DeliusApopUser(username = otherUser.uppercase(), staffCode = "42343")), // APoP user
         exclusionMessage = "sorry",
         restrictionMessage = "sorry",
       )
