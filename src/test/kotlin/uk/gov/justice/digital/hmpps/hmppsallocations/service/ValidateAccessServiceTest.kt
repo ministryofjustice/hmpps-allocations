@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -116,6 +118,33 @@ class ValidateAccessServiceTest {
       ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
     )
     coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(otherRegion))
+
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
+  }
+
+  @Test
+  fun `throws 403 exception when delius throws 403 on getRegionsByUser endpoint `() = runTest {
+    val crn = "X123456"
+    val teamCode = "N54ERET"
+    val region = "N54"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+    val convictionNumber = "1"
+    coEvery { workforceAllocationsToDeliusApiClient.getUnallocatedEvents(any()) } returns UnallocatedEvents(
+      crn,
+      Name("Bob", "Smith", "Jones"),
+      listOf(
+        ActiveEvent(
+          "1",
+          teamCode,
+          "PVI",
+        ),
+      ),
+    )
+    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
+      ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
+    )
+    coEvery { regionsService.getRegionsByUser(staffId) } throws WebClientResponseException(HttpStatus.FORBIDDEN.value(), "", null, null, null)
 
     assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
   }
