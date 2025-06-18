@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
@@ -15,67 +16,63 @@ class LaoService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
   private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
 ) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)!!
+  }
 
-  suspend fun getCrnRestrictions(crn: String): DeliusCrnRestrictions {
-    val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val apopUsersStaffCodes = apopUsers.filter { it.staffCode != null }.map { it.staffCode }
+  suspend fun getCrnRestrictions(userName: String, crn: String): DeliusCrnRestrictions {
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     var apopExcluded = false
 
-    if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
+    if (limitedAccessDetails.restrictedTo.isNotEmpty() && !limitedAccessDetails.restrictedTo.map { it.username.uppercase() }.contains(userName.uppercase())) {
       apopExcluded = true
-    } else {
-      limitedAccessDetails.excludedFrom.forEach {
-        if (apopUsersStaffCodes.contains(it.staffCode)) {
-          apopExcluded = true
-          return@forEach
-        }
-      }
+    }
+
+    if (!apopExcluded) {
+      apopExcluded = limitedAccessDetails.excludedFrom.map { it.username.uppercase() }.contains(userName.uppercase())
     }
 
     return DeliusCrnRestrictions(limitedAccessDetails.excludedFrom.isNotEmpty(), limitedAccessDetails.restrictedTo.isNotEmpty(), apopExcluded)
   }
 
-  suspend fun getCrnRestrictions(crns: List<String>): DeliusUserAccess {
-    val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val apopUsersStaffCodes = apopUsers.filter { it.staffCode != null }.map { it.staffCode }
+  suspend fun getCrnRestrictions(username: String, crns: List<String>): DeliusUserAccess {
     val crnsAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crns).access
 
     crnsAccess.forEach {
-      if (!it.userRestricted) {
-        if (it.userExcluded) {
-          val limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
+      if (it.userRestricted || it.userExcluded) {
+        val limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
 
-          var apopExcluded = false
-          limitedAccessDetail.excludedFrom.forEach {
-            if (apopUsersStaffCodes.contains(it.staffCode)) {
-              apopExcluded = true
-              return@forEach
-            }
-          }
-          it.userRestricted = apopExcluded
+        var apopExcluded = false
+        if (it.userExcluded && limitedAccessDetail.excludedFrom.map { it.username.uppercase() }.contains(username.uppercase())) {
+          apopExcluded = true
         }
+
+        if (it.userRestricted && !limitedAccessDetail.restrictedTo.map { it.username.uppercase() }.contains(username.uppercase())) {
+          apopExcluded = true
+        }
+
+        it.userRestricted = apopExcluded
+        it.userExcluded = true
       }
     }
 
     return DeliusUserAccess(crnsAccess)
   }
 
-  suspend fun getCrnRestrictionStatus(crn: String): DeliusCrnRestrictionStatus {
-    val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val apopUsersStaffCodes = apopUsers.filter { it.staffCode != null }.map { it.staffCode }
+  suspend fun getCrnRestrictionStatus(userName: String, crn: String): DeliusCrnRestrictionStatus {
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
     var apopExcluded = false
 
+    // restrictedTo list exists and user not on it ?
     if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
-      apopExcluded = true
-    } else {
-      limitedAccessDetails.excludedFrom.forEach {
-        if (apopUsersStaffCodes.contains(it.staffCode)) {
-          apopExcluded = true
-          return@forEach
-        }
+      if (!limitedAccessDetails.restrictedTo.map { it.username.uppercase() }.contains(userName.uppercase())) {
+        apopExcluded = true
       }
+    }
+
+    // excluded from list exists and user is on it
+    if (!apopExcluded) {
+      apopExcluded = limitedAccessDetails.excludedFrom.map { it.username.uppercase() }.contains(userName.uppercase())
     }
 
     return DeliusCrnRestrictionStatus(
@@ -85,7 +82,7 @@ class LaoService(
     )
   }
 
-  suspend fun isCrnRestricted(crn: String): Boolean {
+  suspend fun isCrnRestricted(userName: String, crn: String): Boolean {
     val limitedAccessDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
 
     // Nobody excluded from and nobody restricted to
@@ -93,33 +90,51 @@ class LaoService(
       return false
     }
 
-    // restricted to certain individuals only
-    if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
-      throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
-    }
-
-    val apopUsers = workforceAllocationsToDeliusApiClient.getApopUsers()
-    val apopUsersStaffCodes = apopUsers.map { it.staffCode }
-
     // Case is excluded from certain individuals
 
-    limitedAccessDetails.excludedFrom.filter { it.staffCode != null }.forEach {
-      if (apopUsersStaffCodes.contains(it.staffCode)) {
-        // Case excluded from an APoP user
-        throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
+    val excludedList = limitedAccessDetails.excludedFrom.map { it.username.uppercase() }
+
+    if (excludedList.contains(userName.uppercase())) {
+      // Case excluded from user
+      throw NotAllowedForLAOException("User is excluded from viewing this case", crn)
+    }
+
+    // restricted to certain individuals only
+    if (limitedAccessDetails.restrictedTo.isNotEmpty()) {
+      if (!limitedAccessDetails.restrictedTo.map { it.username.uppercase() }.contains(userName.uppercase())) {
+        throw NotAllowedForLAOException("User is excluded from viewing this case", crn)
       }
     }
 
-    return true
+    return limitedAccessDetails.excludedFrom.isNotEmpty() || limitedAccessDetails.restrictedTo.isNotEmpty()
   }
 
   suspend fun getCrnRestrictionsForUsers(crn: String, staffCodes: List<String>): CrnStaffRestrictions {
-    val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getAccessRestrictionsForStaffCodesByCrn(crn, staffCodes)
-    val restrictedStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
+    val validStaffCodes: ArrayList<String> = ArrayList()
+    staffCodes.forEach { staffCode ->
+      try {
+        validStaffCodes.add(workforceAllocationsToDeliusApiClient.getOfficerView(staffCode).code)
+      } catch (exception: Exception) {
+        log.warn("Officer with code $staffCode not found with message ${exception.message} for crn $crn")
+      }
+    }
+    val deliusAccessRestrictionDetails = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(crn)
+    val excludedFromStaffCodes = deliusAccessRestrictionDetails.excludedFrom.map { it.staffCode }
+    val restrictedToStaffCodes = deliusAccessRestrictionDetails.restrictedTo.map { it.staffCode }
 
     val arrStaffRestrictions = ArrayList<CrnStaffRestrictionDetail>()
     staffCodes.forEach {
-      arrStaffRestrictions.add(CrnStaffRestrictionDetail(it, restrictedStaffCodes.contains(it)))
+      var isExcluded = !validStaffCodes.contains(it)
+      if (!isExcluded) {
+        if (restrictedToStaffCodes.isNotEmpty()) {
+          isExcluded = !restrictedToStaffCodes.contains(it)
+        }
+
+        if (!isExcluded) {
+          isExcluded = excludedFromStaffCodes.contains(it)
+        }
+      }
+      arrStaffRestrictions.add(CrnStaffRestrictionDetail(it, isExcluded))
     }
     return CrnStaffRestrictions(crn, arrStaffRestrictions)
   }

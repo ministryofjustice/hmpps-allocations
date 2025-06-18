@@ -53,10 +53,10 @@ internal class GetUnallocatedCaseServiceTest {
           access = listOf(DeliusCaseAccess(crn = crn, userRestricted = false, userExcluded = false)),
         )
       coEvery { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) } returns emptyFlow()
-      coEvery { mockLaoService.getCrnRestrictions(crn) } returns
+      coEvery { mockLaoService.getCrnRestrictions("userone", crn) } returns
         DeliusCrnRestrictions(false, false, false)
       val cases = GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService)
-        .getAllByTeam("TM1").toList()
+        .getAllByTeam("UsErONe", "TM1").toList()
       assertEquals(0, cases.size)
     }
   }
@@ -80,10 +80,13 @@ internal class GetUnallocatedCaseServiceTest {
         access = listOf(DeliusCaseAccess(crn = crn, userRestricted = true, userExcluded = true)),
       )
 
+    coEvery { mockLaoService.getCrnRestrictions("UserOne", crn) } returns
+      DeliusCrnRestrictions(true, true, true)
+
     mockServices(crn)
 
     val cases =
-      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("TM1")
+      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("UserOne", "TM1")
         .toList()
 
     verify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
@@ -134,11 +137,13 @@ internal class GetUnallocatedCaseServiceTest {
       DeliusUserAccess(
         access = listOf(DeliusCaseAccess(crn = crn, userRestricted = true, userExcluded = false)),
       )
+    coEvery { mockLaoService.getCrnRestrictions("UserOne", crn) } returns
+      DeliusCrnRestrictions(false, true, true)
 
     mockServices(crn)
 
     val cases =
-      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("TM1")
+      GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("UserOne", "TM1")
         .toList()
 
     verify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }

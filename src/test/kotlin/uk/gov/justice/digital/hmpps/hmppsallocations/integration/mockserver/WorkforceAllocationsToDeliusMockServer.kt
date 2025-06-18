@@ -112,6 +112,23 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
+  fun setuserAccessToCases(caseAccessList: List<Triple<String, Boolean, Boolean>>, username: String) {
+    val request = HttpRequest.request()
+      .withPath("/users/limited-access/$username")
+      .withMethod("POST")
+      .withBody(
+        jacksonObjectMapper()
+          .writeValueAsString(caseAccessList.map { it.first }),
+      )
+
+    workforceAllocationsToDelius.`when`(request, Times.exactly(1)).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(deliusUserAccessResponse(caseAccessList)),
+    )
+  }
+
   fun userHasAccess(crn: String, restricted: Boolean = false, excluded: Boolean = false) {
     val request = HttpRequest.request()
       .withPath("/users/limited-access")
@@ -180,7 +197,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "excludedFrom": [
         {
             "username": "Test2",
-            "staffCode": "TS4J273"
+            "staffCode": "TomJones"
         },
         {
             "username": "Test3",
@@ -196,7 +213,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     )
   }
 
-  fun setExcludedUsersByCrn(crn: String, staffCode: String) {
+  fun setExcludedUsersByCrn(crn: String, staffCode: String, username: String = "Test2") {
     val request = HttpRequest.request()
       .withPath("/person/$crn/limited-access/all")
       .withMethod("GET")
@@ -210,11 +227,70 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     "crn": "$crn",
     "excludedFrom": [
         {
-            "username": "Test2",
+            "username": "$username",
             "staffCode": "$staffCode"
         }
     ],
     "restrictedTo": [],
+    "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
+    "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
+}""",
+
+        ),
+    )
+  }
+
+  fun setExcludedAndRestrictedUsersCrn(crn: String, staffCode: String, username: String) {
+    val request = HttpRequest.request()
+      .withPath("/person/$crn/limited-access/all")
+      .withMethod("GET")
+
+    workforceAllocationsToDelius.`when`(request).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(
+          """{
+    "crn": "$crn",
+    "excludedFrom": [
+        {
+            "username": "$username",
+            "staffCode": "$staffCode"
+        }
+    ],
+    "restrictedTo": [
+            {
+            "username": "$username",
+            "staffCode": "$staffCode"
+        }
+    ],
+    "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
+    "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
+}""",
+
+        ),
+    )
+  }
+
+  fun setRestrictedUsersByCrn(crn: String, staffCode: String, username: String) {
+    val request = HttpRequest.request()
+      .withPath("/person/$crn/limited-access/all")
+      .withMethod("GET")
+
+    workforceAllocationsToDelius.`when`(request).respond(
+      HttpResponse.response()
+        .withStatusCode(200)
+        .withContentType(MediaType.APPLICATION_JSON)
+        .withBody(
+          """{
+    "crn": "$crn",
+    "excludedFrom": [],
+    "restrictedTo": [
+           {
+            "username": "$username",
+            "staffCode": "$staffCode"
+        }
+    ],
     "exclusionMessage": "You are excluded from viewing this offender record. Please contact a system administrator",
     "restrictionMessage": "This is a restricted offender record. Please contact a system administrator"
 }""",
