@@ -155,13 +155,15 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
 
     // NOt excluded
-    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
-    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J680660")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("J678910", "SOmeoneelse", "someoneelse")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("J680660", "SOmeoneelse", "someoneelse")
 
     // excluded user
     workforceAllocationsToDelius.setExcludedUsersByCrn("J680648")
     // excluded APoP User
-    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "Fred")
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "test3", "TomjonEs")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("X6666222", "SOmeoneelse", "someoneelse")
+
     workforceAllocationsToDelius.setApopUsers()
 
     webTestClient.get()
@@ -253,6 +255,14 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         Triple("ZZZZZZZ", true, true),
       ),
     )
+    workforceAllocationsToDelius.setExcludedUsersByCrn("J678910", "test3", "tomJones")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("J680648", "SOmeoneelse", "someoneelse")
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X4565764", "test3", "TomJones")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("J680660", "SOmeoneelse", "someoneelse")
+    workforceAllocationsToDelius.setExcludedUsersByCrn("X6666222", "test3", "TomJoNes")
+    workforceAllocationsToDelius.setRestrictedUsersByCrn("XXXXXXX", "SOmeoneelse", "someoneelse")
+    workforceAllocationsToDelius.setExcludedAndRestrictedUsersCrn("ZZZZZZZ", "test3", "tomjones")
+
     workforceAllocationsToDelius.setupTeam1CaseDetails()
 
     webTestClient.get()
