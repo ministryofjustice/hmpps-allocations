@@ -12,10 +12,14 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Dataset
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionList
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamWithLau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
@@ -118,5 +122,71 @@ class ValidateAccessServiceTest {
     coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(otherRegion))
 
     assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, crn, convictionNumber) }
+  }
+
+  @Test
+  fun `throws exception for no access to region`() = runTest {
+    val region = "N54"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(any()) } returns DeliusTeams(
+      listOf(Dataset(region, "hello"), Dataset(otherRegion, "goodbye")),
+      emptyList<TeamWithLau>(),
+    )
+
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserRegionAccess(staffId, "InvalidRegion") }
+  }
+
+  @Test
+  fun `returns true when access to region`() = runTest {
+    val region = "N54"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+
+    coEvery { workforceAllocationsToDeliusApiClient.getTeamsByUsername(any()) } returns DeliusTeams(
+      listOf(Dataset(region, "hello"), Dataset(otherRegion, "goodbye")),
+      emptyList<TeamWithLau>(),
+    )
+    assert(validateAccessService.validateUserRegionAccess(staffId, region))
+  }
+
+  @Test
+  fun `throws exception when no access to pdu`() = runTest {
+    val region = "N54"
+    val unallowedRegion = "XX55"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+    val pdu = "PDU1"
+
+    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
+
+    coEvery { probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails(
+      unallowedRegion,
+      "Not for an allowed region",
+      RegionOverview(unallowedRegion, "Region name"),
+      emptyList(),
+    )
+
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccess(staffId, pdu) }
+  }
+
+  @Test
+  fun `returns true when access allowed for pdu`() = runTest {
+    val region = "N54"
+    val unallowedRegion = "XX55"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+    val pdu = "PDU1"
+
+    coEvery { regionsService.getRegionsByUser(any()) } returns RegionList(listOf(region, otherRegion))
+
+    coEvery { probationEstateApiClient.getProbationDeliveryUnitByCode(pdu) } returns ProbationDeliveryUnitDetails(
+      pdu,
+      "pdu in the allowed regions",
+      RegionOverview(region, "Region name"),
+      emptyList(),
+    )
+
+    assert(validateAccessService.validateUserAccess(staffId, pdu))
   }
 }

@@ -36,4 +36,29 @@ class ValidateAccessService(
       throw EntityNotFoundException("Problem fetching regions: ${e.message}")
     }
   }
+
+  suspend fun validateUserAccess(userName: String, pdu: String): Boolean {
+    val allowedRegions = getRegionsService.getRegionsByUser(userName).regions
+
+    val pduRegion = hmppsProbationEstateApiClient.getProbationDeliveryUnitByCode(pdu)?.region?.code
+    val validPdu = allowedRegions.contains(pduRegion)
+
+    if (validPdu) {
+      return true
+    }
+
+    throw NotAllowedForAccessException("User $userName does not have access to pdu $pdu", "")
+  }
+
+  suspend fun validateUserRegionAccess(userName: String, region: String): Boolean {
+    val allowedRegions = workforceAllocationsToDeliusApiClient.getTeamsByUsername(userName).datasets.map { it.code }.distinct()
+
+    val validRegion = allowedRegions.contains(region)
+
+    if (validRegion) {
+      return true
+    }
+
+    throw NotAllowedForAccessException("User $userName does not have access to region $region", "")
+  }
 }
