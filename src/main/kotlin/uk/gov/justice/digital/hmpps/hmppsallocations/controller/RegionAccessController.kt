@@ -52,4 +52,42 @@ class RegionAccessController(
   } catch (e: EntityNotFoundException) {
     ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
+
+  @Operation(summary = "Check for user access to PDU")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Forbidden"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/user/{userName}/pdu/{pdu}/is-allowed")
+  suspend fun getValidatedPduAccess(@PathVariable userName: String, @PathVariable pdu: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccess(userName, pdu)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
+  }
+
+  @Operation(summary = "Check for user access for region")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Forbidden"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/user/{userName}/region/{region}/is-allowed")
+  suspend fun getValidatedRegionAccess(@PathVariable userName: String, @PathVariable region: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserRegionAccess(userName, region)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
+  }
 }
