@@ -1,7 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
@@ -34,6 +36,12 @@ class ValidateAccessService(
       return true
     } catch (e: IndexOutOfBoundsException) {
       throw EntityNotFoundException("Problem fetching regions: ${e.message}")
+    } catch (e: WebClientResponseException) {
+      if (e.statusCode.isSameCodeAs(HttpStatus.FORBIDDEN)) {
+        throw NotAllowedForAccessException("User $staffCode does not have access to $crn", crn)
+      } else {
+        throw e
+      }
     }
   }
 
