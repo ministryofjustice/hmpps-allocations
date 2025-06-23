@@ -81,6 +81,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .awaitExchange { response ->
       when (response.statusCode()) {
         HttpStatus.OK -> response.awaitBody()
+        HttpStatus.GATEWAY_TIMEOUT -> throw AllocationsFailedDependencyException("users/limited-access failed")
         else -> throw response.createExceptionAndAwait()
       }
     }
@@ -152,6 +153,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .get()
     .uri("/allocation-demand/{crn}/unallocated-events", crn)
     .retrieve()
+    .onStatus({ status -> status == HttpStatus.GATEWAY_TIMEOUT }) {
+      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+    }
     .onStatus({ status -> status.is5xxServerError }) {
       Mono.error(AllocationsServerError("Internal server error"))
     }
@@ -164,7 +168,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .bodyToMono(UnallocatedEvents::class.java)
     .retryWhen(
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { it is AllocationsServerError },
+        .filter { (it is AllocationsServerError || it is AllocationsGatewayTimeoutError) },
     )
     .awaitSingleOrNull()
 
@@ -183,13 +187,17 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     }
     .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
       Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
-    }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
+    }
+    .onStatus({ status -> status.value() == HttpStatus.GATEWAY_TIMEOUT.value() }) {
+      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
       Mono.error(AllocationsServerError("Internal server error"))
     }
     .bodyToMono(AllocatedEvent::class.java)
     .retryWhen(
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { it is AllocationsServerError },
+        .filter { it is AllocationsServerError || it is AllocationsGatewayTimeoutError },
     )
     .awaitSingleOrNull()
 }
@@ -206,6 +214,8 @@ data class OfficerView(
 
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
+class AllocationsGatewayTimeoutError(msg: String) : RuntimeException(msg)
+class AllocationsFailedDependencyException(msg: String) : RuntimeException(msg)
 class EventsNotFoundError(msg: String) : RuntimeException(msg)
 class EmptyTeamForEventException(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)

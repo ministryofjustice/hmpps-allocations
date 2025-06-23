@@ -42,6 +42,18 @@ class AssessRisksNeedsApiClientTest {
   }
 
   @Test
+  fun `test getLatestCompleteAssessment 504 response`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val exception = assertThrows<RuntimeException> {
+      AssessRisksNeedsApiClient(webClient).getLatestCompleteAssessment("X123456")
+    }
+    assert(exception.message!!.contains("Retries exhausted"))
+  }
+
+  @Test
   fun `test getLatestCompleteAssessment 500 response`() = runBlocking {
     val exchangeFunction = ExchangeFunction { request ->
       Mono.just(ClientResponse.create(HttpStatus.INTERNAL_SERVER_ERROR).build())
@@ -68,6 +80,17 @@ class AssessRisksNeedsApiClientTest {
     assert(result != null)
     assert(result?.assessedOn == LocalDate.parse("2023-01-01"))
     assert(result?.riskInCommunity?.get("COMMUNITY") == "HIGH")
+  }
+
+  @Test
+  fun `test getRosh 504 response`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val result = AssessRisksNeedsApiClient(webClient).getRosh("X123456")
+
+    assert(result?.riskInCommunity == emptyMap<String, String?>())
   }
 
   @Test
@@ -104,5 +127,17 @@ class AssessRisksNeedsApiClientTest {
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = AssessRisksNeedsApiClient(webClient).getRiskPredictors("X123456").toList()
+  }
+
+  @Test
+  fun `test getRiskPredictors 504 response`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val result = AssessRisksNeedsApiClient(webClient).getRiskPredictors("X123456").toList()
+    assert(result.get(0).completedDate == null)
+    assert(result.get(0).rsrScoreLevel == "UNAVAILABLE")
+    assert(result.get(0).rsrPercentageScore == BigDecimal(Int.MIN_VALUE))
   }
 }
