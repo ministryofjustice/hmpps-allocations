@@ -125,6 +125,13 @@ class UnallocatedCasesController(
   ): UnallocatedCaseConfirmInstructions = getUnallocatedCaseService.getCaseConfirmInstructions(crn, convictionNumber, staffCode)
     ?: throw EntityNotFoundException("$UNALLOCATED_CASE_NOT_FOUND_FOR $crn and conviction $convictionNumber")
 
+  @Operation(summary = "Retrieve staff restrictions for given list and crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @PostMapping("/cases/unallocated/{crn}/restrictions")
   suspend fun getCaseRestrictionsByStaffCodes(
@@ -133,6 +140,7 @@ class UnallocatedCasesController(
   ): CrnStaffRestrictions = getUnallocatedCaseService.getCrnStaffRestrictions(crn, staffCodesRequest.staffCodes)
     ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 
+  @Operation(summary = "Retrieve is crn restricted for logged on user")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -148,6 +156,7 @@ class UnallocatedCasesController(
   ): Boolean = getUnallocatedCaseService.isCrnRestricted(principal.userName, crn)
     ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 
+  @Operation(summary = "Retrieve case restrictions for given crn")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -163,6 +172,7 @@ class UnallocatedCasesController(
   ): DeliusCrnRestrictionStatus = getUnallocatedCaseService.getCaseRestrictions(principal.userName, crn)
     ?: throw EntityNotFoundException("Unallocated case Not Found for $crn")
 
+  @Operation(summary = "Retrieve case restrictions for given list of crns")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
