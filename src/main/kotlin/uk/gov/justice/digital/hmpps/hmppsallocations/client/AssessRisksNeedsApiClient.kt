@@ -35,10 +35,13 @@ private const val SERVER_EXCEPTION = "SERVER_ERROR"
 private const val TIMEOUT_VALUE = 30000L
 
 @Suppress("SwallowedException")
+private const val GATEWAY_TIMEOUT = "GATEWAY_TIMEOUT"
+
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   companion object {
     val log = LoggerFactory.getLogger(this::class.java)
   }
+
 
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     try {
@@ -99,7 +102,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
-
+  
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     try {
       return withTimeout(TIMEOUT_VALUE) {
