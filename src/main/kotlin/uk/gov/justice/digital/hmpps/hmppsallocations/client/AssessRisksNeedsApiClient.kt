@@ -42,7 +42,6 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     val log = LoggerFactory.getLogger(this::class.java)
   }
 
-
   suspend fun getLatestCompleteAssessment(crn: String): Assessment? {
     try {
       return withTimeout(TIMEOUT_VALUE) {
@@ -102,7 +101,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
-  
+
   suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
     try {
       return withTimeout(TIMEOUT_VALUE) {
