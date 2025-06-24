@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -89,7 +89,7 @@ internal class GetUnallocatedCaseServiceTest {
       GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("UserOne", "TM1")
         .toList()
 
-    verify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
+    coVerify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
     assertEquals(1, cases.size)
   }
 
@@ -146,7 +146,7 @@ internal class GetUnallocatedCaseServiceTest {
       GetUnallocatedCaseService(mockRepo, mockOutOfAreaTransferService, mockk(), mockWorkforceAllocationsToDeliusApiClientClient, mockLaoService).getAllByTeam("UserOne", "TM1")
         .toList()
 
-    verify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
+    coVerify(exactly = 1) { mockWorkforceAllocationsToDeliusApiClientClient.getDeliusCaseDetailsCases(listOf(unallocatedCaseEntity)) }
     assertEquals(1, cases.size)
   }
 }

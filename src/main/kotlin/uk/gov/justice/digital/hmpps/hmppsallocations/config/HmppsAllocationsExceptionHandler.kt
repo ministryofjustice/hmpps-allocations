@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsFailedDependencyException
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsWebClientTimeoutException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
@@ -54,15 +55,15 @@ class HmppsAllocationsExceptionHandler {
       )
   }
 
-  @ExceptionHandler(AllocationsFailedDependencyException::class)
-  fun handleAllocationsFailedDependencyException(e: AllocationsFailedDependencyException): ResponseEntity<ErrorResponse> {
+  @ExceptionHandler(AllocationsFailedDependencyException::class, AllocationsWebClientTimeoutException::class)
+  fun handleAllocationsFailedDependencyException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
     log.error("AllocationsFailedDependencyException: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.FAILED_DEPENDENCY)
+      .status(HttpStatus.GATEWAY_TIMEOUT)
       .body(
         ErrorResponse(
-          status = HttpStatus.FAILED_DEPENDENCY,
-          userMessage = "Allocations failed dependency: ${e.message}",
+          status = HttpStatus.GATEWAY_TIMEOUT,
+          userMessage = "Allocations gateway timeout: ${e.message}",
           developerMessage = e.message,
           moreInfo = e.message,
         ),
