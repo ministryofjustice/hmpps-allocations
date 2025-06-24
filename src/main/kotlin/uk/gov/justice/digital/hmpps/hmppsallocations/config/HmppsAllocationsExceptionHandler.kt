@@ -18,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsFailedDependencyException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
 
@@ -49,6 +50,21 @@ class HmppsAllocationsExceptionHandler {
           userMessage = "Access Denied (LAO): ${e.message}",
           developerMessage = e.message,
           moreInfo = e.crn,
+        ),
+      )
+  }
+
+  @ExceptionHandler(AllocationsFailedDependencyException::class)
+  fun handleAllocationsFailedDependencyException(e: AllocationsFailedDependencyException): ResponseEntity<ErrorResponse> {
+    log.error("AllocationsFailedDependencyException: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.FAILED_DEPENDENCY)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.FAILED_DEPENDENCY,
+          userMessage = "Allocations failed dependency: ${e.message}",
+          developerMessage = e.message,
+          moreInfo = e.message,
         ),
       )
   }

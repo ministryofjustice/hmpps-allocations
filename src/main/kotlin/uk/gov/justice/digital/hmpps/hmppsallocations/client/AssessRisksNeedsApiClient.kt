@@ -30,6 +30,8 @@ private const val UNAVAILABLE = "UNAVAILABLE"
 
 private const val SERVER_EXCEPTION = "SERVER_ERROR"
 
+private const val GATEWAY_TIMEOUT = "GATEWAY_TIMEOUT"
+
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   companion object {
     val log = LoggerFactory.getLogger(this::class.java)
@@ -40,6 +42,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     .uri("/assessments/timeline/crn/{crn}", crn)
     .retrieve()
     .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
+    .onStatus({ it == HttpStatus.GATEWAY_TIMEOUT }) { res -> res.createException().flatMap { Mono.error(Exception(GATEWAY_TIMEOUT)) } }
     .onStatus({ it.is5xxServerError }) { res -> res.createException().flatMap { Mono.error(Exception(SERVER_EXCEPTION)) } }
     .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
     .bodyToMono<Timeline>()
@@ -50,8 +53,9 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
     .retryWhen(
       Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-        .filter { it is Exception && it.message == SERVER_EXCEPTION },
+        .filter { it is Exception && (it.message == SERVER_EXCEPTION || it.message == GATEWAY_TIMEOUT) },
     )
+    .doOnError { log.warn("getLatestCompleteAssessment failed for $crn", it) }
     .awaitSingleOrNull()
 
   suspend fun getRosh(crn: String): RoshSummary? = webClient
@@ -59,14 +63,16 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     .uri("/risks/crn/{crn}/widget", crn)
     .retrieve()
     .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+    .onStatus({ it == HttpStatus.GATEWAY_TIMEOUT }) { res -> res.createException().flatMap { Mono.error(Exception(GATEWAY_TIMEOUT)) } }
     .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
     .bodyToMono<RoshSummary>()
     .retryWhen(
       Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-        .filter { it.message == UNAVAILABLE },
+        .filter { it.message == UNAVAILABLE || it.message == GATEWAY_TIMEOUT },
     )
     .timeout(Duration.ofSeconds(20))
     .onErrorResume { throwable ->
+      log.warn("getRoSH failed for $crn", throwable)
       when (throwable.message) {
         NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
         else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
@@ -79,12 +85,13 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
     .retrieve()
     .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+    .onStatus({ it == HttpStatus.GATEWAY_TIMEOUT }) { res -> res.createException().flatMap { Mono.error(Exception(GATEWAY_TIMEOUT)) } }
     .onStatus({ it.is5xxServerError }) { Mono.error(Exception(SERVER_EXCEPTION)) }
     .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
     .bodyToFlow<RiskPredictor>()
     .retryWhen(
       { cause, attempt ->
-        if (cause.message == SERVER_EXCEPTION && attempt < RETRY_ATTEMPTS) {
+        if ((cause.message == SERVER_EXCEPTION || cause.message == GATEWAY_TIMEOUT) && attempt < RETRY_ATTEMPTS) {
           delay(Duration.ofSeconds(RETRY_DELAY))
           true
         } else {
@@ -93,6 +100,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       },
     )
     .catch {
+      log.warn("getRiskPredictors failed for $crn", it)
       when (it.message) {
         NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
         else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
