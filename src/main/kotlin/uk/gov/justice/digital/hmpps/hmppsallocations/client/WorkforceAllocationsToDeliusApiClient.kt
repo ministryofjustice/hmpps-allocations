@@ -81,7 +81,10 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .awaitExchange { response ->
       when (response.statusCode()) {
         HttpStatus.OK -> response.awaitBody()
-        HttpStatus.GATEWAY_TIMEOUT -> throw AllocationsFailedDependencyException("users/limited-access failed")
+        HttpStatus.GATEWAY_TIMEOUT -> {
+          log.warn("getUserAccess failed for $crns GATEWAY_TIMEOUT")
+          throw AllocationsFailedDependencyException("users/limited-access failed")
+        }
         else -> throw response.createExceptionAndAwait()
       }
     }
@@ -170,6 +173,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
         .filter { (it is AllocationsServerError || it is AllocationsGatewayTimeoutError) },
     )
+    .doOnError { log.warn("getUnallocatedEvents failed for $crn", it) }
     .awaitSingleOrNull()
 
   suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
@@ -199,6 +203,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
         .filter { it is AllocationsServerError || it is AllocationsGatewayTimeoutError },
     )
+    .doOnError { log.warn("getAllocatedTeam failed for $crn", it) }
     .awaitSingleOrNull()
 }
 

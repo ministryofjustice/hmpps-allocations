@@ -55,6 +55,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
         .filter { it is Exception && (it.message == SERVER_EXCEPTION || it.message == GATEWAY_TIMEOUT) },
     )
+    .doOnError { log.warn("getLatestCompleteAssessment failed for $crn", it) }
     .awaitSingleOrNull()
 
   suspend fun getRosh(crn: String): RoshSummary? = webClient
@@ -71,6 +72,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     )
     .timeout(Duration.ofSeconds(20))
     .onErrorResume { throwable ->
+      log.warn("getRoSH failed for $crn", throwable)
       when (throwable.message) {
         NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
         else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
@@ -98,6 +100,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
       },
     )
     .catch {
+      log.warn("getRiskPredictors failed for $crn", it)
       when (it.message) {
         NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
         else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
