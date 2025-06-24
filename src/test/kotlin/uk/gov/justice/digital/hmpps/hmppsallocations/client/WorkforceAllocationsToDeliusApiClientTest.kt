@@ -129,7 +129,7 @@ class WorkforceAllocationsToDeliusApiClientTest {
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = WorkforceAllocationsToDeliusApiClient(webClient).getTeamsByUsername("JoeBloggs")
   }
-  
+
   fun `test 504 on delius client`() = runBlocking {
     val exchangeFunction = ExchangeFunction { request ->
       Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
