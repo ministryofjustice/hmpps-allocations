@@ -129,4 +129,27 @@ class WorkforceAllocationsToDeliusApiClientTest {
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = WorkforceAllocationsToDeliusApiClient(webClient).getTeamsByUsername("JoeBloggs")
   }
+  
+  fun `test 504 on delius client`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val exception = assertThrows<RuntimeException> {
+      WorkforceAllocationsToDeliusApiClient(webClient).getUnallocatedEvents("999999")
+    }
+    assert(exception.message!!.contains("Retries exhausted: 3/3"))
+  }
+
+  @Test
+  fun `test 424 on delius client`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val exception = assertThrows<RuntimeException> {
+      WorkforceAllocationsToDeliusApiClient(webClient).getUserAccess(listOf("X999999", "E912831"))
+    }
+    assert(exception.message == "users/limited-access failed")
+  }
 }

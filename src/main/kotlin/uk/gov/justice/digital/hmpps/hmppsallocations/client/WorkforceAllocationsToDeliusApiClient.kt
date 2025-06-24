@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.reactive.function.client.awaitExchange
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -27,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.PersonOnProbationStaffDetailsResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -49,6 +51,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .uri("/users")
     .retrieve()
     .awaitBody()
+
+  suspend fun getOfficerView(staffCode: String): OfficerView = webClient
+    .get()
+    .uri("/staff/{staffCode}/officer-view", staffCode)
+    .retrieve()
+    .awaitBodyOrNull<OfficerView>() ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
+
   suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails = webClient
     .get()
     .uri("person/{crn}/limited-access/all", crn)
@@ -72,6 +81,10 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .awaitExchange { response ->
       when (response.statusCode()) {
         HttpStatus.OK -> response.awaitBody()
+        HttpStatus.GATEWAY_TIMEOUT -> {
+          log.warn("getUserAccess failed for $crns GATEWAY_TIMEOUT")
+          throw AllocationsFailedDependencyException("users/limited-access failed")
+        }
         else -> throw response.createExceptionAndAwait()
       }
     }
@@ -143,6 +156,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .get()
     .uri("/allocation-demand/{crn}/unallocated-events", crn)
     .retrieve()
+    .onStatus({ status -> status == HttpStatus.GATEWAY_TIMEOUT }) {
+      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+    }
     .onStatus({ status -> status.is5xxServerError }) {
       Mono.error(AllocationsServerError("Internal server error"))
     }
@@ -155,8 +171,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .bodyToMono(UnallocatedEvents::class.java)
     .retryWhen(
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { it is AllocationsServerError },
+        .filter { (it is AllocationsServerError || it is AllocationsGatewayTimeoutError) },
     )
+    .doOnError { log.warn("getUnallocatedEvents failed for $crn", it) }
     .awaitSingleOrNull()
 
   suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
@@ -174,19 +191,36 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     }
     .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
       Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
-    }.onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
+    }
+    .onStatus({ status -> status.value() == HttpStatus.GATEWAY_TIMEOUT.value() }) {
+      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+    }
+    .onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
       Mono.error(AllocationsServerError("Internal server error"))
     }
     .bodyToMono(AllocatedEvent::class.java)
     .retryWhen(
       Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { it is AllocationsServerError },
+        .filter { it is AllocationsServerError || it is AllocationsGatewayTimeoutError },
     )
+    .doOnError { log.warn("getAllocatedTeam failed for $crn", it) }
     .awaitSingleOrNull()
 }
 
+data class OfficerView(
+  val code: String,
+  val name: Name,
+  val grade: String,
+  val email: String,
+  val casesDueToEndInNext4Weeks: Int,
+  val releasesWithinNext4Weeks: Int,
+  val paroleReportsToCompleteInNext4Weeks: Int,
+)
+
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
+class AllocationsGatewayTimeoutError(msg: String) : RuntimeException(msg)
+class AllocationsFailedDependencyException(msg: String) : RuntimeException(msg)
 class EventsNotFoundError(msg: String) : RuntimeException(msg)
 class EmptyTeamForEventException(msg: String) : RuntimeException(msg)
 data class CaseIdentifier(val crn: String, val eventNumber: String)
@@ -265,7 +299,7 @@ data class DocumentEvent @JsonCreator constructor(
 data class DeliusCaseAccess(
   val crn: String,
   var userRestricted: Boolean,
-  val userExcluded: Boolean,
+  var userExcluded: Boolean,
 )
 
 data class DeliusUserAccess(

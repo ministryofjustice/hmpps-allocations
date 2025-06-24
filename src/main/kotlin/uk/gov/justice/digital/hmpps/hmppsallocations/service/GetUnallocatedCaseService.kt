@@ -41,9 +41,9 @@ class GetUnallocatedCaseService(
   private val laoService: LaoService,
 ) {
 
-  suspend fun getCase(crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
-    if (laoService.getCrnRestrictions(crn).apopUserExcluded) {
-      throw NotAllowedForLAOException("A user of APoP is excluded from viewing this case", crn)
+  suspend fun getCase(userName: String, crn: String, convictionNumber: Long): UnallocatedCaseDetails? {
+    if (laoService.getCrnRestrictions(userName, crn).apopUserExcluded) {
+      throw NotAllowedForLAOException("User is excluded from viewing this case", crn)
     }
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
@@ -116,10 +116,10 @@ class GetUnallocatedCaseService(
 
   suspend fun getCaseOverview(crn: String, convictionNumber: Long): CaseOverview? = findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let {
     CaseOverview.from(it)
-  }.takeUnless { restricted(crn) }
+  }
 
   @SuppressWarnings("LongMethod")
-  suspend fun getAllByTeam(teamCode: String): List<UnallocatedCase> {
+  suspend fun getAllByTeam(userName: String, teamCode: String): List<UnallocatedCase> {
     log.info("Getting all unallocated cases for team $teamCode")
     val unallocatedCases = unallocatedCasesRepository.findByTeamCode(teamCode)
     if (unallocatedCases.isEmpty()) {
@@ -150,15 +150,20 @@ class GetUnallocatedCaseService(
           .map { deliusCaseDetail ->
             val unallocatedCase =
               unallocatedCases.first { it.crn == deliusCaseDetail.crn && it.convictionNumber == deliusCaseDetail.event.number.toInt() }
-            val excluded = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userExcluded }
-            val restricted = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && it.userRestricted }
+            val limitedAccess = unallocatedCasesUserAccess.any { it.crn == unallocatedCase.crn && (it.userExcluded || it.userRestricted) }
+            var restricted = false
+
+            if (limitedAccess) {
+              val crnLaoAccess = laoService.getCrnRestrictions(userName, unallocatedCase.crn)
+              restricted = crnLaoAccess.apopUserExcluded
+            }
 
             UnallocatedCase.from(
               unallocatedCase,
               deliusCaseDetail,
               outOfAreaTransfer = crnsThatAreCurrentlyManagedOutsideOfThisTeamsRegion.contains(unallocatedCase.crn),
-              excluded || restricted,
-              restricted || excluded && laoService.getCrnRestrictions(unallocatedCase.crn).apopUserExcluded,
+              limitedAccess,
+              restricted,
             )
           }
       }
@@ -168,7 +173,7 @@ class GetUnallocatedCaseService(
   suspend fun getCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
     return findUnallocatedCaseByConvictionNumber(crn, excludeConvictionNumber)?.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(it, probationRecord).takeUnless { restricted(crn) }
+      return UnallocatedCaseConvictions.from(it, probationRecord)
     }
   }
 
@@ -207,9 +212,9 @@ class GetUnallocatedCaseService(
 
   suspend fun getCrnStaffRestrictions(crn: String, staffCodes: List<String>): CrnStaffRestrictions? = laoService.getCrnRestrictionsForUsers(crn, staffCodes)
 
-  suspend fun isCrnRestricted(crn: String): Boolean? = laoService.isCrnRestricted(crn)
-  suspend fun getCaseRestrictions(crn: List<String>): DeliusUserAccess = laoService.getCrnRestrictions(crn)
-  suspend fun getCaseRestrictions(crn: String): DeliusCrnRestrictionStatus = laoService.getCrnRestrictionStatus(crn)
+  suspend fun isCrnRestricted(userName: String, crn: String): Boolean? = laoService.isCrnRestricted(userName, crn)
+  suspend fun getCaseRestrictions(userName: String, crn: List<String>): DeliusUserAccess = laoService.getCrnRestrictions(userName, crn)
+  suspend fun getCaseRestrictions(userName: String, crn: String): DeliusCrnRestrictionStatus = laoService.getCrnRestrictionStatus(userName, crn)
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
