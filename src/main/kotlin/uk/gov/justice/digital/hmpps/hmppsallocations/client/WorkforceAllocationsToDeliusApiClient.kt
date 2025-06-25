@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.withTimeout
 import org.owasp.html.PolicyFactory
 import org.owasp.html.Sanitizers
 import org.slf4j.LoggerFactory
@@ -35,8 +37,9 @@ import java.time.ZonedDateTime
 
 private const val NUMBER_OF_RETRIES = 3L
 private const val RETRY_INTERVAL = 3L
+private const val TIMEOUT_VALUE = 30000L
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "SwallowedException")
 class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -46,58 +49,113 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
   /*
    * returns a list of all users with permission to use the aPop tool (Delius role 'MAABT001')
    */
-  suspend fun getApopUsers(): List<DeliusApopUser> = webClient
-    .get()
-    .uri("/users")
-    .retrieve()
-    .awaitBody()
-
-  suspend fun getOfficerView(staffCode: String): OfficerView = webClient
-    .get()
-    .uri("/staff/{staffCode}/officer-view", staffCode)
-    .retrieve()
-    .awaitBodyOrNull<OfficerView>() ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
-
-  suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails = webClient
-    .get()
-    .uri("person/{crn}/limited-access/all", crn)
-    .retrieve()
-    .awaitBody()
-
-  suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails = webClient
-    .post()
-    .uri("person/{crn}/limited-access", crn)
-    .bodyValue(staffCodes)
-    .retrieve()
-    .awaitBody()
-  suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess = webClient
-    .post()
-    .uri { ub ->
-      ub.path("/users/limited-access")
-      username?.also { ub.queryParam("username", it) }
-      ub.build()
-    }
-    .bodyValue(crns)
-    .awaitExchange { response ->
-      when (response.statusCode()) {
-        HttpStatus.OK -> response.awaitBody()
-        HttpStatus.GATEWAY_TIMEOUT -> {
-          log.warn("getUserAccess failed for $crns GATEWAY_TIMEOUT")
-          throw AllocationsFailedDependencyException("users/limited-access failed")
-        }
-        else -> throw response.createExceptionAndAwait()
+  suspend fun getApopUsers(): List<DeliusApopUser> {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/users")
+          .retrieve()
+          .awaitBody()
       }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/users failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
     }
+  }
+  suspend fun getOfficerView(staffCode: String): OfficerView {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/staff/{staffCode}/officer-view", staffCode)
+          .retrieve()
+          .awaitBodyOrNull<OfficerView>()
+          ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/staff/$staffCode/officer-view failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  suspend fun getTeamsByUsername(username: String): DeliusTeams = webClient
-    .get()
-    .uri("users/{username}/teams", username)
-    .retrieve()
-    .awaitBody()
+  suspend fun getUserAccessRestrictionsByCrn(crn: String): DeliusAccessRestrictionDetails {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("person/{crn}/limited-access/all", crn)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/person/$crn/limited-access/all failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
+
+  suspend fun getAccessRestrictionsForStaffCodesByCrn(crn: String, staffCodes: List<String>): DeliusAccessRestrictionDetails {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .post()
+          .uri("person/{crn}/limited-access", crn)
+          .bodyValue(staffCodes)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/person/$crn/limited-access failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
+  suspend fun getUserAccess(crns: List<String>, username: String? = null): DeliusUserAccess {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .post()
+          .uri { ub ->
+            ub.path("/users/limited-access")
+            username?.also { ub.queryParam("username", it) }
+            ub.build()
+          }
+          .bodyValue(crns)
+          .awaitExchange { response ->
+            when (response.statusCode()) {
+              HttpStatus.OK -> response.awaitBody()
+              HttpStatus.GATEWAY_TIMEOUT -> {
+                log.warn("getUserAccess failed for $crns GATEWAY_TIMEOUT")
+                throw AllocationsFailedDependencyException("users/limited-access failed")
+              }
+
+              else -> throw response.createExceptionAndAwait()
+            }
+          }
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/users/limited-access failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
+
+  suspend fun getTeamsByUsername(username: String): DeliusTeams {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("users/{username}/teams", username)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/users/$username/teams failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
   suspend fun getUserAccess(crn: String, username: String? = null): DeliusCaseAccess? = getUserAccess(listOf(crn), username).access.firstOrNull { it.crn == crn }
 
-  fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> = getDeliusCaseDetails(
+  suspend fun getDeliusCaseDetailsCases(cases: List<UnallocatedCaseEntity>): Flow<DeliusCaseDetail> = getDeliusCaseDetails(
     caseDetails = GetCaseDetails(
       cases.map { CaseIdentifier(it.crn, it.convictionNumber.toString()) },
     ),
@@ -105,7 +163,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .flatMapIterable { it.cases }
     .asFlow()
 
-  fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> = getDeliusCaseDetails(
+  suspend fun getDeliusCaseDetails(crn: String, convictionNumber: Long): Mono<DeliusCaseDetails> = getDeliusCaseDetails(
     caseDetails = GetCaseDetails(
       listOf(CaseIdentifier(crn, convictionNumber.toString())),
     ),
@@ -115,96 +173,172 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     ),
   )
 
-  private fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> = webClient
-    .post()
-    .uri("/allocation-demand")
-    .body(Mono.just(caseDetails), GetCaseDetails::class.java)
-    .retrieve()
-    .bodyToMono(DeliusCaseDetails::class.java)
+  private suspend fun getDeliusCaseDetails(caseDetails: GetCaseDetails): Mono<DeliusCaseDetails> {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .post()
+          .uri("/allocation-demand")
+          .body(Mono.just(caseDetails), GetCaseDetails::class.java)
+          .retrieve()
+          .bodyToMono(DeliusCaseDetails::class.java)
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  fun getDocuments(crn: String): Flow<Document> = webClient
-    .get()
-    .uri("/offenders/{crn}/documents", crn)
-    .retrieve()
-    .bodyToFlow()
+  suspend fun getDocuments(crn: String): Flow<Document> {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/offenders/{crn}/documents", crn)
+          .retrieve()
+          .bodyToFlow<Document>()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/offenders/$crn/documents failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
   fun getDocumentById(crn: String, documentId: String): Mono<ResponseEntity<Resource>> = webClient
     .get()
     .uri("/offenders/{crn}/documents/{documentId}", crn, documentId)
     .retrieve()
     .toEntity(Resource::class.java)
+    .timeout(Duration.ofMillis(TIMEOUT_VALUE))
+    .onErrorMap(AllocationsWebClientTimeoutException::class.java) {
+      AllocationsWebClientTimeoutException(it.localizedMessage)
+    }
 
-  fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> = webClient
-    .get()
-    .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
-    .retrieve()
-    .bodyToMono()
+  suspend fun getDeliusCaseView(crn: String, convictionNumber: Long): Mono<DeliusCaseView> {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
+          .retrieve()
+          .bodyToMono()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/$convictionNumber/case-view failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord = webClient
-    .get()
-    .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
-    .retrieve()
-    .awaitBody()
+  suspend fun getProbationRecord(crn: String, excludeConvictionNumber: Long): DeliusProbationRecord {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/$excludeConvictionNumber/probation-record failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  suspend fun getDeliusRisk(crn: String): DeliusRisk = webClient
-    .get()
-    .uri("/allocation-demand/{crn}/risk", crn)
-    .retrieve()
-    .awaitBody()
+  suspend fun getDeliusRisk(crn: String): DeliusRisk {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/allocation-demand/{crn}/risk", crn)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/risk failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? = webClient
-    .get()
-    .uri("/allocation-demand/{crn}/unallocated-events", crn)
-    .retrieve()
-    .onStatus({ status -> status == HttpStatus.GATEWAY_TIMEOUT }) {
-      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+  suspend fun getUnallocatedEvents(crn: String): UnallocatedEvents? {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/allocation-demand/{crn}/unallocated-events", crn)
+          .retrieve()
+          .onStatus({ status -> status == HttpStatus.GATEWAY_TIMEOUT }) {
+            Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+          }
+          .onStatus({ status -> status.is5xxServerError }) {
+            Mono.error(AllocationsServerError("Internal server error"))
+          }
+          .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+            Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
+          }
+          .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+            Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
+          }
+          .bodyToMono(UnallocatedEvents::class.java)
+          .retryWhen(
+            Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+              .filter { (it is AllocationsServerError || it is AllocationsGatewayTimeoutError) },
+          )
+          .doOnError { log.warn("getUnallocatedEvents failed for $crn", it) }
+          .awaitSingleOrNull()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/unallocated-events failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
     }
-    .onStatus({ status -> status.is5xxServerError }) {
-      Mono.error(AllocationsServerError("Internal server error"))
-    }
-    .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
-      Mono.error(ForbiddenOffenderError("Unable to access offender details for $crn"))
-    }
-    .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-      Mono.error(EventsNotFoundError("Unallocated events not found for $crn"))
-    }
-    .bodyToMono(UnallocatedEvents::class.java)
-    .retryWhen(
-      Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { (it is AllocationsServerError || it is AllocationsGatewayTimeoutError) },
-    )
-    .doOnError { log.warn("getUnallocatedEvents failed for $crn", it) }
-    .awaitSingleOrNull()
+  }
 
-  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse = webClient
-    .get()
-    .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
-    .retrieve()
-    .awaitBody()
+  suspend fun personOnProbationStaffDetails(crn: String, staffCode: String): PersonOnProbationStaffDetailsResponse {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
+          .retrieve()
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/impact/crn=$crn&staff=$staffCode failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
 
-  suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? = webClient
-    .get()
-    .uri("allocation-completed/order-manager?crn={crn}&eventNumber={convictionNumber}", crn, convictionNumber)
-    .retrieve()
-    .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
-      Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
+  suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("allocation-completed/order-manager?crn={crn}&eventNumber={convictionNumber}", crn, convictionNumber)
+          .retrieve()
+          .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
+            Mono.error(EmptyTeamForEventException("Unable to find allocated team for $crn"))
+          }
+          .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
+            Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
+          }
+          .onStatus({ status -> status.value() == HttpStatus.GATEWAY_TIMEOUT.value() }) {
+            Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
+          }
+          .onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
+            Mono.error(AllocationsServerError("Internal server error"))
+          }
+          .bodyToMono(AllocatedEvent::class.java)
+          .retryWhen(
+            Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
+              .filter { it is AllocationsServerError || it is AllocationsGatewayTimeoutError },
+          )
+          .doOnError { log.warn("getAllocatedTeam failed for $crn", it) }
+          .awaitSingleOrNull()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
     }
-    .onStatus({ status -> status.value() == HttpStatus.FORBIDDEN.value() }) {
-      Mono.error(ForbiddenOffenderError("Unable to access allocated team for $crn , event number: $convictionNumber"))
-    }
-    .onStatus({ status -> status.value() == HttpStatus.GATEWAY_TIMEOUT.value() }) {
-      Mono.error(AllocationsGatewayTimeoutError("Gateway timeout"))
-    }
-    .onStatus({ status -> status.value() == HttpStatus.INTERNAL_SERVER_ERROR.value() }) {
-      Mono.error(AllocationsServerError("Internal server error"))
-    }
-    .bodyToMono(AllocatedEvent::class.java)
-    .retryWhen(
-      Retry.backoff(NUMBER_OF_RETRIES, Duration.ofSeconds(RETRY_INTERVAL))
-        .filter { it is AllocationsServerError || it is AllocationsGatewayTimeoutError },
-    )
-    .doOnError { log.warn("getAllocatedTeam failed for $crn", it) }
-    .awaitSingleOrNull()
+  }
 }
 
 data class OfficerView(
@@ -220,6 +354,7 @@ data class OfficerView(
 class ForbiddenOffenderError(msg: String) : RuntimeException(msg)
 class AllocationsServerError(msg: String) : RuntimeException(msg)
 class AllocationsGatewayTimeoutError(msg: String) : RuntimeException(msg)
+class AllocationsWebClientTimeoutException(msg: String) : RuntimeException(msg)
 class AllocationsFailedDependencyException(msg: String) : RuntimeException(msg)
 class EventsNotFoundError(msg: String) : RuntimeException(msg)
 class EmptyTeamForEventException(msg: String) : RuntimeException(msg)
