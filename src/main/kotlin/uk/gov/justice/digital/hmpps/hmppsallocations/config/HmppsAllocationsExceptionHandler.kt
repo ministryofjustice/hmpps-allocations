@@ -55,15 +55,30 @@ class HmppsAllocationsExceptionHandler {
       )
   }
 
-  @ExceptionHandler(AllocationsFailedDependencyException::class, AllocationsWebClientTimeoutException::class)
-  fun handleAllocationsFailedDependencyException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
-    log.error("AllocationsFailedDependencyException: {}", e.message)
+  @ExceptionHandler(AllocationsWebClientTimeoutException::class)
+  fun handleAllocationsGatewayTimeoutException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
+    log.error("Allocations gateway timeout: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.GATEWAY_TIMEOUT)
       .body(
         ErrorResponse(
           status = HttpStatus.GATEWAY_TIMEOUT,
           userMessage = "Allocations gateway timeout: ${e.message}",
+          developerMessage = e.message,
+          moreInfo = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(AllocationsFailedDependencyException::class)
+  fun handleAllocationsFailedDependencyException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
+    log.error("Allocations Failed Dependency: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.FAILED_DEPENDENCY)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.FAILED_DEPENDENCY,
+          userMessage = "Allocations Failed Dependency: ${e.message}",
           developerMessage = e.message,
           moreInfo = e.message,
         ),

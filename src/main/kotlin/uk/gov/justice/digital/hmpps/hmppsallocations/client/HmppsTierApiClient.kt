@@ -43,6 +43,8 @@ class HmppsTierApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       AssessRisksNeedsApiClient.Companion.log.warn("/crn/$crn/tier failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/crn/$crn/tier failed for 500 error ${e.message}")
     }
   }
 

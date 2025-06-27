@@ -15,8 +15,9 @@ import java.time.format.DateTimeFormatter
 
 class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
-  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertionsAndProbationEstateFailure(
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    probationEstateStatusCode: HttpStatus = HttpStatus.OK,
     vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
     workforceAllocationsToDelius.setuserAccessToCases(
@@ -46,7 +47,42 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .isOk
+      .isEqualTo(probationEstateStatusCode)
+  }
+
+  private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+    probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    probationEstateStatusCode: HttpStatus = HttpStatus.OK,
+    vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
+  ) {
+    workforceAllocationsToDelius.setuserAccessToCases(
+      listOf(
+        Triple("J678910", false, false),
+        Triple("J680648", false, false),
+        Triple("X4565764", false, false),
+        Triple("J680660", false, false),
+        Triple("X6666222", false, false),
+        Triple("XXXXXXX", true, false),
+        Triple("ZZZZZZZ", false, true),
+      ),
+    )
+    insertCases()
+    val initialAppointment = LocalDate.of(2022, 10, 11)
+    val firstSentenceDate = LocalDate.of(2022, 11, 5)
+
+    workforceAllocationsToDelius.setupTeam1CaseDetails(*extraCaseDetailsIntegrations)
+
+    workforceAllocationsToDelius.setExcludedUsersByCrn(
+      listOf("J678910", "J680660", "X4565764", "J680648", "X6666222", "XXXXXXX", "ZZZZZZZ"),
+    )
+    workforceAllocationsToDelius.setApopUsers()
+
+    webTestClient.get()
+      .uri("/team/TEAM1/cases/unallocated")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isEqualTo(probationEstateStatusCode)
       .expectBody()
       .jsonPath("$.length()")
       .isEqualTo(5)
@@ -317,6 +353,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = true,
+      probationEstateStatusCode = HttpStatus.OK,
       extraUnexpectedCaseFromDelius,
     )
   }
@@ -324,8 +361,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
   @Test
   fun `Get unallocated cases by team where probation-estate API is failing with InternalServerError response`() {
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
+    testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertionsAndProbationEstateFailure(
       probationEstateTeamsAndRegionsApiIsWorking = false,
+      probationEstateStatusCode = HttpStatus.FAILED_DEPENDENCY,
     )
   }
 
@@ -359,7 +397,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .is5xxServerError
+      .isEqualTo(HttpStatus.FAILED_DEPENDENCY)
   }
 
   @Test

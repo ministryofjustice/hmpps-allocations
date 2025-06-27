@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import com.fasterxml.jackson.core.type.TypeReference
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Document
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
@@ -33,7 +34,7 @@ class GetCaseDocumentsTest : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .is5xxServerError
+      .isEqualTo(HttpStatus.FAILED_DEPENDENCY)
   }
 
   @Test

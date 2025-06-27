@@ -138,9 +138,9 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("$.roshRisk.overallRisk")
-      .isEqualTo("NOT_FOUND")
+      .isEqualTo("UNAVAILABLE")
 
-    assessRisksNeedsApi.verifyRoshCalled(crn, 2)
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
     assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
@@ -162,7 +162,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.roshRisk.overallRisk")
       .isEqualTo("UNAVAILABLE")
-    assessRisksNeedsApi.verifyRoshCalled(crn, 4)
+    assessRisksNeedsApi.verifyRoshCalled(crn, 1)
     assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
   }
 
