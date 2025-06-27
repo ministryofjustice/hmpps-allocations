@@ -35,8 +35,6 @@ private const val SERVER_EXCEPTION = "SERVER_ERROR"
 private const val TIMEOUT_VALUE = 30000L
 
 @Suppress("SwallowedException")
-private const val GATEWAY_TIMEOUT = "GATEWAY_TIMEOUT"
-
 class AssessRisksNeedsApiClient(private val webClient: WebClient) {
   companion object {
     val log = LoggerFactory.getLogger(this::class.java)
@@ -51,7 +49,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .retrieve()
           .onStatus({ it == HttpStatus.NOT_FOUND }) { res -> res.releaseBody().then(Mono.defer { Mono.empty() }) }
           .onStatus({ it.is5xxServerError }) { res ->
-            res.createException().flatMap { Mono.error(Exception(SERVER_EXCEPTION)) }
+            res.createException().flatMap { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           }
           .onStatus({ it != HttpStatus.OK }) { res -> res.createException().flatMap { Mono.error(it) } }
           .bodyToMono<Timeline>()
@@ -69,6 +67,8 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       log.warn("/assessments/timeline/crn/$crn failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/assessments/timeline/crn/$crn failed for 500 error, ${e.message}")
     }
   }
 
@@ -80,16 +80,18 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .uri("/risks/crn/{crn}/widget", crn)
           .retrieve()
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
+          .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
           .bodyToMono<RoshSummary>()
           .retryWhen(
             Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-              .filter { it.message == UNAVAILABLE },
+              .filter { it.message == UNAVAILABLE || it.message == SERVER_EXCEPTION },
           )
           .timeout(Duration.ofSeconds(20))
           .onErrorResume { throwable ->
             log.warn("getRoSH failed for $crn", throwable)
             when (throwable.message) {
+              SERVER_EXCEPTION -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
               NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
               else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
             }
@@ -99,6 +101,8 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       log.warn("/risks/crn/$crn/widget failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/risks/crn/$crn failed for 500 error, ${e.message}")
     }
   }
 
@@ -110,7 +114,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
           .retrieve()
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-          .onStatus({ it.is5xxServerError }) { Mono.error(Exception(SERVER_EXCEPTION)) }
+          .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
           .bodyToFlow<RiskPredictor>()
           .retryWhen(
@@ -135,6 +139,8 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       log.warn("/risks/crn/$crn/predictors/rsr/history failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/risks/crn/$crn/predictors/rsr/history failed for 500 error, ${e.message}")
     }
   }
 }

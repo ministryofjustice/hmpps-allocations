@@ -1,14 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsFailedDependencyException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
 
+@Suppress("SwallowedException")
 @Component
 class ValidateAccessService(
   @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
@@ -16,6 +19,10 @@ class ValidateAccessService(
   private val hmppsProbationEstateApiClient: HmppsProbationEstateApiClient,
   private val getRegionsService: GetRegionsService,
 ) {
+  companion object {
+    val log = LoggerFactory.getLogger(this::class.java)
+  }
+
   suspend fun validateUserAccess(staffCode: String, crn: String, convictionNumber: String): Boolean {
     try {
       val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
@@ -24,7 +31,12 @@ class ValidateAccessService(
         workforceAllocationsToDeliusApiClient.getUnallocatedEvents(crn)?.activeEvents?.filter { it.eventNumber == convictionNumber }
           ?.map { it.teamCode }?.distinct()?.get(0)
       val probationEstateRegion =
-        hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForPoP ?: ""))
+        try {
+          hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForPoP ?: ""))
+        } catch (e: AllocationsFailedDependencyException) {
+          log.warn("Probation estate client failed to get regions and teams for $probationEstateForPoP, failed with 424 error")
+          null
+        }
           ?.map { it.region.code }?.get(0)
       val result = allowedRegions.contains(probationEstateRegion)
       if (!result) {

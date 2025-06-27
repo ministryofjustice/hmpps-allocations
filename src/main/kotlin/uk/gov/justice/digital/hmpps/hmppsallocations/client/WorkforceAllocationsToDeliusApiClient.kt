@@ -56,6 +56,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/users")
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/users failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -70,6 +77,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/staff/{staffCode}/officer-view", staffCode)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/staff/$staffCode/officer-view failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBodyOrNull<OfficerView>()
           ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
       }
@@ -86,6 +100,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("person/{crn}/limited-access/all", crn)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/person/$crn/limited-access/all failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -102,6 +123,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .uri("person/{crn}/limited-access", crn)
           .bodyValue(staffCodes)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/person/$crn/limited-access failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -123,9 +151,9 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitExchange { response ->
             when (response.statusCode()) {
               HttpStatus.OK -> response.awaitBody()
-              HttpStatus.GATEWAY_TIMEOUT -> {
-                log.warn("getUserAccess failed for $crns GATEWAY_TIMEOUT")
-                throw AllocationsFailedDependencyException("users/limited-access failed")
+              HttpStatus.INTERNAL_SERVER_ERROR -> {
+                log.warn("/users/limited-access failed for $crns")
+                throw AllocationsFailedDependencyException("/users/limited-access failed")
               }
 
               else -> throw response.createExceptionAndAwait()
@@ -145,6 +173,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("users/{username}/teams", username)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/users/$username/teams failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -181,6 +216,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .uri("/allocation-demand")
           .body(Mono.just(caseDetails), GetCaseDetails::class.java)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/allocation-demand failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .bodyToMono(DeliusCaseDetails::class.java)
       }
     } catch (e: TimeoutCancellationException) {
@@ -196,6 +238,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/offenders/{crn}/documents", crn)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/offenders/$crn/documents failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .bodyToFlow<Document>()
       }
     } catch (e: TimeoutCancellationException) {
@@ -208,6 +257,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     .get()
     .uri("/offenders/{crn}/documents/{documentId}", crn, documentId)
     .retrieve()
+    .onStatus({ it.is5xxServerError }) { res ->
+      res.createException().flatMap {
+        Mono.error(
+          AllocationsFailedDependencyException("/offenders/$crn/documents/{documentId} failed with ${res.statusCode()}"),
+        )
+      }
+    }
     .toEntity(Resource::class.java)
     .timeout(Duration.ofMillis(TIMEOUT_VALUE))
     .onErrorMap(AllocationsWebClientTimeoutException::class.java) {
@@ -221,6 +277,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/allocation-demand/{crn}/{convictionNumber}/case-view", crn, convictionNumber)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/allocation-demand/$crn/{convictionNumber}/case-view failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .bodyToMono()
       }
     } catch (e: TimeoutCancellationException) {
@@ -236,6 +299,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/allocation-demand/{crn}/{excludeConvictionNumber}/probation-record", crn, excludeConvictionNumber)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/allocation-demand/$crn/$excludeConvictionNumber/probation-record failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -251,6 +321,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/allocation-demand/{crn}/risk", crn)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/allocation-demand/$crn/risk failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -289,6 +366,8 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/unallocated-events failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/allocation-demand/$crn/unallocated-events failed for 500 error ${e.message}")
     }
   }
 
@@ -299,6 +378,13 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .get()
           .uri("/allocation-demand/impact?crn={crn}&staff={staffCode}", crn, staffCode)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/allocation-demand/impact?crn=$crn&staff=$staffCode failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
@@ -337,6 +423,8 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     } catch (e: TimeoutCancellationException) {
       AssessRisksNeedsApiClient.Companion.log.warn("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
+    } catch (e: AllocationsServerError) {
+      throw AllocationsFailedDependencyException("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for 500, ${e.message}")
     }
   }
 }
