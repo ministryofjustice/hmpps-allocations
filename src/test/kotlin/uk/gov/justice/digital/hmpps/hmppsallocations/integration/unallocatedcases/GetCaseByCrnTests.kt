@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcases
 
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.AssessRisksNeedsApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.ProbateEstateApiExtension.Companion.hmppsProbateEstate
@@ -50,7 +49,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    canGetCaseByCrnAndConvictionNumber424(
+    canGetCaseByCrnAndConvictionNumber(
       outOfAreaTransfer = false,
     )
   }
@@ -76,27 +75,6 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .exchange()
       .expectStatus()
       .isForbidden
-  }
-
-  private fun canGetCaseByCrnAndConvictionNumber424(
-    outOfAreaTransfer: Boolean = false,
-  ) {
-    val crn = "J678910"
-    val convictionNumber = 1
-    workforceAllocationsToDelius.userHasAccess("J678910")
-    insertCases()
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
-    workforceAllocationsToDelius.riskResponse(crn)
-    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
-    workforceAllocationsToDelius.userHasAccess("J678910")
-    webTestClient.get()
-      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
-      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
-      .exchange()
-      .expectStatus()
-      .isEqualTo(HttpStatus.FAILED_DEPENDENCY)
   }
 
   private fun canGetCaseByCrnAndConvictionNumber(

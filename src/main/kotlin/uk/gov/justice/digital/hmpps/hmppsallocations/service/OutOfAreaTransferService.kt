@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsFailedDependencyException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnAndTeamCode
@@ -53,9 +54,13 @@ class OutOfAreaTransferService(
     currentTeamCode: String,
     teamCodesToInvestigate: Set<String>,
   ): List<String>? = if (teamCodesToInvestigate.size > 1) {
-    hmppsProbationEstateApiClient.getRegionsAndTeams(
-      teamCodes = teamCodesToInvestigate,
-    )?.let { regionAndTeams ->
+    try {
+      hmppsProbationEstateApiClient.getRegionsAndTeams(
+        teamCodes = teamCodesToInvestigate,
+      )
+    } catch (e: AllocationsFailedDependencyException) {
+      null
+    }?.let { regionAndTeams ->
       val currentTeamRegionCode = regionAndTeams
         .filter { it.team.code == currentTeamCode }
         .map { it.region.code }

@@ -80,17 +80,18 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .uri("/risks/crn/{crn}/widget", crn)
           .retrieve()
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
-          .onStatus({ it == HttpStatus.INTERNAL_SERVER_ERROR }) { Mono.error(AllocationsServerError("Internal server error")) }
+          .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
           .bodyToMono<RoshSummary>()
           .retryWhen(
             Retry.backoff(RETRY_ATTEMPTS, Duration.ofSeconds(RETRY_DELAY))
-              .filter { it.message == UNAVAILABLE },
+              .filter { it.message == UNAVAILABLE || it.message == SERVER_EXCEPTION },
           )
           .timeout(Duration.ofSeconds(20))
           .onErrorResume { throwable ->
             log.warn("getRoSH failed for $crn", throwable)
             when (throwable.message) {
+              SERVER_EXCEPTION -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
               NOT_FOUND -> Mono.just(RoshSummary(NOT_FOUND, null, emptyMap()))
               else -> Mono.just(RoshSummary(UNAVAILABLE, null, emptyMap()))
             }
