@@ -17,6 +17,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
   private fun testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
     probationEstateTeamsAndRegionsApiIsWorking: Boolean,
+    probationEstateStatusCode: HttpStatus = HttpStatus.OK,
     vararg extraCaseDetailsIntegrations: CaseDetailsIntegration,
   ) {
     workforceAllocationsToDelius.setuserAccessToCases(
@@ -46,7 +47,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .isOk
+      .isEqualTo(probationEstateStatusCode)
       .expectBody()
       .jsonPath("$.length()")
       .isEqualTo(5)
@@ -317,6 +318,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
 
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = true,
+      probationEstateStatusCode = HttpStatus.OK,
       extraUnexpectedCaseFromDelius,
     )
   }
@@ -326,6 +328,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
     testUnallocatedCasesByTeamSuccessWithAllDataSetupAndAssertions(
       probationEstateTeamsAndRegionsApiIsWorking = false,
+      probationEstateStatusCode = HttpStatus.OK,
     )
   }
 
@@ -359,7 +362,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .exchange()
       .expectStatus()
-      .is5xxServerError
+      .isEqualTo(HttpStatus.FAILED_DEPENDENCY)
   }
 
   @Test

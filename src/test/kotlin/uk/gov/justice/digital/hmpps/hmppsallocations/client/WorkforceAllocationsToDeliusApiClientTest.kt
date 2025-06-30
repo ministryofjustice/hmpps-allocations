@@ -144,12 +144,12 @@ class WorkforceAllocationsToDeliusApiClientTest {
   @Test
   fun `test 424 on delius client`() = runBlocking {
     val exchangeFunction = ExchangeFunction { request ->
-      Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build())
+      Mono.just(ClientResponse.create(HttpStatus.INTERNAL_SERVER_ERROR).build())
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
-    val exception = assertThrows<RuntimeException> {
+    val exception = assertThrows<AllocationsFailedDependencyException> {
       WorkforceAllocationsToDeliusApiClient(webClient).getUserAccess(listOf("X999999", "E912831"))
     }
-    assert(exception.message == "users/limited-access failed")
+    assert(exception.message == "/users/limited-access failed")
   }
 }

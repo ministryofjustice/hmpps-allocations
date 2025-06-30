@@ -8,6 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchangeOrNull
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionsAndTeamsRequest
@@ -28,6 +29,7 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
           .awaitExchangeOrNull { response ->
             when (response.statusCode()) {
               HttpStatus.OK -> response.awaitBody<List<ProbationEstateRegionAndTeamOverview>>()
+              HttpStatus.INTERNAL_SERVER_ERROR -> throw AllocationsFailedDependencyException("/regions failed for 500 error")
               else -> {
                 log.error(
                   "Unexpected response from probation-estate's regions-and-teams API. Getting response-status: {}",
@@ -51,6 +53,13 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
           .get()
           .uri("/probationDeliveryUnit/{pduCode}", pduCode)
           .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/probationDeliveryUnit/$pduCode failed with ${res.statusCode()}"),
+              )
+            }
+          }
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
