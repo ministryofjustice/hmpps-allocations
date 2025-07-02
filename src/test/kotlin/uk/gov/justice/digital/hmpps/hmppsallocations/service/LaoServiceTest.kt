@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
@@ -493,7 +495,7 @@ class LaoServiceTest {
 
   @Test
   fun `returns correct restriction statuses object for a a list of cases`() = runTest {
-    val crns = listOf("crn1", "crn2", "crn3", "crn4", "crn5", "crn6", "crn7", "crn8", "crn9", "crn10")
+    val crns = listOf("crn1", "crn2", "crn3", "crn4", "crn5", "crn6", "crn7", "crn8", "crn9", "crn10", "BadCrn")
     val currentUser = "ThisUser"
 
     val deliusUserAccess = DeliusUserAccess(
@@ -509,8 +511,46 @@ class LaoServiceTest {
         DeliusCaseAccess(crn = "crn9", userRestricted = true, userExcluded = false), // restricted
         DeliusCaseAccess(crn = "crn10", userRestricted = false, userExcluded = true), // excluded
         DeliusCaseAccess(crn = "crn11", userRestricted = true, userExcluded = true), // excluded AND restricted
+        DeliusCaseAccess(crn = "BadCrn", userRestricted = false, userExcluded = false), // NOt an existing crn Deius returns fal and false
       ),
     )
+
+    // Unrestricted ones
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn1") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn1",
+        restrictedTo = emptyList(),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn2") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn2",
+        restrictedTo = emptyList(),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn6") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn6",
+        restrictedTo = emptyList(),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
+
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn7") } returns
+      DeliusAccessRestrictionDetails(
+        crn = "crn7",
+        restrictedTo = emptyList(),
+        excludedFrom = emptyList(),
+        exclusionMessage = "sorry",
+        restrictionMessage = "sorry",
+      )
 
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("crn3") } returns
       DeliusAccessRestrictionDetails(
@@ -575,6 +615,8 @@ class LaoServiceTest {
         restrictionMessage = "sorry",
       )
 
+    coEvery { workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn("BadCrn") } throws WebClientResponseException(HttpStatus.NOT_FOUND.value(), "Not Found", null, null, null)
+
     coEvery { workforceAllocationsToDeliusApiClient.getUserAccess(crns) } returns
       deliusUserAccess
 
@@ -593,6 +635,8 @@ class LaoServiceTest {
         DeliusCaseAccess(crn = "crn9", userRestricted = false, userExcluded = true), // Not restricted because we are on the restricted list
         DeliusCaseAccess(crn = "crn10", userRestricted = false, userExcluded = true),
         DeliusCaseAccess(crn = "crn11", userRestricted = true, userExcluded = true), // user on both lists thus restricted
+        DeliusCaseAccess(crn = "BadCrn", userRestricted = true, userExcluded = true), // CRN dos not exist
+
       ),
     )
     assert(restrictions.equals(checkDeliusUserAccess))

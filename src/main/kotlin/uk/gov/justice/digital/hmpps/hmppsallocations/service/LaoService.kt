@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusUserAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnStaffRestrictionDetail
@@ -39,20 +41,29 @@ class LaoService(
     val crnsAccess = workforceAllocationsToDeliusApiClient.getUserAccess(crns).access
 
     crnsAccess.forEach {
-      if (it.userRestricted || it.userExcluded) {
-        val limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
+      try {
+        var limitedAccessDetail = workforceAllocationsToDeliusApiClient.getUserAccessRestrictionsByCrn(it.crn)
 
-        var apopExcluded = false
-        if (it.userExcluded && limitedAccessDetail.excludedFrom.map { it.username.uppercase() }.contains(username.uppercase())) {
-          apopExcluded = true
+        if (it.userRestricted || it.userExcluded) {
+          var apopExcluded = false
+          if (it.userExcluded && limitedAccessDetail.excludedFrom.map { it.username.uppercase() }.contains(username.uppercase())) {
+            apopExcluded = true
+          }
+
+          if (it.userRestricted && !limitedAccessDetail.restrictedTo.map { it.username.uppercase() }.contains(username.uppercase())) {
+            apopExcluded = true
+          }
+
+          it.userRestricted = apopExcluded
+          it.userExcluded = true
         }
-
-        if (it.userRestricted && !limitedAccessDetail.restrictedTo.map { it.username.uppercase() }.contains(username.uppercase())) {
-          apopExcluded = true
+      } catch (e: WebClientResponseException) {
+        if (e.statusCode.isSameCodeAs(HttpStatus.NOT_FOUND)) {
+          it.userRestricted = true
+          it.userExcluded = true
+        } else {
+          throw e
         }
-
-        it.userRestricted = apopExcluded
-        it.userExcluded = true
       }
     }
 
