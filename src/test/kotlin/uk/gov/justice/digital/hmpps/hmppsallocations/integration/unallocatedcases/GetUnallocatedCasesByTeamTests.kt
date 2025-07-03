@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.unallocatedcas
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
@@ -520,5 +522,28 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.[?(@.convictionNumber == 2 && @.crn == 'AB77711')].handoverDate")
       .isEqualTo(handoverDate)
+  }
+
+  @Test
+  fun `Propogate Bad request when invalid body passed`() {
+    webTestClient.post()
+      .uri("/cases/restrictions/crn/list")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(BodyInserters.fromValue("{ \"staffCodes\": [ \"invalid\" ] }"))
+      .exchange()
+      .expectStatus()
+      .isEqualTo(HttpStatus.BAD_REQUEST)
+  }
+
+  @Test
+  fun `Propogate Bad request when no body passed`() {
+    webTestClient.post()
+      .uri("/cases/restrictions/crn/list")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .contentType(MediaType.APPLICATION_JSON)
+      .exchange()
+      .expectStatus()
+      .isEqualTo(HttpStatus.BAD_REQUEST)
   }
 }
