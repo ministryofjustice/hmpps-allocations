@@ -18,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.MethodNotAllowedException
+import org.springframework.web.server.ServerWebInputException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsFailedDependencyException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AllocationsWebClientTimeoutException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
@@ -169,6 +170,15 @@ class HmppsAllocationsExceptionHandler {
       developerMessage = e.message,
     ),
     NOT_FOUND,
+  )
+
+  @ExceptionHandler(ServerWebInputException::class)
+  fun handle(e: ServerWebInputException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> = ResponseEntity(
+    uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
+      status = 400,
+      developerMessage = e.message,
+    ),
+    BAD_REQUEST,
   )
 
   @ExceptionHandler(java.lang.Exception::class)
