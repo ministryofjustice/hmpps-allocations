@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.1"
   kotlin("plugin.spring") version "2.2.0"
   kotlin("plugin.jpa") version "2.2.0"
   kotlin("jvm") version "2.2.0"
@@ -40,7 +40,7 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.3")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.6")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.7")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9")
 
