@@ -31,8 +31,8 @@ generic-prometheus-alerts:
   sqsNumberAlertQueueNames:
     - "Digital-Prison-Services-prod-hmpps_allocations_offender_events_queue_dl"
     - "manage-a-workforce-production-hmpps_allocation_domain_events_dlq"
-  sqsAlertsOldestThreshold: 2
-  sqsAlertsTotalMessagesThreshold: 1
+  sqsAlertsOldestThreshold: 5
+  sqsAlertsTotalMessagesThreshold: 5
   ingress5xxErrorWindowMinutes: 4
 
   namespace_secrets:
