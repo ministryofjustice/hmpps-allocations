@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: hmpps-allocations-ingress
+  labels:
+    app.kubernetes.io/name: hmpps-allocations
+    role: alert-rules
+spec:
+  groups:
+    - name: hmpps-allocations-ingress
+      rules:
+        - alert: 504ErrorResponses
+          expr: sum(rate(nginx_ingress_controller_requests{status="504"}[5m])) > 4
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Ingress for hmpps-allocations is serving 504 responses
