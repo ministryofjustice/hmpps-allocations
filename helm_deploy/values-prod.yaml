@@ -34,6 +34,7 @@ generic-prometheus-alerts:
   sqsAlertsOldestThreshold: 5
   sqsAlertsTotalMessagesThreshold: 5
   ingress5xxErrorWindowMinutes: 4
+  ingressAlertsEnabled: false
 
   namespace_secrets:
     sqs-domain-events-secret:

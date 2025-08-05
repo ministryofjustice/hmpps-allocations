@@ -38,3 +38,4 @@ generic-service:
 
 generic-prometheus-alerts:
   businessHoursOnly: true
+  ingressAlertsEnabled: false
