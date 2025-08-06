@@ -35,5 +35,4 @@ jobs:
         shell: bash
         run: |
           cd helm_deploy/hmpps-allocations
-          helm dependency build .
           helm lint . --values=../values-${{ inputs.environment }}.yaml
