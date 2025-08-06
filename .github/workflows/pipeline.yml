@@ -27,12 +27,10 @@ jobs:
       matrix:
         environments: ['dev', 'preprod', 'prod']
     name: helm lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2 # WORKFLOW_VERSION
+    uses: ./.github/workflows/test_helm_lint.yml
     secrets: inherit
     with:
       environment: ${{ matrix.environments }}
-      chart_name: .
-      helm_dir: helm_deploy/hmpps-allocations
   kotlin_validate:
     name: Validate the kotlin
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
