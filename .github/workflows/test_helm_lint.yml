@@ -36,4 +36,4 @@ jobs:
         run: |
           cd helm_deploy
           helm dependency update hmpps-allocations
-          helm lint hmpps-allocations --values=../../values-${{ inputs.environment }}.yaml
+          helm lint hmpps-allocations --values=values-${{ inputs.environment }}.yam
