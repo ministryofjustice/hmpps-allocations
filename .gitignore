@@ -71,4 +71,3 @@ ecr.repo
 .editorconfig
 
 #Helm
-**/Chart.lock
