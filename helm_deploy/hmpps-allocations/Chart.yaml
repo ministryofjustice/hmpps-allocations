@@ -12,4 +12,4 @@ dependencies:
     repository: https://ministryofjustice.github.io/hmpps-helm-charts
   - name: alerts
     version: 0.1.0
-    repository: file://charts/alerts
+    repository: file://./charts/alerts
