@@ -34,5 +34,6 @@ jobs:
       - name: Lint Helm chart
         shell: bash
         run: |
-          cd helm_deploy
-          helm lint hmpps-allocations --values=values-${{ inputs.environment }}.yaml
+          cd helm_deploy/hmpps-allocations
+          helm dependency build
+          helm lint hmpps-allocations --values=../values-${{ inputs.environment }}.yaml
