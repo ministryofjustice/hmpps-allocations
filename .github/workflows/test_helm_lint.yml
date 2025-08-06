@@ -35,4 +35,4 @@ jobs:
         shell: bash
         run: |
           cd helm_deploy
-          helm lint hmpps-allocations --values=../values-${{ inputs.environment }}.yaml
+          helm lint hmpps-allocations --values=values-${{ inputs.environment }}.yaml
