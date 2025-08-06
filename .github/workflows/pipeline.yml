@@ -32,7 +32,7 @@ jobs:
     with:
       environment: ${{ matrix.environments }}
       chart_name: .
-      helm_dir: /helm_deploy/hmpps-allocations
+      helm_dir: helm_deploy/hmpps-allocations
   kotlin_validate:
     name: Validate the kotlin
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_postgres_verify.yml@v2 # WORKFLOW_VERSION
