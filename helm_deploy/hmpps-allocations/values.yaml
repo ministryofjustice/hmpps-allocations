@@ -71,3 +71,4 @@ generic-service:
 generic-prometheus-alerts:
   targetApplication: hmpps-allocations
   alertSeverity: hmpps-tier
+  ingressAlertsEnabled: false
