@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentAllocatedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
@@ -68,6 +70,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
+    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "SPO", "TEAM1", true)),
     handoverDate = null,
   )
 
@@ -78,6 +81,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Joe", null, "Bloggs"), "SPO", "TEAM2"),
+    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Joe", null, "Bloggs"), "SPO", "TEAM2", true)),
     handoverDate = null,
   )
 
@@ -154,6 +158,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "PREVIOUSLY_MANAGED",
         probationStatusDescription = "Previously managed",
         communityPersonManager = CommunityPersonManager(Name("Janie", null, "Jones"), "PO", "TEAM1"),
+        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Janie", null, "Jones"), "PO", "TEAM1", true)),
         handoverDate = null,
       ),
       CaseDetailsIntegration(
@@ -163,6 +168,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "NEW_TO_PROBATION",
         probationStatusDescription = "New to probation",
         communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
+        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "SPO", "TEAM1", true)),
         handoverDate = null,
       ),
       CaseDetailsIntegration(
@@ -172,6 +178,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "PREVIOUSLY_MANAGED",
         probationStatusDescription = "Previously managed",
         communityPersonManager = null,
+        mostRecentAllocatedEvent = null,
         handoverDate = null,
       ),
       *extraCaseDetailsIntegrations,
