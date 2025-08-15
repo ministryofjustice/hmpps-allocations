@@ -70,7 +70,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
-    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "SPO", "TEAM1", true)),
+    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "TEAM1", "SPO", true)),
     handoverDate = null,
   )
 
@@ -81,7 +81,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     probationStatus = "CURRENTLY_MANAGED",
     probationStatusDescription = "Currently managed",
     communityPersonManager = CommunityPersonManager(Name("Joe", null, "Bloggs"), "SPO", "TEAM2"),
-    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Joe", null, "Bloggs"), "SPO", "TEAM2", true)),
+    mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Joe", null, "Bloggs"), "TEAM2", "SPO", true)),
     handoverDate = null,
   )
 
@@ -158,7 +158,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "PREVIOUSLY_MANAGED",
         probationStatusDescription = "Previously managed",
         communityPersonManager = CommunityPersonManager(Name("Janie", null, "Jones"), "PO", "TEAM1"),
-        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Janie", null, "Jones"), "PO", "TEAM1", true)),
+        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Janie", null, "Jones"), "TEAM1", "PO", true)),
         handoverDate = null,
       ),
       CaseDetailsIntegration(
@@ -168,7 +168,7 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
         probationStatus = "NEW_TO_PROBATION",
         probationStatusDescription = "New to probation",
         communityPersonManager = CommunityPersonManager(Name("Beverley", null, "Smith"), "SPO", "TEAM1"),
-        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "SPO", "TEAM1", true)),
+        mostRecentAllocatedEvent = RecentAllocatedEvent("1", RecentManager("1", Name("Beverley", null, "Smith"), "TEAM1", "SPO", true)),
         handoverDate = null,
       ),
       CaseDetailsIntegration(
