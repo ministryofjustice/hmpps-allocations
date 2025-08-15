@@ -458,6 +458,7 @@ data class DeliusCaseDetail(
   val event: Event,
   val probationStatus: ProbationStatus,
   val communityPersonManager: CommunityPersonManager?,
+  val mostRecentAllocatedEvent: RecentAllocatedEvent?,
   var type: String,
   val handoverDate: LocalDate?,
 )
@@ -470,6 +471,10 @@ data class ProbationStatus(
 )
 
 data class InitialAppointment(val date: LocalDate, val staff: Staff)
+
+data class RecentAllocatedEvent(val number: String, val manager: RecentManager)
+
+data class RecentManager(val code: String, val name: Name, val teamCode: String, val grade: String, val allocated: Boolean)
 
 data class Staff @JsonCreator constructor(
   val name: Name,

@@ -9,6 +9,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManag
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseDetail
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ProbationStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentAllocatedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationEstateRegionAndTeamOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.RegionOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamOverview
@@ -111,6 +113,16 @@ internal class OutOfAreaTransferServiceTest {
       name = mockk(),
       grade = "",
       teamCode = communityPersonManagerTeamCode,
+    ),
+    mostRecentAllocatedEvent = RecentAllocatedEvent(
+      number = "1",
+      manager = RecentManager(
+        code = "001",
+        name = mockk(),
+        teamCode = communityPersonManagerTeamCode,
+        grade = "",
+        allocated = false,
+      ),
     ),
     type = "",
     handoverDate = mockk(),

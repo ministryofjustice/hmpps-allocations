@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.work
 
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentAllocatedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import java.time.format.DateTimeFormatter
 
@@ -47,6 +48,7 @@ private fun deliusCaseDetail(caseDetailsIntegration: CaseDetailsIntegration) = "
   handoverDate(caseDetailsIntegration.handoverDate) +
   initialAppointment(caseDetailsIntegration.initialAppointment) +
   communityPersonManager(caseDetailsIntegration.communityPersonManager) +
+  mostRecentEvent(caseDetailsIntegration.mostRecentAllocatedEvent) +
   "}".trimIndent()
 
 private fun handoverDate(handoverDate: String?) = if (handoverDate != null) {
@@ -87,9 +89,34 @@ private fun communityPersonManager(communityPersonManager: CommunityPersonManage
   """.trimIndent()
 } ?: ""
 
+private fun mostRecentEvent(recentAllocatedEvent: RecentAllocatedEvent?): String = recentAllocatedEvent?.let {
+  """
+       ,"mostRecentAllocatedEvent" :{
+         "number": "1",
+         "manager": {
+          "code": "N54B999",
+          "name": {
+            "forename": "${recentAllocatedEvent.manager.name.forename}",
+            "surname": "${recentAllocatedEvent.manager.name.surname}"
+          },
+          "teamCode": "${recentAllocatedEvent.manager.teamCode}",
+          ${showGrade(recentAllocatedEvent.manager.grade)},
+          "allocated": "${recentAllocatedEvent.manager.allocated}"
+        } 
+      }
+  """.trimIndent()
+} ?: ""
+
 private fun showGrade(communityPersonManager: CommunityPersonManager): String {
   if (communityPersonManager.grade != null) {
     return ""","grade": "${communityPersonManager.grade}""""
+  }
+  return ""
+}
+
+private fun showGrade(grade: String?): String {
+  if (grade != null) {
+    return """ "grade": "$grade""""
   }
   return ""
 }

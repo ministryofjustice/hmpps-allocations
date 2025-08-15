@@ -301,6 +301,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       probationStatus = "NEW_TO_PROBATION",
       probationStatusDescription = "New to probation",
       communityPersonManager = null,
+      mostRecentAllocatedEvent = null,
       handoverDate = null,
     )
     hmppsProbateEstate.regionsAndTeamsSuccessResponse(
@@ -475,6 +476,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       probationStatus = "PREVIOUSLY_MANAGED",
       probationStatusDescription = "Previously managed",
       communityPersonManager = null,
+      mostRecentAllocatedEvent = null,
       handoverDate = handoverDate,
     )
     workforceAllocationsToDelius.setupTeam1CaseDetails(c2cCase)

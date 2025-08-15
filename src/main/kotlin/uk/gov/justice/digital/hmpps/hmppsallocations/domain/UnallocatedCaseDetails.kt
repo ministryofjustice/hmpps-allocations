@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.CommunityPersonManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentAllocatedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CaseViewDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
@@ -112,6 +113,14 @@ data class OffenderManagerDetails @JsonCreator constructor(
         communityPersonManager.name.forename,
         communityPersonManager.name.surname,
         gradeFrom(probationStatus, communityPersonManager.grade),
+      )
+    }
+
+    fun from(recentAllocatedEvent: RecentAllocatedEvent?, probationStatus: String): OffenderManagerDetails? = recentAllocatedEvent?.manager?.name?.forename?.takeUnless { probationStatus == "New to probation" }?.let {
+      OffenderManagerDetails(
+        recentAllocatedEvent.manager.name.forename,
+        recentAllocatedEvent.manager.name.surname,
+        gradeFrom(probationStatus, recentAllocatedEvent.manager.grade),
       )
     }
 

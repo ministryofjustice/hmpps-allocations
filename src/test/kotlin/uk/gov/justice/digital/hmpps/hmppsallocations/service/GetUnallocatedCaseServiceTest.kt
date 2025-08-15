@@ -17,6 +17,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.Event
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.ProbationStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentAllocatedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.RecentManager
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Sentence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -110,6 +112,20 @@ internal class GetUnallocatedCaseServiceTest {
             name = Name(forename = "me", surname = "you", middleName = ""),
             grade = "SPO",
             teamCode = "TM1",
+          ),
+          mostRecentAllocatedEvent = RecentAllocatedEvent(
+            number = "1",
+            manager = RecentManager(
+              code = "001",
+              name = Name(
+                forename = "me",
+                surname = "you",
+                middleName = "",
+              ),
+              teamCode = "TM1",
+              grade = "SPO",
+              allocated = false,
+            ),
           ),
           type = "",
           handoverDate = LocalDate.now(),
