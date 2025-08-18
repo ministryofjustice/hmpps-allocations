@@ -9,50 +9,51 @@ spec:
   groups:
     - name: hmpps-allocations-ingress
       rules:
-        # 5xx responses (all 5xx except 504)
+        # 5xx responses (all 5xx except 504) — >=3 in 5m
         - alert: Ingress5xxErrorResponses
           expr: |
-            avg(
-              rate(nginx_ingress_controller_requests{
-                exported_namespace="default",
-                ingress=~"hmpps-allocations(-v1-2)",
-                path="/",
+            sum by (ingress, exported_namespace) (
+              increase(nginx_ingress_controller_requests{
+                exported_namespace="workforce-management-prod",
+                ingress=~"hmpps-allocations(-v1-2)?",
                 status=~"5(0[0-3]|0[5-9]|[1-9][0-9])"
-              }[5m]) * 60 * 5 >= 3
-            ) by (ingress, exported_namespace)
+              }[5m])
+            ) >= 3
           for: 1m
           labels:
             severity: warning
             service: hmpps-allocations
           annotations:
-            summary: Ingress serving 5xx responses.
+            summary: Ingress serving 5xx (excl. 504) responses.
+
+        # 504 responses — any in last 5m
         - alert: Ingress504ErrorResponses
           expr: |
-            avg(
-              rate(nginx_ingress_controller_requests{
-                exported_namespace="default",
-                ingress=~"hmpps-allocations(-v1-2)",
-                path="/",
-                status=~"504"
-              }[5m]) > 0
-            ) by (ingress, exported_namespace)
+            sum by (ingress, exported_namespace) (
+              increase(nginx_ingress_controller_requests{
+                exported_namespace="workforce-management-prod",
+                ingress=~"hmpps-allocations(-v1-2)?",
+                status="504"
+              }[5m])
+            ) > 0
           for: 1m
           labels:
             severity: warning
             service: hmpps-allocations
           annotations:
             summary: Ingress serving 504 responses.
-        # 5xx on /health specifically
+
+        # 5xx on /health specifically — sustained rate > 0.5 req/s over 5m
         - alert: Ingress5xxOnHealthEndpoint
           expr: |
-            avg(
+            sum by (ingress, exported_namespace) (
               rate(nginx_ingress_controller_requests{
-                exported_namespace="default",
-                ingress=~"hmpps-allocations(-v1-2)",
-                path="/health",
-                status=~"5.*"
-              }[5m]) > 0.5
-            ) by (ingress, exported_namespace)
+                exported_namespace="workforce-management-prod",
+                ingress=~"hmpps-allocations(-v1-2)?",
+                path=~"/health.*",
+                status=~"5.."
+              }[5m])
+            ) > 0.5
           for: 5m
           labels:
             severity: warning
@@ -60,33 +61,33 @@ spec:
           annotations:
             summary: High rate of 5xx errors on /health.
 
-        # 429 rate limiting detected
+        # 429 rate limiting — any in last 1m
         - alert: IngressRatelimitBlocking
           expr: |
-            avg(
-              rate(nginx_ingress_controller_requests{
-                exported_namespace="default",
-                ingress=~"hmpps-allocations(-v1-2)",
+            sum by (ingress, exported_namespace) (
+              increase(nginx_ingress_controller_requests{
+                exported_namespace="workforce-management-prod",
+                ingress=~"hmpps-allocations(-v1-2)?",
                 status="429"
-              }[1m]) > 0
-            ) by (ingress, exported_namespace)
+              }[1m])
+            ) > 0
           for: 1m
           labels:
             severity: warning
             service: hmpps-allocations
           annotations:
-            summary: Ingress is being rate limited (429s).
+            summary: Ingress is rate limiting (429s).
 
-        # ModSecurity blocking (default blocking code 406)
+        # ModSecurity blocking (default 406) — > 0.33 req/s over 1m
         - alert: IngressModSecurityBlocking
           expr: |
-            avg(
+            sum by (ingress, exported_namespace) (
               rate(nginx_ingress_controller_requests{
-                exported_namespace="default",
-                ingress=~"hmpps-allocations(-v1-2)",
+                exported_namespace="workforce-management-prod",
+                ingress=~"hmpps-allocations(-v1-2)?",
                 status="406"
-              }[1m]) > 0.33
-            ) by (ingress, exported_namespace)
+              }[1m])
+            ) > 0.33
           for: 1m
           labels:
             severity: warning
