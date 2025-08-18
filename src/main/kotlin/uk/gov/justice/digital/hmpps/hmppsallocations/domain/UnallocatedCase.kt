@@ -53,7 +53,7 @@ data class UnallocatedCase @JsonCreator constructor(
       ),
       status = deliusCaseDetail.probationStatus.description,
       offenderManager = OffenderManagerDetails.from(
-        deliusCaseDetail.communityPersonManager,
+        deliusCaseDetail.mostRecentAllocatedEvent,
         deliusCaseDetail.probationStatus.description,
       ),
       caseType = deliusCaseDetail.type,
