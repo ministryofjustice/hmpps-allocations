@@ -21,7 +21,7 @@ spec:
             ) >= 3
           for: 1m
           labels:
-            severity: warning
+            severity: workforce-management-prod-alerts
             service: hmpps-allocations
           annotations:
             summary: Ingress serving 5xx (excl. 504) responses.
@@ -38,7 +38,7 @@ spec:
             ) > 0
           for: 1m
           labels:
-            severity: warning
+            severity: workforce-management-prod-alerts
             service: hmpps-allocations
           annotations:
             summary: Ingress serving 504 responses.
@@ -56,7 +56,7 @@ spec:
             ) > 0.5
           for: 5m
           labels:
-            severity: warning
+            severity: workforce-management-prod-alerts
             service: hmpps-allocations
           annotations:
             summary: High rate of 5xx errors on /health.
@@ -73,7 +73,7 @@ spec:
             ) > 0
           for: 1m
           labels:
-            severity: warning
+            severity: workforce-management-prod-alerts
             service: hmpps-allocations
           annotations:
             summary: Ingress is rate limiting (429s).
@@ -90,7 +90,7 @@ spec:
             ) > 0.33
           for: 1m
           labels:
-            severity: warning
+            severity: workforce-management-prod-alerts
             service: hmpps-allocations
           annotations:
             summary: ModSecurity is blocking requests.
