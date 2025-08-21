@@ -7,6 +7,7 @@ plugins {
   kotlin("jvm") version "2.2.10"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
   id("org.jetbrains.kotlin.plugin.allopen") version "2.2.10"
+  id("org.owasp.dependencycheck") version "12.1.3"
 }
 
 configurations {
@@ -28,6 +29,7 @@ configurations.matching { it.name == "detekt" }.all {
 
 dependencyCheck {
   suppressionFiles.add("suppressions.xml")
+  nvd.datafeedUrl = "file:///opt/vulnz/cache"
 }
 
 allOpen {
