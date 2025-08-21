@@ -40,8 +40,8 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.4")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.4")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.5")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.5")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.10")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.10")
@@ -59,8 +59,8 @@ dependencies {
   implementation("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.7")
 
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.7")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.7")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
