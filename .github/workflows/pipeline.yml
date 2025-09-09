@@ -63,6 +63,8 @@ jobs:
     with:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
+    env:
+      NONPROD_RELEASES_SLACK_CHANNEL: manage_a_workforce_dev
   deploy_preprod:
     name: Deploy to the preprod environment
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/epic')
@@ -75,6 +77,8 @@ jobs:
     with:
       environment: 'preprod'
       app_version: '${{ needs.build.outputs.app_version }}'
+    env:
+      NONPROD_RELEASES_SLACK_CHANNEL: manage_a_workforce_dev
   deploy_prod:
     name: Deploy to the prod environment
     if: github.ref == 'refs/heads/main'
@@ -88,3 +92,6 @@ jobs:
     with:
       environment: 'prod'
       app_version: '${{ needs.build.outputs.app_version }}'
+    env:
+      PROD_RELEASES_SLACK_CHANNEL: manage_a_workforce_live
+
