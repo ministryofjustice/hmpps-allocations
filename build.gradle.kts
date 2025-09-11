@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.0.1"
-  kotlin("plugin.spring") version "2.2.10"
-  kotlin("plugin.jpa") version "2.2.10"
-  kotlin("jvm") version "2.2.10"
+  kotlin("plugin.spring") version "2.2.20"
+  kotlin("plugin.jpa") version "2.2.20"
+  kotlin("jvm") version "2.2.20"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.2.10"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.2.20"
   id("org.owasp.dependencycheck") version "12.1.3"
 }
 
