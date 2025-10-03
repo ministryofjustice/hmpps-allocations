@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.FeatureFlagClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstateApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -20,6 +21,8 @@ class WebClientConfiguration(
   @Value("\${hmpps-tier.endpoint.url}") private val hmppsTierApiRootUri: String,
   @Value("\${hmpps-probation-estate.endpoint.url}") private val hmppsProbationEstateApiRootUri: String,
   @Value("\${workforce-allocations-to-delius.endpoint.url}") private val workforceAllocationsToDeliusApiRootUri: String,
+  @Value("\${FLIPT_API_URL:http://someurl:8089}") private val featureFlagApiRootUri: String,
+  @Value("\${FLIPT_API_KEY:someTestToken}") private val featureFlagApiKey: String,
 ) {
 
   @Bean
@@ -63,6 +66,9 @@ class WebClientConfiguration(
   @Bean
   fun workforceAllocationsToDeliusApiClient(@Qualifier("workforceAllocationsToDeliusApiClientWebClientAppScope") webClient: WebClient): WorkforceAllocationsToDeliusApiClient = WorkforceAllocationsToDeliusApiClient(webClient)
 
+  @Bean
+  fun featureFlagClient(builder: WebClient.Builder): FeatureFlagClient = FeatureFlagClient(getFliptWebClient(builder))
+
   @Suppress("LongParameterList")
   private fun getOAuthWebClient(
     authorizedClientManager: ReactiveOAuth2AuthorizedClientManager,
@@ -76,4 +82,14 @@ class WebClientConfiguration(
       .filter(oauth2Client)
       .build()
   }
+  private fun getFliptWebClient(
+    builder: WebClient.Builder,
+  ): WebClient = builder
+    .baseUrl(featureFlagApiRootUri)
+    .defaultHeader(
+      "Authorization",
+      "Bearer $featureFlagApiKey",
+    )
+    .defaultHeader("Content-Type", "application/json ")
+    .build()
 }
