@@ -46,6 +46,9 @@ generic-service:
   #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
 
   namespace_secrets:
+    flipt:
+      FLIPT_API_URL: "URL"
+      FLIPT_API_KEY: "API_KEY"
     hmpps-allocations:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
       OAUTH_CLIENT_ID: "AUTH_API_CLIENT_ID"
