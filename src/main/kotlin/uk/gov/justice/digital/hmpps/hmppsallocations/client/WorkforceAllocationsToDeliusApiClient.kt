@@ -21,6 +21,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAccessRestrictionDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
@@ -392,6 +393,29 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
+
+  suspend fun getCrnDetails(crn: String): CrnDetails {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/person/{crn}/reallocation-details", crn)
+          .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/person/{crn}/reallocation-details failed with ${res.statusCode()}"),
+              )
+            }
+          }
+          .awaitBody()
+      }
+    } catch (e: TimeoutCancellationException) {
+      AssessRisksNeedsApiClient.Companion.log.warn("/person/{crn}/reallocation-details failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
+
 
   suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? {
     try {
