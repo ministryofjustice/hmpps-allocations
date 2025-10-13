@@ -13,9 +13,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.CrnLookupService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class CrnController (
+class CrnController(
   private val crnLookupService: CrnLookupService,
-){
+) {
   @Operation(summary = "Information about person on probation by crn")
   @ApiResponses(
     value = [
@@ -26,8 +26,5 @@ class CrnController (
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/allocated/crn/{crn}")
-  suspend fun getCrn(crn: String) : CrnDetails{
-    return crnLookupService.getCrnDetails(crn)
-
-  }
+  suspend fun getCrn(crn: String): CrnDetails = crnLookupService.getCrnDetails(crn)
 }

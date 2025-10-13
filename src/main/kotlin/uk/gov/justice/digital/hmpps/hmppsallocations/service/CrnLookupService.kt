@@ -7,13 +7,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 
 @Service
 class CrnLookupService(
-  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced")
-  private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
-)
-{
+  @Qualifier("workforceAllocationsToDeliusApiClientUserEnhanced") private val workforceAllocationsToDeliusApiClient: WorkforceAllocationsToDeliusApiClient,
+) {
 
-  suspend fun getCrnDetails(crn: String) : CrnDetails
-    {
-      return workforceAllocationsToDeliusApiClient.getCrnDetails(crn)
-    }
+  suspend fun getCrnDetails(crn: String): CrnDetails = workforceAllocationsToDeliusApiClient.getCrnDetails(crn)
 }

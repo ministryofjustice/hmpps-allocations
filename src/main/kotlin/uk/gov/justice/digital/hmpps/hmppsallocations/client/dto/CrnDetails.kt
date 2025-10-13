@@ -8,7 +8,7 @@ data class CrnDetails(
   val name: Name,
   val dateOfBirth: LocalDate,
   val manager: Manager,
-  val hasActiveOrder: Boolean
+  val hasActiveOrder: Boolean,
 )
 
 data class Manager(

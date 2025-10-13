@@ -416,7 +416,6 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
     }
   }
 
-
   suspend fun getAllocatedTeam(crn: String, convictionNumber: Int): AllocatedEvent? {
     try {
       return withTimeout(TIMEOUT_VALUE) {
