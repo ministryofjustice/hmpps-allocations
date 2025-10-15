@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
@@ -26,5 +27,5 @@ class CrnController(
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/allocated/crn/{crn}")
-  suspend fun getCrn(crn: String): CrnDetails = crnLookupService.getCrnDetails(crn)
+  suspend fun getCrn(@PathVariable crn: String): CrnDetails = crnLookupService.getCrnDetails(crn)
 }
