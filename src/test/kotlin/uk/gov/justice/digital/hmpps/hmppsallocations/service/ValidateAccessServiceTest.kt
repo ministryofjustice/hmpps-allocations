@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsProbationEstate
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Dataset
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusTeams
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationDeliveryUnitDetails
@@ -25,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TeamWithLau
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForAccessException
+import java.time.LocalDate
 import kotlin.collections.listOf
 
 class ValidateAccessServiceTest {
@@ -97,6 +99,64 @@ class ValidateAccessServiceTest {
     val actualResult = validateAccessService.validateUserAccess(staffId, crn, convictionNumber)
 
     assert(actualResult)
+  }
+
+  @Test
+  fun `returns true for allowed access for no conviction number`() = runTest {
+    val crn = "X123456"
+    val teamCode = "N54ERET"
+    val region = "N54"
+    val staffId = "KennySmith1"
+    val convictionNumber = "1"
+    coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(crn) } returns CrnDetails(
+      crn,
+      Name("Bob", "Smith", "Jones"),
+      dateOfBirth = LocalDate.of(1980, 1, 1),
+      manager = uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Manager(
+        code = "123",
+        name = Name("Alice", "Johnson", "Smith"),
+        teamCode = teamCode,
+        grade = "PO",
+        allocated = true,
+      ),
+      hasActiveOrder = true,
+    )
+    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
+      ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
+    )
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(region))
+
+    val actualResult = validateAccessService.validateUserAccessForCrnAndStaff(staffId, crn)
+
+    assert(actualResult)
+  }
+
+  @Test
+  fun `throws exception for no access when no conviction number`() = runTest {
+    val crn = "X123456"
+    val teamCode = "N54ERET"
+    val region = "N54"
+    val otherRegion = "N55"
+    val staffId = "KennySmith2"
+    coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(any()) } returns CrnDetails(
+      crn,
+      Name("Bob", "Smith", "Jones"),
+      dateOfBirth = LocalDate.of(1980, 1, 1),
+      manager = uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Manager(
+        code = "123",
+        name = Name("Alice", "Johnson", "Smith"),
+        teamCode = teamCode,
+        grade = "PO",
+        allocated = true,
+      ),
+      hasActiveOrder = true,
+    )
+    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
+      ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
+    )
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(otherRegion))
+
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccessForCrnAndStaff(staffId, crn) }
   }
 
   @Test

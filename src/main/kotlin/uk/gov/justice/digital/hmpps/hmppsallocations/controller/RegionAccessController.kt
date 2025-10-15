@@ -90,4 +90,23 @@ class RegionAccessController(
   } catch (e: EntityNotFoundException) {
     ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
+
+  @Operation(summary = "Check staff member can access CRN")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "403", description = "Forbidden"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/user/{userName}/crn/{crn}/is-allowed")
+  suspend fun getValidatedCrnAccess(@PathVariable userName: String, @PathVariable crn: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccessForCrnAndStaff(userName, crn)
+    ResponseEntity<String>("Ok", HttpStatus.OK)
+  } catch (e: NotAllowedForAccessException) {
+    ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)
+  } catch (e: EntityNotFoundException) {
+    ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
+  }
 }
