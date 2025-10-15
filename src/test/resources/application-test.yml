@@ -7,9 +7,11 @@ spring:
 
   datasource:
     url: "jdbc:postgresql://${database.endpoint:localhost:5432}/${database.name:postgres}"
-    username: postgres
-    password: postgres
-
+    username: root
+    password: dev
+  flyway:
+    password: dev
+    user: root
 server:
   shutdown: immediate
 

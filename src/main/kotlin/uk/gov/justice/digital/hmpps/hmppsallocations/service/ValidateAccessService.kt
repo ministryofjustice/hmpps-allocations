@@ -23,6 +23,41 @@ class ValidateAccessService(
     val log = LoggerFactory.getLogger(this::class.java)
   }
 
+  @Suppress("TooGenericExceptionCaught")
+  suspend fun validateUserAccessForCrnAndStaff(staffCode: String, crn: String): Boolean {
+    try {
+      val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
+
+      val probationEstateForCrn =
+        workforceAllocationsToDeliusApiClient.getCrnDetails(crn).manager.teamCode
+      val probationEstateRegion =
+        try {
+          hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForCrn))
+        } catch (e: AllocationsFailedDependencyException) {
+          log.warn("Probation estate client failed to get regions and teams for $probationEstateForCrn, failed with 424 error")
+          null
+        }
+          ?.map { it.region.code }?.get(0)
+      val result = allowedRegions.contains(probationEstateRegion)
+      if (!result) {
+        throw NotAllowedForAccessException(
+          "User $staffCode does not have access to $crn due to region $probationEstateRegion",
+          crn,
+        )
+      }
+      return true
+    } catch (e: IndexOutOfBoundsException) {
+      throw EntityNotFoundException("Problem fetching regions: ${e.message}")
+    } catch (e: WebClientResponseException) {
+      if (e.statusCode.isSameCodeAs(HttpStatus.FORBIDDEN)) {
+        throw NotAllowedForAccessException("User $staffCode does not have access to $crn", crn)
+      } else {
+        throw e
+      }
+    }
+  }
+
+  @Suppress("TooGenericExceptionCaught")
   suspend fun validateUserAccess(staffCode: String, crn: String, convictionNumber: String): Boolean {
     try {
       val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
