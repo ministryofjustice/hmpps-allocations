@@ -68,20 +68,19 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
     }
   }
 
-  suspend fun getProbationEstate(): AllRegionDeliveryUnit {
-    return withTimeout(TIMEOUT_VALUE) {
-      webClient
-        .get()
-        .uri("/all/regions")
-        .retrieve()
-        .onStatus({ it.is5xxServerError }) { res -> res.createException().flatMap {
+  suspend fun getProbationEstate(): AllRegionDeliveryUnit = withTimeout(TIMEOUT_VALUE) {
+    webClient
+      .get()
+      .uri("/all/regions")
+      .retrieve()
+      .onStatus({ it.is5xxServerError }) { res ->
+        res.createException().flatMap {
           Mono.error(
             AllocationsFailedDependencyException("/all/regions failed with ${res.statusCode()}"),
           )
         }
-        }
-        .awaitBody()
-    }
+      }
+      .awaitBody()
   }
 
   companion object {
@@ -90,22 +89,22 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
 
   data class ProbationEstate(
     val name: String,
-    val regions: Map<String, AllRegionDeliveryUnit>
+    val regions: Map<String, AllRegionDeliveryUnit>,
   )
 
   data class AllRegionDeliveryUnit(
     val name: String,
-    val pdus: Map<String, AllProbationDeliveryUnit>
+    val pdus: Map<String, AllProbationDeliveryUnit>,
   )
 
   data class AllProbationDeliveryUnit(
     val name: String,
-    val ldus: Map<String, AllLocalDeliveryUnit>
+    val ldus: Map<String, AllLocalDeliveryUnit>,
   )
 
   data class AllLocalDeliveryUnit(
     val name: String,
-    val teams: Map<String, AllTeam>
+    val teams: Map<String, AllTeam>,
   )
 
   data class AllTeam(

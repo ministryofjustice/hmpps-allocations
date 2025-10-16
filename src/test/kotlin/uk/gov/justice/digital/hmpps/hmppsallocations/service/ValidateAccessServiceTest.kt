@@ -121,20 +121,20 @@ class ValidateAccessServiceTest {
                   name = "LDU One",
                   teams = mapOf(
                     "Team1" to HmppsProbationEstateApiClient.AllTeam(name = "Team Alpha", code = "TA01"),
-                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02")
-                  )
+                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02"),
+                  ),
                 ),
                 "LDU2" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
                   name = "LDU Two",
                   teams = mapOf(
-                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03")
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
+                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03"),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     )
     coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(crn) } returns CrnDetails(
       crn,
@@ -177,20 +177,20 @@ class ValidateAccessServiceTest {
                   name = "LDU One",
                   teams = mapOf(
                     "Team1" to HmppsProbationEstateApiClient.AllTeam(name = "Team Alpha", code = "TA01"),
-                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02")
-                  )
+                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02"),
+                  ),
                 ),
                 "LDU2" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
                   name = "LDU Two",
                   teams = mapOf(
-                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03")
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
+                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03"),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     )
     coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(any()) } returns CrnDetails(
       crn,
