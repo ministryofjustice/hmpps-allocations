@@ -24,24 +24,21 @@ class ValidateAccessService(
   }
 
   @Suppress("TooGenericExceptionCaught")
-  suspend fun validateUserAccessForCrnAndStaff(staffCode: String, crn: String): Boolean {
+  suspend fun validateUserAccessForCrnAndStaff(pduCode: String, crn: String): Boolean {
     try {
-      val allowedRegions = getRegionsService.getRegionsByUser(staffCode).regions
-
       val probationEstateForCrn =
         workforceAllocationsToDeliusApiClient.getCrnDetails(crn).manager.teamCode
-      val probationEstateRegion =
-        try {
-          hmppsProbationEstateApiClient.getRegionsAndTeams(setOf(probationEstateForCrn))
-        } catch (e: AllocationsFailedDependencyException) {
-          log.warn("Probation estate client failed to get regions and teams for $probationEstateForCrn, failed with 424 error")
-          null
-        }
-          ?.map { it.region.code }?.get(0)
-      val result = allowedRegions.contains(probationEstateRegion)
+      val pdus =
+        hmppsProbationEstateApiClient.getProbationEstate().pdus.filter { it.key == pduCode }
+          .map { it.value.ldus.values }
+          .flatten()
+      val ldus = pdus.map { it.teams.values }.flatten()
+      val teams = ldus.map { it.code }
+
+      val result = teams.contains(probationEstateForCrn)
       if (!result) {
         throw NotAllowedForAccessException(
-          "User $staffCode does not have access to $crn due to region $probationEstateRegion",
+          "User with PDU $pduCode does not have access to $crn to reallocate due to pdu out of area",
           crn,
         )
       }
@@ -50,7 +47,7 @@ class ValidateAccessService(
       throw EntityNotFoundException("Problem fetching regions: ${e.message}")
     } catch (e: WebClientResponseException) {
       if (e.statusCode.isSameCodeAs(HttpStatus.FORBIDDEN)) {
-        throw NotAllowedForAccessException("User $staffCode does not have access to $crn", crn)
+        throw NotAllowedForAccessException("User with PDU $pduCode does not have reallocate access to $crn", crn)
       } else {
         throw e
       }

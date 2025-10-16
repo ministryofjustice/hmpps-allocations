@@ -104,10 +104,38 @@ class ValidateAccessServiceTest {
   @Test
   fun `returns true for allowed access for no conviction number`() = runTest {
     val crn = "X123456"
-    val teamCode = "N54ERET"
-    val region = "N54"
+    val teamCode = "TA01"
+    val region = "Region1"
     val staffId = "KennySmith1"
     val convictionNumber = "1"
+    val testEstate = HmppsProbationEstateApiClient.ProbationEstate(
+      name = "Test Estate",
+      regions = mapOf(
+        "Region1" to HmppsProbationEstateApiClient.AllRegionDeliveryUnit(
+          name = "Region One",
+          pdus = mapOf(
+            "PDU1" to HmppsProbationEstateApiClient.AllProbationDeliveryUnit(
+              name = "PDU One",
+              ldus = mapOf(
+                "LDU1" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
+                  name = "LDU One",
+                  teams = mapOf(
+                    "Team1" to HmppsProbationEstateApiClient.AllTeam(name = "Team Alpha", code = "TA01"),
+                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02")
+                  )
+                ),
+                "LDU2" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
+                  name = "LDU Two",
+                  teams = mapOf(
+                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03")
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
     coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(crn) } returns CrnDetails(
       crn,
       Name("Bob", "Smith", "Jones"),
@@ -121,12 +149,11 @@ class ValidateAccessServiceTest {
       ),
       hasActiveOrder = true,
     )
-    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
-      ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
-    )
+    coEvery { probationEstateApiClient.getProbationEstate() } returns testEstate.regions.values.first()
+
     coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(region))
 
-    val actualResult = validateAccessService.validateUserAccessForCrnAndStaff(staffId, crn)
+    val actualResult = validateAccessService.validateUserAccessForCrnAndStaff("PDU1", crn)
 
     assert(actualResult)
   }
@@ -134,10 +161,37 @@ class ValidateAccessServiceTest {
   @Test
   fun `throws exception for no access when no conviction number`() = runTest {
     val crn = "X123456"
-    val teamCode = "N54ERET"
-    val region = "N54"
-    val otherRegion = "N55"
-    val staffId = "KennySmith2"
+    val teamCode = "CA099"
+    val region = "Region2"
+    val staffId = "KennySmith1"
+    val testEstate = HmppsProbationEstateApiClient.ProbationEstate(
+      name = "Test Estate",
+      regions = mapOf(
+        "Region1" to HmppsProbationEstateApiClient.AllRegionDeliveryUnit(
+          name = "Region One",
+          pdus = mapOf(
+            "PDU1" to HmppsProbationEstateApiClient.AllProbationDeliveryUnit(
+              name = "PDU One",
+              ldus = mapOf(
+                "LDU1" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
+                  name = "LDU One",
+                  teams = mapOf(
+                    "Team1" to HmppsProbationEstateApiClient.AllTeam(name = "Team Alpha", code = "TA01"),
+                    "Team2" to HmppsProbationEstateApiClient.AllTeam(name = "Team Beta", code = "TB02")
+                  )
+                ),
+                "LDU2" to HmppsProbationEstateApiClient.AllLocalDeliveryUnit(
+                  name = "LDU Two",
+                  teams = mapOf(
+                    "Team3" to HmppsProbationEstateApiClient.AllTeam(name = "Team Gamma", code = "TG03")
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
     coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(any()) } returns CrnDetails(
       crn,
       Name("Bob", "Smith", "Jones"),
@@ -151,12 +205,10 @@ class ValidateAccessServiceTest {
       ),
       hasActiveOrder = true,
     )
-    coEvery { probationEstateApiClient.getRegionsAndTeams(setOf(teamCode)) } returns listOf(
-      ProbationEstateRegionAndTeamOverview(RegionOverview(region, "Test Region"), TeamOverview(teamCode, "Test Team")),
-    )
-    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(otherRegion))
+    coEvery { probationEstateApiClient.getProbationEstate() } returns testEstate.regions.values.first()
+    coEvery { regionsService.getRegionsByUser(staffId) } returns RegionList(listOf(region))
 
-    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccessForCrnAndStaff(staffId, crn) }
+    assertThrows<NotAllowedForAccessException> { validateAccessService.validateUserAccessForCrnAndStaff("PDU23", crn) }
   }
 
   @Test

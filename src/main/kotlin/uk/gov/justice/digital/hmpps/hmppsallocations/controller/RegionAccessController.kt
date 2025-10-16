@@ -91,7 +91,7 @@ class RegionAccessController(
     ResponseEntity<String>(e.message, HttpStatus.NOT_FOUND)
   }
 
-  @Operation(summary = "Check staff member can access CRN")
+  @Operation(summary = "Check staff within certain pdu can access CRN")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -100,9 +100,9 @@ class RegionAccessController(
     ],
   )
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/user/{userName}/crn/{crn}/is-allowed")
-  suspend fun getValidatedCrnAccess(@PathVariable userName: String, @PathVariable crn: String): ResponseEntity<String> = try {
-    validateAccessService.validateUserAccessForCrnAndStaff(userName, crn)
+  @GetMapping("/pdu/{pduCode}/crn/{crn}/is-allowed")
+  suspend fun getValidatedCrnAccess(@PathVariable pduCode: String, @PathVariable crn: String): ResponseEntity<String> = try {
+    validateAccessService.validateUserAccessForCrnAndStaff(pduCode, crn)
     ResponseEntity<String>("Ok", HttpStatus.OK)
   } catch (e: NotAllowedForAccessException) {
     ResponseEntity<String>(e.message, HttpStatus.FORBIDDEN)

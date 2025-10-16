@@ -68,7 +68,48 @@ class HmppsProbationEstateApiClient(private val webClient: WebClient) {
     }
   }
 
+  suspend fun getProbationEstate(): AllRegionDeliveryUnit {
+    return withTimeout(TIMEOUT_VALUE) {
+      webClient
+        .get()
+        .uri("/all/regions")
+        .retrieve()
+        .onStatus({ it.is5xxServerError }) { res -> res.createException().flatMap {
+          Mono.error(
+            AllocationsFailedDependencyException("/all/regions failed with ${res.statusCode()}"),
+          )
+        }
+        }
+        .awaitBody()
+    }
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
+
+  data class ProbationEstate(
+    val name: String,
+    val regions: Map<String, AllRegionDeliveryUnit>
+  )
+
+  data class AllRegionDeliveryUnit(
+    val name: String,
+    val pdus: Map<String, AllProbationDeliveryUnit>
+  )
+
+  data class AllProbationDeliveryUnit(
+    val name: String,
+    val ldus: Map<String, AllLocalDeliveryUnit>
+  )
+
+  data class AllLocalDeliveryUnit(
+    val name: String,
+    val teams: Map<String, AllTeam>
+  )
+
+  data class AllTeam(
+    val name: String,
+    val code: String,
+  )
 }
