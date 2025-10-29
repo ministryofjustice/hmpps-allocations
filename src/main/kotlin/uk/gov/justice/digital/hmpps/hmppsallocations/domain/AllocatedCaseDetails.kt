@@ -3,11 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.InitialAppointment
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CaseViewDocument
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddress
 import java.time.LocalDate
@@ -84,43 +80,6 @@ data class AllocatedEventSentence @JsonCreator constructor(
   val endDate: LocalDate,
   val length: String,
 )
-
-data class InitialAppointmentDetails @JsonCreator constructor(
-  @Schema(description = "Initial appointment Date", example = "2020-01-16")
-  val date: LocalDate?,
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  val staff: Staff?,
-) {
-  companion object {
-    fun from(initialAppointment: InitialAppointment?): InitialAppointmentDetails = InitialAppointmentDetails(
-      initialAppointment?.date,
-      initialAppointment?.staff,
-    )
-  }
-}
-
-data class UnallocatedCaseDocument @JsonCreator constructor(
-  @Schema(description = "Description", example = "Fast")
-  var description: String?,
-  @Schema(description = "Completed Date", example = "2019-11-11")
-  @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
-  val completedDate: LocalDate?,
-  @Schema(description = "Document Id used to download the document", example = "00000000-0000-0000-0000-000000000000")
-  val documentId: String?,
-  @Schema(description = "Name of document")
-  val name: String,
-) {
-  companion object {
-    fun from(document: CaseViewDocument?): UnallocatedCaseDocument? = document?.let {
-      UnallocatedCaseDocument(
-        it.description,
-        it.dateCreated,
-        it.documentId,
-        it.documentName,
-      )
-    }
-  }
-}
 
 fun calculateAge(dateOfBirth: LocalDate?): Int {
   if (dateOfBirth == null) return 0
