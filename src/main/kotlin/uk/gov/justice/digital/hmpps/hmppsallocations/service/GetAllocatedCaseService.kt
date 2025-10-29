@@ -27,7 +27,7 @@ class GetAllocatedCaseService(
       deliusAllocatedCaseView,
       false,
       tier!!,
-      crn
+      crn,
     )
   }
 }

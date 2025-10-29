@@ -63,7 +63,7 @@ data class AllocatedActiveEvent @JsonCreator constructor(
   val failureToComplyStartDate: LocalDate?,
   val sentence: AllocatedEventSentence?,
   val offences: List<AllocatedEventOffences>,
-  val requirements: List<AllocatedEventRequirement>
+  val requirements: List<AllocatedEventRequirement>,
 )
 
 data class AllocatedEventRequirement @JsonCreator constructor(
@@ -77,7 +77,6 @@ data class AllocatedEventOffences @JsonCreator constructor(
   val subCategory: String,
   val mainOffence: Boolean,
 )
-
 
 data class AllocatedEventSentence @JsonCreator constructor(
   val description: String,
