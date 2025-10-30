@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAccessRestrictionDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusApopUser
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
@@ -67,7 +68,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/users failed for timeout", e)
+      log.warn("/users failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -89,7 +90,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           ?: throw EntityNotFoundException("Officer view not found for staff code $staffCode")
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/staff/$staffCode/officer-view failed for timeout", e)
+      log.warn("/staff/$staffCode/officer-view failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -111,7 +112,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/person/$crn/limited-access/all failed for timeout", e)
+      log.warn("/person/$crn/limited-access/all failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -134,7 +135,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/person/$crn/limited-access failed for timeout", e)
+      log.warn("/person/$crn/limited-access failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -162,7 +163,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           }
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/users/limited-access failed for timeout", e)
+      log.warn("/users/limited-access failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -184,7 +185,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/users/$username/teams failed for timeout", e)
+      log.warn("/users/$username/teams failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -227,7 +228,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .bodyToMono(DeliusCaseDetails::class.java)
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand failed for timeout", e)
+      log.warn("/allocation-demand failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -249,7 +250,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .bodyToFlow<Document>()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/offenders/$crn/documents failed for timeout", e)
+      log.warn("/offenders/$crn/documents failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -288,7 +289,29 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .bodyToMono()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/$convictionNumber/case-view failed for timeout", e)
+      log.warn("/allocation-demand/$crn/$convictionNumber/case-view failed for timeout", e)
+      throw AllocationsWebClientTimeoutException(e.message!!)
+    }
+  }
+
+  suspend fun getAllocatedDeliusCaseView(crn: String): Mono<DeliusAllocatedCaseView> {
+    try {
+      return withTimeout(TIMEOUT_VALUE) {
+        webClient
+          .get()
+          .uri("/reallocation/{crn}/case-view", crn)
+          .retrieve()
+          .onStatus({ it.is5xxServerError }) { res ->
+            res.createException().flatMap {
+              Mono.error(
+                AllocationsFailedDependencyException("/reallocation/$crn/case-view failed with ${res.statusCode()}"),
+              )
+            }
+          }
+          .bodyToMono()
+      }
+    } catch (e: TimeoutCancellationException) {
+      log.warn("/reallocation/$crn/case-view failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -310,7 +333,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/$excludeConvictionNumber/probation-record failed for timeout", e)
+      log.warn("/allocation-demand/$crn/$excludeConvictionNumber/probation-record failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -332,7 +355,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/risk failed for timeout", e)
+      log.warn("/allocation-demand/$crn/risk failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -365,7 +388,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitSingleOrNull()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/$crn/unallocated-events failed for timeout", e)
+      log.warn("/allocation-demand/$crn/unallocated-events failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     } catch (e: AllocationsServerError) {
       throw AllocationsFailedDependencyException("/allocation-demand/$crn/unallocated-events failed for 500 error ${e.message}")
@@ -389,7 +412,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-demand/impact/crn=$crn&staff=$staffCode failed for timeout", e)
+      log.warn("/allocation-demand/impact/crn=$crn&staff=$staffCode failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -411,7 +434,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitBody()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/person/{crn}/reallocation-details failed for timeout", e)
+      log.warn("/person/{crn}/reallocation-details failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     }
   }
@@ -444,7 +467,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
           .awaitSingleOrNull()
       }
     } catch (e: TimeoutCancellationException) {
-      AssessRisksNeedsApiClient.Companion.log.warn("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for timeout", e)
+      log.warn("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     } catch (e: AllocationsServerError) {
       throw AllocationsFailedDependencyException("/allocation-completed/order-manager?crn=$crn&eventNumber=$convictionNumber failed for 500, ${e.message}")
