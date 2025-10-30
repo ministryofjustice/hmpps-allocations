@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNot
 class ReallocationCasesController(private val getAllocatedCaseService: GetAllocatedCaseService) {
 
   @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
-  @GetMapping("/cases/allocated/{crn}}")
+  @GetMapping("/cases/allocated/{crn}")
   suspend fun getAllocatedCase(
     @AuthenticationPrincipal principal: Principal,
     @PathVariable(required = true) crn: String,
