@@ -41,7 +41,8 @@ data class AllocatedCaseDetails @JsonCreator constructor(
       crn: String,
     ): AllocatedCaseDetails = AllocatedCaseDetails(
       deliusCaseView.name.getCombinedName(),
-      crn, deliusCaseView.pncNumber,
+      crn,
+      deliusCaseView.pncNumber,
       deliusCaseView.gender, deliusCaseView.dateOfBirth,
       calculateAge(deliusCaseView.dateOfBirth),
       tier,
