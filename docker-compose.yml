@@ -1,7 +1,7 @@
 version: "3"
 services:
   postgres:
-    image: postgres:15.5
+    image: postgres:15.14
     networks:
       - hmpps
     container_name: hmpps-allocations-postgres
@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=dev
       - POSTGRES_USER=root
   localstack:
-    image: localstack/localstack:3.0.2
+    image: localstack/localstack:3.8.1
     networks:
       - hmpps
     container_name: hmpps-allocations-localstack
