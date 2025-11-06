@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNot
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class ReallocationCasesController(private val getAllocatedCaseService: GetAllocatedCaseService) {
 
-  // @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
   @GetMapping("/cases/allocated/{crn}")
   suspend fun getAllocatedCase(
     @AuthenticationPrincipal principal: Principal,
