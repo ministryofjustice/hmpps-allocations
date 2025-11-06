@@ -307,8 +307,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
                 AllocationsFailedDependencyException("/reallocation/$crn/case-view failed with ${res.statusCode()}"),
               )
             }
-          }
-          .bodyToMono()
+          }.bodyToMono()
       }
     } catch (e: TimeoutCancellationException) {
       log.warn("/reallocation/$crn/case-view failed for timeout", e)

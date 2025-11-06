@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedActiveEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddress
 import java.time.LocalDate
 import java.time.Period
 
@@ -46,7 +46,7 @@ data class AllocatedCaseDetails @JsonCreator constructor(
       deliusCaseView.gender, deliusCaseView.dateOfBirth,
       calculateAge(deliusCaseView.dateOfBirth),
       tier,
-      deliusCaseView.mainAddress,
+      deliusCaseView.mainAddress?.let { MainAddress.from(it) },
       deliusCaseView.nextAppointmentDate,
       deliusCaseView.activeEvents,
       outOfAreaTransfer,
@@ -81,6 +81,34 @@ data class AllocatedEventSentence @JsonCreator constructor(
   val endDate: LocalDate,
   val length: String,
 )
+
+data class MainAddress constructor(
+  val buildingName: String?,
+  val addressNumber: String?,
+  val streetName: String?,
+  val town: String?,
+  val county: String?,
+  val postcode: String?,
+  val noFixedAbode: Boolean?,
+  val typeVerified: Boolean?,
+  val typeDescription: String?,
+  val startDate: LocalDate?,
+) {
+  companion object {
+    fun from(address: uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddressDto): MainAddress = MainAddress(
+      address.buildingName ?: "",
+      address.addressNumber ?: "",
+      address.streetName ?: "",
+      address.town ?: "",
+      address.county ?: "",
+      address.postcode ?: "",
+      address.noFixedAbode,
+      address.typeVerified,
+      address.typeDescription ?: "",
+      address.startDate,
+    )
+  }
+}
 
 fun calculateAge(dateOfBirth: LocalDate?): Int {
   if (dateOfBirth == null) return 0
