@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 
 @Service
 class GetAllocatedCaseService(
@@ -29,5 +30,16 @@ class GetAllocatedCaseService(
       tier!!,
       crn,
     )
+  }
+
+  suspend fun getAllocatedCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
+
+    val deliusAllocatedCaseView: DeliusAllocatedCaseView = workforceAllocationsToDeliusApiClient
+      .getAllocatedDeliusCaseView(crn).awaitSingle()
+    val tier = tierApiClient.getTierByCrn(crn)
+    return deliusAllocatedCaseView.let {
+      val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
+      return UnallocatedCaseConvictions.from(probationRecord, crn, excludeConvictionNumber.toInt(), tier!!)
+    }
   }
 }
