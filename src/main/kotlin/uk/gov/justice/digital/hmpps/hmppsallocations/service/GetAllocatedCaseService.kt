@@ -33,7 +33,6 @@ class GetAllocatedCaseService(
   }
 
   suspend fun getAllocatedCaseConvictions(crn: String, excludeConvictionNumber: Long): UnallocatedCaseConvictions? {
-
     val deliusAllocatedCaseView: DeliusAllocatedCaseView = workforceAllocationsToDeliusApiClient
       .getAllocatedDeliusCaseView(crn).awaitSingle()
     val tier = tierApiClient.getTierByCrn(crn)

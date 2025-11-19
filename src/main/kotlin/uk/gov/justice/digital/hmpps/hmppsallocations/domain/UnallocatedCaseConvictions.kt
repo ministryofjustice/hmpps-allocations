@@ -34,11 +34,12 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
       case.convictionNumber,
     )
 
+    @Suppress("LongParameterList")
     fun from(
       probationRecord: DeliusProbationRecord,
       crn: String,
       convictionNumber: Int,
-      tier: String
+      tier: String,
     ): UnallocatedCaseConvictions = UnallocatedCaseConvictions(
       probationRecord.name.getCombinedName(),
       crn,

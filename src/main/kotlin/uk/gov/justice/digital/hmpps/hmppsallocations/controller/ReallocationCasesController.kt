@@ -45,5 +45,4 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
     @PathVariable(required = true) excludeConvictionNumber: Long,
   ): UnallocatedCaseConvictions = getAllocatedCaseService.getAllocatedCaseConvictions(crn, excludeConvictionNumber)
     ?: throw EntityNotFoundException("$CASE_NOT_FOUND_FOR $crn")
-
 }

@@ -146,7 +146,6 @@ class GetAllocatedCaseServiceTest {
 
   @Test
   fun `should return probation record details`() = runBlocking {
-
     val crn = "X123456"
     val convictionNumber = 2L
 
@@ -186,7 +185,6 @@ class GetAllocatedCaseServiceTest {
     val sentencedEvent = SentencedEvent(probationRecordSentence, listOf(sentenceOffence, sentenceOffence2), null)
     val sentencedEvent2 = SentencedEvent(probationRecordSentence2, listOf(sentenceOffence, sentenceOffence3), null)
 
-
     val probationRecord = DeliusProbationRecord(
       crn,
       Name(forename = "John", middleName = null, surname = "Doe"),
@@ -202,8 +200,7 @@ class GetAllocatedCaseServiceTest {
     // Act
     val result = service.getAllocatedCaseConvictions(crn, convictionNumber)
 
-
-    //Assert
+    // Assert
     assert(result!!.crn == crn)
     assert(result!!.previous.size == 2)
     assert(result!!.tier == tier)
