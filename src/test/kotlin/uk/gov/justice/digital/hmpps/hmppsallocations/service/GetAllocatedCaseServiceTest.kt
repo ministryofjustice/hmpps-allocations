@@ -15,7 +15,11 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEventRe
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEventSentence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictionStatus
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddressDto
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationRecordSentence
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
 import java.time.LocalDate
 
 class GetAllocatedCaseServiceTest {
@@ -138,5 +142,69 @@ class GetAllocatedCaseServiceTest {
     assert(result.activeEvents.size == 1)
     assert(result.activeEvents.first().sentence!!.length == "12 months")
     assert(result.activeEvents.first().offences.first().mainOffence == true)
+  }
+
+  @Test
+  fun `should return probation record details`() = runBlocking {
+    val crn = "X123456"
+    val convictionNumber = 2L
+
+    val deliusCaseView = DeliusAllocatedCaseView(
+      Name(forename = "John", middleName = null, surname = "Doe"),
+      LocalDate.of(1980, 1, 1),
+      "Male",
+      "pnc123456",
+      null,
+      nextAppointmentDate = LocalDate.of(2023, 12, 1),
+      activeEvents = listOf(
+        AllocatedActiveEvent(
+          1,
+          0,
+          LocalDate.of(2022, 1, 27),
+          AllocatedEventSentence(
+            "Custodial",
+            LocalDate.of(2022, 1, 15),
+            LocalDate.of(2023, 1, 15),
+            "12 months",
+          ),
+          listOf(AllocatedEventOffences("Burglary", "Theft", true)),
+          listOf(AllocatedEventRequirement("Curfew", "Must comply with curfew", "6 months")),
+        ),
+      ),
+    )
+
+    val tier = "C2"
+
+    val sentenceOffence = SentenceOffence("Thievery", true)
+    val sentenceOffence2 = SentenceOffence("Vagrancy", false)
+    val sentenceOffence3 = SentenceOffence("Revelry", false)
+
+    val probationRecordSentence = ProbationRecordSentence("Clink", "forever", LocalDate.now(), null)
+    val probationRecordSentence2 = ProbationRecordSentence("Slammer", "eternity", LocalDate.now(), null)
+
+    val sentencedEvent = SentencedEvent(probationRecordSentence, listOf(sentenceOffence, sentenceOffence2), null)
+    val sentencedEvent2 = SentencedEvent(probationRecordSentence2, listOf(sentenceOffence, sentenceOffence3), null)
+
+    val probationRecord = DeliusProbationRecord(
+      crn,
+      Name(forename = "John", middleName = null, surname = "Doe"),
+      listOf(sentencedEvent),
+      listOf(sentencedEvent, sentencedEvent2),
+    )
+
+    // Arrange
+    coEvery { workforceAllocationsToDeliusApiClient.getAllocatedDeliusCaseView(any()) } returns Mono.just(deliusCaseView)
+    coEvery { tierApiClient.getTierByCrn(any()) } returns tier
+    coEvery { workforceAllocationsToDeliusApiClient.getProbationRecord(crn, convictionNumber) } returns probationRecord
+
+    // Act
+    val result = service.getAllocatedCaseConvictions(crn, convictionNumber)
+
+    // Assert
+    assert(result!!.crn == crn)
+    assert(result!!.previous.size == 2)
+    assert(result!!.tier == tier)
+    assert(result!!.active.size == 1)
+    assert(result!!.convictionNumber.toLong() == convictionNumber)
   }
 }

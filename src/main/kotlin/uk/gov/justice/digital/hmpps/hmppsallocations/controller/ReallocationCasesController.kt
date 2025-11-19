@@ -1,5 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -9,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.Principal
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetAllocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
+
+private const val CASE_NOT_FOUND_FOR = "Case not found for "
 
 @Suppress("StringLiteralDuplication")
 @RestController
@@ -23,5 +29,20 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
     @AuthenticationPrincipal principal: Principal,
     @PathVariable(required = true) crn: String,
   ): AllocatedCaseDetails = getAllocatedCaseService.getCase(principal.userName, crn)
-    ?: throw EntityNotFoundException("ALLOCATED_CASE_NOT_FOUND_FOR $crn")
+    ?: throw EntityNotFoundException("$CASE_NOT_FOUND_FOR $crn")
+
+  @Operation(summary = "Retrieve case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/allocated/{crn}/record/exclude-conviction/{excludeConvictionNumber}")
+  suspend fun getCaseProbationRecord(
+    @PathVariable(required = true) crn: String,
+    @PathVariable(required = true) excludeConvictionNumber: Long,
+  ): UnallocatedCaseConvictions = getAllocatedCaseService.getAllocatedCaseConvictions(crn, excludeConvictionNumber)
+    ?: throw EntityNotFoundException("$CASE_NOT_FOUND_FOR $crn")
 }

@@ -33,6 +33,21 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
       probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
       case.convictionNumber,
     )
+
+    @Suppress("LongParameterList")
+    fun from(
+      probationRecord: DeliusProbationRecord,
+      crn: String,
+      convictionNumber: Int,
+      tier: String,
+    ): UnallocatedCaseConvictions = UnallocatedCaseConvictions(
+      probationRecord.name.getCombinedName(),
+      crn,
+      tier,
+      probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
+      probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
+      convictionNumber,
+    )
   }
 }
 
