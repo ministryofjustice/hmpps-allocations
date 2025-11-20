@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Ogrs
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
@@ -23,7 +24,7 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
   val roshRisk: RoshSummary?,
   val rsr: UnallocatedCaseRsr?,
   val ogrs: UnallocatedCaseOgrs?,
-  val convictionNumber: Int,
+  val convictionNumber: Int?,
 ) {
   companion object {
     @Suppress("LongParameterList")
@@ -42,6 +43,25 @@ data class UnallocatedCaseRisks @JsonCreator constructor(
       UnallocatedCaseRsr.from(riskPredictor),
       UnallocatedCaseOgrs.from(deliusRisk.ogrs),
       case.convictionNumber,
+    )
+
+    @Suppress("LongParameterList")
+    fun from(
+      deliusRisk: DeliusRisk,
+      case: CrnDetails,
+      rosh: RoshSummary?,
+      riskPredictor: RiskPredictor?,
+      tier: String,
+    ): UnallocatedCaseRisks = UnallocatedCaseRisks(
+      case.name.getCombinedName(),
+      case.crn,
+      tier,
+      deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
+      deliusRisk.inactiveRegistrations.map { UnallocatedCaseRegistration.from(it) },
+      rosh,
+      UnallocatedCaseRsr.from(riskPredictor),
+      UnallocatedCaseOgrs.from(deliusRisk.ogrs),
+      null,
     )
   }
 }

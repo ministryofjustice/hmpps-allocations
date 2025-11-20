@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
@@ -27,6 +28,7 @@ class GetAllocatedCaseServiceTest {
   private val workforceAllocationsToDeliusApiClient = mockk<WorkforceAllocationsToDeliusApiClient>()
   private val laoService = mockk<LaoService>()
   private val tierApiClient = mockk<HmppsTierApiClient>()
+  private val assessRisksNeedsApiClient = mockk<AssessRisksNeedsApiClient>()
 
   private lateinit var service: GetAllocatedCaseService
 
@@ -36,6 +38,7 @@ class GetAllocatedCaseServiceTest {
       workforceAllocationsToDeliusApiClient,
       laoService,
       tierApiClient,
+      assessRisksNeedsApiClient,
     )
   }
 

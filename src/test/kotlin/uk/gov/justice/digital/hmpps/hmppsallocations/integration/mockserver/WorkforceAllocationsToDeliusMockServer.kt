@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.Staff
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseDetailsIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.domain.CaseViewAddressIntegration
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension.Companion.workforceAllocationsToDelius
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.crnResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.communityapi.deliusUserAccessResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusAllocatedEventResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.workforceallocationstodelius.deliusCaseViewAddressResponse
@@ -462,6 +463,15 @@ class WorkforceAllocationsToDeliusMockServer : ClientAndServer(MOCKSERVER_PORT) 
     val riskRequest = HttpRequest.request().withPath("/allocation-demand/$crn/risk")
     workforceAllocationsToDelius.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(deliusRiskResponse()),
+    )
+  }
+
+  fun getCrnDetails(crn: String) {
+    val riskRequest =
+      HttpRequest.request().withPath("/person/$crn/reallocation-details")
+
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(crnResponse()),
     )
   }
 

@@ -1,13 +1,18 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import java.time.LocalDateTime
 
 @Service
 class GetAllocatedCaseService(
@@ -16,6 +21,8 @@ class GetAllocatedCaseService(
   @Qualifier("laoService")
   private val laoService: LaoService,
   private val tierApiClient: HmppsTierApiClient,
+  @Qualifier("assessRisksNeedsApiClientUserEnhanced")
+  private val assessRisksNeedsApiClient: AssessRisksNeedsApiClient,
 ) {
   suspend fun getCase(userName: String, crn: String): AllocatedCaseDetails? {
     val deliusAllocatedCaseView: DeliusAllocatedCaseView = workforceAllocationsToDeliusApiClient
@@ -39,6 +46,21 @@ class GetAllocatedCaseService(
     return deliusAllocatedCaseView.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
       return UnallocatedCaseConvictions.from(probationRecord, crn, excludeConvictionNumber.toInt(), tier!!)
+    }
+  }
+
+  suspend fun getCaseRisks(crn: String): UnallocatedCaseRisks? {
+    val tier = tierApiClient.getTierByCrn(crn)
+    return workforceAllocationsToDeliusApiClient.getCrnDetails(crn)?.let { caseDetails ->
+      return UnallocatedCaseRisks.from(
+        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+        caseDetails,
+        assessRisksNeedsApiClient.getRosh(crn),
+        assessRisksNeedsApiClient.getRiskPredictors(crn)
+          .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
+          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
+        tier!!,
+      )
     }
   }
 }
