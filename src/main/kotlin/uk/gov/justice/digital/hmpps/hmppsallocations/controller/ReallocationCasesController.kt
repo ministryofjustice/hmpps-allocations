@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.Principal
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetAllocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -45,4 +46,18 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
     @PathVariable(required = true) excludeConvictionNumber: Long,
   ): UnallocatedCaseConvictions = getAllocatedCaseService.getAllocatedCaseConvictions(crn, excludeConvictionNumber)
     ?: throw EntityNotFoundException("$CASE_NOT_FOUND_FOR $crn")
+
+  @Operation(summary = "Retrieve case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/allocated/{crn}/risks")
+  suspend fun getCaseRisks(
+    @PathVariable(required = true) crn: String,
+  ): UnallocatedCaseRisks = getAllocatedCaseService.getCaseRisks(crn)
+    ?: throw EntityNotFoundException("Case risks Not Found for $crn")
 }
