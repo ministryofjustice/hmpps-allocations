@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,14 +15,25 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedActiveE
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEventOffences
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEventRequirement
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.AllocatedEventSentence
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.CrnDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestrictionStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusProbationRecord
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Flag
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddressDto
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Manager
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Ogrs
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationRecordSentence
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class GetAllocatedCaseServiceTest {
 
@@ -209,5 +221,97 @@ class GetAllocatedCaseServiceTest {
     assert(result!!.tier == tier)
     assert(result!!.active.size == 1)
     assert(result!!.convictionNumber.toLong() == convictionNumber)
+  }
+
+  @Test
+  fun `should return probation risks `() = runBlocking {
+    val crn = "X123456"
+
+    val crnDetails = CrnDetails(
+      crn,
+      Name(
+        forename = "Dylan",
+        middleName = null,
+        surname = "Armstrong",
+      ),
+      LocalDate.of(1959, 1, 20),
+      Manager(
+        "N57A046",
+        Name("Samantha", "", "Bryant"),
+        "N03S0D",
+        "PO",
+        true,
+      ),
+      true,
+    )
+
+    val tier = "C2"
+
+    val deliusRisk = DeliusRisk(
+      Name(forename = "Dylan", middleName = null, surname = "Armstrong"),
+      crn,
+      listOf(
+        Registrations(
+          "ALT Under MAPPA Arrangements",
+          LocalDate.of(2021, 8, 30),
+          null,
+          "some Notes",
+          Flag("MAPPA Risk"),
+        ),
+        Registrations(
+          "Suicide/self-harm",
+          LocalDate.of(2021, 8, 30),
+          null,
+          "some Notes",
+          Flag("MAPPA Risk"),
+        ),
+      ),
+      listOf(
+        Registrations(
+          "Child Protection",
+          LocalDate.of(2021, 5, 20),
+          LocalDate.of(2021, 8, 30),
+          "some Notes",
+          Flag("Child Protection Flag"),
+        ),
+      ),
+      Ogrs(LocalDate.of(2021, 5, 20), BigInteger.valueOf(85)),
+    )
+
+    val roshSummary = RoshSummary(
+      "VERY_HIGH",
+      LocalDate.of(2022, 10, 7),
+      mapOf(
+        "crn" to crn,
+        "Public" to "HIGH",
+        "Children" to "LOW",
+        "Known Adult" to "MEDIUM",
+        "Staff" to "VERY_HIGH",
+        "Prisoners" to "MEDIUM",
+      ),
+    )
+
+    val riskPredictor = RiskPredictor(BigDecimal.valueOf(3.8), "MEDIUM", LocalDateTime.parse("2019-02-12T16:09:10.271"))
+
+    // Arrange
+    coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(any()) } returns crnDetails
+    coEvery { workforceAllocationsToDeliusApiClient.getDeliusRisk(any()) } returns deliusRisk
+    coEvery { tierApiClient.getTierByCrn(any()) } returns tier
+    coEvery { assessRisksNeedsApiClient.getRosh(crn) } returns roshSummary
+    coEvery { assessRisksNeedsApiClient.getRiskPredictors(crn) } returns flowOf(riskPredictor)
+
+    // Act
+    val result = service.getCaseRisks(crn)
+
+    // Assert
+    assert(result!!.crn == crn)
+    assert(result!!.name == "Dylan Armstrong")
+    assert(result!!.tier == tier)
+    assert(result!!.activeRegistrations.size == 2)
+    assert(result!!.inactiveRegistrations.size == 1)
+    assert(result!!.ogrs!!.score == BigInteger.valueOf(85))
+    assert(result!!.roshRisk!!.getOverallRisk() == "VERY_HIGH")
+    assert(result!!.rsr!!.level == "MEDIUM")
+    assert(result!!.activeRegistrations.get(0).type == "ALT Under MAPPA Arrangements")
   }
 }
