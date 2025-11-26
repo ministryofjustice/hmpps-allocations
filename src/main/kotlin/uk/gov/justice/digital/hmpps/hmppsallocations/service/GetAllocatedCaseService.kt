@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import java.time.LocalDateTime
@@ -62,5 +64,10 @@ class GetAllocatedCaseService(
         tier!!,
       )
     }
+  }
+
+  suspend fun getCaseAssessment(crn: String): AssessmentDate {
+    val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
+    return AssessmentDate(assessment?.completed)
   }
 }

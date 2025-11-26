@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationRecordS
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import java.math.BigDecimal
@@ -108,6 +109,39 @@ class GetAllocatedCaseServiceTest {
     assert(result.activeEvents.first().offences.first().mainOffence == true)
   }
 
+  @Test
+  fun `should not populate assesment date if not assessment found`() = runBlocking {
+    val crn = "X123456"
+
+    val now = LocalDateTime.now()
+    val assessment = Assessment (now, "", "")
+
+    // Arrange
+    coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) }  returns null
+
+    // Act
+    val result = service.getCaseAssessment(crn)
+
+    // Assert
+    assert(result!!.updatedDate == null)
+  }
+
+  @Test
+  fun `should return assesment date`() = runBlocking {
+    val crn = "X123456"
+
+    val now = LocalDateTime.now()
+    val assessment = Assessment (now, "", "")
+
+    // Arrange
+    coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) } returns assessment
+
+    // Act
+    val result = service.getCaseAssessment(crn)
+
+    // Assert
+    assert(result!!.updatedDate == now)
+  }
   @Test
   fun `should return allocated case details with null address`() = runBlocking {
     val crn = "X123456"

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsallocations.config.Principal
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetAllocatedCaseService
@@ -59,5 +61,19 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
   suspend fun getCaseRisks(
     @PathVariable(required = true) crn: String,
   ): UnallocatedCaseRisks = getAllocatedCaseService.getCaseRisks(crn)
+    ?: throw EntityNotFoundException("Case risks Not Found for $crn")
+
+  @Operation(summary = "Retrieve case risks by crn")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "OK"),
+      ApiResponse(responseCode = "404", description = "Result Not Found"),
+    ],
+  )
+  @PreAuthorize("hasRole('ROLE_MANAGE_A_WORKFORCE_ALLOCATE')")
+  @GetMapping("/cases/{crn}/assessmentDate")
+  suspend fun getCaseAssessment(
+    @PathVariable(required = true) crn: String,
+  ): AssessmentDate = getAllocatedCaseService.getCaseAssessment(crn)
     ?: throw EntityNotFoundException("Case risks Not Found for $crn")
 }
