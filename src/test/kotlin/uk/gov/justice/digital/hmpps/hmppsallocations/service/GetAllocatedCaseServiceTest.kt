@@ -114,10 +114,10 @@ class GetAllocatedCaseServiceTest {
     val crn = "X123456"
 
     val now = LocalDateTime.now()
-    val assessment = Assessment (now, "", "")
+    val assessment = Assessment(now, "", "")
 
     // Arrange
-    coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) }  returns null
+    coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) } returns null
 
     // Act
     val result = service.getCaseAssessment(crn)
@@ -131,7 +131,7 @@ class GetAllocatedCaseServiceTest {
     val crn = "X123456"
 
     val now = LocalDateTime.now()
-    val assessment = Assessment (now, "", "")
+    val assessment = Assessment(now, "", "")
 
     // Arrange
     coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) } returns assessment
@@ -142,6 +142,7 @@ class GetAllocatedCaseServiceTest {
     // Assert
     assert(result!!.updatedDate == now)
   }
+
   @Test
   fun `should return allocated case details with null address`() = runBlocking {
     val crn = "X123456"

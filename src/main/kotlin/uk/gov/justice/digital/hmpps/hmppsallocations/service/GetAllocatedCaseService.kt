@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedAssessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import java.time.LocalDateTime
