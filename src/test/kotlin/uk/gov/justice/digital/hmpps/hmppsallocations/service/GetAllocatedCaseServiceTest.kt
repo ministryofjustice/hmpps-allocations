@@ -113,14 +113,11 @@ class GetAllocatedCaseServiceTest {
   fun `should not populate assesment date if not assessment found`() = runBlocking {
     val crn = "X123456"
 
-    val now = LocalDateTime.now()
-    val assessment = Assessment(now, "", "")
-
     // Arrange
     coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) } returns null
 
     // Act
-    val result = service.getCaseAssessment(crn)
+    val result = service.getCaseAssessmentDate(crn)
 
     // Assert
     assert(result!!.updatedDate == null)
@@ -137,10 +134,10 @@ class GetAllocatedCaseServiceTest {
     coEvery { assessRisksNeedsApiClient.getLatestCompleteAssessment(crn) } returns assessment
 
     // Act
-    val result = service.getCaseAssessment(crn)
+    val result = service.getCaseAssessmentDate(crn)
 
     // Assert
-    assert(result!!.updatedDate == now)
+    assert(result.updatedDate == now)
   }
 
   @Test

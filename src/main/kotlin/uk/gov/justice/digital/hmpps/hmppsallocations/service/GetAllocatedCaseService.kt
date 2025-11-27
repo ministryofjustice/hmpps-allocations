@@ -65,7 +65,7 @@ class GetAllocatedCaseService(
     }
   }
 
-  suspend fun getCaseAssessment(crn: String): AssessmentDate {
+  suspend fun getCaseAssessmentDate(crn: String): AssessmentDate {
     val assessment = assessRisksNeedsApiClient.getLatestCompleteAssessment(crn)
     return AssessmentDate(assessment?.completed)
   }

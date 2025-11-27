@@ -62,7 +62,7 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
   ): UnallocatedCaseRisks = getAllocatedCaseService.getCaseRisks(crn)
     ?: throw EntityNotFoundException("Case risks Not Found for $crn")
 
-  @Operation(summary = "Retrieve case risks by crn")
+  @Operation(summary = "Retrieve assessment date by crn")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "OK"),
@@ -73,6 +73,5 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
   @GetMapping("/cases/{crn}/assessmentDate")
   suspend fun getCaseAssessment(
     @PathVariable(required = true) crn: String,
-  ): AssessmentDate = getAllocatedCaseService.getCaseAssessment(crn)
-    ?: throw EntityNotFoundException("Case risks Not Found for $crn")
+  ): AssessmentDate = getAllocatedCaseService.getCaseAssessmentDate(crn)
 }
