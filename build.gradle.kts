@@ -40,8 +40,8 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.7")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.7")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:4.0.0")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.0.0")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.1")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.14")
