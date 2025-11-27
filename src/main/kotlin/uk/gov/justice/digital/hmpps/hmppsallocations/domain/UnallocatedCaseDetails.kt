@@ -204,6 +204,9 @@ data class UnallocatedCaseDocument @JsonCreator constructor(
   }
 }
 
+data class AssessmentDate @JsonCreator constructor(
+  val updatedDate: LocalDateTime?,
+)
 data class UnallocatedAssessment @JsonCreator constructor(
   @Schema(description = "Completed Date", example = "2019-11-11")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)
