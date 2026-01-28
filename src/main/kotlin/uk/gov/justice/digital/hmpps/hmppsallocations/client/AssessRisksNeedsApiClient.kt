@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorNew
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
@@ -106,17 +107,17 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
   }
 
-  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor> {
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictorNew> {
     try {
       return withTimeout(TIMEOUT_VALUE) {
         webClient
           .get()
-          .uri("/risks/crn/{crn}/predictors/rsr/history", crn)
+          .uri("/risks/predictors/all/crn/{crn}", crn)
           .retrieve()
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
           .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
-          .bodyToFlow<RiskPredictor>()
+          .bodyToFlow<RiskPredictorNew>()
           .retryWhen(
             { cause, attempt ->
               if (cause.message == SERVER_EXCEPTION && attempt < RETRY_ATTEMPTS) {
