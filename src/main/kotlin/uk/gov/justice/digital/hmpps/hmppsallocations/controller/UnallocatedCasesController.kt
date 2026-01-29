@@ -25,7 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksNew
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetUnallocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -106,7 +106,7 @@ class UnallocatedCasesController(
   suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
-  ): UnallocatedCaseRisks = getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
+  ): UnallocatedCaseRisksNew = getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
     ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
 
   @Operation(summary = "Retrieve unallocated case confirm instructions by crn")

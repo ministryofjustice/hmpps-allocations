@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 
 data class RiskPredictorNew @JsonCreator constructor(
   val completedDate: LocalDateTime?,
-  val outputVersion: String,
-  val source: String,
-  val status: String,
-  val output: Any,
+  val outputVersion: String?,
+  val source: String?,
+  val status: String?,
+  val output: RiskPredictorOutput?,
 )

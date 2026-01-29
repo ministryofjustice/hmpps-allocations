@@ -22,7 +22,9 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseDetails
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksNew
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.NotAllowedForLAOException
@@ -177,16 +179,25 @@ class GetUnallocatedCaseService(
     }
   }
 
-  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisks? {
+  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisksNew? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
-      return UnallocatedCaseRisks.from(
-        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
-        unallocatedCaseEntity,
-        assessRisksNeedsApiClient.getRosh(crn),
-        assessRisksNeedsApiClient.getRiskPredictors(crn)
-          .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
-      )
+      val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
+        .filter { it.output?.getRSRScoreLevel() != null && it.output.getRSRPercentageScore() != null }
+        .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+      return if (riskPredictor?.outputVersion == "2")
+        UnallocatedCaseRisksV2.from(
+          workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+          unallocatedCaseEntity,
+          assessRisksNeedsApiClient.getRosh(crn),
+          riskPredictor
+          )
+        else
+          UnallocatedCaseRisksV1.from(
+          workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+          unallocatedCaseEntity,
+          assessRisksNeedsApiClient.getRosh(crn),
+          riskPredictor
+        )
     }
   }
 

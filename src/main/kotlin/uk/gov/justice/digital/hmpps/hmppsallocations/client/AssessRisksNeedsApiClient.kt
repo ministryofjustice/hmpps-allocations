@@ -15,9 +15,10 @@ import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllReoffendingPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorNew
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
@@ -131,11 +132,11 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .catch {
             log.warn("getRiskPredictors failed for $crn", it)
             when (it.message) {
-              NOT_FOUND -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null))
-              else -> emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), UNAVAILABLE, null))
+              NOT_FOUND -> emit(getFailedRiskPredictors(NOT_FOUND))
+              else -> emit(getFailedRiskPredictors(UNAVAILABLE))
             }
           }
-          .onEmpty { emit(RiskPredictor(BigDecimal(Int.MIN_VALUE), NOT_FOUND, null)) }
+          .onEmpty { emit(getFailedRiskPredictors(NOT_FOUND)) }
       }
     } catch (e: TimeoutCancellationException) {
       log.warn("/risks/crn/$crn/predictors/rsr/history failed for timeout", e)
@@ -143,5 +144,23 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     } catch (e: AllocationsServerError) {
       throw AllocationsFailedDependencyException("/risks/crn/$crn/predictors/rsr/history failed for 500 error, ${e.message}")
     }
+  }
+
+  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew {
+    return RiskPredictorNew(
+      null,null,null,null,
+      RiskPredictorOutputV2(
+        AllReoffendingPredictor(
+          null,
+          BigDecimal(Int.MIN_VALUE),
+          rsrScoreLevel,
+        ),
+        null,
+        null,
+        null,
+        null,
+        null,
+      )
+    )
   }
 }
