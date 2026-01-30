@@ -9,20 +9,7 @@ data class RiskPredictorOutputV1 @JsonCreator constructor(
   val generalPredictorScore: GeneralPredictorScore?,
   val riskOfSeriousRecidivismScore: RiskOfSeriousRecidivismScore?,
   val sexualPredictorScore: SexualPredictorScore?,
-) : RiskPredictorOutput{
-  override fun getRSRScoreLevel(): String? {
-    return riskOfSeriousRecidivismScore?.scoreLevel
-  }
-  override fun getRSRPercentageScore(): BigDecimal? {
-    return riskOfSeriousRecidivismScore?.percentageScore
-  }
-  override fun getRiskPredictorOutputV1(): RiskPredictorOutputV1 {
-    return this
-  }
-  override fun getRiskPredictorOutputV2(): RiskPredictorOutputV2? {
-    return null
-  }
-}
+)
 
 data class GroupReconvictionScore @JsonCreator constructor(
   val oneYear: BigDecimal?,

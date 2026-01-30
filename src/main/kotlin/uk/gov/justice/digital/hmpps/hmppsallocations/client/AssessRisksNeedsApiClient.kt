@@ -148,7 +148,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
 
   private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew {
     return RiskPredictorNew(
-      null,null,null,null,
+      null,null,null,"2",
       RiskPredictorOutputV2(
         AllReoffendingPredictor(
           null,
