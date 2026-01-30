@@ -24,7 +24,7 @@ data class UnallocatedCaseRisksV1 @JsonCreator constructor(
   val rsr: UnallocatedCaseRsrV1?,
   val ogrs: UnallocatedCaseOgrsV1?,
   val convictionNumber: Int?,
-) : UnallocatedCaseRisksNew(){
+) : UnallocatedCaseRisksNew{
   companion object {
     @Suppress("LongParameterList")
     fun from(

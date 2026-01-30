@@ -9,7 +9,7 @@ data class RiskPredictorOutputV1 @JsonCreator constructor(
   val generalPredictorScore: GeneralPredictorScore?,
   val riskOfSeriousRecidivismScore: RiskOfSeriousRecidivismScore?,
   val sexualPredictorScore: SexualPredictorScore?,
-) : RiskPredictorOutput(){
+) : RiskPredictorOutput{
   override fun getRSRScoreLevel(): String? {
     return riskOfSeriousRecidivismScore?.scoreLevel
   }
@@ -18,6 +18,9 @@ data class RiskPredictorOutputV1 @JsonCreator constructor(
   }
   override fun getRiskPredictorOutputV1(): RiskPredictorOutputV1 {
     return this
+  }
+  override fun getRiskPredictorOutputV2(): RiskPredictorOutputV2? {
+    return null
   }
 }
 
