@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.config.Principal
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksNew
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.GetAllocatedCaseService
 import uk.gov.justice.digital.hmpps.hmppsallocations.service.exception.EntityNotFoundException
 
@@ -59,7 +59,7 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
   @GetMapping("/cases/allocated/{crn}/risks")
   suspend fun getCaseRisks(
     @PathVariable(required = true) crn: String,
-  ): UnallocatedCaseRisks = getAllocatedCaseService.getCaseRisks(crn)
+  ): UnallocatedCaseRisksNew<Any> = getAllocatedCaseService.getCaseRisks(crn)
     ?: throw EntityNotFoundException("Case risks Not Found for $crn")
 
   @Operation(summary = "Retrieve assessment date by crn")

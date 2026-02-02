@@ -7,18 +7,14 @@ import java.time.LocalDateTime
 
 data class RiskPredictorV1 @JsonCreator constructor(
   override val completedDate: LocalDateTime?,
-  override val source: String,
-  override val status: String,
+  override val source: String?,
+  override val status: String?,
   @Schema(description = "Version of the output", allowableValues = ["1"], defaultValue = "1")
   override val outputVersion: String = "1",
   override val output: RiskPredictorOutputV1?,
 ) : RiskPredictorNew<RiskPredictorOutputV1> {
-  override fun getRSRScoreLevel(): String? {
-    return this.output?.riskOfSeriousRecidivismScore?.scoreLevel
-  }
-  override fun getRSRPercentageScore(): BigDecimal? {
-    return this.output?.riskOfSeriousRecidivismScore?.percentageScore
-  }
+  override fun getRSRScoreLevel(): String? = this.output?.riskOfSeriousRecidivismScore?.scoreLevel
+  override fun getRSRPercentageScore(): BigDecimal? = this.output?.riskOfSeriousRecidivismScore?.percentageScore
 }
 
 data class RiskPredictorOutputV1 @JsonCreator constructor(
@@ -71,5 +67,3 @@ data class SexualPredictorScore @JsonCreator constructor(
   val ospIndirectImageScoreLevel: String?,
   val ospDirectContactScoreLevel: String?,
 )
-
-

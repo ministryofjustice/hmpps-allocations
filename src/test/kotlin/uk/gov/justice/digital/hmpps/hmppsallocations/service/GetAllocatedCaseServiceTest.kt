@@ -29,7 +29,10 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.GroupReconvictionScore
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskOfSeriousRecidivismScore
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV1
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -323,7 +326,29 @@ class GetAllocatedCaseServiceTest {
       ),
     )
 
-    val riskPredictor = RiskPredictor(BigDecimal.valueOf(3.8), "MEDIUM", LocalDateTime.parse("2019-02-12T16:09:10.271"))
+    val riskPredictor = RiskPredictorV1(
+      LocalDateTime.parse("2019-02-12T16:09:10.271"),
+      "OASYS",
+      "COMPLETED",
+      "1",
+      RiskPredictorOutputV1(
+        GroupReconvictionScore(
+          null,
+          BigDecimal.valueOf(85),
+          null,
+        ),
+        null,
+        null,
+        RiskOfSeriousRecidivismScore(
+          null,
+          null,
+          null,
+          null,
+          "MEDIUM",
+        ),
+        null,
+      ),
+    )
 
     // Arrange
     coEvery { workforceAllocationsToDeliusApiClient.getCrnDetails(any()) } returns crnDetails
@@ -341,9 +366,10 @@ class GetAllocatedCaseServiceTest {
     assert(result!!.tier == tier)
     assert(result!!.activeRegistrations.size == 2)
     assert(result!!.inactiveRegistrations.size == 1)
-    assert(result!!.ogrs!!.score == BigInteger.valueOf(85))
-    assert(result!!.roshRisk!!.getOverallRisk() == "VERY_HIGH")
-    assert(result!!.rsr!!.level == "MEDIUM")
+    println(result!!)
+    assert(result!!.getOGRSScore() == BigDecimal.valueOf(85))
+    assert(result!!.getROSHLevel() == "VERY_HIGH")
+    assert(result!!.getRSRLevel() == "MEDIUM")
     assert(result!!.activeRegistrations.get(0).type == "ALT Under MAPPA Arrangements")
   }
 }

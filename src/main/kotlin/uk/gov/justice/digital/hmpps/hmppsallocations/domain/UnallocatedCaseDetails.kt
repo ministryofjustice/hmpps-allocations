@@ -93,6 +93,38 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
       outOfAreaTransfer,
     )
+
+    @Suppress("LongParameterList")
+    fun from(
+      case: UnallocatedCaseEntity,
+      deliusCaseView: DeliusCaseView,
+      assessment: Assessment?,
+      unallocatedCaseRisks: UnallocatedCaseRisksNew<Any>?,
+      outOfAreaTransfer: Boolean,
+    ): UnallocatedCaseDetails = UnallocatedCaseDetails(
+      deliusCaseView.name.getCombinedName(),
+      case.crn, case.tier, deliusCaseView.sentence.startDate,
+      deliusCaseView.gender,
+      deliusCaseView.dateOfBirth,
+      deliusCaseView.age,
+      deliusCaseView.offences.map { UnallocatedCaseOffence.from(it) },
+      deliusCaseView.sentence.endDate,
+      deliusCaseView.sentence.description,
+      deliusCaseView.requirements.map { UnallocatedCaseRequirement.from(it) },
+      deliusCaseView.pncNumber,
+      UnallocatedCaseDocument.from(deliusCaseView.courtReport),
+      UnallocatedAssessment.from(assessment),
+      UnallocatedCaseDocument.from(deliusCaseView.cpsPack),
+      UnallocatedCaseDocument.from(deliusCaseView.preConvictionDocument),
+      deliusCaseView.mainAddress,
+      deliusCaseView.sentence.length,
+      case.convictionNumber,
+      unallocatedCaseRisks?.getROSHLevel(),
+      unallocatedCaseRisks?.getRSRLevel(),
+      unallocatedCaseRisks?.getOGRSScore() as BigInteger?,
+      unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
+      outOfAreaTransfer,
+    )
   }
 }
 

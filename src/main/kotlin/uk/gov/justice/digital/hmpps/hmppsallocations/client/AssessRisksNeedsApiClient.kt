@@ -15,8 +15,8 @@ import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllReoffendingPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CombinedSeriousReoffendingPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorNew
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
@@ -147,21 +147,23 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
   }
 
-  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew<RiskPredictorOutputV2> {
-    return RiskPredictorV2(
-      null,"OASYS","FAILED","2",
-      RiskPredictorOutputV2(
-        AllReoffendingPredictor(
-          null,
-          BigDecimal(Int.MIN_VALUE),
-          rsrScoreLevel,
-        ),
+  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew<RiskPredictorOutputV2> = RiskPredictorV2(
+    null,
+    null,
+    null,
+    "2",
+    RiskPredictorOutputV2(
+      null,
+      null,
+      null,
+      null,
+      null,
+      CombinedSeriousReoffendingPredictor(
         null,
         null,
-        null,
-        null,
-        null,
-      )
-    )
-  }
+        BigDecimal(Int.MIN_VALUE),
+        rsrScoreLevel,
+      ),
+    ),
+  )
 }

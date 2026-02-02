@@ -181,25 +181,26 @@ class GetUnallocatedCaseService(
     }
   }
 
-  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisksNew? {
+  suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisksNew<Any>? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
         .filter { it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null }
         .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
-      return if (riskPredictor?.outputVersion == "2")
+      return if (riskPredictor?.outputVersion == "2") {
         UnallocatedCaseRisksV2.from(
           workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
           unallocatedCaseEntity,
           assessRisksNeedsApiClient.getRosh(crn),
-          riskPredictor as RiskPredictorV2?
-          )
-        else
-          UnallocatedCaseRisksV1.from(
+          riskPredictor as RiskPredictorV2?,
+        )
+      } else {
+        UnallocatedCaseRisksV1.from(
           workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
           unallocatedCaseEntity,
           assessRisksNeedsApiClient.getRosh(crn),
-            riskPredictor as RiskPredictorV1?
+          riskPredictor as RiskPredictorV1?,
         )
+      }
     }
   }
 
