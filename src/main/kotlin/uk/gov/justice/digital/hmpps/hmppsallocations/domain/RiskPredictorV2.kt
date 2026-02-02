@@ -1,7 +1,25 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import io.swagger.v3.oas.annotations.media.Schema
 import java.math.BigDecimal
+import java.time.LocalDateTime
+
+data class RiskPredictorV2 @JsonCreator constructor(
+  override val completedDate: LocalDateTime?,
+  override val source: String,
+  override val status: String,
+  @Schema(description = "Version of the output", allowableValues = ["2"], defaultValue = "2")
+  override val outputVersion: String = "2",
+  override val output: RiskPredictorOutputV2?,
+) : RiskPredictorNew<RiskPredictorOutputV2> {
+  override fun getRSRScoreLevel(): String? {
+    return this.output?.combinedSeriousReoffendingPredictor?.band
+  }
+  override fun getRSRPercentageScore(): BigDecimal? {
+    return this.output?.combinedSeriousReoffendingPredictor?.score
+  }
+}
 
 data class RiskPredictorOutputV2 @JsonCreator constructor(
   val allReoffendingPredictor: AllReoffendingPredictor?,

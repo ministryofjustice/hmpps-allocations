@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllReoffendingPredic
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorNew
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV2
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Timeline
 import java.math.BigDecimal
@@ -108,7 +109,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
   }
 
-  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictorNew> {
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictorNew<Any>> {
     try {
       return withTimeout(TIMEOUT_VALUE) {
         webClient
@@ -118,7 +119,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
           .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
-          .bodyToFlow<RiskPredictorNew>()
+          .bodyToFlow<RiskPredictorNew<Any>>()
           .retryWhen(
             { cause, attempt ->
               if (cause.message == SERVER_EXCEPTION && attempt < RETRY_ATTEMPTS) {
@@ -146,9 +147,9 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
   }
 
-  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew {
-    return RiskPredictorNew(
-      null,null,null,"2",
+  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew<RiskPredictorOutputV2> {
+    return RiskPredictorV2(
+      null,"OASYS","FAILED","2",
       RiskPredictorOutputV2(
         AllReoffendingPredictor(
           null,

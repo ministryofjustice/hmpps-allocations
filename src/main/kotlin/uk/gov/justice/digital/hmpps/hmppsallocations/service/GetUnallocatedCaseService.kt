@@ -18,6 +18,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusCrnRestric
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseCountByTeam
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CaseOverview
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCase
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConfirmInstructions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
@@ -182,21 +184,21 @@ class GetUnallocatedCaseService(
   suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisksNew? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .filter { it.output?.getRSRScoreLevel() != null && it.output.getRSRPercentageScore() != null }
+        .filter { it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null }
         .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       return if (riskPredictor?.outputVersion == "2")
         UnallocatedCaseRisksV2.from(
           workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
           unallocatedCaseEntity,
           assessRisksNeedsApiClient.getRosh(crn),
-          riskPredictor
+          riskPredictor as RiskPredictorV2?
           )
         else
           UnallocatedCaseRisksV1.from(
           workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
           unallocatedCaseEntity,
           assessRisksNeedsApiClient.getRosh(crn),
-          riskPredictor
+            riskPredictor as RiskPredictorV1?
         )
     }
   }

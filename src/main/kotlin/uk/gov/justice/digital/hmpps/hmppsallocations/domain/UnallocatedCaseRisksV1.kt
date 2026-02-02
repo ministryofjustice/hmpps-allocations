@@ -31,9 +31,9 @@ data class UnallocatedCaseRisksV1 @JsonCreator constructor(
       deliusRisk: DeliusRisk,
       case: UnallocatedCaseEntity,
       rosh: RoshSummary?,
-      riskPredictor: RiskPredictorNew?,
+      riskPredictor: RiskPredictorV1?,
     ): UnallocatedCaseRisksV1{
-        val riskPredictorOutput = riskPredictor?.output?.getRiskPredictorOutputV1()
+        val riskPredictorOutput = riskPredictor?.output
         return UnallocatedCaseRisksV1(
           case.name,
           case.crn,
