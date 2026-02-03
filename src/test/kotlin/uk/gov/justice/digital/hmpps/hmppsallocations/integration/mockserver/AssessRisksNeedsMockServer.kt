@@ -168,7 +168,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   fun getRiskPredictorsNotFoundForCrn(crn: String) {
     val riskRequest =
-      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+      HttpRequest.request().withPath("/risks/predictors/all/crn/$crn")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorNotFoundResponse()),
@@ -177,7 +177,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   fun getRiskPredictorsUnavailableForCrn(crn: String) {
     val riskRequest =
-      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+      HttpRequest.request().withPath("/risks/predictors/all/crn/$crn")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(4)).respond(
       HttpResponse.response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()).withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorUnavailableResponse()),
@@ -186,7 +186,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
 
   fun getRiskPredictorsForCrnEmptyList(crn: String) {
     val riskRequest =
-      HttpRequest.request().withPath("/risks/crn/$crn/predictors/rsr/history")
+      HttpRequest.request().withPath("/risks/predictors/all/crn/$crn")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
       HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody("[]"),
@@ -196,7 +196,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
   fun verifyRiskPredictorCalled(crn: String, times: Int) {
     assessRisksNeedsApi.verify(
       HttpRequest.request()
-        .withPath("/risks/crn/$crn/predictors/rsr/history"),
+        .withPath("/risks/predictors/all/crn/$crn"),
       VerificationTimes.exactly(times),
     )
   }

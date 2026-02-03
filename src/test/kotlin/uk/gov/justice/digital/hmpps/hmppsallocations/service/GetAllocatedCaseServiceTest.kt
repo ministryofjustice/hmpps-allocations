@@ -328,8 +328,8 @@ class GetAllocatedCaseServiceTest {
 
     val riskPredictor = RiskPredictorV1(
       LocalDateTime.parse("2019-02-12T16:09:10.271"),
-      "OASYS",
-      "COMPLETED",
+      null,
+      null,
       "1",
       RiskPredictorOutputV1(
         GroupReconvictionScore(
@@ -340,7 +340,7 @@ class GetAllocatedCaseServiceTest {
         null,
         null,
         RiskOfSeriousRecidivismScore(
-          null,
+          BigDecimal.valueOf(50),
           null,
           null,
           null,
@@ -366,7 +366,6 @@ class GetAllocatedCaseServiceTest {
     assert(result!!.tier == tier)
     assert(result!!.activeRegistrations.size == 2)
     assert(result!!.inactiveRegistrations.size == 1)
-    println(result!!)
     assert(result!!.getOGRSScore() == BigDecimal.valueOf(85))
     assert(result!!.getROSHLevel() == "VERY_HIGH")
     assert(result!!.getRSRLevel() == "MEDIUM")

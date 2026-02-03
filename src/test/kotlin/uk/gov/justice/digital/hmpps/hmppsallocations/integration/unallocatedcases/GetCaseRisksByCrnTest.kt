@@ -9,7 +9,7 @@ import java.math.BigDecimal
 class GetCaseRisksByCrnTest : IntegrationTestBase() {
 
   @Test
-  fun `can get case risks by crn and convictionNUmber`() {
+  fun `can get case risks by crn and convictionNumber`() {
     val crn = "J678910"
     val convictionNumber = 1
     workforceAllocationsToDelius.userHasAccess("J678910")
@@ -135,7 +135,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.roshRisk.overallRisk")
+      .jsonPath("$.risk.roshRisk.overallRisk")
       .isEqualTo("NOT_FOUND")
 
     assessRisksNeedsApi.verifyRoshCalled(crn, 2)
@@ -158,7 +158,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.roshRisk.overallRisk")
+      .jsonPath("$.risk.roshRisk.overallRisk")
       .isEqualTo("UNAVAILABLE")
     assessRisksNeedsApi.verifyRoshCalled(crn, 4)
     assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
@@ -180,9 +180,9 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rsr.level")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
       .isEqualTo("NOT_FOUND")
-      .jsonPath("$.rsr.percentage")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.score")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
     assessRisksNeedsApi.verifyRoshCalled(crn, 1)
     assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 1)
@@ -204,9 +204,9 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rsr.level")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
       .isEqualTo("UNAVAILABLE")
-      .jsonPath("$.rsr.percentage")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.score")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
     assessRisksNeedsApi.verifyRoshCalled(crn, 1)
     assessRisksNeedsApi.verifyRiskPredictorCalled(crn, 4)
@@ -228,9 +228,9 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rsr.level")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
       .isEqualTo("NOT_FOUND")
-      .jsonPath("$.rsr.percentage")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.score")
       .isEqualTo(BigDecimal(Int.MIN_VALUE))
     assessRisksNeedsApi.verifyRoshCalled(crn, 1)
   }
@@ -251,7 +251,7 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.ogrs")
+      .jsonPath("$.risk.allReoffendingPredictor")
       .doesNotExist()
   }
 
@@ -271,8 +271,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.rosh")
-      .doesNotExist()
+      .jsonPath("$.risk.roshRisk.overallRisk")
+      .isEqualTo("NOT_FOUND")
   }
 
   @Test

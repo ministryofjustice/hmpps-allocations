@@ -121,7 +121,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       case.convictionNumber,
       unallocatedCaseRisks?.getROSHLevel(),
       unallocatedCaseRisks?.getRSRLevel(),
-      unallocatedCaseRisks?.getOGRSScore() as BigInteger?,
+      unallocatedCaseRisks?.getOGRSScore()?.toBigInteger(),
       unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
       outOfAreaTransfer,
     )
