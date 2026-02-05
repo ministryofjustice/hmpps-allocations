@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds
 
-fun riskPredictorResponse() = """
+fun riskPredictorResponseV1() = """
   [
     {
       "completedDate": "2025-10-23T03:02:59",
@@ -11,15 +11,15 @@ fun riskPredictorResponse() = """
         "groupReconvictionScore": {
           "oneYear": 0,
           "twoYears": 85,
-          "scoreLevel": "LOW"
+          "scoreLevel": "HIGH"
         },
         "violencePredictorScore": {
           "ovpStaticWeightedScore": 0,
           "ovpDynamicWeightedScore": 0,
           "ovpTotalWeightedScore": 0,
           "oneYear": 0,
-          "twoYears": 0,
-          "ovpRisk": "LOW"
+          "twoYears": 50,
+          "ovpRisk": "MEDIUM"
         },
         "generalPredictorScore": {
           "ogpStaticWeightedScore": 0,
@@ -45,6 +45,48 @@ fun riskPredictorResponse() = """
           "ospDirectContactPercentageScore": 0,
           "ospIndirectImageScoreLevel": "LOW",
           "ospDirectContactScoreLevel": "LOW"
+        }
+      }
+    }
+  ]
+""".trimIndent()
+
+fun riskPredictorResponseV2() = """
+  [
+    {
+      "completedDate": "2025-10-23T03:02:59",
+      "source": "OASYS",
+      "status": "COMPLETE",
+      "outputVersion": "2",
+      "output": {
+        "allReoffendingPredictor": {
+          "staticOrDynamic": "STATIC",
+          "score": 85,
+          "band": "HIGH"
+        },
+        "violentReoffendingPredictor": {
+          "staticOrDynamic": "DYNAMIC",
+          "score": 30,
+          "band": "MEDIUM"
+        },
+        "seriousViolentReoffendingPredictor": {
+          "staticOrDynamic": "STATIC",
+          "score": 99,
+          "band": "HIGH"
+        },
+        "directContactSexualReoffendingPredictor": {
+          "score": 10,
+          "band": "LOW"
+        },
+        "indirectImageContactSexualReoffendingPredictor": {
+          "score": 10,
+          "band": "LOW"
+        },
+        "combinedSeriousReoffendingPredictor": {
+          "algorithmVersion": "6",
+          "staticOrDynamic": "STATIC",
+          "score": 10,
+          "band": "LOW"
         }
       }
     }

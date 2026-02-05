@@ -15,7 +15,8 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.Asse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentNotFoundResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessment.assessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorNotFoundResponse
-import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponse
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponseV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorResponseV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.riskPredictorUnavailableResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponse
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.responses.assessrisksneeds.roshResponseNoOverallRisk
@@ -137,12 +138,21 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
     )
   }
 
-  fun getRiskPredictorsForCrn(crn: String) {
+  fun getRiskPredictorsV1ForCrn(crn: String) {
     val riskRequest =
       HttpRequest.request().withPath("/risks/predictors/all/crn/$crn")
 
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponse()),
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponseV1()),
+    )
+  }
+
+  fun getRiskPredictorsV2ForCrn(crn: String) {
+    val riskRequest =
+      HttpRequest.request().withPath("/risks/predictors/all/crn/$crn")
+
+    assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponseV2()),
     )
   }
 
@@ -162,7 +172,7 @@ class AssessRisksNeedsMockServer : ClientAndServer(MOCKSERVER_PORT) {
       ),
     )
     assessRisksNeedsApi.`when`(riskRequest, Times.exactly(1)).respond(
-      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponse()),
+      HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(riskPredictorResponseV1()),
     )
   }
 

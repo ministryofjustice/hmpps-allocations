@@ -85,7 +85,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsV1ForCrn(crn)
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
