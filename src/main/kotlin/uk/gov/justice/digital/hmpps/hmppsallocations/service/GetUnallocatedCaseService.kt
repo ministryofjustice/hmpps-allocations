@@ -186,18 +186,20 @@ class GetUnallocatedCaseService(
       val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
         .filter { it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null }
         .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+      val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
+      val rosh = assessRisksNeedsApiClient.getRosh(crn)
       return if (riskPredictor?.outputVersion == "2") {
         UnallocatedCaseRisksV2.from(
-          workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+          deliusRisk,
           unallocatedCaseEntity,
-          assessRisksNeedsApiClient.getRosh(crn),
+          rosh,
           riskPredictor as RiskPredictorV2?,
         )
       } else {
         UnallocatedCaseRisksV1.from(
-          workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
+          deliusRisk,
           unallocatedCaseEntity,
-          assessRisksNeedsApiClient.getRosh(crn),
+          rosh,
           riskPredictor as RiskPredictorV1?,
         )
       }
