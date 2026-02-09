@@ -62,12 +62,13 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
 ) {
 
   companion object {
+
     @Suppress("LongParameterList")
     fun from(
       case: UnallocatedCaseEntity,
       deliusCaseView: DeliusCaseView,
       assessment: Assessment?,
-      unallocatedCaseRisks: UnallocatedCaseRisks?,
+      unallocatedCaseRisks: UnallocatedCaseRisksNew<Any>?,
       outOfAreaTransfer: Boolean,
     ): UnallocatedCaseDetails = UnallocatedCaseDetails(
       deliusCaseView.name.getCombinedName(),
@@ -87,9 +88,9 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       deliusCaseView.mainAddress,
       deliusCaseView.sentence.length,
       case.convictionNumber,
-      unallocatedCaseRisks?.roshRisk?.getOverallRisk(),
-      unallocatedCaseRisks?.rsr?.level,
-      unallocatedCaseRisks?.ogrs?.score,
+      unallocatedCaseRisks?.getROSHLevel(),
+      unallocatedCaseRisks?.getRSRLevel(),
+      unallocatedCaseRisks?.getOGRSScore()?.toBigInteger(),
       unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
       outOfAreaTransfer,
     )
