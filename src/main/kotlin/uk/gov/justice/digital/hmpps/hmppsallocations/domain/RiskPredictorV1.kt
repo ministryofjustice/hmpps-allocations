@@ -15,6 +15,8 @@ data class RiskPredictorV1 @JsonCreator constructor(
 ) : RiskPredictorNew<RiskPredictorOutputV1> {
   override fun getRSRScoreLevel(): String? = this.output?.riskOfSeriousRecidivismScore?.scoreLevel
   override fun getRSRPercentageScore(): BigDecimal? = this.output?.riskOfSeriousRecidivismScore?.percentageScore
+  override fun getOGRSScoreLevel(): String? = this.output?.groupReconvictionScore?.scoreLevel
+  override fun getOGRSPercentageScore(): BigDecimal? = this.output?.groupReconvictionScore?.twoYears
 }
 
 data class RiskPredictorOutputV1 @JsonCreator constructor(

@@ -184,7 +184,8 @@ class GetUnallocatedCaseService(
   suspend fun getCaseRisks(crn: String, convictionNumber: Long): UnallocatedCaseRisksNew<Any>? {
     return findUnallocatedCaseByConvictionNumber(crn, convictionNumber)?.let { unallocatedCaseEntity ->
       val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
-        .filter { it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null }
+        .filter { (it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null)
+          || (it.getOGRSScoreLevel() != null && it.getOGRSPercentageScore() != null) }
         .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
       val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
       val rosh = assessRisksNeedsApiClient.getRosh(crn)

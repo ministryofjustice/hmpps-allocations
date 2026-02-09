@@ -22,4 +22,6 @@ sealed interface RiskPredictorNew<out T> {
 
   fun getRSRScoreLevel(): String?
   fun getRSRPercentageScore(): BigDecimal?
+  fun getOGRSScoreLevel(): String?
+  fun getOGRSPercentageScore(): BigDecimal?
 }

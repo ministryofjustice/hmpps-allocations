@@ -69,10 +69,7 @@ data class UnallocatedCaseRisksV1 @JsonCreator constructor(
 data class RiskV1 @JsonCreator constructor(
   val roshRisk: RoshSummary?,
   val groupReconvictionScore: GroupReconvictionScore?,
-  val violencePredictorScore: ViolencePredictorScore?,
-  val generalPredictorScore: GeneralPredictorScore?,
   val riskOfSeriousRecidivismScore: RiskOfSeriousRecidivismScore?,
-  val sexualPredictorScore: SexualPredictorScore?,
 ) {
   companion object {
     fun from(
@@ -81,10 +78,7 @@ data class RiskV1 @JsonCreator constructor(
     ): RiskV1 = RiskV1(
       roshRisk,
       riskPredictor?.output?.groupReconvictionScore,
-      riskPredictor?.output?.violencePredictorScore,
-      riskPredictor?.output?.generalPredictorScore,
       riskPredictor?.output?.riskOfSeriousRecidivismScore,
-      riskPredictor?.output?.sexualPredictorScore,
     )
   }
 }
