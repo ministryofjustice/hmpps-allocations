@@ -23,7 +23,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusRisk
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Flag
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.MainAddressDto
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Manager
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Ogrs
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationRecordSentence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
@@ -35,7 +34,6 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV1
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -310,7 +308,6 @@ class GetAllocatedCaseServiceTest {
           Flag("Child Protection Flag"),
         ),
       ),
-      Ogrs(LocalDate.of(2021, 5, 20), BigInteger.valueOf(85)),
     )
 
     val roshSummary = RoshSummary(
