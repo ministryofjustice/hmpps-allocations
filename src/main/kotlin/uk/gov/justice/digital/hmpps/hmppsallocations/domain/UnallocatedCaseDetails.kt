@@ -54,9 +54,8 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   @Schema(description = "Sentence Length")
   val sentenceLength: String?,
   val convictionNumber: Int,
-  val roshLevel: String?,
-  val rsrLevel: String?,
-  val ogrsScore: BigInteger?,
+  val riskVersion: String?,
+  val risk: Any?,
   val activeRiskRegistration: String?,
   val outOfAreaTransfer: Boolean,
 ) {
@@ -88,9 +87,8 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
       deliusCaseView.mainAddress,
       deliusCaseView.sentence.length,
       case.convictionNumber,
-      unallocatedCaseRisks?.getROSHLevel(),
-      unallocatedCaseRisks?.getRSRLevel(),
-      unallocatedCaseRisks?.getOGRSScore()?.toBigInteger(),
+      unallocatedCaseRisks?.riskVersion,
+      getOverallRisk(unallocatedCaseRisks),
       unallocatedCaseRisks?.activeRegistrations?.takeUnless { it.isEmpty() }?.joinToString(", ") { it.type },
       outOfAreaTransfer,
     )
@@ -218,5 +216,41 @@ data class UnallocatedAssessment @JsonCreator constructor(
     fun from(assessment: Assessment?): UnallocatedAssessment? = assessment?.let {
       UnallocatedAssessment(assessment.completed!!, assessment.assessmentType)
     }
+  }
+}
+
+data class OverallRiskV1 @JsonCreator constructor(
+  val roshLevel: String?,
+  val rsrLevel: String?,
+  val ogrsScore: BigInteger?,
+) {
+  companion object {
+    fun from(unallocatedCaseRisksV1: UnallocatedCaseRisksNew<RiskV1>) = OverallRiskV1(
+      unallocatedCaseRisksV1.getROSHLevel(),
+      unallocatedCaseRisksV1.getRSRLevel(),
+      unallocatedCaseRisksV1.getOGRSScore()?.toBigInteger(),
+    )
+  }
+}
+
+data class OverallRiskV2 @JsonCreator constructor(
+  val roshLevel: String?,
+  val combinedSeriousReoffendingPredictor: CombinedSeriousReoffendingPredictor?,
+  val allReoffendingPredictor: AllReoffendingPredictor?,
+) {
+  companion object {
+    fun from(unallocatedCaseRisksV2: UnallocatedCaseRisksNew<RiskV2>) = OverallRiskV2(
+      unallocatedCaseRisksV2.getROSHLevel(),
+      unallocatedCaseRisksV2.risk?.combinedSeriousReoffendingPredictor,
+      unallocatedCaseRisksV2.risk?.allReoffendingPredictor,
+    )
+  }
+}
+
+fun getOverallRisk(unallocatedCaseRisks: UnallocatedCaseRisksNew<Any>?): Any {
+  if (unallocatedCaseRisks?.riskVersion == "2") {
+    return OverallRiskV2.from(unallocatedCaseRisks as UnallocatedCaseRisksNew<RiskV2>)
+  } else {
+    return OverallRiskV1.from(unallocatedCaseRisks as UnallocatedCaseRisksNew<RiskV1>)
   }
 }
