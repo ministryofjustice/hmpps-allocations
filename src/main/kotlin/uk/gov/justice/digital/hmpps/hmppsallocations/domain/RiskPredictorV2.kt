@@ -12,7 +12,7 @@ data class RiskPredictorV2 @JsonCreator constructor(
   @Schema(description = "Version of the output", allowableValues = ["2"], defaultValue = "2")
   override val outputVersion: String = "2",
   override val output: RiskPredictorOutputV2?,
-) : RiskPredictorNew<RiskPredictorOutputV2> {
+) : RiskPredictor<RiskPredictorOutputV2> {
   override fun getRSRScoreLevel(): String? = this.output?.combinedSeriousReoffendingPredictor?.band
   override fun getRSRPercentageScore(): BigDecimal? = this.output?.combinedSeriousReoffendingPredictor?.score
   override fun getOGRSScoreLevel(): String? = this.output?.allReoffendingPredictor?.band

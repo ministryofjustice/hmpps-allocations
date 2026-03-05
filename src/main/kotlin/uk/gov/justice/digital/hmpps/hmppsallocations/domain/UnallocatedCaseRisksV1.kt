@@ -21,7 +21,7 @@ data class UnallocatedCaseRisksV1 @JsonCreator constructor(
   override val inactiveRegistrations: List<UnallocatedCaseRegistration>,
   override val risk: RiskV1?,
   override val convictionNumber: Int?,
-) : UnallocatedCaseRisksNew<RiskV1> {
+) : UnallocatedCaseRisks<RiskV1> {
   override fun getROSHLevel(): String? = risk?.roshRisk?.getOverallRisk()
   override fun getRSRLevel(): String? = risk?.riskOfSeriousRecidivismScore?.scoreLevel
   override fun getOGRSScore(): BigDecimal? = this.risk?.groupReconvictionScore?.twoYears

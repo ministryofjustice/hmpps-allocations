@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsallocations.domain
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-interface UnallocatedCaseRisksNew<out T> {
+interface UnallocatedCaseRisks<out T> {
   val name: String
   val crn: String
   val tier: String

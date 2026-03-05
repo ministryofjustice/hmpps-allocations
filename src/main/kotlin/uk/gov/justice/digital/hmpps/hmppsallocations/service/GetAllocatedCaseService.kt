@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV1
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksNew
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV1
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV2
 import java.time.LocalDateTime
@@ -54,7 +54,7 @@ class GetAllocatedCaseService(
     }
   }
 
-  suspend fun getCaseRisks(crn: String): UnallocatedCaseRisksNew<Any>? {
+  suspend fun getCaseRisks(crn: String): UnallocatedCaseRisks<Any>? {
     val tier = tierApiClient.getTierByCrn(crn)
     return workforceAllocationsToDeliusApiClient.getCrnDetails(crn)?.let { caseDetails ->
       val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)

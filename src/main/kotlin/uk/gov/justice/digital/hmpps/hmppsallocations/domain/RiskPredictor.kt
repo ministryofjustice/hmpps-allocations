@@ -13,7 +13,7 @@ import java.time.LocalDateTime
   JsonSubTypes.Type(value = RiskPredictorV1::class, name = "1"),
   JsonSubTypes.Type(value = RiskPredictorV2::class, name = "2"),
 )
-sealed interface RiskPredictorNew<out T> {
+sealed interface RiskPredictor<out T> {
   val completedDate: LocalDateTime?
   val source: String?
   val status: String?

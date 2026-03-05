@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.CombinedSeriousReoffendingPredictor
-import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorNew
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictor
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorOutputV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RoshSummary
@@ -109,7 +109,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
     }
   }
 
-  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictorNew<Any>> {
+  suspend fun getRiskPredictors(crn: String): Flow<RiskPredictor<Any>> {
     try {
       return withTimeout(TIMEOUT_VALUE) {
         webClient
@@ -119,7 +119,7 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .onStatus({ it == HttpStatus.NOT_FOUND }) { Mono.error(Exception(NOT_FOUND)) }
           .onStatus({ it.is5xxServerError }) { Mono.error(AllocationsServerError(SERVER_EXCEPTION)) }
           .onStatus({ it != HttpStatus.OK }) { Mono.error(Exception(UNAVAILABLE)) }
-          .bodyToFlow<RiskPredictorNew<Any>>()
+          .bodyToFlow<RiskPredictor<Any>>()
           .retryWhen(
             { cause, attempt ->
               if (cause.message == SERVER_EXCEPTION && attempt < RETRY_ATTEMPTS) {
@@ -140,14 +140,14 @@ class AssessRisksNeedsApiClient(private val webClient: WebClient) {
           .onEmpty { emit(getFailedRiskPredictors(NOT_FOUND)) }
       }
     } catch (e: TimeoutCancellationException) {
-      log.warn("/risks/crn/$crn/predictors/rsr/history failed for timeout", e)
+      log.warn("risks/predictors/all/crn/$crn failed for timeout", e)
       throw AllocationsWebClientTimeoutException(e.message!!)
     } catch (e: AllocationsServerError) {
-      throw AllocationsFailedDependencyException("/risks/crn/$crn/predictors/rsr/history failed for 500 error, ${e.message}")
+      throw AllocationsFailedDependencyException("risks/predictors/all/crn/$crn failed for 500 error, ${e.message}")
     }
   }
 
-  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictorNew<RiskPredictorOutputV2> = RiskPredictorV2(
+  private fun getFailedRiskPredictors(rsrScoreLevel: String): RiskPredictor<RiskPredictorOutputV2> = RiskPredictorV2(
     null,
     null,
     null,
