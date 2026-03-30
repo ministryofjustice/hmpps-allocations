@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.service
 
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SavedEmailRequest
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.SavedEmailsEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.SavedEmailsRepository
 
@@ -18,15 +19,16 @@ class SavedEmailService(
     else return emptyList()
   }
 
-  suspend fun saveEmail(userId: String, savedEmail: String) {
-    if (!repository.existsByUserIdAndSavedEmail(userId, savedEmail)) {
-      repository.save(SavedEmailsEntity(userId =  userId, savedEmail = savedEmail))
+  suspend fun saveEmail(savedEmailRequest: SavedEmailRequest) {
+
+    if (!repository.existsByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)) {
+      repository.save(SavedEmailsEntity(userId =  savedEmailRequest.userId, savedEmail = savedEmailRequest.email))
     }
   }
 
-  suspend fun deleteSavedEmail(userId: String, savedEmail: String) {
-    if (repository.existsByUserIdAndSavedEmail(userId, savedEmail)) {
-      repository.delete(repository.findByUserIdAndSavedEmail(userId, savedEmail))
+  suspend fun deleteSavedEmail(savedEmailRequest: SavedEmailRequest) {
+    if (repository.existsByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)) {
+      repository.delete(repository.findByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email))
     }
   }
 }
