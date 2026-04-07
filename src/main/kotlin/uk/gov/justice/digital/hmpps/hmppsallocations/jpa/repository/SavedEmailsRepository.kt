@@ -14,7 +14,4 @@ interface SavedEmailsRepository : CrudRepository<SavedEmailsEntity, Long> {
   fun findByUserId(userId: String): List<SavedEmailsEntity>
 
   fun findByUserIdAndSavedEmail(userId: String, savedEmail: String): SavedEmailsEntity?
-
-
-
 }

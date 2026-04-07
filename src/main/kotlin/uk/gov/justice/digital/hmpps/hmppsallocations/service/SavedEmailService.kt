@@ -7,22 +7,24 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.SavedEmailsR
 
 @Service
 class SavedEmailService(
-  private val repository: SavedEmailsRepository,) {
+  private val repository: SavedEmailsRepository,
+) {
 
-  suspend fun getSavedEmails(userId: String): List<String>{
+  suspend fun getSavedEmails(userId: String): List<String> {
     if (repository.existsByUserId(userId)) {
       val emails = ArrayList<String>()
-      repository.findByUserId(userId).stream().forEach {
-          entity ->  emails.add(entity.savedEmail)}
+      repository.findByUserId(userId).stream().forEach { entity ->
+        emails.add(entity.savedEmail)
+      }
       return emails
+    } else {
+      return emptyList()
     }
-    else return emptyList()
   }
 
   suspend fun saveEmail(savedEmailRequest: SavedEmailRequest) {
-
     if (!repository.existsByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)) {
-      repository.save(SavedEmailsEntity(userId =  savedEmailRequest.userId, savedEmail = savedEmailRequest.email))
+      repository.save(SavedEmailsEntity(userId = savedEmailRequest.userId, savedEmail = savedEmailRequest.email))
     }
   }
 

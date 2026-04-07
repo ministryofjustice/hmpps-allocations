@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.service.SavedEmailService
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class SavedEmailController(
-  private val savedEmailService: SavedEmailService
+  private val savedEmailService: SavedEmailService,
 ) {
   @Operation(summary = "Get saved emails for a User")
   @ApiResponses(
