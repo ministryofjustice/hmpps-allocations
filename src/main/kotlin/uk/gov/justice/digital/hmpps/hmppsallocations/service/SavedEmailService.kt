@@ -10,17 +10,7 @@ class SavedEmailService(
   private val repository: SavedEmailsRepository,
 ) {
 
-  suspend fun getSavedEmails(userId: String): List<String> {
-    if (repository.existsByUserId(userId)) {
-      val emails = ArrayList<String>()
-      repository.findByUserId(userId).stream().forEach { entity ->
-        emails.add(entity.savedEmail)
-      }
-      return emails
-    } else {
-      return emptyList()
-    }
-  }
+  suspend fun getSavedEmails(userId: String): List<String> = repository.findByUserId(userId).map { it.savedEmail }
 
   suspend fun saveEmail(savedEmailRequest: SavedEmailRequest) {
     if (!repository.existsByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)) {
@@ -29,8 +19,8 @@ class SavedEmailService(
   }
 
   suspend fun deleteSavedEmail(savedEmailRequest: SavedEmailRequest) {
-    if (repository.existsByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)) {
-      repository.delete(repository.findByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email))
+    repository.findByUserIdAndSavedEmail(savedEmailRequest.userId, savedEmailRequest.email)?.let {
+      repository.delete(it)
     }
   }
 }

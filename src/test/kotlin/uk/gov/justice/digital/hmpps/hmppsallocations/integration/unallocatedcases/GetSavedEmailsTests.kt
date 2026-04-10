@@ -17,7 +17,7 @@ class GetSavedEmailsTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `get emails`() {
+  fun `get emails test`() {
     val userId = "TestID"
     savedEmailRepository.save(SavedEmailsEntity(userId = userId, savedEmail = "testemail@justice.gov.uk"))
     webTestClient.get().uri("/user/$userId/savedEmails")
@@ -28,8 +28,7 @@ class GetSavedEmailsTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `save email`() {
-    savedEmailRepository.deleteAll()
+  fun `save email test`() {
     webTestClient.post().uri("/user/savedEmails").contentType(MediaType.APPLICATION_JSON)
       .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
       .body(
@@ -47,7 +46,35 @@ class GetSavedEmailsTests : IntegrationTestBase() {
   }
 
   @Test
-  fun `delete email`() {
+  fun `save duplicate email test`() {
+    webTestClient.post().uri("/user/savedEmails").contentType(MediaType.APPLICATION_JSON)
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .body(
+        BodyInserters.fromValue(
+          """{
+        "userId": "TestID",
+        "email": "testemail@justice.gov.uk"
+        }""",
+        ),
+      ).exchange().expectStatus().isOk
+    webTestClient.post().uri("/user/savedEmails").contentType(MediaType.APPLICATION_JSON)
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .body(
+        BodyInserters.fromValue(
+          """{
+        "userId": "TestID",
+        "email": "testemail@justice.gov.uk"
+        }""",
+        ),
+      ).exchange().expectStatus().isOk
+    savedEmailRepository.findByUserId("TestID").let {
+      assertThat(it).hasSize(1)
+      assertThat(it[0].savedEmail).isEqualTo("testemail@justice.gov.uk")
+    }
+  }
+
+  @Test
+  fun `delete email test`() {
     val userId = "TestID"
     savedEmailRepository.save(SavedEmailsEntity(userId = userId, savedEmail = "testemail@justice.gov.uk"))
 
