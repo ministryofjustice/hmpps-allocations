@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.aot.hint.TypeReference.listOf
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.AssessRisksNeedsApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
@@ -81,7 +82,7 @@ class GetAllocatedCaseServiceTest {
             "12 months",
           ),
           listOf(AllocatedEventOffences("Burglary", "Theft", true)),
-          listOf(AllocatedEventRequirement("Curfew", "Must comply with curfew", "6 months")),
+          listOf(AllocatedEventRequirement("Curfew", null, "6 months")),
         ),
       ),
     )
