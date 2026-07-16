@@ -26,7 +26,7 @@ class GetCaseOverviewByCrnTests : IntegrationTestBase() {
       .jsonPath("$.crn")
       .isEqualTo("J678910")
       .jsonPath("$.tier")
-      .isEqualTo("C1")
+      .isEqualTo("C")
       .jsonPath("$.convictionNumber")
       .isEqualTo(convictionNumber)
   }

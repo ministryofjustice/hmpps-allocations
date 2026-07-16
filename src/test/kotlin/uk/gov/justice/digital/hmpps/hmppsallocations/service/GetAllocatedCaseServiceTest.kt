@@ -93,7 +93,7 @@ class GetAllocatedCaseServiceTest {
       isRedacted = false,
     )
 
-    val tier = TierWithStatus("C2", false)
+    val tier = TierWithStatus("C", false)
 
     // Arrange
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedDeliusCaseView(any()) } returns Mono.just(deliusCaseView)
@@ -175,7 +175,7 @@ class GetAllocatedCaseServiceTest {
       isRedacted = false,
     )
 
-    val tier = TierWithStatus("C2", false)
+    val tier = TierWithStatus("C", false)
 
     // Arrange
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedDeliusCaseView(any()) } returns Mono.just(deliusCaseView)
@@ -222,7 +222,7 @@ class GetAllocatedCaseServiceTest {
       ),
     )
 
-    val tier = TierWithStatus("C2", false)
+    val tier = TierWithStatus("C", false)
 
     val sentenceOffence = SentenceOffence("Thievery", true)
     val sentenceOffence2 = SentenceOffence("Vagrancy", false)
@@ -279,7 +279,7 @@ class GetAllocatedCaseServiceTest {
       true,
     )
 
-    val tier = TierWithStatus("C2", false)
+    val tier = TierWithStatus("C", false)
 
     val deliusRisk = DeliusRisk(
       Name(forename = "Dylan", middleName = null, surname = "Armstrong"),

@@ -25,7 +25,7 @@ data class UnallocatedCaseDetails @JsonCreator constructor(
   val name: String,
   @Schema(description = "CRN", example = "J111111")
   val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
   @Schema(description = "Sentence Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = STRING)

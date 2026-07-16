@@ -23,7 +23,7 @@ data class AllocatedCaseDetails @JsonCreator constructor(
   val dateOfBirth: LocalDate?,
   @Schema(description = "Age", example = "34")
   val age: Int,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
   val address: MainAddress?,
   @Schema(description = "Next Appointment Date", example = "2021-06-19")

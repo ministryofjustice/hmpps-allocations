@@ -29,7 +29,7 @@ class TelemetryServiceTest {
     val name = "Bob Jones"
     val teamCode = "N54ERT"
     val providerCode = "PC001"
-    val tier = "C2"
+    val tier = "C"
     val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
     coEvery { telemetryClient.trackEvent(TelemetryEventType.EventAllocated.eventName, any(), null) } returns Unit
     telemetryService.trackUnallocatedCaseAllocated(unallocatedCaseEntity, teamCode)

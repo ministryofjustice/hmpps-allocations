@@ -15,7 +15,7 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   val name: String,
   @Schema(description = "CRN", example = "J111111")
   val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
   val active: List<UnallocatedCaseConviction>,
   val previous: List<UnallocatedCaseConviction>,

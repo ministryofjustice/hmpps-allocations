@@ -42,12 +42,12 @@ class HmppsTierApiClientTest {
       Mono.just(
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
-          .body("""{"tierScore":"A1","provisional":false}""")
+          .body("""{"tierScore":"A","provisional":false}""")
           .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = HmppsTierApiClient(webClient).getTierByCrn("X123456")
-    assert(result == TierWithStatus("A1", false))
+    assert(result == TierWithStatus("A", false))
   }
 }

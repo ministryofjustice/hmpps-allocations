@@ -13,7 +13,7 @@ data class UnallocatedCaseRisksV2 @JsonCreator constructor(
   override val name: String,
   @Schema(description = "CRN", example = "J111111")
   override val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   override val tier: String,
   override val completedDate: LocalDateTime?,
   override val riskVersion: String?,

@@ -20,7 +20,7 @@ class GetCaseProbationRecordByCrnTest : IntegrationTestBase() {
       .jsonPath("$.crn")
       .isEqualTo("J678910")
       .jsonPath("$.tier")
-      .isEqualTo("C1")
+      .isEqualTo("C")
       .jsonPath("$.active")
       .isEmpty
       .jsonPath("$.previous[0].description")
