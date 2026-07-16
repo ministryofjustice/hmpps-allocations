@@ -30,7 +30,7 @@ class HmppsTierApiClient(private val webClient: WebClient) {
           }
           .onStatus({ status -> status.value() == HttpStatus.NOT_FOUND.value() }) {
             log.debug("Tier not found for crn $crn")
-            Mono.error(MissingTierException("Tier not found for CRN $crn"))
+            Mono.error(TierNotFoundException("Tier not found for CRN $crn"))
           }
           .bodyToMono(TierWithStatus::class.java)
           .retryWhen(
@@ -51,4 +51,4 @@ class HmppsTierApiClient(private val webClient: WebClient) {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
-class MissingTierException(msg: String) : RuntimeException()
+class TierNotFoundException(msg: String) : RuntimeException()

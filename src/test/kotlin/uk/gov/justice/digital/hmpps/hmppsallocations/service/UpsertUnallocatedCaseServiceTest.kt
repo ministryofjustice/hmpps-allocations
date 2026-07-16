@@ -57,7 +57,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
     cut.upsertUnallocatedCase(crn)
-    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
+    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any(), any()) }
   }
 
   @Test
@@ -76,7 +76,7 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
     cut.upsertUnallocatedCase(crn)
-    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
+    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any(), any()) }
   }
 
   @Test
@@ -95,6 +95,6 @@ class UpsertUnallocatedCaseServiceTest {
     coEvery { hmppsTierApiClient.getTierByCrn(crn) } returns tier
     coEvery { repository.findByCrn(crn) } returns listOf(unallocatedCaseEntity)
     cut.upsertUnallocatedCase(crn)
-    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any()) }
+    verify(exactly = 1) { dataBaseOperationService.saveNewEvents(any(), any(), any(), crn, any(), any()) }
   }
 }

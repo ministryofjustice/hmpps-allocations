@@ -33,7 +33,7 @@ class HmppsTierApiClientTest {
     val exception = assertThrows<RuntimeException> {
       HmppsTierApiClient(webClient).getTierByCrn("X123456")
     }
-    assert(exception is MissingTierException)
+    assert(exception is TierNotFoundException)
   }
 
   @Test
