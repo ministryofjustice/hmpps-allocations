@@ -48,6 +48,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         tier = tier,
+        provisionalTier = false,
         name = "foo",
         providerCode = "",
         teamCode = "",

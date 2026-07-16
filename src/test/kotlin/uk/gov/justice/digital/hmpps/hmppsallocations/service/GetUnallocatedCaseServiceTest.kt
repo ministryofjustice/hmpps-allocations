@@ -45,6 +45,7 @@ internal class GetUnallocatedCaseServiceTest {
         providerCode = "PC1",
         teamCode = "TM1",
         tier = "C2",
+        provisionalTier = false,
         id = id,
         convictionNumber = 1,
       )
@@ -72,6 +73,7 @@ internal class GetUnallocatedCaseServiceTest {
       providerCode = "PC1",
       teamCode = "TM1",
       tier = "C2",
+      provisionalTier = false,
       id = 2L,
       convictionNumber = 1,
     )
@@ -144,6 +146,7 @@ internal class GetUnallocatedCaseServiceTest {
       providerCode = "PC1",
       teamCode = "TM1",
       tier = "C2",
+      provisionalTier = false,
       id = 2L,
       convictionNumber = 1,
     )

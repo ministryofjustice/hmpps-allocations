@@ -47,7 +47,7 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, false, false)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
@@ -66,7 +66,7 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, true, false)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
@@ -85,7 +85,7 @@ class UpsertUnallocatedCaseServiceTest {
     val teamCode = "N54ERT"
     val providerCode = "PC001"
     val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, false, true)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))

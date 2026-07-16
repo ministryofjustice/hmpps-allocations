@@ -462,6 +462,7 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         name = "Donald Duck",
         crn = c2cCaseCrn,
         tier = "A1",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "TEAM1",
         convictionNumber = 2,
