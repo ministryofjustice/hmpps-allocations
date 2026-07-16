@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TierWithStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.LaoStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
@@ -47,8 +48,8 @@ class UpsertUnallocatedCaseService(
           val tier = getTier(crn)
           log.debug("hmpps tier api client: got tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()
-          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
+          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier.tierScore)
+          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier.tierScore)
         } catch (e: MissingTierException) {
           log.error("Tier Missing for crn $crn; ${e.message}")
         } finally {
@@ -78,5 +79,5 @@ class UpsertUnallocatedCaseService(
     MDC.remove(LAO_STATUS)
   }
 
-  suspend fun getTier(crn: String): String = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
+  suspend fun getTier(crn: String): TierWithStatus = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
 }

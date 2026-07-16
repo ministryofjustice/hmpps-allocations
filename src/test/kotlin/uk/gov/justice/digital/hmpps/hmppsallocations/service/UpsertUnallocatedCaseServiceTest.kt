@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.Name
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ActiveEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TierWithStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.UnallocatedEvents
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
@@ -46,8 +47,8 @@ class UpsertUnallocatedCaseServiceTest {
     val name = "Bob Jones"
     val teamCode = "N54ERT"
     val providerCode = "PC001"
-    val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val tier = TierWithStatus("C2", false)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier.tierScore, tier.provisional, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, false, false)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
@@ -65,8 +66,8 @@ class UpsertUnallocatedCaseServiceTest {
     val name = "Bob Jones"
     val teamCode = "N54ERT"
     val providerCode = "PC001"
-    val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val tier = TierWithStatus("C2", false)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier.tierScore, tier.provisional, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, true, false)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
@@ -84,8 +85,8 @@ class UpsertUnallocatedCaseServiceTest {
     val name = "Bob Jones"
     val teamCode = "N54ERT"
     val providerCode = "PC001"
-    val tier = "C2"
-    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier, false, teamCode, providerCode, ZonedDateTime.now(), 1)
+    val tier = TierWithStatus("C2", false)
+    val unallocatedCaseEntity = UnallocatedCaseEntity(1L, name, crn, tier.tierScore, tier.provisional, teamCode, providerCode, ZonedDateTime.now(), 1)
     val deliusCaseAccess = DeliusCaseAccess(crn, false, true)
     val activeEvent = ActiveEvent("1", teamCode, providerCode)
     val unallocatedEvents = UnallocatedEvents(crn, Name("Bob", "Crusher", "Jones"), listOf(activeEvent))
