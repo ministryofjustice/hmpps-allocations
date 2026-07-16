@@ -98,6 +98,8 @@ class GetCaseRisksByCrnTest : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C")
+      .jsonPath("$.provisionalTier")
+      .isEqualTo(false)
       .jsonPath("$.completedDate")
       .isEqualTo("2025-10-23T03:02:59")
       .jsonPath("$.activeRegistrations[0].type")

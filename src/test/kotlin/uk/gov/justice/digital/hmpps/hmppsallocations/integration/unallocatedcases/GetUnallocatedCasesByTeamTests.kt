@@ -71,6 +71,8 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].tier")
       .isEqualTo("C")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].provisionalTier")
+      .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].status")
       .isEqualTo("Currently managed")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].offenderManager.forenames")

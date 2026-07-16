@@ -48,6 +48,7 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
     assertThat(case.name).isEqualTo("Tester TestSurname")
     assertThat(case.tier).isEqualTo("B")
+    assertThat(case.provisionalTier).isEqualTo(false)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
   }

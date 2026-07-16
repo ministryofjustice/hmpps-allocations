@@ -28,6 +28,8 @@ class GetCaseInstructionDetailsByCrnTests : IntegrationTestBase() {
       .isEqualTo("J678910")
       .jsonPath("$.tier")
       .isEqualTo("C")
+      .jsonPath("$.provisionalTier")
+      .isEqualTo(false)
       .jsonPath("$.convictionNumber")
       .isEqualTo(convictionNumber)
       .jsonPath("$.staff.name.combinedName")

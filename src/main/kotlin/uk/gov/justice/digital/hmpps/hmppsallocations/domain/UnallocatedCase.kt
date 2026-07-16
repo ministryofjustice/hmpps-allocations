@@ -15,6 +15,7 @@ data class UnallocatedCase @JsonCreator constructor(
   val crn: String,
   @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
+  val provisionalTier: Boolean,
   @Schema(description = "Sentence Date", example = "2020-01-16")
   @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
   val sentenceDate: LocalDate,
@@ -47,6 +48,7 @@ data class UnallocatedCase @JsonCreator constructor(
       name = "${deliusCaseDetail.name.forename} ${deliusCaseDetail.name.surname}",
       crn = deliusCaseDetail.crn,
       tier = case.tier,
+      provisionalTier = case.provisionalTier,
       sentenceDate = deliusCaseDetail.sentence.date,
       initialAppointment = InitialAppointmentDetails.from(
         deliusCaseDetail.initialAppointment,

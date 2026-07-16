@@ -40,6 +40,7 @@ class GetAllocatedCaseService(
       deliusAllocatedCaseView,
       false,
       tier!!.tierScore,
+      tier.provisional,
       crn,
     )
   }
@@ -50,7 +51,7 @@ class GetAllocatedCaseService(
     val tier = tierApiClient.getTierByCrn(crn)
     return deliusAllocatedCaseView.let {
       val probationRecord = workforceAllocationsToDeliusApiClient.getProbationRecord(crn, excludeConvictionNumber)
-      return UnallocatedCaseConvictions.from(probationRecord, crn, excludeConvictionNumber.toInt(), tier!!.tierScore)
+      return UnallocatedCaseConvictions.from(probationRecord, crn, excludeConvictionNumber.toInt(), tier!!.tierScore, tier.provisional)
     }
   }
 
@@ -63,9 +64,9 @@ class GetAllocatedCaseService(
       val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
       val rosh = assessRisksNeedsApiClient.getRosh(crn)
       return if (riskPredictor?.outputVersion == "2") {
-        UnallocatedCaseRisksV2.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV2?, tier!!.tierScore)
+        UnallocatedCaseRisksV2.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV2?, tier!!.tierScore, tier.provisional)
       } else {
-        UnallocatedCaseRisksV1.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV1?, tier!!.tierScore)
+        UnallocatedCaseRisksV1.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV1?, tier!!.tierScore, tier.provisional)
       }
     }
   }
