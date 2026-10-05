@@ -28,10 +28,10 @@ ENV TZ=Europe/London
 RUN ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 RUN addgroup --gid 2000 --system appgroup && \
-    adduser --uid 2000 --system appuser --gid 2000
+    adduser --uid 2000 --system appuser --gid 2000 --home /home/appuser
 
 # Install AWS RDS Root cert into Java truststore
-RUN mkdir -p /home/appuser/.postgresql
+RUN mkdir /home/appuser/.postgresql
 COPY --from=builder --chown=appuser:appgroup /app/root.crt /home/appuser/.postgresql/root.crt
 
 WORKDIR /app
