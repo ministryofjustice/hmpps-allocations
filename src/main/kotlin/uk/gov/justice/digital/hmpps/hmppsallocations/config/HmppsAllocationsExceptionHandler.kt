@@ -101,7 +101,7 @@ class HmppsAllocationsExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedException::class)
-  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse?>? = ResponseEntity
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(FORBIDDEN)
     .body(
       ErrorResponse(
@@ -113,7 +113,7 @@ class HmppsAllocationsExceptionHandler {
 
   @ExceptionHandler(EntityNotFoundException::class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  fun handle(e: EntityNotFoundException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+  fun handle(e: EntityNotFoundException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
     log.error("Not found (404) returned with message {}", e.message)
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
@@ -126,7 +126,7 @@ class HmppsAllocationsExceptionHandler {
 
   @ExceptionHandler(HttpMessageConversionException::class)
   @ResponseStatus(BAD_REQUEST)
-  fun handle(e: HttpMessageConversionException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+  fun handle(e: HttpMessageConversionException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
     log.error("HttpMessageConversionException: {}", e.message)
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
@@ -139,7 +139,7 @@ class HmppsAllocationsExceptionHandler {
 
   @ExceptionHandler(IllegalArgumentException::class)
   @ResponseStatus(BAD_REQUEST)
-  fun handle(e: IllegalArgumentException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+  fun handle(e: IllegalArgumentException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
     log.error("IllegalArgumentException: {}", e.message)
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
@@ -152,7 +152,7 @@ class HmppsAllocationsExceptionHandler {
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   @ResponseStatus(BAD_REQUEST)
-  fun handle(e: MethodArgumentTypeMismatchException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse?> {
+  fun handle(e: MethodArgumentTypeMismatchException): ResponseEntity<uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse> {
     log.error("MethodArgumentTypeMismatchException: {}", e.message)
     return ResponseEntity(
       uk.gov.justice.digital.hmpps.hmppsallocations.domain.ErrorResponse(
@@ -182,7 +182,7 @@ class HmppsAllocationsExceptionHandler {
   )
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
+  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
       .status(INTERNAL_SERVER_ERROR)
