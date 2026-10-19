@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.11"
   kotlin("plugin.spring") version "2.3.10"
   kotlin("plugin.jpa") version "2.3.10"
   kotlin("jvm") version "2.3.10"
@@ -33,15 +33,18 @@ allOpen {
 
 dependencies {
   implementation(kotlin("stdlib"))
-  implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
+  implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20260101.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.10")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.10")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3")
+  implementation("org.springframework.boot:spring-boot-starter-webflux")
+  implementation("org.springframework.boot:spring-boot-starter-webclient")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-flyway")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.15")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.1.1")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.security:spring-security-access")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
@@ -52,16 +55,17 @@ dependencies {
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.10")
+  runtimeOnly("org.postgresql:postgresql:42.7.14")
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
-  testImplementation("org.mock-server:mockserver-netty:5.15.0")
+  testImplementation("org.mock-server:mockserver-netty-no-dependencies:9.0.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
   testImplementation("io.mockk:mockk:1.14.9")
   testImplementation("com.ninja-squad:springmockk:5.0.1")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+  testImplementation("org.springframework.boot:spring-boot-webtestclient")
 }
 
 tasks {
