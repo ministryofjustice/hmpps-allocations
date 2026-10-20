@@ -2,9 +2,9 @@
 spring:
   application:
     name: hmpps-allocations
-  codec:
-    max-in-memory-size: 200MB
-
+  http:
+    codecs:
+      max-in-memory-size: 200MB
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     datatype:
